@@ -31,16 +31,16 @@
     // ########## LANGUAGE ##########
 
     // Create the language prefix and arguments exception
-    var $_lang_compatibility        = 'A browser that supports JavaScript 1.8.5 (MSIE 9+) is required.';
-    var $_lang_exception_arguments  = '"{0}({1})" has some invalid arguments.';
-    var $_lang_exception_prefix     = 'jTypes Error: ';
+    var $_lang_compatibility       = 'A browser that supports JavaScript 1.8.5 (MSIE 9+) is required.';
+    var $_lang_exception_arguments = '"{0}({1})" has some invalid arguments.';
+    var $_lang_exception_prefix    = 'jTypes Error: ';
 
     // Create the language constants
     var $_lang_$$_abstract_instance                = 'Abstract classes cannot be instantiated.';
     var $_lang_$$_abstract_override                = 'Class must implement the inherited abstract {1} "{0}" with the override modifier.';
     var $_lang_$$_abstract_sealed                  = 'Classes cannot have the abstract and sealed modifiers.';
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
-    var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only field';
+    var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only field.';
     var $_lang_$$_keyword                          = '"{0}" is not a valid class modifier.';
     var $_lang_$$_member_abstract                  = '"{0}" cannot have the abstract modifier in a non-abstract class.';
     var $_lang_$$_member_abstract_override         = '"{0}" must implement the inherited abstract {1} with the override modifier.';
@@ -117,7 +117,7 @@
     
     // ########## EXCEPTIONS ##########
     
-    // Create the exception arguments format helper
+    // Create the exception arguments and format helpers
     var $_exceptionArguments = function($name, $arguments)
     {
         // If a name was provided, prepend "$$." for reference
@@ -137,9 +137,7 @@
         // Return the exception string
         return $_lang_exception_prefix + $$.format($_lang_exception_arguments, $name, $types.join(', '));
     };
-
-    // Create the exception format helper
-    var $_exceptionFormat = function($message)
+    var $_exceptionFormat    = function($message)
     {
         // Return the exception string
         return $_lang_exception_prefix + $$.format.apply($$, arguments);
@@ -1751,6 +1749,9 @@
                 for (var $i = 0; $i < $levels; $i++)
                     ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_class, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly);
             }
+            
+            // Set the public instance
+            $instance = $public;
 
             // If the "new" keyword was used, execute the constructor
             if ($isNew)
