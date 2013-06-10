@@ -356,7 +356,7 @@
             throw $_exceptionFormat($_lang_$$_member_name_null, $type);
         
         // If the name is not a valid member name, throw an exception
-        if (!$name.match(/^(_|$|[a-z])[a-z0-9]*$/i))
+        if (!$name.match(/^(_|\$|[a-z])[_\$a-z0-9]*$/i))
             throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
         var $abstract = false;
