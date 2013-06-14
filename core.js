@@ -1566,11 +1566,8 @@
                 // If the level is still valid
                 while (++$level < $levels);
                 
-                // Set the new public instance
-                $instance = $matrix[$level][2];
-
-                // Return the instance
-                return $instance;
+                // Return the public instance
+                return $matrix[$level][2];
             };
             var $is = function($type)
             {
@@ -1593,11 +1590,6 @@
             var $public    = $instance;
 
             // Create the internal get accessors
-            var $getterInstance = function()
-            {
-                // Return the current instance reference
-                return $instance;
-            };
             var $getterReadonly = function()
             {
                 // Return true if the class is initialized
@@ -1656,8 +1648,8 @@
                     $public  = $stack[2];
 
                     // Define the public instance accessors on the private instance
-                    $__defineProperty__.call($__object__, $private, '__self', { 'value': $public });
-                    $__defineProperty__.call($__object__, $private, '__this', { 'get': $getterInstance });
+                    $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
+                    $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
 
                     // If the stack has a base class
                     if ($i !== $levels - 1)
@@ -1734,8 +1726,8 @@
                     $private = $__create__.call($__object__, $protected);
                     
                     // Define the public instance accessors on the private instance
-                    $__defineProperty__.call($__object__, $private, '__self', { 'value': $public });
-                    $__defineProperty__.call($__object__, $private, '__this', { 'get': $getterInstance });
+                    $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
+                    $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
 
                     // If the stack has a base class, define the base instance reference on the private instance
                     if ($i !== $levels - 1)
@@ -1749,9 +1741,6 @@
                 for (var $i = 0; $i < $levels; $i++)
                     ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_class, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly);
             }
-            
-            // Set the public instance
-            $instance = $public;
 
             // If the "new" keyword was used, execute the constructor
             if ($isNew)
@@ -2388,10 +2377,11 @@
     });
 
     // ########## GLOBALS ##########
-    
+
+    // If the "$$" shorthand global variable is not already defined or should be overwritten, define/overwrite it
+    if (window.$$ === undefined || window.$$ === window.jTypes)
+        window.$$ = $$;
+
     // Define the global variable
     window.jTypes = $$;
-
-    // Define the "$$" shorthand global variable
-    window.$$ = $$;
 })(window);
