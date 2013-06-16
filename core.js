@@ -1547,6 +1547,9 @@
                 $_subclass = false;
             }
 
+            // Define the instance accessor on the instance
+            $__defineProperty__.call($__object__, $instance, '__self', { 'value': $instance });
+
             // Create the casting and checking functions
             var $as = function($type)
             {
