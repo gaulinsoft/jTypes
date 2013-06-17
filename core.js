@@ -62,6 +62,7 @@
     var $_lang_$$_member_property_function         = '"{0}" must have a function for the {1} accessor.';
     var $_lang_$$_member_property_keyword          = '"{0}" has an invalid modifier "{2}" on the {1} accessor.';
     var $_lang_$$_member_property_keyword_access_2 = '"{0}" cannot have access modifiers on both property accessors.';
+    var $_lang_$$_member_property_name_2           = '"{0}" cannot have more than one definition for the {1} accessor.';
     var $_lang_$$_member_property_name_invalid     = '"{0}" cannot have a "{1}" property accessor.';
     var $_lang_$$_member_property_name_null        = '"{0}" must have at least one property accessor.';
     var $_lang_$$_member_virtual                   = '"{0}" cannot have the virtual modifier in a sealed class.';
@@ -117,7 +118,7 @@
     
     // ########## EXCEPTIONS ##########
     
-    // Create the exception arguments and format helpers
+    // Create the exceptions helpers
     var $_exceptionArguments = function($name, $arguments)
     {
         // If a name was provided, prepend "$$." for reference
@@ -130,9 +131,9 @@
         // Create the types array
         var $types = [];
 
-        // Put the argument types into the types array
+        // Push the argument types into the types array
         for (var $i = 0, $j = $arguments.length; $i < $j; $i++)
-            $types[$i] = $$.type($arguments[$i]);
+            $types.push($$.type($arguments[$i]));
 
         // Return the exception string
         return $_lang_exception_prefix + $$.format($_lang_exception_arguments, $name, $types.join(', '));
@@ -143,7 +144,48 @@
         return $_lang_exception_prefix + $$.format.apply($$, arguments);
     };
 
-    // ########## CLASSES ##########
+    // ########## DEFINES ##########
+
+    // Create the defines helpers
+    var $_defineField    = function($name, $field)
+    {
+        // Define an enumerable field on the jTypes object
+        return $__defineProperty__.call($__object__, $$, $name,
+        {
+            'configurable': false,
+            'enumerable':   true,
+            'value':        $field,
+            'writable':     false
+        });
+    };
+    var $_defineMethod   = function($name, $method)
+    {
+        // Define a non-enumerable method on the jTypes object
+        return $__defineProperty__.call($__object__, $$, $name,
+        {
+            'configurable': false,
+            'enumerable':   false,
+            'value':        $method,
+            'writable':     false
+        });
+    };
+    var $_defineProperty = function($name, $getMethod, $setMethod)
+    {
+        // Define an enumerable property on the jTypes object
+        return $__defineProperty__.call($__object__, $$, $name,
+        {
+            'configurable': false,
+            'enumerable':   true,
+            'get':          $getMethod || undefined,
+            'set':          $setMethod || undefined
+        });
+    };
+
+    // ##########################
+    // ########## CORE ##########
+    // ##########################
+
+    // ########## KEYS ##########
     
     // Create the characters string and keys array
     var $_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -181,10 +223,10 @@
         return '~' + $key;
     };
 
-    // Create the definition obfuscated constant length
+    // Create the definition obfuscated key length
     var $_definition_keyLength = 3;
 
-    // Create the definition obfuscated constants
+    // Create the definition obfuscated keys
     var $_definition_abstract          = $_keyGenerator($_definition_keyLength);
     var $_definition_baseClass         = $_keyGenerator($_definition_keyLength);
     var $_definition_construct         = $_keyGenerator($_definition_keyLength);
@@ -196,7 +238,7 @@
     var $_definition_protected         = $_keyGenerator($_definition_keyLength);
     var $_definition_public            = $_keyGenerator($_definition_keyLength);
 
-    // Create the definition member obfuscated constants
+    // Create the definition member obfuscated keys
     var $_definition_member_field_readOnly     = $_keyGenerator($_definition_keyLength);
     var $_definition_member_method_abstract    = $_keyGenerator($_definition_keyLength);
     var $_definition_member_method_final       = $_keyGenerator($_definition_keyLength);
@@ -216,6 +258,26 @@
     var $_accessor_member_protected   = $_accessor_member_flagCount++;
     var $_accessor_member_public      = $_accessor_member_flagCount++;
     var $_accessor_member_value       = $_accessor_member_flagCount++;
+
+    // #################################################
+    // ########## BEGIN jTypes.NET INJECTIONS ##########
+    // #################################################
+
+    // Create the injection flags length
+    var $_inject_flagCount = 0;
+    
+    // Create the injection flags
+    var $_inject_private   = $_inject_flagCount++;
+    var $_inject_protected = $_inject_flagCount++;
+    var $_inject_prototype = $_inject_flagCount++;
+    var $_inject_public    = $_inject_flagCount++;
+    var $_inject_static    = $_inject_flagCount++;
+
+    // ###############################################
+    // ########## END jTypes.NET INJECTIONS ##########
+    // ###############################################
+
+    // ########## CLASSES ##########
 
     // Create the base class of all classes
     var $_class = function()
@@ -253,22 +315,31 @@
         return '[object Class]';
     };
 
+    // ########## FLAGS ##########
+
     // Create the lazy, subclass, and unsafe flags
+    var $_debug    = true;// DEFAULT (for beta)
     var $_lazy     = true;// DEFAULT
     var $_subclass = false;// DON'T CHANGE
     var $_unsafe   = false;// DON'T CHANGE
 
-    // Create the definition compiler helper functions
+    // ########## COMPILER ##########
+
+    // Create the definitions compiler helper functions
     var $_definitionsCompilerAccessorMethod = function($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $accessor, $type, $abstract, $override, $sealed, $virtual, $hasTwoAccessors)
     {
         // Create the property method definition object
         var $method = {};
+        
+        // Reference some accessor data
+        var $accessorName    = $accessor[$_accessor_member_name];
+        var $accessorPrivate = $accessor[$_accessor_member_private];
 
         // Set the method definition object data
-        $method[$_definition_member_method_abstract]    = !$accessor[$_accessor_member_private] && $abstract;
-        $method[$_definition_member_method_final]       = !$accessor[$_accessor_member_private] && $sealed;
-        $method[$_definition_member_method_virtual]     = !$accessor[$_accessor_member_private] && ($virtual || $abstract || $override);
-        $method[$_definition_member_name]               = $accessor[$_accessor_member_name].substr(5);
+        $method[$_definition_member_method_abstract]    = !$accessorPrivate && $abstract;
+        $method[$_definition_member_method_final]       = !$accessorPrivate && $sealed;
+        $method[$_definition_member_method_virtual]     = !$accessorPrivate && ($virtual || $abstract || $override);
+        $method[$_definition_member_name]               = $accessorName.substr(5);
         $method[$_definition_member_property_accessors] = $hasTwoAccessors;
         $method[$_definition_member_type]               = $type;
         $method[$_definition_member_value]              = $accessor[$_accessor_member_value];
@@ -280,25 +351,25 @@
         if ($accessor[$_accessor_member_hasModifier])
         {
             // If the accessor is private, set the method definition in the private definitions object
-            if ($accessor[$_accessor_member_private])
-                $__defineProperty__.call($__object__, $privateDefinitions, $accessor[$_accessor_member_name], { 'enumerable': true, 'value': $method });
+            if ($accessorPrivate)
+                $__defineProperty__.call($__object__, $privateDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
             // If the accessor is protected, set the method definition in the protected definitions object
             else if ($accessor[$_accessor_member_protected])
-                $__defineProperty__.call($__object__, $protectedDefinitions, $accessor[$_accessor_member_name], { 'enumerable': true, 'value': $method });
+                $__defineProperty__.call($__object__, $protectedDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
             // If the accessor is public, set the method definition in the public definitions object
             else if ($accessor[$_accessor_member_public])
-                $__defineProperty__.call($__object__, $publicDefinitions, $accessor[$_accessor_member_name], { 'enumerable': true, 'value': $method });
+                $__defineProperty__.call($__object__, $publicDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
         }
         // Set the method definition in the definitions object
         else
-            $__defineProperty__.call($__object__, $definitions, $accessor[$_accessor_member_name], { 'enumerable': true, 'value': $method });
+            $__defineProperty__.call($__object__, $definitions, $accessorName, { 'enumerable': true, 'value': $method });
     };
     var $_definitionsCompilerBaseAbstracts  = function($definitions, $baseDefinitions, $baseKey)
     {
         // Get the base definition object from the base definitions object
         var $baseDefinition = $baseDefinitions[$baseKey];
                     
-        // If the base definition is not abstract, break
+        // If the base definition is not abstract, return
         if (!$baseDefinition[$_definition_member_method_abstract])
             return;
 
@@ -309,7 +380,7 @@
         if (!$definition || $definition[$_definition_member_type] !== $baseDefinition[$_definition_member_type])
             throw $_exceptionFormat($_lang_$$_abstract_override, $baseDefinition[$_definition_member_name], $baseDefinition[$_definition_member_type]);
     };
-    var $_definitionsCompilerBaseMethod     = function($key, $type, $typeName, $baseClass, $override, $protected, $public)
+    var $_definitionsCompilerBaseMethod     = function($key, $type, $typeName, $baseProtected, $basePublic, $override, $protected, $public)
     {
         // If no type name was provided, use the type as the type name
         if (!$typeName)
@@ -319,10 +390,10 @@
 
         // If the method has the protected access modifier, get the protected base definition object
         if ($protected)
-            $baseDefinition = $baseClass[$_definition_protected][$key] || null;
+            $baseDefinition = $baseProtected[$key] || null;
         // If the method has the public access modifier, get the public base definition object
         else if ($public)
-            $baseDefinition = $baseClass[$_definition_public][$key] || null;
+            $baseDefinition = $basePublic[$key] || null;
 
         // If the method has the override modifier
         if ($override)
@@ -335,7 +406,7 @@
         else if ($baseDefinition && $baseDefinition[$_definition_member_method_abstract])
             throw $_exceptionFormat($_lang_$$_member_abstract_override, $key.charAt(0) === '~' ? $key.substr(5) : $key, $type);
     };
-    var $_definitionsCompiler               = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseClass, $isAbstract, $isFinal)
+    var $_definitionsCompiler               = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal)
     {
         // Create the type
         var $type = 'field';
@@ -506,7 +577,7 @@
                     throw $_exceptionFormat($_lang_$$_member_keyword_conflict_2, $name, 'override', 'virtual');
 
                 // If there is no base class, throw an exception
-                if (!$baseClass)
+                if (!$baseProtected && !$basePublic)
                     throw $_exceptionFormat($_lang_$$_member_override_null, $name, $type);
             }
             // If the member is sealed, throw an exception
@@ -559,8 +630,8 @@
             case 'method':
                 
                 // If there is a base class, perform further compiling on the method
-                if ($baseClass)
-                    $_definitionsCompilerBaseMethod($name, $type, null, $baseClass, $override, $protected, $public);
+                if ($baseProtected || $basePublic)
+                    $_definitionsCompilerBaseMethod($name, $type, null, $baseProtected, $basePublic, $override, $protected, $public);
                 
                 // Create the method definition object
                 var $method = {};
@@ -586,12 +657,17 @@
                 // Create the get and set method data arrays
                 var $get = [];
                 var $set = [];
+
+                // Create the has get and set accessors flags
+                var $hasGet = false;
+                var $hasSet = false;
                 
                 for (var $propertyKey in $value)
                 {
-                    // Break the property key string into a keywords array and get the member name
+                    // Break the property key string into a keywords array and get the member name and value
                     var $propertyKeywords = $$.asString($propertyKey).trim().split(' ') || [];
                     var $memberName       = $$.asString($propertyKeywords.pop());
+                    var $memberValue      = $value[$propertyKey];
 
                     // If the member name is empty or whitespace, throw an exception
                     if (!$memberName.trim())
@@ -606,6 +682,13 @@
                         if ($memberName !== 'set')
                             throw $_exceptionFormat($_lang_$$_member_property_name_invalid, $name, $memberName);
 
+                        // If a set accessor was already provided, throw an exception
+                        if ($hasSet)
+                            throw $_exceptionFormat($_lang_$$_member_property_name_2, $name, 'set');
+
+                        // Set the flag for the property having a set accessor
+                        $hasSet = true;
+
                         // Set the set method name
                         $set[$_accessor_member_name] = '~set_' + $name;
 
@@ -614,6 +697,13 @@
                     }
                     else
                     {
+                        // If a get accessor was already provided, throw an exception
+                        if ($hasGet)
+                            throw $_exceptionFormat($_lang_$$_member_property_name_2, $name, 'get');
+
+                        // Set the flag for the property having a get accessor
+                        $hasGet = true;
+
                         // Set the get method name
                         $get[$_accessor_member_name] = '~get_' + $name;
 
@@ -621,17 +711,15 @@
                         $member = $get;
                     }
 
-                    // Set the member value
-                    $member[$_accessor_member_value] = $value[$propertyKey];
-
                     // If the member is not a function, throw an exception
-                    if (!$$.isFunction($member[$_accessor_member_value]))
+                    if (!$$.isFunction($memberValue))
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
-                    // Set the member access modifier flags
+                    // Set the member access modifier flags and value
                     $member[$_accessor_member_private]   = false;
                     $member[$_accessor_member_protected] = false;
                     $member[$_accessor_member_public]    = false;
+                    $member[$_accessor_member_value]     = $memberValue;
         
                     for (var $i = 0, $j = $propertyKeywords.length; $i < $j; $i++)
                     {
@@ -667,20 +755,16 @@
                             throw $_exceptionFormat($_lang_$$_member_property_accessors_access, $name, $memberName);
                     }
                 }
-                
-                // Check if the property has get and set accessors
-                var $hasGet = !!$get[$_accessor_member_name];
-                var $hasSet = !!$set[$_accessor_member_name];
-
-                // Check if the property has get and set accessor access modifiers
-                var $hasGetModifier = $get[$_accessor_member_hasModifier];
-                var $hasSetModifier = $set[$_accessor_member_hasModifier];
 
                 // If there is neither a get nor a set method, throw an exception
                 if (!$hasGet && !$hasSet)
                     throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
-                // If the get and set methods both had access modifiers, throw an exception
+                // Check if the property has get and set accessor access modifiers
+                var $hasGetModifier = $get[$_accessor_member_hasModifier];
+                var $hasSetModifier = $set[$_accessor_member_hasModifier];
+
+                // If the get and set methods both have access modifiers, throw an exception
                 if ($hasGetModifier && $hasSetModifier)
                     throw $_exceptionFormat($_lang_$$_member_property_keyword_access_2, $name);
                 
@@ -692,8 +776,8 @@
                         throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'get');
 
                     // If there is a base class, perform further compiling on the get method
-                    if ($baseClass)
-                        $_definitionsCompilerBaseMethod($get[$_accessor_member_name], $type, 'get accessor', $baseClass, $override, $hasGetModifier ? $get[$_accessor_member_protected] : $protected, $hasGetModifier ? $get[$_accessor_member_public] : $public);
+                    if ($baseProtected || $basePublic)
+                        $_definitionsCompilerBaseMethod($get[$_accessor_member_name], $type, 'get accessor', $baseProtected, $basePublic, $override, $hasGetModifier ? $get[$_accessor_member_protected] : $protected, $hasGetModifier ? $get[$_accessor_member_public] : $public);
 
                     // Compile the get accessor method
                     $_definitionsCompilerAccessorMethod($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $get, $type, $abstract, $override, $sealed, $virtual, $hasGet && $hasSet);
@@ -707,8 +791,8 @@
                         throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'set');
 
                     // If there is a base class, perform further compiling on the set method
-                    if ($baseClass)
-                        $_definitionsCompilerBaseMethod($set[$_accessor_member_name], $type, 'set accessor', $baseClass, $override, $hasSetModifier ? $set[$_accessor_member_protected] : $protected, $hasSetModifier ? $set[$_accessor_member_public] : $public);
+                    if ($baseProtected || $basePublic)
+                        $_definitionsCompilerBaseMethod($set[$_accessor_member_name], $type, 'set accessor', $baseProtected, $basePublic, $override, $hasSetModifier ? $set[$_accessor_member_protected] : $protected, $hasSetModifier ? $set[$_accessor_member_public] : $public);
 
                     // Compile the set accessor method
                     $_definitionsCompilerAccessorMethod($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $set, $type, $abstract, $override, $sealed, $virtual, $hasGet && $hasSet);
@@ -1170,25 +1254,7 @@
         }
     };
 
-    // #################################################
-    // ########## BEGIN jTypes.NET INJECTIONS ##########
-    // #################################################
-
-    // Create the injection flags length
-    var $_inject_flagCount = 0;
-    
-    // Create the injection flags
-    var $_inject_private   = $_inject_flagCount++;
-    var $_inject_protected = $_inject_flagCount++;
-    var $_inject_prototype = $_inject_flagCount++;
-    var $_inject_public    = $_inject_flagCount++;
-    var $_inject_static    = $_inject_flagCount++;
-
-    // ###############################################
-    // ########## END jTypes.NET INJECTIONS ##########
-    // ###############################################
-    
-    // ---------- JTYPES ----------
+    // Create the compiler
     var $$ = function()
     {
         // Get the initial arguments
@@ -1335,6 +1401,10 @@
         var $definitionsPrototype = {};
         var $definitionsStatic    = {};
 
+        // Get the base protected and public definitions objects
+        var $baseProtected = $baseClass && $baseClass[$_definition_protected] || null;
+        var $basePublic    = $baseClass && $baseClass[$_definition_public] || null;
+
         for (var $key in $prototype)
         {
             // If the property is a special member, continue
@@ -1342,7 +1412,7 @@
                 continue;
 
             // Compile the the class definition into the definitions objects
-            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $definitionsPrototype, $definitionsStatic, $key, $prototype[$key], $baseClass, $abstract, $final);
+            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $definitionsPrototype, $definitionsStatic, $key, $prototype[$key], $baseProtected, $basePublic, $abstract, $final);
         }
 
         // If a base class was provided
@@ -1355,13 +1425,9 @@
             // If the base class is abstract
             if ($baseClass[$_definition_abstract])
             {
-                // Get the base protected and public definitions objects
-                var $baseProtected = $baseClass[$_definition_protected];
-                var $basePublic    = $baseClass[$_definition_public];
-
                 // Get the array of keys for the base protected and public definitions objects
-                var $baseProtectedKeys = $$.keys($baseProtected);
-                var $basePublicKeys    = $$.keys($basePublic);
+                var $baseProtectedKeys = $__keys__.call($__object__, $baseProtected) || [];
+                var $basePublicKeys    = $__keys__.call($__object__, $basePublic) || [];
 
                 // Compile the protected definition object for each property defined in the base protected definition object
                 for (var $i = 0, $j = $baseProtectedKeys.length; $i < $j; $i++)
@@ -1438,14 +1504,14 @@
         }
 
         // Freeze the class definitions objects
-        //$__freeze__.call($__object__, $classPrivate);
-        //$__freeze__.call($__object__, $classProtected);
-        //$__freeze__.call($__object__, $classPublic);
+        $__freeze__.call($__object__, $classPrivate);
+        $__freeze__.call($__object__, $classProtected);
+        $__freeze__.call($__object__, $classPublic);
 
         // Get the arrays of private, protected, and public member keys
-        var $classPrivateKeys   = $$.keys($classPrivate);
-        var $classProtectedKeys = $$.keys($classProtected);
-        var $classPublicKeys    = $$.keys($classPublic);
+        var $classPrivateKeys   = $__keys__.call($__object__, $classPrivate) || [];
+        var $classProtectedKeys = $__keys__.call($__object__, $classProtected) || [];
+        var $classPublicKeys    = $__keys__.call($__object__, $classPublic) || [];
 
         // Create the construct helper function
         var $construct = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context)
@@ -1833,63 +1899,18 @@
         // Return the class
         return $class;
     };
-    
-    // ########## DEFINES ##########
 
-    // ---------- FIELD ----------
-    var $_defineField = function($name, $field)
-    {
-        // Define an enumerable field on the jTypes object
-        return $__defineProperty__.call($__object__, $$, $name,
-        {
-            'configurable': false,
-            'enumerable':   true,
-            'value':        $field,
-            'writable':     false
-        });
-    };
-
-    // ---------- METHOD ----------
-    var $_defineMethod = function($name, $method)
-    {
-        // Define a non-enumerable method on the jTypes object
-        return $__defineProperty__.call($__object__, $$, $name,
-        {
-            'configurable': false,
-            'enumerable':   false,
-            'value':        $method,
-            'writable':     false
-        });
-    };
-
-    // ---------- PROPERTY ----------
-    var $_defineProperty = function($name, $getMethod, $setMethod)
-    {
-        // Define an enumerable property on the jTypes object
-        return $__defineProperty__.call($__object__, $$, $name,
-        {
-            'configurable': false,
-            'enumerable':   true,
-            'get':          $getMethod || undefined,
-            'set':          $setMethod || undefined
-        });
-    };
-
-    // ########## INFORMATION ##########
-
-    // ---------- TO-STRING ----------
+    // Define the compiler toString method
     $_defineMethod('toString', function()
     {
         // Return the type string
         return '[object jTypes]';
     });
 
-    // ---------- VERSION ----------
-    $_defineProperty('version', function()
-    {
-        // Return the version string
-        return $_version;
-    });
+    // ########## VERSION ##########
+
+    // Define the version field
+    $_defineField('version', $_version);
 
     // ########## TYPES ##########
     
@@ -1923,7 +1944,7 @@
             $types['[object ' + $window + ']'] = 'window';
         });
 
-        // ---------- TYPE ----------
+        // Define the type method
         $_defineMethod('type', function($object)
         {
             // If the object is null or undefined, return the object cast as a string
@@ -1935,7 +1956,7 @@
                 return 'window';
         
             // If the object is a class, return the "class" type string
-            if ($__toString__.call($object[$_definition_construct]) === '[object Function]')
+            if ($__hasOwnProperty__.call($object, $_definition_construct) && $__toString__.call($object[$_definition_construct]) === '[object Function]')
                 return 'class';
 
             // If the object is a class instance, return the "instance" type string
@@ -2175,198 +2196,18 @@
         });
     });
 
-    // ---------- INHERIT ----------
-    $_defineMethod('inherit', function($object)
-    {
-        // CHECK $object
-        if ($object === undefined || $object === null || $$.isValueType($object))
-            throw $_exceptionArguments('inherit', arguments);
-        
-        // Store a reference to the constructor variable and create the inherit constructor
-        var $constructor = $object.constructor;
-        var $inherit     = $$.empty();
-
-        // Set the inherit object prototype to the object
-        $inherit.prototype = $object;
-
-        // If the object is not an instance
-        if (!$$.isInstance($object))
-        {
-            // Check if the object has a constructor variable
-            var $hasConstructor = $__hasOwnProperty__.call($object, 'constructor');
-
-            // Reference the empty constructor while the object is used as a prototype
-            $object.constructor = $inherit;
-
-            // Create the inherited object
-            $inherit = new $inherit();
-
-            // If the object had a constructor, put the constructor reference back
-            if ($hasConstructor)
-                $object.constructor = $constructor;
-            // Delete the constructor property
-            else
-                delete $object.constructor;
-        }
-        else
-        {
-            // Set the subclass flag
-            $_subclass = true;
-
-            // Create the inherited object
-            $inherit = new $inherit();
-
-            // Reset the subclass flag
-            $_subclass = false;
-        }
-
-        // Return the inherited object
-        return $inherit;
-    });
-
-    // ---------- KEYS ----------
-    $_defineMethod('keys', function($object)
-    {
-        // CHECK $object
-        if ($object === undefined || $object === null)
-            throw $_exceptionArguments('keys', arguments);
-        
-        // Return the keys array of the object
-        return $__keys__.call($__object__, $object) || [];
-    });
-
-    // ---------- MATCH ----------
-    $_defineMethod('match', function($string, $expression)
-    {
-        // CHECK $string
-        if (!$$.isString($string))
-            throw $_exceptionArguments('match', arguments);
-        
-        // CHECK $expression
-        if (!$$.isRegExp($expression) && !$$.isString($expression))
-            throw $_exceptionArguments('match', arguments);
-
-        // Return true if the string matched the expression
-        return $__match__.call($string, $expression);
-    });
-
-    // ---------- PROPERTY ----------
-    $_defineMethod('property', function($object, $name, $settings)
-    {
-        // CHECK $object
-        if (!$$.isReferenceType($object))
-            throw $_exceptionArguments('property', arguments);
-
-        // If the name is not a simple object
-        if (!$$.isSimpleObject($name))
-        {
-            // CHECK $name
-            if (!$$.isString($name))
-                throw $_exceptionArguments('property', arguments);
-
-            // CHECK $settings
-            if (!$$.isSimpleObject($settings))
-                throw $_exceptionArguments('property', arguments);
-
-            // Create the property settings
-            var $propertySettings = (
-            {
-                'configurable': $$.asBool($settings.c),
-                'enumerable':   $$.asBool($settings.e)
-            });
-
-            // Check if there are get or set accessor functions
-            var $getter = $$.isFunction($settings.g);
-            var $setter = $$.isFunction($settings.s);
-
-            // If a get or set function was provided
-            if ($getter || $setter)
-            {
-                // Set the getter and setter
-                $propertySettings['get'] = $getter ? $settings.g : undefined;
-                $propertySettings['set'] = $setter ? $settings.s : undefined;
-            }
-            else
-            {
-                // Set the value and writable attribute
-                $propertySettings['value']    = $settings.v;
-                $propertySettings['writable'] = $$.asBool($settings.w);
-            }
-
-            // Define a property on the object
-            $__defineProperty__.call($__object__, $object, $name, $propertySettings);
-        }
-        else
-        {
-            // Fix the arguments
-            $settings = $name;
-            $name     = undefined;
-
-            // Create the property for each property settings object
-            for (var $key in $settings)
-                $$.property($object, $$.asString($key), $settings[$key]);
-        }
-
-        // Return the object
-        return $object;
-    });
-
-    // ---------- REGULAR-EXPRESSIONS ----------
-    $_defineMethod('regexp', function($pattern, $flags)
-    {
-        // CHECK $pattern
-        if (!$$.isString($pattern))
-            throw $_exceptionArguments('regexp', arguments);
-
-        // CHECK $flags
-        if (!$$.isString($flags) && $flags !== undefined && $flags !== null)
-            throw $_exceptionArguments('regexp', arguments);
-
-        // Return the regular expression object
-        return new RegExp($pattern, $flags);
-    });
-
-    // ---------- REGULAR-EXPRESSIONS ESCAPE ----------
-    $_defineMethod('regexpEscape', function($string)
-    {
-        // CHECK $string
-        if (!$$.isString($string))
-            throw $_exceptionArguments('regexpEscape', arguments);
-
-        // Return the escaped string
-        return $__replace__.call($string, /[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    });
-
-    // ---------- REPLACE ----------
-    $_defineMethod('replace', function($string, $expression, $replace, $replaceIsCode)
-    {
-        // CHECK $string
-        if (!$$.isString($string))
-            throw $_exceptionArguments('replace', arguments);
-        
-        // CHECK $expression
-        if (!$$.isRegExp($expression) && !$$.isString($expression))
-            throw $_exceptionArguments('replace', arguments);
-
-        // See if the replacement is a string
-        var $replaceIsString = $$.isString($replace);
-
-        // CHECK $replace
-        if (!$$.isFunction($replace) && !$replaceIsString)
-            throw $_exceptionArguments('replace', arguments);
-
-        // FORMAT $replaceIsCode
-        $replaceIsCode = $$.asBool($replaceIsCode);
-
-        // If the replacement is a string and not code, escape the dollar signs in the replacement string
-        if (!$replaceIsCode && $replaceIsString)
-            $replace = $__replace__.call($replace, /\$/g, '\$$&');
-        
-        // Return the replaced string
-        return $__replace__.call($string, $expression, $replace);
-    });
-
     // ########## SETTINGS ##########
+
+    // ---------- DEBUG ----------
+    $_defineProperty('debug', function()
+    {
+        // Return the debug flag
+        return $_debug;
+    }, function($v)
+    {
+        // Set the debug flag
+        $_debug = $$.asBool($v);
+    });
 
     // ---------- LAZY ----------
     $_defineProperty('lazy', function()
@@ -2385,6 +2226,6 @@
     if (window.$$ === undefined || window.$$ === window.jTypes)
         window.$$ = $$;
 
-    // Define the global variable
+    // Define/overwrite the global variable
     window.jTypes = $$;
 })(window);
