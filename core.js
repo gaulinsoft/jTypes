@@ -701,6 +701,22 @@
 
                         // Set the set method data object as the member
                         $member = $set;
+
+                        // If the set accessor is overriding, no get accessor has been provided yet, and an inherited get accessor was found
+                        if ($override && !$hasGet && $definitions['~get_' + $name])
+                        {
+                            // Inherit the get accessor
+                            $get[$_accessor_member_hasModifier] = false;
+                            $get[$_accessor_member_name]        = '~get_' + $name;
+                            $get[$_accessor_member_private]     = $private;
+                            $get[$_accessor_member_protected]   = $protected;
+                            $get[$_accessor_member_public]      = $public;
+                            $get[$_accessor_member_value]       = function()
+                            {
+                                // Return the base property
+                                return this.__base[$name];
+                            };
+                        }
                     }
                     else
                     {
@@ -716,6 +732,22 @@
 
                         // Set the get method data object as the member
                         $member = $get;
+
+                        // If the get accessor is overriding, no set accessor has been provided yet, and an inherited set accessor was found
+                        if ($override && !$hasSet && $definitions['~set_' + $name])
+                        {
+                            // Inherit the set accessor
+                            $set[$_accessor_member_hasModifier] = false;
+                            $set[$_accessor_member_name]        = '~set_' + $name;
+                            $set[$_accessor_member_private]     = $private;
+                            $set[$_accessor_member_protected]   = $protected;
+                            $set[$_accessor_member_public]      = $public;
+                            $set[$_accessor_member_value]       = function($v)
+                            {
+                                // Set the base property
+                                this.__base[$name] = $v;
+                            };
+                        }
                     }
 
                     // If the member is not a function, throw an exception
@@ -774,14 +806,22 @@
                 // If the get and set methods both have access modifiers, throw an exception
                 if ($hasGetModifier && $hasSetModifier)
                     throw $_exceptionFormat($_lang_$$_member_property_keyword_access_2, $name);
+
+                // If there is no set accessor and the get method has an access modifier, throw an exception
+                if (!$hasSet && $hasGetModifier)
+                    throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'get');
+
+                // If there is no get accessor and the set method has an access modifier, throw an exception
+                if (!$hasGet && $hasSetModifier)
+                    throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'set');
+
+                // Check if the property has any inherited get or set accessors
+                $hasGet = $hasGet || !!$get[$_accessor_member_name];
+                $hasSet = $hasSet || !!$set[$_accessor_member_name];
                 
                 // If a get method was provided
                 if ($hasGet)
                 {
-                    // If there is no set accessor and the get method has an access modifier, throw an exception
-                    if (!$hasSet && $hasGetModifier)
-                        throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'get');
-
                     // If there is a base class, perform further compiling on the get method
                     if ($baseProtected || $basePublic)
                         $_definitionsCompilerBaseMethod($get[$_accessor_member_name], $type, 'get accessor', $baseProtected, $basePublic, $override, $hasGetModifier ? $get[$_accessor_member_protected] : $protected, $hasGetModifier ? $get[$_accessor_member_public] : $public);
@@ -793,10 +833,6 @@
                 // If a set method was provided
                 if ($hasSet)
                 {
-                    // If there is no get accessor and the set method has an access modifier, throw an exception
-                    if (!$hasGet && $hasSetModifier)
-                        throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'set');
-
                     // If there is a base class, perform further compiling on the set method
                     if ($baseProtected || $basePublic)
                         $_definitionsCompilerBaseMethod($set[$_accessor_member_name], $type, 'set accessor', $baseProtected, $basePublic, $override, $hasSetModifier ? $set[$_accessor_member_protected] : $protected, $hasSetModifier ? $set[$_accessor_member_public] : $public);
@@ -1826,10 +1862,10 @@
             $isInit = true;
 
             // ----- DEBUG -----
-            console.log('$$: ----- INSTANTIATOR -----');
-            console.log('$$: Instance Matrix');
-            console.log($matrix);
-            console.log('$$: Differential inheritance ' + ($_lazy ? 'IS' : 'IS NOT') + ' enabled...');
+            //console.log('$$: ----- INSTANTIATOR -----');
+            //console.log('$$: Instance Matrix');
+            //console.log($matrix);
+            //console.log('$$: Differential inheritance ' + ($_lazy ? 'IS' : 'IS NOT') + ' enabled...');
             // ----- DEBUG -----
 
             // Return the public instance
@@ -1894,13 +1930,13 @@
             $__freeze__.call($__object__, $class);
         
         // ----- DEBUG -----
-        console.log('$$: ----- COMPILER -----');
-        console.log('$$: Private Definitions');
-        console.log($classPrivate);
-        console.log('$$: Protected Definitions');
-        console.log($classProtected);
-        console.log('$$: Public Definitions');
-        console.log($classPublic);
+        //console.log('$$: ----- COMPILER -----');
+        //console.log('$$: Private Definitions');
+        //console.log($classPrivate);
+        //console.log('$$: Protected Definitions');
+        //console.log($classProtected);
+        //console.log('$$: Public Definitions');
+        //console.log($classPublic);
         // ----- DEBUG -----
         
         // Return the class
