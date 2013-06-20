@@ -1963,7 +1963,7 @@
                 return 'window';
         
             // If the object is a class, return the "class" type string
-            if ($__hasOwnProperty__.call($object, $_definition_construct) && $__toString__.call($object[$_definition_construct]) === '[object Function]')
+            if ($__hasOwnProperty__.call($object, $_definition_construct) && typeof $object[$_definition_construct] === 'function')
                 return 'class';
 
             // If the object is a class instance, return the "instance" type string
@@ -1981,7 +1981,7 @@
     $_defineMethod('isClass', function($object)
     {
         // Return true if the object has a class construct function
-        return $object && $__toString__.call($object[$_definition_construct]) === '[object Function]';
+        return $object && typeof $object[$_definition_construct] === 'function';
     });
 
     // ---------- FINITE ----------
@@ -2082,7 +2082,7 @@
         if ($object === window)
             return true;
         
-        // Return true if the object is a window object
+        // Return true if the object is a window reference
         return $$.type($object) === 'window';
     });
 
@@ -2229,10 +2229,29 @@
 
     // ########## GLOBALS ##########
 
-    // If the "$$" shorthand global variable is not already defined or should be overwritten, define/overwrite it
-    if (window.$$ === undefined || window.$$ === window.jTypes)
-        window.$$ = $$;
+    // If the AMD module pattern is being used
+    if (typeof define === 'function' && define.amd)
+    {
+        // Define the module
+        define(function()
+        {
+            // Return the jTypes reference
+            return $$;
+        });
+    }
+    // If the CommonJS module pattern is being used
+    else if (typeof module !== 'undefined' && module && module.exports)
+    {
+        // Define the module exports
+        module.exports = $$;
+    }
+    else
+    {
+        // If the "$$" shorthand global variable is not already defined or should be overwritten, define/overwrite it
+        if (window.$$ === undefined || window.$$ === window.jTypes)
+            window.$$ = $$;
 
-    // Define/overwrite the global variable
-    window.jTypes = $$;
-})(window);
+        // Define/overwrite the global variable
+        window.jTypes = $$;
+    }
+})(typeof window !== 'undefined' ? window : {});
