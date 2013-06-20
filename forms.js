@@ -30,7 +30,7 @@
     var $_lang_exception_prefix    = 'jTypes Error: ';
 
     // Create the language constants
-    var $_lang_forms_element_jquery = 'A jQuery wrapper on 1 DOM element is required.';
+    var $_lang_forms_element_jquery = 'An `Element` requires one DOM element in a jQuery wrapper.';
 
     // ########## NATIVE CODE ##########
     
@@ -76,6 +76,13 @@
     var $__match__       = $__stringProto__.match;
     var $__replace__     = $__stringProto__.replace;
     var $__trim__        = $__stringProto__.trim;
+
+    // ---------- WINDOW ----------
+    var $__clearInterval__ = window.clearInterval;
+    var $__clearTimeout__  = window.clearTimeout;
+    var $__document__      = window.document;
+    var $__setInterval__   = window.setInterval;
+    var $__setTimeout__    = window.setTimeout;
     
     // ########## EXCEPTIONS ##########
     
@@ -148,48 +155,190 @@
 
     // ########## GLOBALS ##########
     
-    var $_document = $(window.document);
+    var $_document = $($__document__);
     var $_focused  = null;
     var $_forms    = {};
-    var $_keypress = $$.now();
-    var $_maximum  = 9007199254740992;
-    var $_minimum  = -9007199254740992;
-    var $_window   = $(window);
+    var $_keypress = 0;
+    var $_tabSort  = function($former, $latter)
+    {
+        // FORMAT $former
+        // FORMAT $latter
+        $former = $($former).first();
+        $latter = $($latter).first();
 
-    // REMEMBER TO FIX THESE LEFTOVERS, BRO
-    var $DOCUMENT_KEYPRESS_INTERVAL = 100;
-    var $JQUERY_DATA_PREFIX         = '__jTypes__';
-    var $TICKER_SCROLL_DURATION     = 150;
+        // Get the tab-indices of the elements
+        var $formerIndex = $$.asInt($former.attr('tabindex'));
+        var $latterIndex = $$.asInt($latter.attr('tabindex'));
+
+        // If the former index is not finite, set the it as the maximum integer
+        if (!isFinite($formerIndex))
+            $formerIndex = $$.settings.MAX_INT;
+
+        // If the latter index is not finite, set the it as the maximum integer
+        if (!isFinite($latterIndex))
+            $latterIndex = $$.settings.MAX_INT;
+
+        // If the tab-indices are not equal, return the difference of the tab-indices
+        if ($formerIndex !== $latterIndex)
+            return $formerIndex - $latterIndex;
+
+        // Check if the first element is before the second element
+        var $isBefore = $former.add($latter).index($former) === 0;
+
+        // If the first element is before the second element, return negative one
+        if ($isBefore)
+            return -1;
+
+        // Return one
+        return 1;
+    };
+    var $_window   = $(window);
 
     // ########## HANDLERS ##########
 
     // Create the document event handlers
     var $_document_click   = function(e)
     {
-        //
+        // If an element is currently focused
+        if ($_focused)
+            $_focused
+                // Cast the focused element as an element
+                .as($_forms.Element)
+                // Trigger the blur event on the currently focused element
+                .blur();
     };
     var $_document_keydown = function(e)
     {
-        //
+        // Get the current timestamp
+        var $now = $$.now();
+
+        // If the previous keypress was less than keypress interval, return false
+        if ($now - $_keypress < $$.settings.DOCUMENT_KEYPRESS_INTERVAL)
+            return;
+
+        // Set the previous keypress to the current timestamp
+        $_keypress = $now;
+
+        switch (e.which)
+        {
+            // TAB
+            case 9:
+                // Get the array of elements
+                var $data     = [];
+                var $elements = $$.asArray($('input, select, textarea').toArray());
+
+                // If there are no elements in the array, return
+                if (!$elements.length)
+                    return;
+
+                // Sort the elements by tab-index
+                $elements.sort($_tabSort);
+
+                for (var i = 0, j = $elements.length; i < j; i++)
+                {
+                    // Get the current element and its self reference data
+                    var $element = $($elements[i]);
+                    var $this    = $element.data($$.settings.JQUERY_DATA_PREFIX);
+
+                    // If no self reference data was found, the element is not visible, or it is disabled
+                    if (!$this || !$this.visible || $this.disabled)
+                    {
+                        // Clear the current element in the elements array
+                        $elements[i] = null;
+
+                        continue;
+                    }
+
+                    // Get the tab-index of the current element
+                    var $index = $$.asInt($element.attr('tabindex'));
+
+                    // If the tab-index of the current element is not finite or is less than zero
+                    if (!isFinite($index) || $index < 0)
+                    {
+                        // Clear the current element in the elements array
+                        $elements[i] = null;
+
+                        continue;
+                    }
+
+                    // Add the current reference data to the data array
+                    $data.push($this);
+                }
+
+                // If the data array contains no references, break
+                if (!$data.length)
+                    break;
+
+                // Prevent the default behavior of the key
+                e.preventDefault();
+
+                // Find the index of the currently focused element in the data array
+                var $index = $.inArray($_focused, $data);
+
+                // If the currently focused element was not found or the shift key was not depressed and after incrementing the index it is not outside the collection of elements, set the index to the first element
+                if ($index === -1 || !e.shiftKey && ++$index === $data.length)
+                    $index = 0;
+                // If the shift key was depressed, decrement the index
+                else if (e.shiftKey)
+                    $index--;
+
+                // Trigger the focus event on the element
+                $data[$index].as($_forms.Element).focus();
+
+                return;
+            // ESCAPE
+            case 27:
+                // If an element is currently focused
+                if ($_focused)
+                {
+                    // Prevent the default behavior of the key
+                    e.preventDefault();
+
+                    $_focused
+                        // Cast the focused element as an element
+                        .as($_forms.Element)
+                        // Trigger the blur event on the currently focused element
+                        .blur();
+
+                    return false;
+                }
+
+                break;
+        }
     };
 
     $_document
         // Bind the document click and keydown event handlers
-        .click($_document_click)
-        .keydown($_document_keydown);
+        .bind('click', $_document_click)
+        .bind('keydown', $_document_keydown);
 
     // ########## ELEMENT ##########
     $$.property($_forms, 'Element', { e: true, v: $$('abstract', function($element)
     {
         // If a single jQuery element was not provided, throw an exception
-        if (!$element || !$element.jquery || $element.length !== 1)
+        if (!$element || !$element.jquery || $element.length == 0 || !($element instanceof $))
             throw $_exceptionFormat($_lang_forms_element_jquery);
 
-        $element
+        // Set the element
+        this.$_element = $element
+            // Get the first element
+            .first()
             // Set the jTypes instance in the element data
-            .data($JQUERY_DATA_PREFIX, this.__self);
+            .data($$.settings.JQUERY_DATA_PREFIX, this.__self);
     },
     {
+        // ---------- FIELDS ----------
+        'protected $_element': null,
+
+        // ---------- METHODS ----------
+        'public virtual bind': function()
+        {
+            this.$_element
+                // Bind the event handler to the element
+                .bind.apply(this.$_element, arguments);
+
+            return this;
+        },
         'public abstract blur': function()
         {
             // If this element is the currently focused element
@@ -205,15 +354,17 @@
         },
         'public abstract dispose': function($element)
         {
-            $element
+            this.$_element
                 // Remove the jTypes instance from the element data
-                .removeData($JQUERY_DATA_PREFIX);
+                .removeData($$.settings.JQUERY_DATA_PREFIX);
         },
         'public abstract focus': function()
         {
             // If an element is currently focused and it is not this element
             if ($_focused && $_focused !== this.__self)
                 $_focused
+                    // Cast the focused element as an element
+                    .as($_forms.Element)
                     // Trigger the blur event on the currently focused element
                     .blur();
 
@@ -234,11 +385,46 @@
 
             return this;
         },
-        
-        'public abstract disabled':
+        'public virtual trigger': function()
         {
-            'get': $$.empty(),
-            'set': $$.empty()
+            this.$_element
+                // Trigger the event handler on the element
+                .triggerHandler.apply(this.$_element, arguments);
+
+            return this;
+        },
+        'public virtual unbind': function()
+        {
+            this.$_element
+                // Unbind the event handler from the element
+                .unbind.apply(this.$_element, arguments);
+
+            return this;
+        },
+        
+        // ---------- PROPERTIES ----------
+        'public virtual disabled':
+        {
+            'get': function()
+            {
+                // Return the disabled property of the element
+                return $$.asBool(this.$_element.prop('disabled'));
+            },
+            'set': function($v)
+            {
+                // FORMAT $v
+                $v = $$.asBool($v);
+
+                // If the element is being disabled and is the currently focused element
+                if ($v && $_focused === this.__self)
+                    this
+                        // Trigger the blur event
+                        .blur();
+
+                this.$_element
+                    // Set the disabled property on the element
+                    .prop('disabled', $v);
+            }
         },
         'public abstract visible':
         {
@@ -246,93 +432,17 @@
         }
     }) });
 
-    // ########## INPUT ELEMENT ##########
-    $$.property($_forms, 'InputElement', { e: true, v: $$('abstract', $_forms.Element,
-    {
-        'protected $_input': null,
-
-        'public override blur': function()
-        {
-            // If the trigger function is being called, call the abstract base blur method
-            if (!arguments.length)
-                return this.__base.blur();
-            
-            this.$_input
-                // Bind the blur event handler to the input element
-                .blur.apply(this.$_input, arguments);
-
-            return this;
-        },
-        'public change': function()
-        {
-            // If the trigger function is being called
-            if (!arguments.length)
-                this.$_input
-                    // Trigger the change event handler on the input element
-                    .triggerHandler('change');
-            else
-                this.$_input
-                    // Bind the change event handler to the input element
-                    .change.apply(this.$_input, arguments);
-
-            return this;
-        },
-        'public override dispose': function()
-        {
-            // Call the abstract base dispose method on the input element
-            this.__base.dispose(this.$_input);
-        },
-        'public override focus': function()
-        {
-            // If the trigger function is being called, focus the element
-            if (!arguments.length)
-                return this.__base.focus();
-            
-            this.$_input
-                // Bind the focus event handler to the input element
-                .focus.apply(this.$_input, arguments);
-
-            return this;
-        },
-
-        'public override disabled':
-        {
-            'get': function()
-            {
-                // Return the disabled property of the input element
-                return $$.asBool(this.$_input.prop('disabled'));
-            },
-            'set': function($v)
-            {
-                // FORMAT $v
-                $v = $$.asBool($v);
-
-                // If the input element is being disabled and this is the currently focused element
-                if ($v && $_focused === this.__self)
-                    this
-                        // Trigger the blur event
-                        .blur();
-
-                this.$_input
-                    // Set the disabled property on the input element
-                    .prop('disabled', $v);
-            }
-        },
-        'public abstract override visible':
-        {
-            'get': $$.empty()
-        }
-    }) });
-
     // ---------- HANDLERS ----------
-    var $_button_click      = function(e)
+    var $_forms_button_click      = function(e)
     {
         // Get the self reference
         var $this = e.data;
 
-        // If an element is currently focused
-        if ($_focused)
+        // If an element is currently focused and it is not this button
+        if ($_focused && $_focused !== this.__self)
             $_focused
+                // Cast the focused element as an element
+                .as($_forms.Element)
                 // Trigger the blur event on the currently focused element
                 .blur();
 
@@ -340,17 +450,17 @@
         if ($this.disabled)
             return;
 
-        $this.$_input
+        $this.$_element
             // Trigger the click event handler on the input element
             .triggerHandler('click');
     };
-    var $_button_keydown    = function(e)
+    var $_forms_button_keydown    = function(e)
     {
         // Get the current timestamp
-        var $now = $.utilities.now();
+        var $now = $$.now();
 
         // If the previous keypress was less than keypress interval, return false
-        if ($now - $_keypress < $DOCUMENT_KEYPRESS_INTERVAL)
+        if ($now - $_keypress < $$.settings.DOCUMENT_KEYPRESS_INTERVAL)
             return false;
 
         // Get the self reference
@@ -368,14 +478,14 @@
                 // Prevent the default behavior of the key
                 e.preventDefault();
 
-                $this
-                    // Trigger the click event on the button
-                    .click();
+                $this.$_element
+                    // Trigger the click event handler on the input element
+                    .triggerHandler('click');
 
                 return false;
         }
     };
-    var $_button_mouseenter = function(e)
+    var $_forms_button_mouseenter = function(e)
     {
         // Get the self reference
         var $this = e.data;
@@ -384,11 +494,11 @@
         if ($this.disabled())
             return;
 
-        $this._input
+        $this.$_element
             // Trigger the mouseenter event handler on the input element
             .triggerHandler('mouseenter');
     };
-    var $_button_mouseleave = function(e)
+    var $_forms_button_mouseleave = function(e)
     {
         // Get the self reference
         var $this = e.data;
@@ -397,24 +507,27 @@
         if ($this.disabled())
             return;
 
-        $this._input
+        $this.$_element
             // Trigger the mouseleave event handler on the input element
             .triggerHandler('mouseleave');
     };
 
     // ########## BUTTON ##########
-    $$.property($_forms, 'Button', { e: true, v: $$($_forms.InputElement, function($element)
+    $$.property($_forms, 'Button', { e: true, v: $$($_forms.Element, function($element, $isImage)
     {
         // Call the base constructor
         this.__base($element);
 
+        // Store the image flag
+        this._img = $$.asBool($isImage);
+
         // Create the button and icon
         this.$_button = $('<span class="button" />');
-        this.$_icon   = $('<img />');
+        this.$_icon   = $($isImage ? '<img />' : '<span />');
 
         // Get the class and style attributes of the input element
-        var $class = $$.asString(this.$_input.attr('class'));
-        var $style = $$.asString(this.$_input.attr('style'));
+        var $class = $$.asString(this.$_element.attr('class'));
+        var $style = $$.asString(this.$_element.attr('style'));
 
         // If the input element has a class attribute
         if ($class)
@@ -437,7 +550,7 @@
                 // Add the "disabled" class to the button
                 .addClass('disabled');
 
-        this.$_input
+        this.$_element
             // Hide the input element
             .hide()
             // Insert the button after it in the DOM
@@ -445,65 +558,36 @@
             (
                 this.$_button
                     // Bind click, vmouseover, and vmouseout event handlers to the button
-                    .click(this, $_button_click)
-                    .bind('vmouseover', this, $_button_mouseenter)
-                    .bind('vmouseout', this, $_button_mouseleave)
+                    .bind('click', this, $_forms_button_click)
+                    .bind('vmouseover', this, $_forms_button_mouseenter)
+                    .bind('vmouseout', this, $_forms_button_mouseleave)
             );
 
         // Set the text of the button to the input element value
-        this.text = this.$_input.val() || '';
+        this.text = this.$_element.val() || '';
     },
     {
         'protected $_button': null,
         'protected $_icon': null,
+        'private _img': false,
 
         'public override blur': function()
         {
-            // If the trigger function is being called, otherwise bind the blur event handler to the input element
-            if (!arguments.length)
-            {
-                // If the base blur method does not blur the button, return false
-                if (!this.__base.blur())
-                    return false;
+            // If the base blur method does not blur the button, return
+            if (!this.__base.blur())
+                return this;
                 
-                this._button
-                    // Remove the "focused" class from the button
-                    .removeClass('focused');
+            this.$_button
+                // Remove the "focused" class from the button
+                .removeClass('focused');
 
-                $_document
-                    // Unbind the document keydown event handler for focused buttons
-                    .unbind('keydown', $_button_keydown);
+            $_document
+                // Unbind the document keydown event handler for focused buttons
+                .unbind('keydown', $_forms_button_keydown);
 
-                this._input
-                    // Trigger the blur event handler on the input element
-                    .triggerHandler('blur');
-
-                return true;
-            }
-            else
-                this.__base.blur.apply(this, arguments);
-
-            return this;
-        },
-        'public click': function()
-        {
-            // If the trigger function is being called
-            if (!arguments.length)
-            {
-                // If an element is currently focused and it is not this button
-                if ($_focused && $_focused !== this.__self)
-                    $_focused
-                        // Trigger the blur event on the currently focused element
-                        .blur();
-
-                this.$_input
-                    // Trigger the click event handler on the input element
-                    .triggerHandler('click');
-            }
-            else
-                this.$_input
-                    // Bind the click event handler to the input element
-                    .click.apply(this.$_input, arguments);
+            this.$_element
+                // Trigger the blur event handler on the input element
+                .triggerHandler('blur');
 
             return this;
         },
@@ -516,70 +600,34 @@
                 // Remove the button from the DOM
                 .remove();
 
-            this.$_input
+            this.$_element
                 // Unbind the event handlers from the input element
-                .unbind('click', $_button_click)
-                .unbind('vmouseover', $_button_mouseenter)
-                .unbind('vmouseout', $_button_mouseleave)
+                .unbind('click', $_forms_button_click)
+                .unbind('vmouseover', $_forms_button_mouseenter)
+                .unbind('vmouseout', $_forms_button_mouseleave)
                 // Show the input element
                 .show();
         },
         'public override focus': function()
         {
-            // If the trigger function is being called, otherwise bind the focus event handler to the input element
-            if (!arguments.length)
-            {
-                // If the base focus method does not focus the button, return false
-                if (!this.__base.focus())
-                    return false;
+            // If the base focus method does not focus the button, return
+            if (!this.__base.focus())
+                return this;
 
-                // Scroll the button into the window
-                $$.utilities.scrollTo(this.$_button);
+            // Scroll the button into the window
+            $$.scrollTo(this.$_button);
 
-                this.$_button
-                    // Add the "focused" class to the button
-                    .addClass('focused');
+            this.$_button
+                // Add the "focused" class to the button
+                .addClass('focused');
 
-                $_document
-                    // Bind the document keydown event handler for focused buttons
-                    .keydown(this, $_button_keydown);
+            $_document
+                // Bind the document keydown event handler for focused buttons
+                .keydown(this, $_forms_button_keydown);
 
-                this.$_input
-                    // Trigger the focus event handler on the input element
-                    .triggerHandler('focus');
-
-                return true;
-            }
-            else
-                this.__base.focus.apply(this, arguments);
-
-            return this;
-        },
-        'public mouseenter': function()
-        {
-            // If the trigger function is being called
-            if (!arguments.length)
-                this.$_input
-                    // Trigger the mouseenter event handler on the input element
-                    .triggerHandler('mouseenter');
-            else
-                this.$_input
-                    // Bind the mouseenter event handler to the input element
-                    .mouseenter.apply(this.$_input, arguments);
-
-            return this;
-        },
-        'public mouseleave': function()
-        {
-            // If the trigger function is being called
-            if (!arguments.length)
-                this.$_input
-                    // Trigger the mouseleave event handler on the input element
-                    .triggerHandler('mouseleave');
-            else
-                this.$_input
-                    // Bind the mouseleave event handler to the input element
-                    .mouseleave.apply(this.$_input, arguments);
+            this.$_element
+                // Trigger the focus event handler on the input element
+                .triggerHandler('focus');
 
             return this;
         },
@@ -593,18 +641,18 @@
                 .removeClass('error');
 
             // Reset the button text
-            this.text = this.$_input.prop('defaultValue') || '';
+            this.text = this.$_element.prop('defaultValue') || '';
         },
 
         'public override disabled':
         {
             'set': function($v)
             {
-                // Get the disabled flag
-                var $disabled = this.__base.disabled;
+                // Set the base disabled property
+                this.__base.disabled = $v;
 
                 // If the button is being disabled
-                if ($disabled)
+                if ($v)
                     this.$_button
                         // Add the "disabled" class to the button
                         .addClass('disabled');
@@ -612,54 +660,59 @@
                     this.$_button
                         // Remove the "disabled" class from the button
                         .removeClass('disabled');
-
-                // Return the disabled flag
-                return $disabled;
             }
         },
         'public virtual icon':
         {
             'get': function()
             {
+                // If the icon is not an image, return the icon HTML
+                if (!this._img)
+                    return $$.asString(this.$_icon.html());
+
                 // Return the input element source attribute
-                return $$.asString(this.$_input.attr('src'));
+                return $$.asString(this.$_element.attr('src'));
             },
             'set': function($v)
             {
-                // Get the icon argument
-                var $icon = $$.asString($v);
+                // FORMAT $v
+                $v = $$.asString($v);
 
                 // If an icon argument was provided
-                if ($icon)
+                if ($v)
                 {
-                    this.$_input
-                        // Set the input element source attribute
-                        .attr('src', $icon);
+                    // If the icon is an image
+                    if (this._img)
+                    {
+                        this.$_element
+                            // Set the input element source attribute
+                            .attr('src', $v);
+
+                        this.$_icon
+                            // Set the icon source attribute
+                            .attr('src', $v);
+                    }
+                    else
+                        this.$_icon
+                            // Set the icon HTML
+                            .html($v);
                     
                     this.$_button
                         // Insert the icon into the button
-                        .prepend
-                        (
-                            this.$_icon
-                                // Set the icon source attribute
-                                .attr('src', $icon)
-                        );
+                        .prepend(this.$_icon);
                 }
                 else
                 {
-                    this.$_input
-                        // Remove the input element source attribute
-                        .removeAttr('src');
+                    // If the icon is an image
+                    if (this._img)
+                        this.$_element
+                            // Remove the input element source attribute
+                            .removeAttr('src');
 
                     this.$_icon
                         // Detach the icon from the DOM
-                        .detach()
-                        // Remove its source attribute
-                        .removeAttr('src');
+                        .detach();
                 }
-
-                // Return the icon property
-                return $icon;
             }
         },
         'public virtual text':
@@ -667,36 +720,26 @@
             'get': function()
             {
                 // Return the input element value
-                return $$.asString(this.$_input.val());
+                return $$.asString(this.$_element.val());
             },
             'set': function($v)
             {
-                // Get the button icon and text argument
-                var $icon = this.icon;
-                var $text = $$.asString($v);
+                // FORMAT $v
+                $v = $$.asString($v);
 
-                this.$_input
+                this.$_element
                     // Set the input element value
-                    .val($text);
+                    .val($v);
 
                 this.$_button
                     // Set the button text
-                    .text($text);
+                    .text($v);
                 
                 // If the button has an icon
-                if ($icon)
-                {
-                    this.$_icon
-                        // Set the icon source attribute
-                        .attr('src', $icon);
-
+                if (this.icon)
                     this.$_button
                         // Insert the icon into the button
                         .prepend(this.$_icon);
-                }
-
-                // Return the text property
-                return $text;
             }
         },
         'public override visible':
@@ -724,8 +767,8 @@
             .removeClass('focused multiline');
 
         // If the input element has the "floating" class
-        if ($this.$_input.hasClass('floating'))
-            $this.$_input
+        if ($this.$_element.hasClass('floating'))
+            $this.$_element
                 // Remove the "focused" class from the input element
                 .removeClass('focused');
 
@@ -735,14 +778,14 @@
         if (!$$.compatibility.placeholder)
         {
             // If the input element has no value
-            if (!$this.$_input.val())
+            if (!$this.$_element.val())
             {
                 // Get the placeholder text
-                var $placeholder = $$.asString($this.$_input.attr('placeholder'));
+                var $placeholder = $$.asString($this.$_element.attr('placeholder'));
 
                 // If a placeholder text attribute exists
                 if ($placeholder)
-                    $this.$_input
+                    $this.$_element
                         // Add the "placeholder" class to the input element
                         .addClass('placeholder')
                         // Set its value to the placeholder text
@@ -758,6 +801,8 @@
         // If an element is currently focused and it is not the textbox
         if ($_focused && $_focused !== $this.__self)
             $_focused
+                // Cast the focused element as an element
+                .as($_forms.Element)
                 // Trigger the blur event on the currently focused element
                 .blur();
 
@@ -767,7 +812,7 @@
 
         // If the textbox is not the currently focused element
         if ($_focused !== $this.__self)
-            $this.$_input
+            $this.$_element
                 // Trigger the focus event on the input element
                 .focus();
 
@@ -781,6 +826,8 @@
         // If an element is currently focused and it is not the textbox
         if ($_focused && $_focused !== $this.__self)
             $_focused
+                // Cast the focused element as an element
+                .as($_forms.Element)
                 // Trigger the blur event on the currently focused element
                 .blur();
 
@@ -792,8 +839,8 @@
             .addClass('focused');
 
         // If the input element has the "floating" class
-        if ($this.$_input.hasClass('floating'))
-            $this.$_input
+        if ($this.$_element.hasClass('floating'))
+            $this.$_element
                 // Add the "focused" class to the input element
                 .addClass('focused');
 
@@ -801,8 +848,8 @@
         if (!$$.compatibility.placeholder)
         {
             // If the input element has the "placeholder" class
-            if ($this.$_input.hasClass('placeholder'))
-                $this.$_input
+            if ($this.$_element.hasClass('placeholder'))
+                $this.$_element
                     // Remove the "placeholder" class from the input element
                     .removeClass('placeholder')
                     // Reset its value
@@ -825,8 +872,6 @@
                 .closest('form')
                     // Find the input elements of type submit and the input elements with the "data-submit" attribute
                     .find('input[type="submit"], input[data-submit]')
-                        // Convert the input elements to a buttons collection
-                        .jT_filterButtons()
                         // Take the first submit button
                         .first()
                             // Trigger the click event on the submit button
@@ -846,7 +891,7 @@
     };
 
     // ########## TEXTBOX ##########
-    $$.property($_forms, 'Textbox', { e: true, v: $$($_forms.InputElement, function($element)
+    $$.property($_forms, 'Textbox', { e: true, v: $$($_forms.Element, function($element)
     {
         // Call the base constructor
         this.__base($element);
@@ -856,14 +901,14 @@
         this.$_wrapper = $('<span class="fwrapper textbox" />');
             
         // Get the class and style attributes of the input element
-        var $class = $$.asString(this.$_input.attr('class'));
-        var $style = $$.asString(this.$_input.attr('style'));
+        var $class = $$.asString(this.$_element.attr('class'));
+        var $style = $$.asString(this.$_element.attr('style'));
 
         // If the input element has a class attribute
         if ($class)
             this.$_wrapper
                 // Store the class data
-                .data($JQUERY_DATA_PREFIX + 'class', $class)
+                .data($$.settings.JQUERY_DATA_PREFIX + 'class', $class)
                 // Add the classes to the wrapper
                 .addClass($class);
 
@@ -871,7 +916,7 @@
         if ($style)
             this.$_wrapper
                 // Store the style data
-                .data($JQUERY_DATA_PREFIX + 'style', $style)
+                .data($$.settings.JQUERY_DATA_PREFIX + 'style', $style)
                 // Add the styles to the wrapper
                 .attr('style', $style);
         
@@ -881,12 +926,12 @@
             (
                 this.$_textbox
                     // Bind click and vmousedown event handlers to the textbox
-                    .bind('click', this, $_textbox_click)
-                    .bind('vmousedown', this, $_textbox_mousedown)
+                    .bind('click', this, $_forms_textbox_click)
+                    .bind('vmousedown', this, $_forms_textbox_mousedown)
                     // Wrap the input element with the textbox in the DOM
                     .append
                     (
-                        this.$_input
+                        this.$_element
                             // Insert the wrapper after the input element in the DOM
                             .after(this.$_wrapper)
                             // Detach it from the DOM
@@ -895,9 +940,9 @@
                             .removeAttr('class')
                             .removeAttr('style')
                             // Bind blur, focus, and keydown event handlers to it
-                            .bind('blur', this, $_textbox_blur)
-                            .bind('focus', this, $_textbox_focus)
-                            .bind('keydown', this, $_textbox_keydown)
+                            .bind('blur', this, $_forms_textbox_blur)
+                            .bind('focus', this, $_forms_textbox_focus)
+                            .bind('keydown', this, $_forms_textbox_keydown)
                     )
             );
 
@@ -905,14 +950,14 @@
         if (!$$.compatibility.placeholder)
         {
             // If the input element has no value
-            if (!this.$_input.val())
+            if (!this.$_element.val())
             {
                 // Get the placeholder text
-                var $placeholder = $$.asString(this.$_input.attr('placeholder'));
+                var $placeholder = $$.asString(this.$_element.attr('placeholder'));
 
                 // If a placeholder text attribute exists
                 if ($placeholder)
-                    this.$_input
+                    this.$_element
                         // Add the "placeholder" class to the input element
                         .addClass('placeholder')
                         // Set its value to the placeholder text
@@ -928,22 +973,13 @@
         // ---------- METHODS ----------
         'public override blur': function()
         {
-            // If the trigger function is being called
-            if (!arguments.length)
-            {
-                // If the base blur method does not blur the textbox, return false
-                if (!this.__base.blur())
-                    return false;
+            // If the base blur method does not blur the textbox, return
+            if (!this.__base.blur())
+                return this;
                 
-                this.$_input
-                    // Trigger the blur event on the input element
-                    .blur();
-
-                return true;
-            }
-            // Bind the blur event handler to the input element
-            else
-                this.__base.blur.apply(this, arguments);
+            this.$_element
+                // Trigger the blur event on the input element
+                .blur();
 
             return this;
         },
@@ -953,26 +989,26 @@
             this.__base.dispose();
 
             // Get the class and style data
-            var $class = this.$_wrapper.data($JQUERY_DATA_PREFIX + 'class');
-            var $style = this.$_wrapper.data($JQUERY_DATA_PREFIX + 'style');
+            var $class = this.$_wrapper.data($$.settings.JQUERY_DATA_PREFIX + 'class');
+            var $style = this.$_wrapper.data($$.settings.JQUERY_DATA_PREFIX + 'style');
 
             // If the textbox has historical class data
             if ($class)
-                this.$_input
+                this.$_element
                     // Set the class attribute on the input element
                     .attr('class', $class);
             else
-                this.$_input
+                this.$_element
                     // Remove the class attribute from the input element
                     .removeAttr('class');
 
             // If the textbox has historical style data
             if ($style)
-                this.$_input
+                this.$_element
                     // Set the style attribute on the input element
                     .attr('style', $style);
             else
-                this.$_input
+                this.$_element
                     // Remove the style attribute from the input element
                     .removeAttr('style');
 
@@ -980,7 +1016,7 @@
                 // Insert the input element before the wrapper in the DOM
                 .before
                 (
-                    this.$_input
+                    this.$_element
                         // Detach the input element from the DOM
                         .detach()
                         // Unbind the event handlers from the input element
@@ -993,23 +1029,16 @@
         },
         'public override focus': function()
         {
-            // If the trigger function is being called
-            if (!arguments.length)
-            {
-                // If the base focus method does not focus the textbox, return false
-                if (!this.__base.focus())
-                    return this;
+            // If the base focus method does not focus the textbox, return
+            if (!this.__base.focus())
+                return this;
 
-                // Scroll the textbox into the window
-                $$.utilities.scrollTo(this.$_wrapper);
+            // Scroll the textbox into the window
+            $$.scrollTo(this.$_wrapper);
 
-                this.$_input
-                    // Trigger the focus event on the input element
-                    .focus();
-            }
-            else
-                // Bind the focus event handler to the input element
-                this.__base.focus.apply(this, arguments);
+            this.$_element
+                // Trigger the focus event on the input element
+                .focus();
 
             return this;
         },
@@ -1023,7 +1052,7 @@
                 .removeClass('error');
 
             // Reset the value to the default value of the input element
-            this.value = this.$_input.prop('defaultValue');
+            this.value = this.$_element.prop('defaultValue');
 
             return this;
         },
@@ -1052,7 +1081,7 @@
             'get': function()
             {
                 // Return the input element placeholder attribute
-                return $$.asString(this.$_input.attr('placeholder'));
+                return $$.asString(this.$_element.attr('placeholder'));
             },
             'set': function($v)
             {
@@ -1061,17 +1090,17 @@
 
                 // If a placeholder value was provided
                 if ($v)
-                    this.$_input
+                    this.$_element
                         // Set the placeholder attribute of the input element
                         .attr('placeholder', $v);
                 else
-                    this.$_input
+                    this.$_element
                         // Remove the placeholder attribute from the input element
                         .removeAttr('placeholder');
 
                 // If the browser does not support placeholder text and the textbox has the "placeholder" class
                 if (!$$.compatibility.placeholder && this.$_textbox.hasClass('placeholder'))
-                    this.$_input
+                    this.$_element
                         // Set the input element value to the placeholder text
                         .val($v);
             }
@@ -1085,14 +1114,14 @@
                     return '';
 
                 // Return the input element value
-                return $$.asString(this.$_input.val());
+                return $$.asString(this.$_element.val());
             },
             'set': function($v)
             {
                 // FORMAT $v
                 $v = $$.asString($v);
 
-                this.$_input
+                this.$_element
                     // Set the input element value
                     .val($v);
 
@@ -1102,9 +1131,9 @@
                     // If an empty string was set as the input element value
                     if (!$v)
                     {
-                        this.$_input
+                        this.$_element
                             // Set the input element value to the placeholder text
-                            .val($$.asString(this.$_input.attr('placeholder')));
+                            .val($$.asString(this.$_element.attr('placeholder')));
 
                         this.$_textbox
                             // Add the "placeholder" class to the textbox
@@ -1129,4 +1158,4 @@
 
     // Define the forms namespace on the jTypes global variable
     $_defineField('forms', $_forms);
-})(window, window.jQuery, window.jTypes);
+})(window, window['jQuery'], jTypes);

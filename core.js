@@ -112,6 +112,13 @@
     var $__replace__     = $__stringProto__.replace;
     var $__trim__        = $__stringProto__.trim;
 
+    // ---------- WINDOW ----------
+    var $__clearInterval__ = window.clearInterval;
+    var $__clearTimeout__  = window.clearTimeout;
+    var $__document__      = window.document;
+    var $__setInterval__   = window.setInterval;
+    var $__setTimeout__    = window.setTimeout;
+
     // If any of the major native code methods from recent JavaScript versions are not found, throw an exception
     if (!$__create__ || !$__defineProperty__ || !$__freeze__ || !$__getPrototypeOf__ || !$__preventExtensions__ || !$__seal__ || !$__isArray__ || !$__forEach__ || !$__indexOf__ || !$__trim__)
         throw $_lang_exception_prefix + $_lang_compatibility;

@@ -76,6 +76,13 @@
     var $__match__       = $__stringProto__.match;
     var $__replace__     = $__stringProto__.replace;
     var $__trim__        = $__stringProto__.trim;
+
+    // ---------- WINDOW ----------
+    var $__clearInterval__ = window.clearInterval;
+    var $__clearTimeout__  = window.clearTimeout;
+    var $__document__      = window.document;
+    var $__setInterval__   = window.setInterval;
+    var $__setTimeout__    = window.setTimeout;
     
     // ########## EXCEPTIONS ##########
     
@@ -151,11 +158,15 @@
     // Create the defaults object
     var $_defaults = (
     {
-        'AJAX_TIMEOUT': 5000,
-//      'DEBUG': false,
+        'AJAX_TIMEOUT_DURATION': 5000,
+        'DOCUMENT_KEYPRESS_INTERVAL': 100,
+        'JQUERY_DATA_PREFIX': '__jTypes__',
         'LOCALE_MONTHS': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         'LOCALE_WEEKDAYS': ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        'MAX_INT': 9007199254740992,
+        'MIN_INT': -9007199254740992,
         'SCROLLTO_MARGIN': 6,
+        'TICKER_SCROLL_DURATION': 150,
         'TIMESTAMP_OFFSET': 0
     });
 
@@ -173,8 +184,8 @@
     // Create the compatibility object
     var $_compatibility = (
     {
-        'placeholder': !!('placeholder' in document.createElement('input')),
-        'touch': !!('ontouchend' in document)
+        'placeholder': $__document__ && $__document__.createElement && !!('placeholder' in $__document__.createElement('input')),
+        'touch': $__document__ && !!('ontouchend' in $__document__)
     });
 
     try
@@ -756,5 +767,10 @@
             // Return the class
             return $class;
         });
+
+        $_defineMethod('scrollTo', function()
+        {
+            //
+        });
     }
-})(window, window.jQuery, window.jTypes);
+})(window, window['jQuery'], jTypes);
