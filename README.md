@@ -7,7 +7,7 @@ jTypes is the most comprehensive and robust JavaScript library for overcoming di
 
 If you're looking for a more down-to-earth explanation rather than the generic description or tagline, then here's the deal: <em>jTypes will provide you with the ability to develop robust, modular, and scalable application libraries in JavaScript using encapsulation, inheritance, and polymorphism</em>.
 
-What exactly does that mean? You know all those keywords from languages such as C++ or C# that you started missing quite badly after you transitioned to JavaScript? You know what we're talking about. All those beautiful modifiers of classical inheritance such as virtual, abstract, and override or private, protected, and public that gave you so much more control and freedom with your libraries. Well jTypes lets you take those keywords back, so you can develop extremely powerful and robust web applications using the principals of classical inheritance.
+What exactly does that mean? You know all those keywords from languages such as C++ or C# that you started missing quite badly after you transitioned to JavaScript? You know what we're talking about. All those beautiful modifiers of classical inheritance such as `virtual`, `abstract`, and `override` or `private`, `protected`, and `public` that gave you so much more control and freedom with your libraries. Well jTypes lets you take those keywords back, so you can develop extremely powerful and robust web applications using the principals of classical inheritance.
 
 
 ## What are the requirements?
@@ -25,7 +25,7 @@ We hope you find jTypes to be a very useful tool in the development of your appl
 
 ## How to define a class
 
-In the following example, a class is compiled and the type reference is stored in the "Person" variable. A constructor is provided to take in three arguments and set the corresponding fields. Two public read-only fields are defined, and a protected field is defined as well. A public method along with a virtual public method are defined. Finally, a property with both get and set accessors is provided:
+In the following example, a class is compiled and the type reference is stored in the `Person` variable. A constructor is provided to take in three arguments and set the corresponding fields. Two `public` `readonly` fields are defined, and a `protected` field is defined as well. A `public` method along with a `public` `virtual` method are defined. Finally, a property with both `get` and `set` accessors is provided:
 
 ```javascript
 var Person = $$(function($fName, $lName, $age)
@@ -68,7 +68,7 @@ var Person = $$(function($fName, $lName, $age)
 
 ## How to define a derived class
 
-In the following example, a class is derived from the "Person" class and the type reference is stored in the "Employee" variable. Four arguments are provided to the constructor, with which the first three arguments are passed into the base constructor, while the final argument is used to set a protected field defined in the class. A public virtual method that overrides the base virtual method is defined. This method also calls the base virtual method. Finally, a property with only a get accessor is provided, which will act as if it is a read-only field:
+In the following example, a class is derived from the `Person` class and the type reference is stored in the `Employee` variable. Four arguments are provided to the constructor, with which the first three arguments are passed into the base constructor, while the final argument is used to set a `protected` field defined in the class. A `public` method is defined as an `override` for the base `virtual` method. This method also calls the base `virtual` method. Finally, a property with only a `get` accessor is provided, which will act as if it is a read-only field:
 
 ```javascript
 var Employee = $$(Person, function($fName, $lName, $age, $salary)
