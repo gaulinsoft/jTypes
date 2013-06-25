@@ -40,7 +40,9 @@
     var $_lang_$$_abstract_override                = 'Class must implement the inherited abstract {1} "{0}" with the override modifier.';
     var $_lang_$$_abstract_sealed                  = 'Classes cannot have the abstract and sealed modifiers.';
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
+    var $_lang_$$_derive_unsafe                    = 'Classes cannot inherit from a .NET class.';
     var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only field.';
+    var $_lang_$$_field_type                       = '"{0}" must have a value of the types {1}, null, or undefined.';
     var $_lang_$$_keyword                          = '"{0}" is not a valid class modifier.';
     var $_lang_$$_member_abstract                  = '"{0}" cannot have the abstract modifier in a non-abstract class.';
     var $_lang_$$_member_abstract_override         = '"{0}" must implement the inherited abstract {1} with the override modifier.';
@@ -244,11 +246,15 @@
     var $_definition_final             = $_keyGenerator($_definition_keyLength);
     var $_definition_protected         = $_keyGenerator($_definition_keyLength);
     var $_definition_public            = $_keyGenerator($_definition_keyLength);
+    var $_definition_unsafe            = $_keyGenerator($_definition_keyLength);
 
     // Create the definition member obfuscated keys
-    var $_definition_member_field_readOnly     = $_keyGenerator($_definition_keyLength);
+    var $_definition_member_field_injection    = $_keyGenerator($_definition_keyLength);
+    var $_definition_member_field_readonly     = $_keyGenerator($_definition_keyLength);
+    var $_definition_member_field_type         = $_keyGenerator($_definition_keyLength);
     var $_definition_member_method_abstract    = $_keyGenerator($_definition_keyLength);
     var $_definition_member_method_final       = $_keyGenerator($_definition_keyLength);
+    var $_definition_member_method_type        = $_keyGenerator($_definition_keyLength);
     var $_definition_member_method_virtual     = $_keyGenerator($_definition_keyLength);
     var $_definition_member_name               = $_keyGenerator($_definition_keyLength);
     var $_definition_member_property_accessors = $_keyGenerator($_definition_keyLength);
@@ -259,12 +265,12 @@
     var $_accessor_member_flagCount = 0;
     
     // Create the accessor member flags
-    var $_accessor_member_hasModifier = $_accessor_member_flagCount++;
-    var $_accessor_member_name        = $_accessor_member_flagCount++;
-    var $_accessor_member_private     = $_accessor_member_flagCount++;
-    var $_accessor_member_protected   = $_accessor_member_flagCount++;
-    var $_accessor_member_public      = $_accessor_member_flagCount++;
-    var $_accessor_member_value       = $_accessor_member_flagCount++;
+    var $_accessor_member_modifiers = $_accessor_member_flagCount++;
+    var $_accessor_member_name      = $_accessor_member_flagCount++;
+    var $_accessor_member_private   = $_accessor_member_flagCount++;
+    var $_accessor_member_protected = $_accessor_member_flagCount++;
+    var $_accessor_member_public    = $_accessor_member_flagCount++;
+    var $_accessor_member_value     = $_accessor_member_flagCount++;
 
     // #################################################
     // ########## BEGIN jTypes.NET INJECTIONS ##########
@@ -325,10 +331,10 @@
     // ########## FLAGS ##########
 
     // Create the lazy, subclass, and unsafe flags
-    var $_debug    = true;// DEFAULT (for beta)
+    var $_debug    = true;// DEFAULT (FOR BETA ONLY)
     var $_lazy     = true;// DEFAULT
     var $_subclass = false;// DON'T CHANGE
-    var $_unsafe   = false;// DON'T CHANGE
+    var $_unsafe   = '';// DON'T CHANGE
 
     // ########## COMPILER ##########
 
@@ -355,7 +361,7 @@
         $__freeze__.call($__object__, $method);
 
         // If the accessor has an access modifier
-        if ($accessor[$_accessor_member_hasModifier])
+        if ($accessor[$_accessor_member_modifiers])
         {
             // If the accessor is private, set the method definition in the private definitions object
             if ($accessorPrivate)
@@ -621,7 +627,7 @@
                 var $field = {};
 
                 // Set the field definition object data
-                $field[$_definition_member_field_readOnly] = $readonly;
+                $field[$_definition_member_field_readonly] = $readonly;
                 $field[$_definition_member_name]           = $name;
                 $field[$_definition_member_type]           = $type;
                 $field[$_definition_member_value]          = $value;
@@ -706,12 +712,12 @@
                         if ($override && !$hasGet && $definitions['~get_' + $name])
                         {
                             // Inherit the get accessor
-                            $get[$_accessor_member_hasModifier] = false;
-                            $get[$_accessor_member_name]        = '~get_' + $name;
-                            $get[$_accessor_member_private]     = $private;
-                            $get[$_accessor_member_protected]   = $protected;
-                            $get[$_accessor_member_public]      = $public;
-                            $get[$_accessor_member_value]       = function()
+                            $get[$_accessor_member_modifiers] = false;
+                            $get[$_accessor_member_name]      = '~get_' + $name;
+                            $get[$_accessor_member_private]   = $private;
+                            $get[$_accessor_member_protected] = $protected;
+                            $get[$_accessor_member_public]    = $public;
+                            $get[$_accessor_member_value]     = function()
                             {
                                 // Return the base property
                                 return this.__base[$name];
@@ -737,12 +743,12 @@
                         if ($override && !$hasSet && $definitions['~set_' + $name])
                         {
                             // Inherit the set accessor
-                            $set[$_accessor_member_hasModifier] = false;
-                            $set[$_accessor_member_name]        = '~set_' + $name;
-                            $set[$_accessor_member_private]     = $private;
-                            $set[$_accessor_member_protected]   = $protected;
-                            $set[$_accessor_member_public]      = $public;
-                            $set[$_accessor_member_value]       = function($v)
+                            $set[$_accessor_member_modifiers]  = false;
+                            $set[$_accessor_member_name]      = '~set_' + $name;
+                            $set[$_accessor_member_private]   = $private;
+                            $set[$_accessor_member_protected] = $protected;
+                            $set[$_accessor_member_public]    = $public;
+                            $set[$_accessor_member_value]     = function($v)
                             {
                                 // Set the base property
                                 this.__base[$name] = $v;
@@ -780,10 +786,10 @@
                     }
 
                     // Check if the member has any access modifiers
-                    $member[$_accessor_member_hasModifier] = $member[$_accessor_member_private] || $member[$_accessor_member_protected] || $member[$_accessor_member_public];
+                    $member[$_accessor_member_modifiers] = $member[$_accessor_member_private] || $member[$_accessor_member_protected] || $member[$_accessor_member_public];
 
                     // If the member has any access modifiers
-                    if ($member[$_accessor_member_hasModifier])
+                    if ($member[$_accessor_member_modifiers])
                     {
                         // If the member has more than one access modifier, throw an exception
                         if ($member[$_accessor_member_private] && $member[$_accessor_member_protected] || $member[$_accessor_member_private] && $member[$_accessor_member_public] || $member[$_accessor_member_protected] && $member[$_accessor_member_public])
@@ -800,8 +806,8 @@
                     throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
                 // Check if the property has get and set accessor access modifiers
-                var $hasGetModifier = $get[$_accessor_member_hasModifier];
-                var $hasSetModifier = $set[$_accessor_member_hasModifier];
+                var $hasGetModifier = $get[$_accessor_member_modifiers];
+                var $hasSetModifier = $set[$_accessor_member_modifiers];
 
                 // If the get and set methods both have access modifiers, throw an exception
                 if ($hasGetModifier && $hasSetModifier)
@@ -895,7 +901,7 @@
     };
 
     // Create the construct runtime helper functions
-    var $_constructRuntimeField    = function($descriptor, $configurable, $name, $value, $base, $private, $protected, $public, $readonly)
+    var $_constructRuntimeField     = function($descriptor, $configurable, $name, $value, $base, $private, $protected, $public, $readonly)
     {
         // Set the descriptor data
         $descriptor['configurable'] = $configurable;
@@ -917,7 +923,7 @@
                     throw $_exceptionFormat($_lang_$$_field_readonly, $name);
 
                 // If the provided value is set to a private, protected, or base instance, set the value to the public instance
-                if (!$_unsafe && ($v === $private || $protected && $v === $protected || $v === $base))
+                if ($v === $private || $protected && $v === $protected || $v === $base)
                     $value = $public;
                 // Set the value to the provided value
                 else
@@ -930,7 +936,7 @@
             $descriptor['set'] = function($v)
             {
                 // If the provided value is set to a private, protected, or base instance, set the value to the public instance
-                if (!$_unsafe && ($v === $private || $protected && $v === $protected || $v === $base))
+                if ($v === $private || $protected && $v === $protected || $v === $base)
                     $value = $public;
                 // Set the value to the provided value
                 else
@@ -938,7 +944,80 @@
             };
         }
     };
-    var $_constructRuntimeMerge    = function($descriptor, $merge, $accessor)
+    var $_constructRuntimeInjection = function($descriptor, $name, $key, $injections, $type, $readonly)
+    {
+        // Set the descriptor data
+        $descriptor['configurable'] = false;
+        $descriptor['enumerable']   = true;
+        $descriptor['get']          = function()
+        {
+            // Return the injected value
+            return $injections[$key];
+        };
+
+        // If type checking is enabled
+        if ($type)
+        {
+            // If read-only checking is enabled
+            if ($readonly)
+            {
+                // Set the descriptor setting with read-only checking
+                $descriptor['set'] = function($v)
+                {
+                    // If the field is read-only, throw an exception
+                    if ($readonly())
+                        throw $_exceptionFormat($_lang_$$_field_readonly, $name);
+
+                    // If the value does not match the type, throw an exception
+                    if ($v !== undefined && $v !== null && $$.type($v) !== $type)
+                        throw $_exceptionFormat($_lang_$$_field_type, $name, $type);
+                
+                    // Set the injected value
+                    $injections[$key] = $v;
+                };
+            }
+            else
+            {
+                // Set the descriptor setting without read-only checking
+                $descriptor['set'] = function($v)
+                {
+                    // If the value does not match the type, throw an exception
+                    if ($v !== undefined && $v !== null && $$.type($v) !== $type)
+                        throw $_exceptionFormat($_lang_$$_field_type, $name, $type);
+
+                    // Set the injected value
+                    $injections[$key] = $v;
+                };
+            }
+        }
+        else
+        {
+            // If read-only checking is enabled
+            if ($readonly)
+            {
+                // Set the descriptor setting with read-only checking
+                $descriptor['set'] = function($v)
+                {
+                    // If the field is read-only, throw an exception
+                    if ($readonly())
+                        throw $_exceptionFormat($_lang_$$_field_readonly, $name);
+                
+                    // Set the injected value
+                    $injections[$key] = $v;
+                };
+            }
+            else
+            {
+                // Set the descriptor setting without read-only checking
+                $descriptor['set'] = function($v)
+                {
+                    // Set the injected value
+                    $injections[$key] = $v;
+                };
+            }
+        }
+    };
+    var $_constructRuntimeMerge     = function($descriptor, $merge, $accessor)
     {
         // If the method is a get accessor
         if ($accessor === 'get')
@@ -968,7 +1047,7 @@
         // Return the descriptor
         return $descriptor;
     };
-    var $_constructRuntimeMethod   = function($descriptor, $configurable, $this, $function, $base, $private, $protected, $public, $accessor)
+    var $_constructRuntimeMethod    = function($descriptor, $configurable, $this, $function, $base, $private, $protected, $public, $accessor)
     {
         // Set the descriptor data
         $descriptor['configurable'] = $configurable;
@@ -981,7 +1060,7 @@
             var $return = $function.apply($this, arguments);
             
             // If the return value is a private, protected, or base instance, return the public instance
-            if (!$_unsafe && ($return === $private || $protected && $return === $protected || $return === $base))
+            if ($return === $private || $protected && $return === $protected || $return === $base)
                 return $public;
 
             // Return the return value
@@ -998,7 +1077,7 @@
         else
             $descriptor['value'] = $method;
     };
-    var $_constructRuntimeOverride = function($descriptor, $key, $definition, $overrides)
+    var $_constructRuntimeOverride  = function($descriptor, $key, $definition, $overrides)
     {
         // If the method is virtual
         if ($definition[$_definition_member_method_virtual])
@@ -1026,7 +1105,7 @@
 
         return null;
     };
-    var $_constructRuntime         = function($key, $definitions, $overrides, $inherits, $inheritsBase, $readonly, $context, $isProtected, $isPublic, $base, $private, $protected, $public)
+    var $_constructRuntime          = function($key, $definitions, $overrides, $inherits, $inheritsBase, $readonly, $context, $isProtected, $isPublic, $base, $private, $protected, $public, $injections)
     {
         // Get the member definition from the definitions object
         var $definition = $definitions[$key];
@@ -1039,8 +1118,12 @@
                 var $descriptor = {};
                 var $name       = $definition[$_definition_member_name];
 
+                // If an injections array was provided and the field is an injected field, construct the injected field descriptor
+                if ($injections && $definition[$_definition_member_field_injection])
+                    $_constructRuntimeInjection($descriptor, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
                 // Construct the field descriptor
-                $_constructRuntimeField($descriptor, false, $name, $definition[$_definition_member_value], $base, $private, $protected, $public, $definition[$_definition_member_field_readOnly] ? $readonly : null);
+                else
+                    $_constructRuntimeField($descriptor, false, $name, $definition[$_definition_member_value], $base, $private, $protected, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
 
                 // If the field is protected or public
                 if ($isProtected || $isPublic)
@@ -1278,7 +1361,7 @@
                 break;
         }
     };
-    var $_constructRuntimeInherits = function($inherits, $derivedInherits, $instance)
+    var $_constructRuntimeInherits  = function($inherits, $derivedInherits, $instance)
     {
         for (var $inheritKey in $inherits)
         {
@@ -1376,9 +1459,10 @@
         if (!$_unsafe && arguments.length !== $argument)
             throw $_exceptionArguments(null, arguments);
 
-        // Create the abstract and final flags
+        // Create the abstract, final, and unsafe flags
         var $abstract = false;
         var $final    = false;
+        var $unsafe   = false;
 
         // Create the expando flags
         var $expandoClass     = false;
@@ -1424,15 +1508,22 @@
                 // If the keyword is sealed, set the final flag
                 else if ($keyword === 'sealed')
                     $final = true;
+                // If the keyword is the unsafe token, set the unsafe flag
+                else if ($_unsafe && $keyword === $_unsafe)
+                    $unsafe = true;
                 // If a different keyword was provided, throw an exception
                 else if ($keyword)
                     throw $_exceptionFormat($_lang_$$_keyword, $keyword);
             }
-        }
 
-        // If the class is abstract and final, throw an exception
-        if ($abstract && $final)
-            throw $_exceptionFormat($_lang_$$_abstract_sealed);
+            // If the argument count does not match the number of arguments, throw an exception
+            if (!$unsafe && arguments.length !== $argument)
+                throw $_exceptionArguments(null, arguments);
+
+            // If the class is abstract and final, throw an exception
+            if ($abstract && $final)
+                throw $_exceptionFormat($_lang_$$_abstract_sealed);
+        }
 
         // Create the private, protected, and public definitions objects along with the inherited prototype
         var $classPrivate   = {};
@@ -1464,6 +1555,10 @@
             // If the base class is final, throw an exception
             if ($baseClass[$_definition_final])
                 throw $_exceptionFormat($_lang_$$_derive_sealed);
+
+            // If the class is not unsafe and the base class is unsafe, throw an exception
+            if (!$unsafe && $baseClass[$_definition_unsafe])
+                throw $_exceptionFormat($_lang_$$_derive_unsafe);
 
             // If the base class is abstract
             if ($baseClass[$_definition_abstract])
@@ -1521,7 +1616,7 @@
         $__defineProperty__.call($__object__, $classProtected, '~constructor', { 'enumerable': true, 'value': $constructorDefinition });
         
         // If any injections arguments were provided
-        if ($_unsafe && arguments[$argument])
+        if ($unsafe && arguments[$argument])
         {
             // Inject the private, protected, and public definitions objects
             $_definitionsCompilerInjections($classPrivate, arguments[$argument + $_inject_private]);
@@ -1557,7 +1652,7 @@
         var $classPublicKeys    = $__keys__.call($__object__, $classPublic) || [];
 
         // Create the construct helper function
-        var $construct = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context)
+        var $construct = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections)
         {
             // If this function was not internally called, return
             if (this !== $_class)
@@ -1582,15 +1677,15 @@
 
             // Construct each private member in the instance matrix
             for (var $i = 0, $j = $classPrivateKeys.length; $i < $j; $i++)
-                $_constructRuntime($classPrivateKeys[$i], $classPrivate, null, null, null, $readonly, null, false, false, $base, $private, $protected, $public);
+                $_constructRuntime($classPrivateKeys[$i], $classPrivate, null, null, null, $readonly, null, false, false, $base, $private, $protected, $public, $injections);
 
             // Construct each protected member in the instance matrix
             for (var $i = 0, $j = $classProtectedKeys.length; $i < $j; $i++)
-                $_constructRuntime($classProtectedKeys[$i], $classProtected, $protectedOverrides, $protectedInherits, $baseInherits, $readonly, $context, true, false, $base, $private, $protected, $public);
+                $_constructRuntime($classProtectedKeys[$i], $classProtected, $protectedOverrides, $protectedInherits, $baseInherits, $readonly, $context, true, false, $base, $private, $protected, $public, $injections);
 
             // Construct each public member in the instance matrix
             for (var $i = 0, $j = $classPublicKeys.length; $i < $j; $i++)
-                $_constructRuntime($classPublicKeys[$i], $classPublic, $publicOverrides, $publicInherits, $baseInherits, $readonly, null, false, true, $base, $private, $protected, $public);
+                $_constructRuntime($classPublicKeys[$i], $classPublic, $publicOverrides, $publicInherits, $baseInherits, $readonly, null, false, true, $base, $private, $protected, $public, $injections);
 
             // If lazy loading is enabled
             if ($_lazy)
@@ -1712,6 +1807,9 @@
             var $protectedOverrides = {};
             var $publicOverrides    = {};
 
+            // Create the injection objects array
+            var $injections = $unsafe ? $$.asArray(arguments[0]) : null;
+
             // If lazy loading is not enabled
             if (!$_lazy)
             {
@@ -1736,7 +1834,7 @@
                     var $publicInherits    = {};
                     
                     // Build the matrix instance stack
-                    ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_class, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context);
+                    ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_class, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null);
                     
                     // Append the instance stack into the instance matrix and constructor context into the contexts array
                     $matrix.push($stack);
@@ -1851,12 +1949,29 @@
 
                 // Build the matrix instance stack
                 for (var $i = 0; $i < $levels; $i++)
-                    ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_class, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly);
+                    ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_class, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly, null, $unsafe ? $injections[$i] : null);
             }
 
-            // If the "new" keyword was used, execute the constructor
+            // If the "new" keyword was used
             if ($isNew)
-                $private['~constructor'].apply($private, arguments);
+            {
+                // If the class is unsafe
+                if ($unsafe)
+                {
+                    // If any additional arguments were provided, execute the constructor with the extra arguments
+                    if (arguments.length > 1)
+                        $private['~constructor'].apply($private, $__arrayProto__.slice.call(arguments, 1));
+                    // Execute the constructor
+                    else
+                        $private['~constructor'].call($private);
+                }
+                // If arguments were provided, execute the constructor with the arguments
+                else if (arguments.length)
+                    $private['~constructor'].apply($private, arguments);
+                // Execute the constructor
+                else
+                    $private['~constructor'].call($private);
+            }
 
             // Set the initialized flag
             $isInit = true;
@@ -1900,6 +2015,7 @@
         $cache[$_definition_expando_public]    = { 'value': $expandoPublic };
         $cache[$_definition_final]             = { 'value': $final };
         $cache[$_definition_public]            = { 'value': $classPublic };
+        $cache[$_definition_unsafe]            = { 'value': $unsafe };
 
         // If the class is not final
         if (!$final)
