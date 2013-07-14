@@ -1753,6 +1753,7 @@
 
             // Define the instance accessor on the instance
             $__defineProperty__.call($__object__, $instance, '__self', { 'value': $instance });
+            $__defineProperty__.call($__object__, $instance, '__type', { 'value': null });
 
             // Create the casting and checking functions
             var $as = function($type)
@@ -1828,6 +1829,10 @@
                     var $context = $__create__.call($__object__, $private);
                     var $stack   = [$private, $base, $public];
 
+                    // Define the public instance accessors on the private instance
+                    $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
+                    $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
+
                     // Create the inherits objects
                     var $baseInherits      = {};
                     var $protectedInherits = {};
@@ -1857,9 +1862,12 @@
                     $private = $stack[0];
                     $public  = $stack[2];
 
-                    // Define the public instance accessors on the private instance
-                    $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
-                    $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
+                    // Get the current type
+                    var $type = $chain[$i];
+                    
+                    // Define the type accessors on the private and public instances
+                    $__defineProperty__.call($__object__, $private, '__type', { 'value': $type });
+                    $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
 
                     // If the stack has a base class
                     if ($i !== $levels - 1)
@@ -1912,11 +1920,11 @@
                     $__freeze__.call($__object__, $base);
 
                     // If the class is not expando-private, freeze the private instance object
-                    if (!$chain[$i][$_definition_expando_private])
+                    if (!$type[$_definition_expando_private])
                         $__freeze__.call($__object__, $private);
 
                     // If the class is not expando-public, freeze the public instance object
-                    if (!$chain[$i][$_definition_expando_public])
+                    if (!$type[$_definition_expando_public])
                         $__freeze__.call($__object__, $public);
                 }
             }
@@ -1938,6 +1946,13 @@
                     // Define the public instance accessors on the private instance
                     $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
                     $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
+
+                    // Get the current type
+                    var $type = $chain[$i];
+
+                    // Define the type accessors on the protected and public instances
+                    $__defineProperty__.call($__object__, $protected, '__type', { 'value': $type });
+                    $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
 
                     // If the stack has a base class, define the base instance reference on the private instance
                     if ($i !== $levels - 1)
