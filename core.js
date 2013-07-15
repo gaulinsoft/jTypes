@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                               jTypes 2.1.0b
+//                               jTypes 2.1.0
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.0b';
+    var $_version = '2.1.0';
 
     // ########## LANGUAGE ##########
 
@@ -42,7 +42,7 @@
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
     var $_lang_$$_derive_unsafe                    = 'Classes cannot inherit from a .NET class.';
     var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only field.';
-    var $_lang_$$_field_type                       = '"{0}" must have a value of the types {1}, null, or undefined.';
+    var $_lang_$$_field_type                       = '"{0}" must have a value of the type {1}, null, or undefined.';
     var $_lang_$$_keyword                          = '"{0}" is not a valid class modifier.';
     var $_lang_$$_member_abstract                  = '"{0}" cannot have the abstract modifier in a non-abstract class.';
     var $_lang_$$_member_abstract_override         = '"{0}" must implement the inherited abstract {1} with the override modifier.';
@@ -232,49 +232,39 @@
         return '~' + $key;
     };
 
-    // Create the definition obfuscated key length
+    // Create the definition obfuscated key hash flag and length setting
+    var $_definition_keyHash   = true;
     var $_definition_keyLength = 3;
 
     // Create the definition obfuscated keys
-    var $_definition_abstract          = $_keyGenerator($_definition_keyLength);
-    var $_definition_baseClass         = $_keyGenerator($_definition_keyLength);
-    var $_definition_construct         = $_keyGenerator($_definition_keyLength);
-    var $_definition_expando_class     = $_keyGenerator($_definition_keyLength);
-    var $_definition_expando_private   = $_keyGenerator($_definition_keyLength);
-    var $_definition_expando_prototype = $_keyGenerator($_definition_keyLength);
-    var $_definition_expando_public    = $_keyGenerator($_definition_keyLength);
-    var $_definition_final             = $_keyGenerator($_definition_keyLength);
-    var $_definition_protected         = $_keyGenerator($_definition_keyLength);
-    var $_definition_public            = $_keyGenerator($_definition_keyLength);
-    var $_definition_unsafe            = $_keyGenerator($_definition_keyLength);
-
-    // Create the definition member obfuscated keys
-    var $_definition_member_field_injection    = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_field_readonly     = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_field_type         = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_method_abstract    = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_method_final       = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_method_type        = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_method_virtual     = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_name               = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_property_accessors = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_type               = $_keyGenerator($_definition_keyLength);
-    var $_definition_member_value              = $_keyGenerator($_definition_keyLength);
-
-    // Create the accessor member flags length
-    var $_accessor_member_flagCount = 0;
-    
-    // Create the accessor member flags
-    var $_accessor_member_modifiers = $_accessor_member_flagCount++;
-    var $_accessor_member_name      = $_accessor_member_flagCount++;
-    var $_accessor_member_private   = $_accessor_member_flagCount++;
-    var $_accessor_member_protected = $_accessor_member_flagCount++;
-    var $_accessor_member_public    = $_accessor_member_flagCount++;
-    var $_accessor_member_value     = $_accessor_member_flagCount++;
+    var $_definition_abstract          = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~abstract';
+    var $_definition_baseClass         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~baseClass';
+    var $_definition_construct         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~construct';
+    var $_definition_expando_class     = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoClass';
+    var $_definition_expando_private   = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoPrivate';
+    var $_definition_expando_prototype = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoPrototype';
+    var $_definition_expando_public    = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoPublic';
+    var $_definition_final             = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~final';
+    var $_definition_protected         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~protected';
+    var $_definition_public            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~public';
+    var $_definition_unsafe            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~unsafe';
 
     // #################################################
     // ########## BEGIN jTypes.NET INJECTIONS ##########
     // #################################################
+
+    // Create the definition member obfuscated keys
+    var $_definition_member_field_injection    = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~fieldInjection';
+    var $_definition_member_field_readonly     = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~fieldReadOnly';
+    var $_definition_member_field_type         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~fieldType';
+    var $_definition_member_method_abstract    = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~methodAbstract';
+    var $_definition_member_method_final       = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~methodFinal';
+    var $_definition_member_method_type        = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~methodType';
+    var $_definition_member_method_virtual     = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~methodVirtual';
+    var $_definition_member_name               = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~name';
+    var $_definition_member_property_accessors = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~propertyAccessors';
+    var $_definition_member_type               = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~type';
+    var $_definition_member_value              = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~value';
 
     // Create the injection flags length
     var $_inject_flagCount = 0;
@@ -286,9 +276,23 @@
     var $_inject_public    = $_inject_flagCount++;
     var $_inject_static    = $_inject_flagCount++;
 
+    // Create the unsafe token
+    var $_unsafe = '';
+
     // ###############################################
     // ########## END jTypes.NET INJECTIONS ##########
     // ###############################################
+
+    // Create the accessor member flags length
+    var $_accessor_flagCount = 0;
+    
+    // Create the accessor member flags
+    var $_accessor_modifiers = $_accessor_flagCount++;
+    var $_accessor_name      = $_accessor_flagCount++;
+    var $_accessor_private   = $_accessor_flagCount++;
+    var $_accessor_protected = $_accessor_flagCount++;
+    var $_accessor_public    = $_accessor_flagCount++;
+    var $_accessor_value     = $_accessor_flagCount++;
 
     // ########## CLASSES ##########
 
@@ -301,10 +305,7 @@
     // Create the base prototype of all prototypes
     var $_prototype = (
     {
-        // ----- FIELDS -----
         'constructor': $_class,
-
-        // ----- METHODS -----
         'toString': function()
         {
             // Return an instance type string
@@ -330,11 +331,10 @@
 
     // ########## FLAGS ##########
 
-    // Create the lazy, subclass, and unsafe flags
-    var $_debug    = true;// DEFAULT (FOR BETA ONLY)
+    // Create the lazy, and subclass flags
+    var $_debug    = true;// DEFAULT
     var $_lazy     = true;// DEFAULT
     var $_subclass = false;// DON'T CHANGE
-    var $_unsafe   = '';// DON'T CHANGE
 
     // ########## COMPILER ##########
 
@@ -345,8 +345,8 @@
         var $method = {};
         
         // Reference some accessor data
-        var $accessorName    = $accessor[$_accessor_member_name];
-        var $accessorPrivate = $accessor[$_accessor_member_private];
+        var $accessorName    = $accessor[$_accessor_name];
+        var $accessorPrivate = $accessor[$_accessor_private];
 
         // Set the method definition object data
         $method[$_definition_member_method_abstract]    = !$accessorPrivate && $abstract;
@@ -355,22 +355,22 @@
         $method[$_definition_member_name]               = $accessorName.substr(5);
         $method[$_definition_member_property_accessors] = $hasTwoAccessors;
         $method[$_definition_member_type]               = $type;
-        $method[$_definition_member_value]              = $accessor[$_accessor_member_value];
+        $method[$_definition_member_value]              = $accessor[$_accessor_value];
                         
         // Freeze the method definition object
         $__freeze__.call($__object__, $method);
 
         // If the accessor has an access modifier
-        if ($accessor[$_accessor_member_modifiers])
+        if ($accessor[$_accessor_modifiers])
         {
             // If the accessor is private, set the method definition in the private definitions object
             if ($accessorPrivate)
                 $__defineProperty__.call($__object__, $privateDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
             // If the accessor is protected, set the method definition in the protected definitions object
-            else if ($accessor[$_accessor_member_protected])
+            else if ($accessor[$_accessor_protected])
                 $__defineProperty__.call($__object__, $protectedDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
             // If the accessor is public, set the method definition in the public definitions object
-            else if ($accessor[$_accessor_member_public])
+            else if ($accessor[$_accessor_public])
                 $__defineProperty__.call($__object__, $publicDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
         }
         // Set the method definition in the definitions object
@@ -703,7 +703,7 @@
                         $hasSet = true;
 
                         // Set the set method name
-                        $set[$_accessor_member_name] = '~set_' + $name;
+                        $set[$_accessor_name] = '~set_' + $name;
 
                         // Set the set method data object as the member
                         $member = $set;
@@ -712,12 +712,12 @@
                         if ($override && !$hasGet && $definitions['~get_' + $name])
                         {
                             // Inherit the get accessor
-                            $get[$_accessor_member_modifiers] = false;
-                            $get[$_accessor_member_name]      = '~get_' + $name;
-                            $get[$_accessor_member_private]   = $private;
-                            $get[$_accessor_member_protected] = $protected;
-                            $get[$_accessor_member_public]    = $public;
-                            $get[$_accessor_member_value]     = function()
+                            $get[$_accessor_modifiers] = false;
+                            $get[$_accessor_name]      = '~get_' + $name;
+                            $get[$_accessor_private]   = $private;
+                            $get[$_accessor_protected] = $protected;
+                            $get[$_accessor_public]    = $public;
+                            $get[$_accessor_value]     = function()
                             {
                                 // Return the base property
                                 return this.__base[$name];
@@ -734,7 +734,7 @@
                         $hasGet = true;
 
                         // Set the get method name
-                        $get[$_accessor_member_name] = '~get_' + $name;
+                        $get[$_accessor_name] = '~get_' + $name;
 
                         // Set the get method data object as the member
                         $member = $get;
@@ -743,12 +743,12 @@
                         if ($override && !$hasSet && $definitions['~set_' + $name])
                         {
                             // Inherit the set accessor
-                            $set[$_accessor_member_modifiers]  = false;
-                            $set[$_accessor_member_name]      = '~set_' + $name;
-                            $set[$_accessor_member_private]   = $private;
-                            $set[$_accessor_member_protected] = $protected;
-                            $set[$_accessor_member_public]    = $public;
-                            $set[$_accessor_member_value]     = function($v)
+                            $set[$_accessor_modifiers]  = false;
+                            $set[$_accessor_name]      = '~set_' + $name;
+                            $set[$_accessor_private]   = $private;
+                            $set[$_accessor_protected] = $protected;
+                            $set[$_accessor_public]    = $public;
+                            $set[$_accessor_value]     = function($v)
                             {
                                 // Set the base property
                                 this.__base[$name] = $v;
@@ -761,10 +761,10 @@
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
                     // Set the member access modifier flags and value
-                    $member[$_accessor_member_private]   = false;
-                    $member[$_accessor_member_protected] = false;
-                    $member[$_accessor_member_public]    = false;
-                    $member[$_accessor_member_value]     = $memberValue;
+                    $member[$_accessor_private]   = false;
+                    $member[$_accessor_protected] = false;
+                    $member[$_accessor_public]    = false;
+                    $member[$_accessor_value]     = $memberValue;
         
                     for (var $i = 0, $j = $propertyKeywords.length; $i < $j; $i++)
                     {
@@ -773,30 +773,30 @@
 
                         // If the property keyword is private, set the private flag
                         if ($propertyKeyword === 'private')
-                            $member[$_accessor_member_private] = true;
+                            $member[$_accessor_private] = true;
                         // If the property keyword is protected, set the protected flag
                         else if ($propertyKeyword === 'protected')
-                            $member[$_accessor_member_protected] = true;
+                            $member[$_accessor_protected] = true;
                         // If the property keyword is public, set the public flag
                         else if ($propertyKeyword === 'public')
-                            $member[$_accessor_member_public] = true;
+                            $member[$_accessor_public] = true;
                         // If a keyword was defined, throw an exception
                         else if ($keyword)
                             throw $_exceptionFormat($_lang_$$_member_property_keyword, $name, $memberName, $keyword);
                     }
 
                     // Check if the member has any access modifiers
-                    $member[$_accessor_member_modifiers] = $member[$_accessor_member_private] || $member[$_accessor_member_protected] || $member[$_accessor_member_public];
+                    $member[$_accessor_modifiers] = $member[$_accessor_private] || $member[$_accessor_protected] || $member[$_accessor_public];
 
                     // If the member has any access modifiers
-                    if ($member[$_accessor_member_modifiers])
+                    if ($member[$_accessor_modifiers])
                     {
                         // If the member has more than one access modifier, throw an exception
-                        if ($member[$_accessor_member_private] && $member[$_accessor_member_protected] || $member[$_accessor_member_private] && $member[$_accessor_member_public] || $member[$_accessor_member_protected] && $member[$_accessor_member_public])
+                        if ($member[$_accessor_private] && $member[$_accessor_protected] || $member[$_accessor_private] && $member[$_accessor_public] || $member[$_accessor_protected] && $member[$_accessor_public])
                             throw $_exceptionFormat($_lang_$$_member_keyword_access_2, $memberName);
 
                         // If the member access modifier is not more restrictive than the property access modifier, throw an exception
-                        if ($member[$_accessor_member_public] || $member[$_accessor_member_protected] && !$public || $member[$_accessor_member_private] && $private)
+                        if ($member[$_accessor_public] || $member[$_accessor_protected] && !$public || $member[$_accessor_private] && $private)
                             throw $_exceptionFormat($_lang_$$_member_property_accessors_access, $name, $memberName);
                     }
                 }
@@ -806,8 +806,8 @@
                     throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
                 // Check if the property has get and set accessor access modifiers
-                var $hasGetModifier = $get[$_accessor_member_modifiers];
-                var $hasSetModifier = $set[$_accessor_member_modifiers];
+                var $hasGetModifier = $get[$_accessor_modifiers];
+                var $hasSetModifier = $set[$_accessor_modifiers];
 
                 // If the get and set methods both have access modifiers, throw an exception
                 if ($hasGetModifier && $hasSetModifier)
@@ -822,15 +822,15 @@
                     throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'set');
 
                 // Check if the property has any inherited get or set accessors
-                $hasGet = $hasGet || !!$get[$_accessor_member_name];
-                $hasSet = $hasSet || !!$set[$_accessor_member_name];
+                $hasGet = $hasGet || !!$get[$_accessor_name];
+                $hasSet = $hasSet || !!$set[$_accessor_name];
                 
                 // If a get method was provided
                 if ($hasGet)
                 {
                     // If there is a base class, perform further compiling on the get method
                     if ($baseProtected || $basePublic)
-                        $_definitionsCompilerBaseMethod($get[$_accessor_member_name], $type, 'get accessor', $baseProtected, $basePublic, $override, $hasGetModifier ? $get[$_accessor_member_protected] : $protected, $hasGetModifier ? $get[$_accessor_member_public] : $public);
+                        $_definitionsCompilerBaseMethod($get[$_accessor_name], $type, 'get accessor', $baseProtected, $basePublic, $override, $hasGetModifier ? $get[$_accessor_protected] : $protected, $hasGetModifier ? $get[$_accessor_public] : $public);
 
                     // Compile the get accessor method
                     $_definitionsCompilerAccessorMethod($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $get, $type, $abstract, $override, $sealed, $virtual, $hasGet && $hasSet);
@@ -841,7 +841,7 @@
                 {
                     // If there is a base class, perform further compiling on the set method
                     if ($baseProtected || $basePublic)
-                        $_definitionsCompilerBaseMethod($set[$_accessor_member_name], $type, 'set accessor', $baseProtected, $basePublic, $override, $hasSetModifier ? $set[$_accessor_member_protected] : $protected, $hasSetModifier ? $set[$_accessor_member_public] : $public);
+                        $_definitionsCompilerBaseMethod($set[$_accessor_name], $type, 'set accessor', $baseProtected, $basePublic, $override, $hasSetModifier ? $set[$_accessor_protected] : $protected, $hasSetModifier ? $set[$_accessor_public] : $public);
 
                     // Compile the set accessor method
                     $_definitionsCompilerAccessorMethod($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $set, $type, $abstract, $override, $sealed, $virtual, $hasGet && $hasSet);
@@ -895,8 +895,11 @@
             if (!$injectionName)
                 continue;
 
+            // Freeze the injected definition object
+            $__freeze__.call($__object__, $injection);
+
             // Set the injected definition object into the definitions object
-            $__defineProperty__.call($__object__, $definitions, $injectionName, { 'value': $injection });
+            $__defineProperty__.call($__object__, $definitions, $injectionName, { 'enumerable': true, 'value': $injection });
         }
     };
 
@@ -1751,10 +1754,6 @@
                 $_subclass = false;
             }
 
-            // Define the instance accessor on the instance
-            $__defineProperty__.call($__object__, $instance, '__self', { 'value': $instance });
-            $__defineProperty__.call($__object__, $instance, '__type', { 'value': null });
-
             // Create the casting and checking functions
             var $as = function($type)
             {
@@ -1829,8 +1828,9 @@
                     var $context = $__create__.call($__object__, $private);
                     var $stack   = [$private, $base, $public];
 
-                    // Define the public instance accessors on the private instance
+                    // Define the self reference accessors and the public instance accessor on the private and public instances
                     $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
+                    $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
                     $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
 
                     // Create the inherits objects
@@ -1943,15 +1943,16 @@
                     // Create the private instance
                     $private = $__create__.call($__object__, $protected);
                     
-                    // Define the public instance accessors on the private instance
+                    // Define the self reference accessors and the public instance accessor on the private and public instances
                     $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
+                    $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
                     $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
 
                     // Get the current type
                     var $type = $chain[$i];
 
-                    // Define the type accessors on the protected and public instances
-                    $__defineProperty__.call($__object__, $protected, '__type', { 'value': $type });
+                    // Define the type accessors on the private and public instances
+                    $__defineProperty__.call($__object__, $private, '__type', { 'value': $type });
                     $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
 
                     // If the stack has a base class, define the base instance reference on the private instance
