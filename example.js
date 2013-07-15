@@ -82,10 +82,10 @@ console.log(p.age);// 30
 // get a protected field
 console.log(p._age);// undefined
  
-// set a readonly field (throws an exception)
-//p.firstName = 'Jane'; (uncomment to check)
+// set a readonly field (throws an exception in debug mode)
+//p.firstName = 'Jane'; (uncomment to try it out)
  
-// set an invalid property value (throws if you code it)
+// set an invalid property value
 p.age = -40;
  
 // check that the field and property didn't change
@@ -118,8 +118,8 @@ console.log(e.age);// 41
 // get an inherited protected field
 console.log(e._age);// undefined
  
-// set an inherited readonly field (throws an exception)
-//e.firstName = 'Jane'; (uncomment to check)
+// set an inherited readonly field (throws an exception in debug mode)
+//e.firstName = 'Jane'; (uncomment to try it out)
  
 // check that the field didn't change
 console.log(e.firstName);// John
