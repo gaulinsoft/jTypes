@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                               jTypes 2.1.0b
+//                               jTypes 2.1.0
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -24,7 +24,164 @@
     var $modifiers = ['', 'abstract', 'virtual', 'override', 'sealed override', 'abstract override'];
     var $values    = ['', $$.empty(), { 'get': $$.empty(), 'set': $$.empty() }];
 
-    //
+    var $shouldFail = function($h, $i, $j, $k)
+    {
+        if ($j === 0)
+            return false;
+
+        if ($j === 1 && $h === 1 && $i !== 2 && $k !== 0)
+            return false;
+
+        if ($j === 2 && $h !== 2 && $i !== 2 && $k !== 0)
+            return false;
+
+        return true;
+    };
+
+    // Tests each possible variation of a member
+    (function(_)
+    {
+        for (var $h = 0; $h < $keywords.length; $h++)
+        {
+            for (var $i = 0; $i < $accessors.length; $i++)
+            {
+                for (var $j = 0; $j < $modifiers.length; $j++)
+                {
+                    for (var $k = 0; $k < $values.length; $k++)
+                    {
+                        var $keyword  = $keywords[$h];
+                        var $accessor = $accessors[$i];
+                        var $modifier = $modifiers[$j];
+                        var $value    = $values[$k];
+
+                        var $definition = {};
+
+                        $definition[$accessor + ' ' + $modifier + ' member'] = $value;
+
+                        try
+                        {
+                            $$($keyword, $definition);
+
+                            if ($shouldFail($h, $i, $j, $k))
+                            {
+                                console.error('########## FAILED ##########');
+                                console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
+                            }
+                        }
+                        catch(e)
+                        {
+                            if (!$shouldFail($h, $i, $j, $k))
+                            {
+                                console.error('########## FAILED ##########');
+                                console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
+                                console.error(e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })(1);
+
+    var $shouldFailOverride = function($h, $i, $j, $k, $w, $x, $y, $z)
+    {
+        if ($shouldFail($h, $i, $j, $k))
+            return true;
+
+        if (($j === 1 || $j === 2) && ($y === 3 || $y === 4 || $w === 1 && $y === 5) && $i === $x && $k === $z)
+            return false;
+        
+        if ($j !== 1 && !$shouldFail($w, $x, $y, $z))
+            return false;
+
+        return true;
+    };
+
+    // Tests each possible variable of an override member
+    (function(_)
+    {
+        for (var $h = 0; $h < $keywords.length; $h++)
+        {
+            for (var $i = 0; $i < $accessors.length; $i++)
+            {
+                for (var $j = 0; $j < $modifiers.length; $j++)
+                {
+                    for (var $k = 0; $k < $values.length; $k++)
+                    {
+                        var $keyword  = $keywords[$h];
+                        var $accessor = $accessors[$i];
+                        var $modifier = $modifiers[$j];
+                        var $value    = $values[$k];
+
+                        var $definition = {};
+
+                        $definition[$accessor + ' ' + $modifier + ' member'] = $value;
+
+                        try
+                        {
+                            var $baseClass = $$($keyword, $definition);
+
+                            for (var $w = 0; $w < $keywords.length; $w++)
+                            {
+                                for (var $x = 0; $x < $accessors.length; $x++)
+                                {
+                                    for (var $y = 0; $y < $modifiers.length; $y++)
+                                    {
+                                        for (var $z = 0; $z < $values.length; $z++)
+                                        {
+                                            var $keywordOverride  = $keywords[$w];
+                                            var $accessorOverride = $accessors[$x];
+                                            var $modifierOverride = $modifiers[$y];
+                                            var $valueOverride    = $values[$z];
+
+                                            var $definitionOverride = {};
+
+                                            $definitionOverride[$accessorOverride + ' ' + $modifierOverride + ' member'] = $valueOverride;
+
+                                            try
+                                            {
+                                                $$($keywordOverride, $baseClass, $definitionOverride);
+
+                                                if ($shouldFailOverride($h, $i, $j, $k, $w, $x, $y, $z))
+                                                {
+                                                    console.error('########## FAILED ##########');
+                                                    console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k, $w, $x, $y, $z) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ', ' + $w + ', ' + $x + ', ' + $y + ', ' + $z + ')');
+                                                }
+                                            }
+                                            catch(e)
+                                            {
+                                                if (!$shouldFailOverride($h, $i, $j, $k, $w, $x, $y, $z))
+                                                {
+                                                    console.error('########## FAILED ##########');
+                                                    console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k, $w, $x, $y, $z) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ', ' + $w + ', ' + $x + ', ' + $y + ', ' + $z + ')');
+                                                    console.error(e);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if ($shouldFail($h, $i, $j, $k))
+                            {
+                                console.error('########## FAILED ##########');
+                                console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' +  $i + ', ' + $j + ', ' + $k + ')');
+                            }
+                        }
+                        catch(e)
+                        {
+                            if (!$shouldFail($h, $i, $j, $k))
+                            {
+                                console.error('########## FAILED ##########');
+                                console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
+                                console.error(e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })(2);
 })();
 
 // Tests properties
@@ -107,7 +264,7 @@
                 }
             }
         }
-    })(1);
+    })(3);
 
     var $virtuals = ['abstract', 'virtual'];
 
@@ -174,7 +331,7 @@
                 }
             }
         }
-    })(2);
+    })(4);
 
     var $shouldFailOverride = function($i, $j, $k, $x, $y, $z)
     {
@@ -330,5 +487,5 @@
                 }
             }
         }
-    })(3);
+    })(5);
 })();
