@@ -18,7 +18,7 @@ jTypes requires JavaScript 1.8.5, which is supported by any modern browser (MSIE
 
 We strongly encourage anyone who is interested in contributing to contact us through any of the various social mediums on our website ([www.jTypes.com](www.jTypes.com)).
 
-jTypes is a free open-source library developed by Gaulinsoft, a small software consulting company in Chicago, IL. We only have a few employees and spend a majority of our time working with clients in order to keep the lights on. This library was created internally in our free-time to simplify the develoment of some of our other in-house libraries which we also hope to release in the near future. Therefore, any contributions (in the form of code optimization, design ideas, unit testing, bug tracking, ect.) are greatly appreciated and really go a long way to help us out.
+jTypes is a free open-source library developed by Gaulinsoft, a small software consulting company in Chicago, IL. We only have a few employees and spend a majority of our time working with clients on various consulting projects. This library was created internally in our free-time to simplify the development of some of our other in-house libraries which we also hope to release in the near future. Therefore, any contributions (in the form of code optimization, design ideas, unit testing, bug tracking, ect.) are greatly appreciated and really go a long way to help us out.
 
 We hope you find jTypes to be a very useful tool in the development of your application libraries and we have many more great things to come, so be sure to check-in every once in a while to see what's new!
 
