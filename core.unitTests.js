@@ -17,7 +17,7 @@
 //                       limitations under the License.
 */
 // Tests members
-(function()
+(function(_)
 {
     var $keywords  = ['', 'abstract', 'sealed'];
     var $accessors = ['public', 'protected', 'private'];
@@ -65,7 +65,7 @@
                             if ($shouldFail($h, $i, $j, $k))
                             {
                                 console.error('########## FAILED ##########');
-                                console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
+                                console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
                             }
                         }
                         catch(e)
@@ -73,7 +73,7 @@
                             if (!$shouldFail($h, $i, $j, $k))
                             {
                                 console.error('########## FAILED ##########');
-                                console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
+                                console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
                                 console.error(e);
                             }
                         }
@@ -81,7 +81,7 @@
                 }
             }
         }
-    })(1);
+    })(_ + '1');
 
     var $shouldFailOverride = function($h, $i, $j, $k, $w, $x, $y, $z)
     {
@@ -97,7 +97,7 @@
         return true;
     };
 
-    // Tests each possible variable of an override member
+    // Tests each possible variation of an override member
     (function(_)
     {
         for (var $h = 0; $h < $keywords.length; $h++)
@@ -145,7 +145,7 @@
                                                 if ($shouldFailOverride($h, $i, $j, $k, $w, $x, $y, $z))
                                                 {
                                                     console.error('########## FAILED ##########');
-                                                    console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k, $w, $x, $y, $z) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ', ' + $w + ', ' + $x + ', ' + $y + ', ' + $z + ')');
+                                                    console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k, $w, $x, $y, $z) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ', ' + $w + ', ' + $x + ', ' + $y + ', ' + $z + ')');
                                                 }
                                             }
                                             catch(e)
@@ -153,7 +153,7 @@
                                                 if (!$shouldFailOverride($h, $i, $j, $k, $w, $x, $y, $z))
                                                 {
                                                     console.error('########## FAILED ##########');
-                                                    console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k, $w, $x, $y, $z) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ', ' + $w + ', ' + $x + ', ' + $y + ', ' + $z + ')');
+                                                    console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k, $w, $x, $y, $z) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ', ' + $w + ', ' + $x + ', ' + $y + ', ' + $z + ')');
                                                     console.error(e);
                                                 }
                                             }
@@ -165,7 +165,7 @@
                             if ($shouldFail($h, $i, $j, $k))
                             {
                                 console.error('########## FAILED ##########');
-                                console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' +  $i + ', ' + $j + ', ' + $k + ')');
+                                console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' +  $i + ', ' + $j + ', ' + $k + ')');
                             }
                         }
                         catch(e)
@@ -173,7 +173,7 @@
                             if (!$shouldFail($h, $i, $j, $k))
                             {
                                 console.error('########## FAILED ##########');
-                                console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
+                                console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
                                 console.error(e);
                             }
                         }
@@ -181,11 +181,11 @@
                 }
             }
         }
-    })(2);
-})();
+    })(_ + '2');
+})('M');
 
 // Tests properties
-(function()
+(function(_)
 {
     var $accessors = ['public', 'protected', 'private'];
     var $getters   = ['', 'get', 'public get', 'protected get', 'private get'];
@@ -249,7 +249,7 @@
                         if ($shouldFail($i, $j, $k))
                         {
                             console.error('########## FAILED ##########');
-                            console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
+                            console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
                         }
                     }
                     catch(e)
@@ -257,14 +257,14 @@
                         if (!$shouldFail($i, $j, $k))
                         {
                             console.error('########## FAILED ##########');
-                            console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
+                            console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
                             console.error(e);
                         }
                     }
                 }
             }
         }
-    })(3);
+    })(_ + '3');
 
     var $virtuals = ['abstract', 'virtual'];
 
@@ -315,7 +315,7 @@
                             if ($shouldFailVirtual($i, $j, $k))
                             {
                                 console.error('########## FAILED ##########');
-                                console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($i, $j, $k, $m) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $m + ')');
+                                console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($i, $j, $k, $m) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $m + ')');
                             }
                         }
                         catch(e)
@@ -323,7 +323,7 @@
                             if (!$shouldFailVirtual($i, $j, $k))
                             {
                                 console.error('########## FAILED ##########');
-                                console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k, $m) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $m + ')');
+                                console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k, $m) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $m + ')');
                                 console.error(e);
                             }
                         }
@@ -331,7 +331,7 @@
                 }
             }
         }
-    })(4);
+    })(_ + '4');
 
     var $shouldFailOverride = function($i, $j, $k, $x, $y, $z)
     {
@@ -453,7 +453,7 @@
                                         if ($shouldFailOverride($i, $j, $k, $x, $y, $z))
                                         {
                                             console.error('########## FAILED ##########');
-                                            console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($i, $j, $k, $x, $y, $z) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $x + ', ' + $y + ', ' + $z + ')');
+                                            console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($i, $j, $k, $x, $y, $z) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $x + ', ' + $y + ', ' + $z + ')');
                                         }
                                     }
                                     catch(e)
@@ -461,7 +461,7 @@
                                         if (!$shouldFailOverride($i, $j, $k, $x, $y, $z))
                                         {
                                             console.error('########## FAILED ##########');
-                                            console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k, $x, $y, $z) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $x + ', ' + $y + ', ' + $z + ')');
+                                            console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k, $x, $y, $z) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $x + ', ' + $y + ', ' + $z + ')');
                                             console.error(e);
                                         }
                                     }
@@ -472,7 +472,7 @@
                         if ($shouldFailVirtual($i, $j, $k))
                         {
                             console.error('########## FAILED ##########');
-                            console.error('Failed test #' + _ + ' which was SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
+                            console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
                         }
                     }
                     catch(e)
@@ -480,12 +480,12 @@
                         if (!$shouldFailVirtual($i, $j, $k))
                         {
                             console.error('########## FAILED ##########');
-                            console.error('Failed test #' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
+                            console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
                             console.error(e);
                         }
                     }
                 }
             }
         }
-    })(5);
-})();
+    })(_ + '5');
+})('P');
