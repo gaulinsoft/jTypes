@@ -293,6 +293,7 @@
                         var $accessor = $accessors[$i];
                         var $getter   = $getters[$j];
                         var $setter   = $setters[$k];
+                        var $virtual  = $virtuals[$m];
 
                         var $property = {};
                 
@@ -303,8 +304,6 @@
                             $property[$setter] = $$.empty();
 
                         var $definition = {};
-
-                        var $virtual = $virtuals[$m];
 
                         $definition[$accessor + ' ' + $virtual + ' property'] = $property;
 
@@ -373,7 +372,6 @@
         {
             if ($k === 1 || $k === 4)
                 return false;
-        
         }
 
         // protected set OVERRIDES public get + protected set
