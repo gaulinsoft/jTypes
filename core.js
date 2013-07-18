@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                               jTypes 2.1.0
+//                               jTypes 2.1.1
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.0';
+    var $_version = '2.1.1';
 
     // ########## LANGUAGE ##########
 
@@ -276,6 +276,15 @@
     var $_inject_public    = $_inject_flagCount++;
     var $_inject_static    = $_inject_flagCount++;
 
+    // Create the member package obfuscated key hash flag and length setting
+    var $_package_keyHash   = true;
+    var $_package_keyLength = 3;
+
+    // Create the member package obfuscated keys
+    var $_package_modifiers = $_package_keyHash ? $_keyGenerator($_package_keyLength) : '~modifiers';
+    var $_package_type      = $_package_keyHash ? $_keyGenerator($_package_keyLength) : '~type';
+    var $_package_value     = $_package_keyHash ? $_keyGenerator($_package_keyLength) : '~value';
+
     // Create the unsafe token
     var $_unsafe = '';
 
@@ -421,27 +430,35 @@
     };
     var $_definitionsCompiler               = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal)
     {
+        // Break the key string into a keywords array and get the member name
+        var $keywords = $__trim__.call($$.asString($key)).split(' ') || [];
+        var $name     = $$.asString($keywords.pop());
+
+        // If the name is empty or whitespace, throw an exception
+        if (!$__trim__.call($name))
+            throw $_exceptionFormat($_lang_$$_member_name_null, $type);
+        
+        // If the name is not a valid member name, throw an exception
+        if (!$__match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
+            throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
+
+        // If the member is a package
+        if ($__hasOwnProperty__.call($value, $_package_value))
+        {
+            // Extract the package data
+            $keywords = $$.asString($value[$_package_modifiers]).split(' ') || [];
+            $value    = $value[$_package_value];
+        }
+
         // Create the type
         var $type = 'field';
-        
+
         // If the value is a function, set the type as a method
         if ($$.isFunction($value))
             $type = 'method';
         // If the value is a simple object, set the type as a property
         else if ($$.isSimpleObject($value))
             $type = 'property';
-        
-        // Break the key string into a keywords array and get the member name
-        var $keywords = $$.asString($key).trim().split(' ') || [];
-        var $name     = $$.asString($keywords.pop());
-
-        // If the name is empty or whitespace, throw an exception
-        if (!$name.trim())
-            throw $_exceptionFormat($_lang_$$_member_name_null, $type);
-        
-        // If the name is not a valid member name, throw an exception
-        if (!$name.match(/^(_|\$|[a-z])[_\$a-z0-9]*$/i))
-            throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
         var $abstract = false;
         var $override = false;
@@ -678,12 +695,12 @@
                 for (var $propertyKey in $value)
                 {
                     // Break the property key string into a keywords array and get the member name and value
-                    var $propertyKeywords = $$.asString($propertyKey).trim().split(' ') || [];
+                    var $propertyKeywords = $__trim__.call($$.asString($propertyKey)).split(' ') || [];
                     var $memberName       = $$.asString($propertyKeywords.pop());
                     var $memberValue      = $value[$propertyKey];
 
                     // If the member name is empty or whitespace, throw an exception
-                    if (!$memberName.trim())
+                    if (!$__trim__.call($memberName))
                         throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
                     var $member = null;
@@ -1392,7 +1409,7 @@
         var $constructor = arguments[$argument++];
         var $modifiers   = '';
         var $prototype   = null;
-
+        
         // If the constructor is not a simple object
         if (!$$.isSimpleObject($constructor))
         {
@@ -1477,7 +1494,7 @@
         if ($modifiers)
         {
             // Create the keywords array
-            var $keywords = $modifiers.trim().split(' ') || [];
+            var $keywords = $__trim__.call($modifiers).split(' ') || [];
 
             for (var $i = 0, $j = $keywords.length; $i < $j; $i++)
             {
@@ -2025,21 +2042,15 @@
         // Set the class cache data
         $cache[$_definition_abstract]          = { 'value': $abstract };
         $cache[$_definition_baseClass]         = { 'value': $baseClass };
+        $cache[$_definition_construct]         = { 'value': !$final ? $construct : $$.empty() };
         $cache[$_definition_expando_class]     = { 'value': $expandoClass };
         $cache[$_definition_expando_private]   = { 'value': $expandoPrivate };
         $cache[$_definition_expando_prototype] = { 'value': $expandoPrototype };
         $cache[$_definition_expando_public]    = { 'value': $expandoPublic };
         $cache[$_definition_final]             = { 'value': $final };
+        $cache[$_definition_protected]         = { 'value': !$final ? $classProtected : {} };
         $cache[$_definition_public]            = { 'value': $classPublic };
         $cache[$_definition_unsafe]            = { 'value': $unsafe };
-
-        // If the class is not final
-        if (!$final)
-        {
-            // Set the protected class cache data
-            $cache[$_definition_construct] = { 'value': $construct };
-            $cache[$_definition_protected] = { 'value': $classProtected };
-        }
 
         // Set the class cache
         $__defineProperties__.call($__object__, $class, $cache);
@@ -2087,6 +2098,56 @@
     // Define the version field
     $_defineField('version', $_version);
 
+    // ########## PACKAGES ##########
+
+    // Define the package methods for class members
+    $__forEach__.call('private protected public'.split(' ') || [], function($modifier)
+    {
+        // Define the package method for the access modifier
+        $_defineMethod($modifier, function($modifiers, $value)
+        {
+            // Create the member package
+            var $package = {};
+
+            switch (arguments.length)
+            {
+                case 1:
+
+                    // Set the member package data
+                    $package[$_package_modifiers] = $modifier;
+                    $package[$_package_value]     = $modifiers;
+
+                    break;
+
+                case 2:
+
+                    // FORMAT $modifiers
+                    $modifiers = $$.asString($modifiers);
+
+                    // Set the member package data
+                    $package[$_package_modifiers] = $modifiers ? $modifier + ' ' + $modifiers : $modifier;
+                    $package[$_package_value]     = $value;
+
+                    break;
+
+                default:
+                    
+                    // If the debug flag is set, throw an exception
+                    if ($$.debug)
+                        throw $_exceptionArguments($modifier, arguments);
+
+                    // Return null
+                    return null;
+            }
+
+            // Freeze the member package
+            $__freeze__.call($__object__, $package);
+
+            // Return the member package
+            return $package;
+        });
+    });
+
     // ########## TYPES ##########
     
     // Define the types method and the "is" methods for internal JavaScript types
@@ -2096,7 +2157,7 @@
         var $types = {};
         
         // Iterate the internal JavaScript types
-        'Array Boolean Date Function Number RegExp String'.split(' ').forEach(function($type)
+        $__forEach__.call('Array Boolean Date Function Number RegExp String'.split(' ') || [], function($type)
         {
             // Get the type keyword
             var $keyword = $type.toLowerCase();
@@ -2113,7 +2174,7 @@
         });
 
         // Iterate the known aliases of the internal JavaScript window type
-        'Window window Global global'.split(' ').forEach(function($window)
+        $__forEach__.call('Window window Global global'.split(' ') || [], function($window)
         {
             // Insert the window into the types lookup
             $types['[object ' + $window + ']'] = 'window';
@@ -2351,7 +2412,14 @@
     {
         // CHECK $string
         if (!$$.isString($string))
-            throw $_exceptionArguments('format', arguments);
+        {
+            // If the debug flag is set, throw an exception
+            if ($$.debug)
+                throw $_exceptionArguments('format', arguments);
+
+            // Return an empty string
+            return '';
+        }
 
         // Get the arguments
         var $arguments = arguments;
