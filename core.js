@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                               jTypes 2.1.1
+//                               jTypes 2.1.2
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.1';
+    var $_version = '2.1.2b89';
 
     // ########## LANGUAGE ##########
 
@@ -54,10 +54,11 @@
     var $_lang_$$_member_keyword_readonly          = '"{0}" cannot have the readonly modifier because it is {1}.';
     var $_lang_$$_member_keyword_requires_1        = '"{0}" cannot have the {1} modifier without the {2} modifier.';
     var $_lang_$$_member_name_2                    = '"{0}" cannot have more than one definition.';
-    var $_lang_$$_member_name_prototype_2          = '"{0}" cannot have more than one definition or hide an inherited non-prototype member.';
-    var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
     var $_lang_$$_member_name_invalid              = '"{1}" is not a valid {0} name.';
     var $_lang_$$_member_name_null                 = '"" is not a valid {0} name.';
+    var $_lang_$$_member_name_package              = '"{0}" cannot have modifiers because it is a packaged member definition.';
+    var $_lang_$$_member_name_prototype_2          = '"{0}" cannot have more than one definition or hide an inherited non-prototype member.';
+    var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
     var $_lang_$$_member_override_null             = '"{0}" has no suitable {1} to override.';
     var $_lang_$$_member_property_accessors        = '"{0}" must have both accessors to have an access modifier on the {1} accessor.';
     var $_lang_$$_member_property_accessors_access = '"{0}" must have a more restrictive access modifier on the {1} accessor.';
@@ -434,17 +435,13 @@
         var $keywords = $__trim__.call($$.asString($key)).split(' ') || [];
         var $name     = $$.asString($keywords.pop());
 
-        // If the name is empty or whitespace, throw an exception
-        if (!$__trim__.call($name))
-            throw $_exceptionFormat($_lang_$$_member_name_null, $type);
-        
-        // If the name is not a valid member name, throw an exception
-        if (!$__match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
-            throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
-
         // If the member is a package
         if ($__hasOwnProperty__.call($value, $_package_value))
         {
+            // If any keywords were provided, throw an exception
+            if ($keywords.length)
+                throw $_exceptionFormat($_lang_$$_member_name_package, $name);
+
             // Extract the package data
             $keywords = $$.asString($value[$_package_modifiers]).split(' ') || [];
             $value    = $value[$_package_value];
@@ -459,6 +456,14 @@
         // If the value is a simple object, set the type as a property
         else if ($$.isSimpleObject($value))
             $type = 'property';
+
+        // If the name is empty or whitespace, throw an exception
+        if (!$__trim__.call($name))
+            throw $_exceptionFormat($_lang_$$_member_name_null, $type);
+        
+        // If the name is not a valid member name, throw an exception
+        if (!$__match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
+            throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
         var $abstract = false;
         var $override = false;
