@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.2b103';
+    var $_version = '2.1.2b104';
 
     // ########## LANGUAGE ##########
 
@@ -2441,8 +2441,6 @@
                 else
                     $construct.call($_class, $matrix, $getterReadonly, $unsafe ? $injections : null);
             }
-
-            $private['~constructor'].call($private);
 
             // If the "new" keyword was used
             if ($isNew)
