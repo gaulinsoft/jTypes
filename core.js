@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.2b102';
+    var $_version = '2.1.2b103';
 
     // ########## LANGUAGE ##########
 
@@ -2973,33 +2973,53 @@
     // ---------- FLOAT ----------
     $_defineMethod('asFloat', function($object)
     {
-        // Return the object cast as a float
-        return parseFloat($object);
+        // Get the object type
+        var $type = $$.type($object);
+
+        // If the object is a string and matches a float
+        if ($type === 'string' && $__match__.call($__trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
+        {
+            // Cast the object as a float
+            $object = parseFloat($object);
+            $type   = 'number';
+        }
+        
+        // If the object is not a number, return NaN
+        if ($type !== 'number')
+            return NaN;
+
+        // Return the number
+        return $object;
     });
 
     // ---------- INTEGER ----------
     $_defineMethod('asInt', function($object)
     {
-        // Cast the object as an integer
-        var $number = parseInt($object, 10);
+        // Get the object type
+        var $type = $$.type($object);
 
-        // If the number is not NaN, return the number
-        if (!isNaN($number))
-            return $number;
-
-        // Cast the object as a float
-        $number = parseFloat($object);
-
+        // If the object is a string and matches an integer
+        if ($type === 'string' && $__match__.call($__trim__.call($object), /^[-+]?[0-9]+$/))
+        {
+            // Cast the object as an integer
+            $object = parseInt($object, 10);
+            $type   = 'number';
+        }
+        
+        // If the object is not a number, return NaN
+        if ($type !== 'number' || isNaN($object))
+            return NaN;
+        
         // If the number is greater than the maximum integer, return infinity
-        if ($number > 9007199254740992)
+        if ($object > 9007199254740992)
             return Infinity;
 
         // If the number is less than the minimum integer, return negative infinity
-        if ($number < -9007199254740992)
+        if ($object < -9007199254740992)
             return -Infinity;
-        
-        // Return NaN
-        return NaN;
+
+        // Return the number
+        return $object;
     });
 
     // ---------- STRING ----------
