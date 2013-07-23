@@ -184,8 +184,6 @@ console.log(e.age);// 42
 console.log(e.salary);// 77250
 ```
 
-## Recent performance increases
+## Recent performance tests
 
-There have also been signficant performance increases in the beta which are shown on the following chart:
-
-![jTypes 2.1.0b Performance](https://lh5.googleusercontent.com/-VxRzHPydDrQ/UbHk2pn1H7I/AAAAAAAAAD4/F_a9aDRHpyk/w815-h410-no/jTypes+Performance.jpg "jTypes 2.1.0b Performance")
+![jTypes 2.1.2b Performance](https://lh6.googleusercontent.com/-TELz2eL1O_c/Ue6jAkm3CnI/AAAAAAAAAIY/n26xaNn-NRQ/w907-h470-no/2.1.2.bmp "jTypes 2.1.0b Performance")
