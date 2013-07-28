@@ -1,4 +1,8 @@
-﻿var Person = $$(function($fName, $lName, $age)
+﻿// get the precompiled person class
+var cachedPerson = localStorage.getItem('Person');
+
+// compile the person class
+var Person = $$(cachedPerson ? cachedPerson : '', function($fName, $lName, $age)
 {
     // set the readonly fields (cast the string arguments)
     this.firstName = $$.asString($fName);
@@ -41,7 +45,15 @@
     }
 });
 
-var Employee = $$(Person, function($fName, $lName, $age, $salary)
+// if the person class was not cached, store a local copy of the precompiled export string
+if (!cachedPerson)
+    localStorage.setItem('Person', $$.export(Person));
+
+// get the precompiled employee class
+var cachedEmployee = cachedPerson && localStorage.getItem('Employee');
+
+// compile the employee class
+var Employee = $$(cachedEmployee ? cachedEmployee : '', Person, function($fName, $lName, $age, $salary)
 {
     // call the base constructor
     this.__base($fName, $lName, $age);
@@ -70,6 +82,10 @@ var Employee = $$(Person, function($fName, $lName, $age, $salary)
         }
     }
 });
+
+// if the employee class was not cached, store a local copy of the precompiled export string
+if (!cachedEmployee)
+    localStorage.setItem('Employee', $$.export(Employee));
 
 // instantiate a person object
 var p = new Person('John', 'Doe', 30);

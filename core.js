@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                               jTypes 2.1.2
+//                                jTypes 2.1.2
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.2b104';
+    var $_version = '2.1.2b120';
 
     // ########## LANGUAGE ##########
 
@@ -371,6 +371,7 @@
     // Create the lazy, and subclass flags
     var $_debug    = true;// DEFAULT
     var $_lazy     = true;// DEFAULT
+    var $_lock     = {};// DON'T CHANGE
     var $_subclass = false;// DON'T CHANGE
 
     // ########## COMPILER ##########
@@ -611,7 +612,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $name === 'is' || $name === '~constructor' || $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this')
+        if ($name === 'as' || $name === 'is' || $name === '~constructor' || $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
         
         // If the member has more than one access modifier, throw an exception
@@ -902,9 +903,9 @@
                         // If the property keyword is public, set the public flag
                         else if ($propertyKeyword === 'public')
                             $member[$_accessor_public] = true;
-                        // If a keyword was defined, throw an exception
-                        else if ($keyword)
-                            throw $_exceptionFormat($_lang_$$_member_property_keyword, $name, $memberName, $keyword);
+                        // If the property keyword was defined, throw an exception
+                        else if ($propertyKeyword)
+                            throw $_exceptionFormat($_lang_$$_member_property_keyword, $name, $memberName, $propertyKeyword);
                     }
 
                     // Check if the member has any access modifiers
@@ -1059,7 +1060,7 @@
                 if ($constructor === undefined)
                 {
                     // Get the base constructor
-                    $constructor = $private['__base'];
+                    $constructor = $private.__base;
                     $constructor = $constructor && $constructor['~constructor'] || null;
                 }
                                 
@@ -1108,7 +1109,7 @@
             // Set the descriptor setting without read-only checking
             $descriptor['set'] = function($v)
             {
-                /// If the provided value is set to a private instance, set the value to the public instance
+                // If the provided value is set to a private instance, set the value to the public instance
                 if ($v === $private)
                     $value = $public;
                 // Set the value to the provided value
@@ -1283,14 +1284,14 @@
         // Get the member definition from the definitions object
         var $definition = $definitions[$key];
 
+        // Create the descriptor and get the name
+        var $descriptor = {};
+        var $name       = $definition[$_definition_member_name];
+
         switch ($definition[$_definition_member_type])
         {
             case 'field':
-
-                // Create the field descriptor and get the field name
-                var $descriptor = {};
-                var $name       = $definition[$_definition_member_name];
-
+                
                 // If an injections array was provided and the field is an injected field, construct the injected field descriptor
                 if ($injections && $definition[$_definition_member_field_injection])
                     $_constructRuntimeInjection($descriptor, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
@@ -1332,10 +1333,8 @@
 
             case 'method':
 
-                // Create the method descriptor and get the method name
-                var $descriptor = {};
-                var $name       = $definition[$_definition_member_name];
-                var $this       = $private;
+                // Create the method context
+                var $this = $private;
 
                 // If the method is the constructor, set the instance as the constructor instance
                 if ($isProtected && $name === '~constructor')
@@ -1382,18 +1381,14 @@
 
             case 'property':
 
-                // Get the property accessor and name
+                // Get the property accessor
                 var $accessor = $key.substr(1, 3);
-                var $name     = $definition[$_definition_member_name];
 
                 // Check if the property is complex and if a merge operation is being performed
                 var $complex      = $definition[$_definition_member_property_accessors];
                 var $mergeBase    = $complex && $__hasOwnProperty__.call($base, $name);
                 var $mergePrivate = $complex && $__hasOwnProperty__.call($private, $name);
                 var $merge        = $mergeBase || $mergePrivate;
-
-                // Create the property descriptor
-                var $descriptor = {};
                 
                 // Construct the property descriptor
                 $_constructRuntimeMethod($descriptor, $complex && !$merge, $private, $definition[$_definition_member_value], $private, $public, $accessor);
@@ -1528,7 +1523,7 @@
     };
     var $_constructRuntimeDump        = function($vars, $statements, $definitions, $references, $key, $index, $level, $protectedOverrides, $publicOverrides)
     {
-        // Get the member definition from the definitions object
+        // Get the member definition from the definitions object along with the name and type
         var $definition = $definitions[$key];
         var $name       = $definition[$_definition_member_name];
         var $type       = $definition[$_definition_member_type];
@@ -1610,21 +1605,25 @@
         // Append the member definition into the vars string
         $vars.push($reference + '=' + $handle + '(' + $arguments.join(',') + ')');
 
+        // If the member is a property
         if ($type === 'property')
         {
+            // Get the complex and merge flags
             var $complex = $definition[$_definition_member_property_accessors];
             var $merge   = $references[$name];
 
             // If the property is not complex or is being merged
             if (!$complex || $merge)
             {
+                // Get the get and set accessor flags
                 var $get = $accessor === 'g';
                 var $set = $accessor === 's';
                 
-                var $mergeBase      = $merge && $merge[3];
-                var $mergePrivate   = $merge && $merge[0];
-                var $mergeProtected = $merge && $merge[1];
-                var $mergePublic    = $merge && $merge[2];
+                // Get the merge member references
+                var $mergeBase      = $merge && $merge[3] || null;
+                var $mergePrivate   = $merge && $merge[0] || null;
+                var $mergeProtected = $merge && $merge[1] || null;
+                var $mergePublic    = $merge && $merge[2] || null;
 
                 // If the property is protected or public
                 if ($protectedOverrides || $publicOverrides)
@@ -1676,7 +1675,7 @@
             }
             else
             {
-                //
+                // Create the merge array
                 $merge = [null, null, null, null];
 
                 // If the property is protected or public
@@ -1700,170 +1699,186 @@
                 else
                     $merge[0] = $reference;
 
-                //
+                // Store the merge array in the references collection
                 $references[$name] = $merge;
             }
         }
+        // If the member is protected or public
         else if ($protectedOverrides || $publicOverrides)
         {
             var $override = null;
             
+            // If the member is a method, get the reference override
             if ($type === 'method')
-            {
-                if ($protectedOverrides || $publicOverrides)
-                    $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
-            }
+                $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
 
+            // Set the base member reference
             $statements.push('d(' + $_precompile_matrix + $level + '$3,' + $reference + ')');
 
+            // If the member is public, set the protected and public member references
             if ($publicOverrides)
                 $statements.push('d2(' + $_precompile_matrix + $level + '$1,' + $_precompile_matrix + $level + '$2,' + ($override !== null ? $override : $reference) + ')');
+            // Set the protected member reference
             else
                 $statements.push('d(' + $_precompile_matrix + $level + '$1,' + ($override !== null ? $override : $reference) + ')');
         }
+        // Set the private member reference
         else
             $statements.push('d(' + $_precompile_matrix + $level + '$0,' + $reference + ')');
     };
-    var $_constructRuntimePrecompile  = function($chain, $internal)
+    var $_constructRuntimePrecompile  = function($chain)
     {
-        var $precompile = !$internal ? '{' : '';
-
-        var $class      = $chain[0];
+        // Create the closures string and the statements and variables arrays
         var $closures   = $_precompile_null + '=null';
-        var $levels     = $chain.length;
         var $statements = [];
         var $vars       = [];
         
-        var $k0 = 0;
-        var $k1 = 0;
-        var $k2 = 0;
-        
+        // Create the protected and public overrides containers
         var $protectedOverrides = {};
         var $publicOverrides    = {};
 
-        for (var $i = 0; $i < $levels; $i++)
+        for (var $i = 0, $j = $chain.length; $i < $j; $i++)
         {
-            var $current = $chain[$i];
-            
-            var $private   = $current[$_definition_private];
-            var $protected = $current[$_definition_protected];
-            var $public    = $current[$_definition_public];
+            // Get the current class
+            var $class = $chain[$i];
 
-            var $privateKeys   = $__keys__.call($__object__, $private) || [];
-            var $protectedKeys = $__keys__.call($__object__, $protected) || [];
-            var $publicKeys    = $__keys__.call($__object__, $public) || [];
-
-            if ($i === 0)
-            {
-                $k0 = $privateKeys.length;
-                $k1 = $protectedKeys.length;
-                $k2 = $publicKeys.length;
-            }
-
+            // Append the cache closure variable to the closures string
             $closures += ',' + $_precompile_cache + $i + '=c[' + $i + '][k]';
             
+            // Push the stack variable into the variables array
             $vars.push($_precompile_matrix + $i + '=' + $_precompile_matrix + '[' + $i + ']');
+
+            // Push the stack instance variables into the variables array
             $vars.push($_precompile_matrix + $i + '$0=' + $_precompile_matrix + $i + '[0]');
             $vars.push($_precompile_matrix + $i + '$1=' + $_precompile_matrix + $i + '[1]');
             $vars.push($_precompile_matrix + $i + '$2=' + $_precompile_matrix + $i + '[2]');
             $vars.push($_precompile_matrix + $i + '$3=' + $_precompile_matrix + $i + '[3]');
+            
+            // Get the private, protected, and public definitions objects 
+            var $private   = $class[$_definition_private];
+            var $protected = $class[$_definition_protected];
+            var $public    = $class[$_definition_public];
 
+            // Get the private, protected, and public keys
+            var $privateKeys   = $__keys__.call($__object__, $private) || [];
+            var $protectedKeys = $__keys__.call($__object__, $protected) || [];
+            var $publicKeys    = $__keys__.call($__object__, $public) || [];
+
+            // Create the references container
             var $references = {};
 
-            for (var $j = 0, $k = $privateKeys.length; $j < $k; $j++)
-                $_constructRuntimeDump($vars, $statements, $private, $references, $privateKeys[$j], $j, $i, null, null);
+            // Dump the private definitions into the variables and statements arrays
+            for (var $k = 0, $l = $privateKeys.length; $k < $l; $k++)
+                $_constructRuntimeDump($vars, $statements, $private, $references, $privateKeys[$k], $k, $i, null, null);
 
-            var $l = $privateKeys.length;
+            // Create the index offset
+            var $index = $privateKeys.length;
 
-            for (var $j = 0, $k = $protectedKeys.length; $j < $k; $j++)
-                $_constructRuntimeDump($vars, $statements, $protected, $references, $protectedKeys[$j], $j + $l, $i, $protectedOverrides, null);
+            // Dump the protected definitions into the variables and statements arrays
+            for (var $k = 0, $l = $protectedKeys.length; $k < $l; $k++)
+                $_constructRuntimeDump($vars, $statements, $protected, $references, $protectedKeys[$k], $k + $index, $i, $protectedOverrides, null);
 
-            $l += $protectedKeys.length;
+            // Increment the index offset
+            $index += $protectedKeys.length;
             
-            for (var $j = 0, $k = $publicKeys.length; $j < $k; $j++)
-                $_constructRuntimeDump($vars, $statements, $public, $references, $publicKeys[$j], $j + $l, $i, null, $publicOverrides);
+            // Dump the public definitions into the variables and statements arrays
+            for (var $k = 0, $l = $publicKeys.length; $k < $l; $k++)
+                $_constructRuntimeDump($vars, $statements, $public, $references, $publicKeys[$k], $k + $index, $i, null, $publicOverrides);
             
-            $statements.push('l(' + $_precompile_matrix + $i + '$3,' + ($current[$_definition_expando_private] ? $_precompile_null : $_precompile_matrix + $i + '$0') + ',' + $_precompile_matrix + $i + '$1,' + ($current[$_definition_expando_public] ? $_precompile_null : $_precompile_matrix + $i + '$2') + ')');
+            // Push the lock statement into the statements array (without locking expandos)
+            $statements.push('l(' + $_precompile_matrix + $i + '$3,' + ($class[$_definition_expando_private] ? $_precompile_null : $_precompile_matrix + $i + '$0') + ',' + $_precompile_matrix + $i + '$1,' + ($class[$_definition_expando_public] ? $_precompile_null : $_precompile_matrix + $i + '$2') + ')');
         }
 
+        // Create the precompiled string
+        var $precompile = '';
+
+        // Construct the precompiled string from the closures string, variables array, and statements array
         $precompile += 'var ' + $closures + ';';
         $precompile += 'return function(' + $_precompile_matrix + ',' + $_precompile_readonly + ',' + $_precompile_injections + '){';
         $precompile += 'var ' + $vars.join(',') + ';';
         $precompile += $statements.join(';') + ';';
         $precompile += '};';
 
-        if (!$internal)
-        {
-            $precompile += '};';
-            $precompile += '$.a=' + ($class[$_definition_abstract] ? '!0' : '!1') + ';';
-            $precompile += '$.f=' + ($class[$_definition_final] ? '!0' : '!1') + ';';
-            $precompile += '$.k0=' + $k0 + ';';
-            $precompile += '$.k1=' + $k1 + ';';
-            $precompile += '$.k2=' + $k2 + ';';
-            $precompile += '$.l=' + $levels + ';';
-            $precompile += '$.u="' + ($class[$_definition_unsafe] ? '@unsafe' : '') + '";';
-        }
-
+        // Return the precompiled string
         return $precompile;
     };
 
     // Create the import runtime helper functions
     var $_importRuntimeAccessor    = function($cache, $name, $private, $public, $type, $accessor)
     {
+        // Create the accessor descriptor with the embedded property name
         var $descriptor = { 'name': $name };
 
+        // Constructor the accessor descriptor
         $_constructRuntimeMethod($descriptor, false, $private, $cache['~' + $accessor + 'et_' + $name], $private, $public);//, $type);
 
+        // Return the descriptor
         return $descriptor;
     };
     var $_importRuntimeDescriptor  = function($instance, $descriptor)
     {
+        // Set the descriptor on the instance using the embedded member name
         $__defineProperty__.call($__object__, $instance, $descriptor['name'], $descriptor);
     };
     var $_importRuntimeDescriptor2 = function($formerInstance, $latterInstance, $descriptor)
     {
+        // Get the embedded member name
         var $name = $descriptor['name'];
 
+        // Set the descriptor on the former and latter instances
         $__defineProperty__.call($__object__, $formerInstance, $name, $descriptor);
         $__defineProperty__.call($__object__, $latterInstance, $name, $descriptor);
     };
     var $_importRuntimeField       = function($cache, $name, $injections, $private, $public, $type, $readonly)
     {
+        // Create the field descriptor with the embedded property name
         var $descriptor = { 'name': $name };
         
+        // If an injections array was provided, construct the injection descriptor
         if ($injections)
             $_constructRuntimeInjection($descriptor, $name, $cache[$name], $injections, $type, $readonly);
+        // Construct the field descriptor
         else
             $_constructRuntimeField($descriptor, false, $name, $cache[$name], $private, $public, /*$type,*/ $readonly);
 
+        // Return the descriptor
         return $descriptor;
     };
     var $_importRuntimeLock        = function($base, $private, $protected, $public)
     {
+        // Freeze the base instance
         $__freeze__.call($__object__, $base);
 
+        // If a private instance was provided, freeze the private instance
         if ($private)
             $__freeze__.call($__object__, $private);
 
+        // Freeze the protected instance
         $__freeze__.call($__object__, $protected);
         
+        // If a public instance was provided, freeze the public instance
         if ($public)
             $__freeze__.call($__object__, $public);
     };
     var $_importRuntimeMethod      = function($cache, $name, $private, $public, $type)
     {
+        // Create the method descriptor with the embedded property name and the method context
         var $descriptor = { 'name': $name };
         var $this       = $private;
 
+        // If the method is the constructor, create the constructor context
         if ($name === '~constructor')
             $this = $_constructRuntimeConstructor($private);
 
+        // Construct the method descriptor
         $_constructRuntimeMethod($descriptor, false, $this, $cache[$name], $private, $public);//, $type);
 
+        // Return the descriptor
         return $descriptor;
     };
     var $_importRuntimeProperty    = function($instance, $get, $set)
     {
+        // Set the property get/set accessor descriptors on the instance
         $__defineProperty__.call($__object__, $instance, $get && $get['name'] || $set && $set['name'] || '', { 'enumerable': true, 'get': $get && $get['value'] || undefined, 'set': $set && $set['value'] || undefined });
     };
 
@@ -2069,7 +2084,7 @@
         if (!$unsafe && arguments.length !== $argument)
             throw $_exceptionArguments(null, arguments);
 
-        // Create the cache, private, protected, and public reference along with the inherited prototype reference
+        // Create the cache, private, protected, and public references along with the inherited prototype reference
         var $classCache     = null;
         var $classPrivate   = {};
         var $classProtected = null;
@@ -2132,7 +2147,7 @@
 
             // Construct the inherited prototype
             $classPrototype = new $baseClass();
-
+            
             // Reset the subclass flag
             $_subclass = false;
 
@@ -2306,7 +2321,7 @@
                     var $publicInherits    = {};
                     
                     // Build the matrix instance stack
-                    ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_class, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null);
+                    ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null);
                     
                     // Append the instance stack into the instance matrix and constructor context into the contexts array
                     $matrix.push($stack);
@@ -2316,8 +2331,8 @@
                 
                 // Define the derived inherits objects
                 var $derivedBaseInherits      = null;
-                var $derivedProtectedInherits = null
-                var $derivedPublicInherits    = null
+                var $derivedProtectedInherits = null;
+                var $derivedPublicInherits    = null;
 
                 for (var $i = $levels - 1; $i >= 0; $i--)
                 {
@@ -2435,11 +2450,11 @@
                 {
                     // Build the matrix instance stack
                     for (var $i = 0; $i < $levels; $i++)
-                        ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_class, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly, null, $unsafe ? $injections[$i] : null);
+                        ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly, null, $unsafe ? $injections[$i] : null);
                 }
                 // Build the precompiled matrix instance stack
                 else
-                    $construct.call($_class, $matrix, $getterReadonly, $unsafe ? $injections : null);
+                    $construct.call($_lock, $matrix, $getterReadonly, $unsafe ? $injections : null);
             }
 
             // If the "new" keyword was used
@@ -2480,12 +2495,13 @@
         // Prepend the class to the chain array and set the levels count
         $levels = $chain.unshift($class);
 
-        // If the class has the import flag or is optimized, set the constructor in the cache definition object
+        // If the class has the import flag or is optimized, set the constructor in the cache definitions object
         if ($import || $optimized)
             $__defineProperty__.call($__object__, $classCache, '~constructor', { 'enumerable': true, 'value': $constructor });
         
         // Create the class cache
         var $cache      = {};
+        var $eval       = null;
         var $precompile = null;
 
         // If the class does not have the import flag
@@ -2547,7 +2563,7 @@
             // Freeze the constructor definition object
             $__freeze__.call($__object__, $constructorDefinition);
 
-            // Set the constructor in the protected definition object
+            // Set the constructor in the protected definitions object
             $__defineProperty__.call($__object__, $classProtected, '~constructor', { 'enumerable': true, 'value': $constructorDefinition });
             
             // Get the arrays of private, protected, and public member keys
@@ -2559,7 +2575,7 @@
             $construct  = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections)
             {
                 // If this function was not internally called, return
-                if (this !== $_class)
+                if (this !== $_lock)
                     return;
 
                 // Create the stack instance references
@@ -2609,8 +2625,23 @@
             };
             $precompile = function()
             {
+                // Create the precompiled string
+                var $precompile = '{' + ($optimized ? $eval : $_constructRuntimePrecompile($chain)) + '};';
+
+                // Append the class data to the precompiled string
+                $precompile += '$.a=' + ($abstract ? '!0' : '!1') + ';';
+                $precompile += '$.f=' + ($final ? '!0' : '!1') + ';';
+                $precompile += '$.k0=' + $classPrivateKeys.length + ';';
+                $precompile += '$.k1=' + $classProtectedKeys.length + ';';
+                $precompile += '$.k2=' + $classPublicKeys.length + ';';
+                $precompile += '$.l=' + $levels + ';';
+
+                // If the class is unsafe, append the unsafe (razor) class data to the precompiled string
+                if ($unsafe)
+                    $precompile += '$.u="@unsafe";';
+
                 // Return the precompiled string
-                return $_const_precompile_prefix + $_constructRuntimePrecompile($chain, false);
+                return $_const_precompile_prefix + $precompile;
             };
         }
         else
@@ -2641,10 +2672,10 @@
         $cache[$_definition_final]             = { 'value': $final };
         $cache[$_definition_import]            = { 'value': $import };
         $cache[$_definition_optimized]         = { 'value': $optimized };
-        $cache[$_definition_private]           = { 'value': !$final || $import || $optimized ? $classPrivate : {} };
+        $cache[$_definition_private]           = { 'value': !$final || !$optimized ? $classPrivate : {} };
         $cache[$_definition_precompile]        = { 'value': $precompile };
-        $cache[$_definition_protected]         = { 'value': !$final || $import || $optimized ? $classProtected : {} };
-        $cache[$_definition_public]            = { 'value': $classPublic };
+        $cache[$_definition_protected]         = { 'value': !$final || !$optimized ? $classProtected : {} };
+        $cache[$_definition_public]            = { 'value': !$final || !$optimized ? $classPublic : {} };
         $cache[$_definition_unsafe]            = { 'value': $unsafe };
 
         // Set the class cache
@@ -2670,9 +2701,13 @@
         // If the class has the import flag or is optimized
         if ($import || $optimized)
         {
-            // If the class is optimized, generate the optimized construct function factory
+            // If the class is optimized
             if ($optimized)
-                $construct = new Function($_const_construct_arguments, '"use strict";' + $_constructRuntimePrecompile($chain, true));
+            {
+                // Generate the precompiled string and the optimized construct function factory
+                $eval      = $_constructRuntimePrecompile($chain);
+                $construct = new Function($_const_construct_arguments, '"use strict";' + $eval);
+            }
             
             // Generate the optimized construct function
             $construct = $construct.call
@@ -2835,11 +2870,22 @@
         return $object && typeof $object[$_definition_construct] === 'function';
     });
 
+    // ---------- COMPLEX OBJECT ----------
+    $_defineMethod('isComplexObject', function($object)
+    {
+        // If the object is not an object, return false
+        if (!$object || $$.type($object) !== 'object')
+            return false;
+
+        // Return true if the prototype of the object is not the object prototype
+        return $__getPrototypeOf__.call($__object__, $object) !== $__objectProto__;
+    });
+
     // ---------- FINITE ----------
     $_defineMethod('isFinite', function($number)
     {
         // Return true if the object is a number and is finite
-        return !!($$.isNumber($number) && isFinite($number));
+        return $$.isNumber($number) && !!isFinite($number);
     });
 
     // ---------- INFINITY ----------
@@ -2864,7 +2910,7 @@
     $_defineMethod('isNaN', function($number)
     {
         // Return true if the object is a number and is NaN
-        return !!($$.isNumber($number) && isNaN($number));
+        return $$.isNumber($number) && !!isNaN($number);
     });
 
     // ---------- NEGATIVE INFINITY ----------
@@ -3063,7 +3109,7 @@
             return '';
         }
 
-        // If the class has the imported flag
+        // If the class has the import flag
         if ($class[$_definition_import])
         {
             // If the debug flag is set, throw an exception
