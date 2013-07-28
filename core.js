@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.2b120';
+    var $_version = '2.1.2';
 
     // ########## LANGUAGE ##########
 
@@ -464,7 +464,7 @@
         var $name     = $$.asString($keywords.pop());
 
         // If the member is a package
-        if ($__hasOwnProperty__.call($value, $_package_value))
+        if ($value && $__hasOwnProperty__.call($value, $_package_value))
         {
             // If any keywords were provided, throw an exception
             if ($keywords.length)
