@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>jTypes</title>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="core.js"></script>
+    <script type="text/javascript" src="utilities.js"></script>
+    <script type="text/javascript" src="forms.js"></script>
+
+    <script type="text/javascript">
+        jQuery(function($)
+        {
+            window.bS = new $$.forms.Button($('#submit'));
+            window.tU = new $$.forms.Textbox($('#username'));
+            window.tP = new $$.forms.Textbox($('#password'));
+        });
+    </script>
+    <style type="text/css">
+        /*
+        // ############ BUTTON ############
+        */
+
+        .button
+        {
+            background-color: #999999;
+            border: 1px solid #888888;
+            color: #FFFFFF !important;
+            cursor: pointer;
+            display: inline-block;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            height: 18px;
+            margin: 3px;
+            overflow: hidden;
+            padding: 3px 12px;
+            text-align: center;
+            text-decoration: none !important;
+            text-overflow: ellipsis;
+            transition: box-shadow 0.3s ease-out;
+            -moz-transition: box-shadow 0.3s ease-out;
+            -o-transition: box-shadow 0.3s ease-out;
+            -webkit-transition: box-shadow 0.3s ease-out;
+            vertical-align: middle;
+            width: auto;
+            white-space: nowrap;
+        }
+
+        .button:hover
+        {
+            background-color: #888888;
+        }
+
+        .button.focused
+        {
+            box-shadow: 0px 0px 8px #AAAAAA;
+            -moz-box-shadow: 0px 0px 8px #AAAAAA;
+            -webkit-box-shadow: 0px 0px 8px #AAAAAA;
+        }
+
+        /*
+        // ############ INPUT ############
+        */
+
+        .input
+        {
+            background-color: #FFFFFF;
+            border: 1px solid #888888;
+            border-radius: 1px;
+            -moz-border-radius: 1px;
+            -webkit-border-radius: 1px;
+            color: #666666;
+            display: inline-block;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: normal;
+            height: 18px;
+            margin: 3px;
+            padding: 3px 6px;
+            text-decoration: none;
+            transition: box-shadow 0.3s ease-out;
+            -moz-transition: box-shadow 0.3s ease-out;
+            -o-transition: box-shadow 0.3s ease-out;
+            -webkit-transition: box-shadow 0.3s ease-out;
+            vertical-align: middle;
+            width: auto;
+        }
+
+        .input.focused
+        {
+            box-shadow: 0px 0px 8px #AAAAAA;
+            -moz-box-shadow: 0px 0px 8px #AAAAAA;
+            -webkit-box-shadow: 0px 0px 8px #AAAAAA;
+        }
+
+        .input input
+        {
+            background-color: #FFFFFF !important;
+            border-style: solid !important;
+            border-width: 0px !important;
+            color: #666666 !important;
+            font-family: Arial, Helvetica, sans-serif !important;
+            font-size: 13px !important;
+            font-weight: normal !important;
+            margin: 0px !important;
+            padding: 0px !important;
+        }
+
+        .input input
+        {
+            height: 18px;
+            width: 100%;
+        }
+
+        .input textarea
+        {
+            overflow: auto;
+            width: 100%;
+        }
+
+        input:focus, textarea:focus
+        {
+            outline: none !important;
+        }
+
+        input.placeholder
+        {
+            color: #A9A9A9 !important;
+        }
+
+        input:-moz-placeholder
+        {
+            color: #A9A9A9;
+        }
+
+        input::-webkit-input-placeholder
+        {
+            color: #A9A9A9;
+        }
+
+        .input.disabled
+        {
+            cursor: default !important;
+            opacity: 0.75 !important;
+        }
+    </style>
+</head>
+<body>
+    <div><input class="" id="username" type="text" /></div>
+    <div><input class="" id="password" type="text" /></div>
+    <div><input class="button" id="submit" type="button" value="Submit" /></div>
+</body>
+</html>

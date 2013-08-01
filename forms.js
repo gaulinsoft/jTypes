@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                               jTypes 2.1.0b
+//                               jTypes 2.1.X
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -223,9 +223,11 @@
         {
             // TAB
             case 9:
+                
                 // Get the array of elements
-                var $data     = [];
-                var $elements = $$.asArray($('input, select, textarea').toArray());
+                var $data       = [];
+                var $elements   = $$.asArray($('input, select, textarea').toArray());
+                var $references = [];
 
                 // If there are no elements in the array, return
                 if (!$elements.length)
@@ -233,59 +235,82 @@
 
                 // Sort the elements by tab-index
                 $elements.sort($_tabSort);
-
+                
                 for (var i = 0, j = $elements.length; i < j; i++)
                 {
-                    // Get the current element and its self reference data
+                    // Get the current element and its self reference
                     var $element = $($elements[i]);
-                    var $this    = $element.data($$.settings.JQUERY_DATA_PREFIX);
+                    var $self    = $element.data($$.settings.JQUERY_DATA_PREFIX);
 
-                    // If no self reference data was found, the element is not visible, or it is disabled
-                    if (!$this || !$this.visible || $this.disabled)
-                    {
-                        // Clear the current element in the elements array
-                        $elements[i] = null;
-
+                    // If no self reference data was found, continue
+                    if (!$self)
                         continue;
-                    }
+
+                    // Cast the self reference as an element
+                    var $this = $self.as($$.forms.Element);
+
+                    // If the element is not visible or it is disabled, continue
+                    if (!$this.visible || $this.disabled)
+                        continue;
 
                     // Get the tab-index of the current element
-                    var $index = $$.asInt($element.attr('tabindex'));
+                    var $index = $$.asInt($element.attr('tabindex')) || 0;
 
-                    // If the tab-index of the current element is not finite or is less than zero
+                    // If the tab-index of the current element is not finite or is less than zero, continue
                     if (!isFinite($index) || $index < 0)
-                    {
-                        // Clear the current element in the elements array
-                        $elements[i] = null;
-
                         continue;
-                    }
 
-                    // Add the current reference data to the data array
+                    // Add the element to the data array and self reference to the references array
                     $data.push($this);
+                    $references.push($self);
                 }
 
-                // If the data array contains no references, break
-                if (!$data.length)
+                // If the references array contains no references, break
+                if (!$references.length)
                     break;
 
                 // Prevent the default behavior of the key
                 e.preventDefault();
 
-                // Find the index of the currently focused element in the data array
-                var $index = $.inArray($_focused, $data);
+                // Find the index of the currently focused element in the reference array
+                var $index = $.inArray($_focused, $references);
 
                 // If the currently focused element was not found or the shift key was not depressed and after incrementing the index it is not outside the collection of elements, set the index to the first element
                 if ($index === -1 || !e.shiftKey && ++$index === $data.length)
                     $index = 0;
-                // If the shift key was depressed, decrement the index
-                else if (e.shiftKey)
-                    $index--;
+                // If the shift key was depressed and after decrementing the index it is outside the collection of elements, set the index to the last element
+                else if (e.shiftKey && --$index === -1)
+                    $index = $data.length - 1;
 
                 // Trigger the focus event on the element
-                $data[$index].as($_forms.Element).focus();
+                $data[$index].focus();
 
-                return;
+                return false;
+            // ENTER
+            // SPACE
+            case 13:
+            case 32:
+                // If an element is currently focused
+                if ($_focused)
+                {
+                    // Cast the currently focused element as a button
+                    var $button = $_focused.as($$.forms.Button);
+
+                    // If the currently focused element was not a button, break
+                    if (!$button)
+                        break;
+
+                    // Prevent the default behavior of the key
+                    e.preventDefault();
+
+                    $button
+                        // Trigger the click event on the currently focused button
+                        .trigger('click');
+
+                    return false;
+                }
+
+                break;
             // ESCAPE
             case 27:
                 // If an element is currently focused
@@ -459,9 +484,9 @@
         // Get the current timestamp
         var $now = $$.now();
 
-        // If the previous keypress was less than keypress interval, return false
+        // If the previous keypress was less than keypress interval, return
         if ($now - $_keypress < $$.settings.DOCUMENT_KEYPRESS_INTERVAL)
-            return false;
+            return;
 
         // Get the self reference
         var $this = e.data;
