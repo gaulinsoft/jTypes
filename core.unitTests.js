@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                               jTypes 2.1.2
+//                               jTypes 2.1.3
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -100,7 +100,7 @@
 
             if (($j === 1 || $j === 2) && ($y === 3 || $y === 4 || $w === 1 && $y === 5) && $i === $x && $k === $z)
                 return false;
-        
+
             if ($j !== 1 && !$shouldFail($w, $x, $y, $z))
                 return false;
 
@@ -241,7 +241,7 @@
                         var $setter   = $setters[$k];
 
                         var $property = {};
-                
+
                         if ($getter)
                             $property[$getter] = $$.empty();
 
@@ -306,7 +306,7 @@
                             var $virtual  = $virtuals[$m];
 
                             var $property = {};
-                
+
                             if ($getter)
                                 $property[$getter] = $$.empty();
 
@@ -417,7 +417,7 @@
                         var $setter   = $setters[$k];
 
                         var $property = {};
-                
+
                         if ($getter)
                             $property[$getter] = $$.empty();
 
@@ -443,7 +443,7 @@
                                         var $setterOverride   = $setters[$z];
 
                                         var $propertyOverride = {};
-                
+
                                         if ($getterOverride)
                                             $propertyOverride[$getterOverride] = $$.empty();
 
