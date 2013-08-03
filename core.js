@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b144';
+    var $_version = '2.1.3b148';
 
     // ########## LANGUAGE ##########
 
@@ -3062,7 +3062,11 @@
         if ($object < -9007199254740992)
             return -Infinity;
 
-        // Return the number as an integer
+        // If the number is less than zero, return the number as an integer (rounded towards zero)
+        if ($object < 0)
+            return Math.ceil($object);
+
+        // Return the number as an integer (rounded towards zero)
         return Math.floor($object);
     });
 
