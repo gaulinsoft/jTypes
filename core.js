@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b148';
+    var $_version = '2.1.3b150';
 
     // ########## LANGUAGE ##########
 
@@ -2863,6 +2863,13 @@
 
     // ########## CHECKS ##########
 
+    // ---------- ABSTRACT CLASS ----------
+    $_defineMethod('isAbstractClass', function($object)
+    {
+        // Return true if the object is a class and it is abstract
+        return $$.isClass($object) && !!$object[$_definition_abstract];
+    });
+
     // ---------- CLASS ----------
     $_defineMethod('isClass', function($object)
     {
@@ -2942,6 +2949,13 @@
 
         // Return true if the object is not null, undefined, or a value-type
         return $type !== 'undefined' && $type !== 'null' && $type !== 'boolean' && $type !== 'number' && $type !== 'string';
+    });
+
+    // ---------- SEALED CLASS ----------
+    $_defineMethod('isSealedClass', function($object)
+    {
+        // Return true if the object is a class and it is final
+        return $$.isClass($object) && !!$object[$_definition_final];
     });
 
     // ---------- SIMPLE OBJECT ----------
