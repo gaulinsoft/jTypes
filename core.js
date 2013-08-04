@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b150';
+    var $_version = '2.1.3b154';
 
     // ########## LANGUAGE ##########
 
@@ -2895,6 +2895,13 @@
         return $$.isNumber($number) && !!isFinite($number);
     });
 
+    // ---------- IMPORTED CLASS ----------
+    $_defineMethod('isImportedClass', function($object)
+    {
+        // Return true if the object is a class and it has the import flag
+        return $$.isClass($object) && !!$object[$_definition_import];
+    });
+
     // ---------- INFINITY ----------
     $_defineMethod('isInfinity', function($number)
     {
@@ -2932,6 +2939,13 @@
     {
         // Return true if the argument is null
         return $argument === null;
+    });
+
+    // ---------- OPTIMIZED CLASS ----------
+    $_defineMethod('isOptimizedClass', function($object)
+    {
+        // Return true if the object is a class and it is optimized
+        return $$.isClass($object) && !!$object[$_definition_optimized];
     });
 
     // ---------- POSITIVE INFINITY ----------
