@@ -187,3 +187,5 @@ console.log(e.salary);// 77250
 ## Recent performance tests
 
 ![jTypes 2.1.2b Performance](https://lh3.googleusercontent.com/-j9wM6tywbJ4/Ue6906xfa9I/AAAAAAAAAJM/ObpsYcfS8cA/w897-h465-no/2.1.2+%2528compile%2529.bmp "jTypes 2.1.2b Performance")
+
+![jTypes 2.1.2b Performance](https://lh3.googleusercontent.com/-L5LODtb2LIE/Ue6908M_uyI/AAAAAAAAAJI/1sHW5NaS438/w897-h465-no/2.1.2+%2528instantiate%2529.bmp "jTypes 2.1.2b Performance")
