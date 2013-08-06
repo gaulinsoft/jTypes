@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b154';
+    var $_version = '2.1.3b157';
 
     // ########## LANGUAGE ##########
 
@@ -267,6 +267,7 @@
     var $_definition_precompile        = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~precompile';
     var $_definition_protected         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~protected';
     var $_definition_public            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~public';
+    var $_definition_struct            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~struct';
     var $_definition_unsafe            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~unsafe';
 
     // #################################################
@@ -1984,12 +1985,13 @@
                 $constructor = $$.empty();
         }
 
-        // Create the abstract, export, final, import, optimized, and unsafe flags
+        // Create the flags
         var $abstract  = false;
         var $export    = false;
         var $final     = false;
         var $import    = false;
         var $optimized = false;
+        var $struct    = false;
         var $unsafe    = false;
 
         // Create the expando flags
@@ -2045,6 +2047,9 @@
                     // If the keyword is sealed, set the final flag
                     else if ($keyword === 'sealed')
                         $final = true;
+                    // If the keyword is struct, set the struct flag
+                    else if ($keyword === 'struct')
+                        $struct = true;
                     // If the keyword is the unsafe token, set the unsafe flag
                     else if ($_unsafe && $keyword === $_unsafe)
                         $unsafe = true;
@@ -2077,6 +2082,7 @@
             // Copy the imported construct data into the class
             $abstract = !!$construct['a'];
             $final    = !!$construct['f'];
+            $struct   = !!$construct['s'];
             $unsafe   = $_unsafe && $construct['u'] === $_unsafe;
         }
 
@@ -2221,7 +2227,7 @@
 
             // Check if the new operator was used
             var $isInit = false;
-            var $isNew  = this instanceof $class;
+            var $isNew  = this instanceof $class && this.as === undefined && this.is === undefined;
 
             // If the new operator was not used
             if (!$isNew)
@@ -2457,26 +2463,25 @@
                     $construct.call($_lock, $matrix, $getterReadonly, $unsafe ? $injections : null);
             }
 
-            // If the "new" keyword was used
-            if ($isNew)
+            // Create a reference for the return value of the constructor
+            var $return = undefined;
+
+            // If the class is unsafe
+            if ($unsafe)
             {
-                // If the class is unsafe
-                if ($unsafe)
-                {
-                    // If any additional arguments were provided, execute the constructor with the extra arguments
-                    if (arguments.length > 1)
-                        $private['~constructor'].apply($private, $__arrayProto__.slice.call(arguments, 1));
-                    // Execute the constructor
-                    else
-                        $private['~constructor'].call($private);
-                }
-                // If arguments were provided, execute the constructor with the arguments
-                else if (arguments.length)
-                    $private['~constructor'].apply($private, arguments);
+                // If any additional arguments were provided, execute the constructor with the extra arguments
+                if (arguments.length > 1)
+                    $return = $private['~constructor'].apply($private, $__arrayProto__.slice.call(arguments, 1));
                 // Execute the constructor
                 else
-                    $private['~constructor'].call($private);
+                    $return = $private['~constructor'].call($private);
             }
+            // If arguments were provided, execute the constructor with the arguments
+            else if (arguments.length)
+                $return = $private['~constructor'].apply($private, arguments);
+            // Execute the constructor
+            else
+                $return = $private['~constructor'].call($private);
 
             // Set the initialized flag
             $isInit = true;
@@ -2487,6 +2492,10 @@
             //console.log($matrix);
             //console.log('$$: Differential inheritance ' + ($_lazy ? 'IS' : 'IS NOT') + ' enabled...');
             // ----- DEBUG -----
+
+            // If the "new" keyword was not used and the return value of the constructor was not undefined, return it
+            if (!$isNew && $return !== undefined)
+                return $return;
 
             // Return the public instance
             return $public;
@@ -2635,6 +2644,7 @@
                 $precompile += '$.k1=' + $classProtectedKeys.length + ';';
                 $precompile += '$.k2=' + $classPublicKeys.length + ';';
                 $precompile += '$.l=' + $levels + ';';
+                $precompile += '$.s=' + ($struct ? '!0' : '!1') + ';';
 
                 // If the class is unsafe, append the unsafe (razor) class data to the precompiled string
                 if ($unsafe)
@@ -2676,6 +2686,7 @@
         $cache[$_definition_precompile]        = { 'value': $precompile };
         $cache[$_definition_protected]         = { 'value': !$final || !$optimized ? $classProtected : {} };
         $cache[$_definition_public]            = { 'value': !$final || !$optimized ? $classPublic : {} };
+        $cache[$_definition_struct]            = { 'value': $struct };
         $cache[$_definition_unsafe]            = { 'value': $unsafe };
 
         // Set the class cache
