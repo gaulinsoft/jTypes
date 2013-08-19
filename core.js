@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b157';
+    var $_version = '2.1.3b182';
 
     // ########## LANGUAGE ##########
 
@@ -144,11 +144,11 @@
             $name = '$$';
 
         // Create the types array
-        var $types = [];
+        var $types = new Array($arguments.length);
 
-        // Push the argument types into the types array
-        for (var $i = 0, $j = $arguments.length; $i < $j; $i++)
-            $types.push($$.type($arguments[$i]));
+        // Set the argument types in the types array
+        for (var $i = 0, $j = $types.length; $i < $j; $i++)
+            $types[$i] = $$.type($arguments[$i]);
 
         // Return the exception string
         return $_lang_exception_prefix + $$.format($_lang_exception_arguments, $name, $types.join(', '));
@@ -792,8 +792,8 @@
             case 'property':
 
                 // Create the get and set method data arrays
-                var $get = [];
-                var $set = [];
+                var $get = new Array($_accessor_flagCount);
+                var $set = new Array($_accessor_flagCount);
 
                 // Create the has get and set accessors flags
                 var $hasGet = false;
@@ -2223,7 +2223,7 @@
 
             // Create the instance reference and matrix
             var $instance = this;
-            var $matrix   = [];
+            var $matrix   = new Array($levels);
 
             // Check if the new operator was used
             var $isInit = false;
@@ -2302,8 +2302,8 @@
             if (!$_lazy && !$import && !$optimized)
             {
                 // Create the contexts and inherits arrays
-                var $contexts = [];
-                var $inherits = [];
+                var $contexts = new Array($levels);
+                var $inherits = new Array($levels);
 
                 for (var $i = 0; $i < $levels; $i++)
                 {
@@ -2330,9 +2330,9 @@
                     ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null);
 
                     // Append the instance stack into the instance matrix and constructor context into the contexts array
-                    $matrix.push($stack);
-                    $contexts.push($context);
-                    $inherits.push([$baseInherits, $protectedInherits, $publicInherits]);
+                    $matrix[$i]   = $stack;
+                    $contexts[$i] = $context;
+                    $inherits[$i] = [$baseInherits, $protectedInherits, $publicInherits];
                 }
 
                 // Define the derived inherits objects
