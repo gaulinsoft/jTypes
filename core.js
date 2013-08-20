@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b182';
+    var $_version = '2.1.3b185';
 
     // ########## LANGUAGE ##########
 
@@ -2952,6 +2952,13 @@
         return $argument === null;
     });
 
+    // ---------- OBJECT ----------
+    $_defineMethod('isObject', function($object)
+    {
+        // Return true if the object is neither undefined nor null
+        return $object !== undefined && $object !== null;
+    });
+
     // ---------- OPTIMIZED CLASS ----------
     $_defineMethod('isOptimizedClass', function($object)
     {
@@ -3078,19 +3085,11 @@
     // ---------- INTEGER ----------
     $_defineMethod('asInt', function($object)
     {
-        // Get the object type
-        var $type = $$.type($object);
-
-        // If the object is a string and matches an integer
-        if ($type === 'string' && $__match__.call($__trim__.call($object), /^[-+]?[0-9]+$/))
-        {
-            // Cast the object as an integer
-            $object = parseInt($object, 10);
-            $type   = 'number';
-        }
+        // Cast the object as a float
+        $object = $$.asFloat($object);
 
         // If the object is not a number, return NaN
-        if ($type !== 'number' || isNaN($object))
+        if (isNaN($object))
             return NaN;
 
         // If the number is greater than the maximum integer, return infinity
