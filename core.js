@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                                jTypes 2.1.3
+//                                jTypes 2.1.4
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3';
+    var $_version = '2.1.4b193';
 
     // ########## LANGUAGE ##########
 
@@ -2913,7 +2913,7 @@
         var $types = {};
 
         // Iterate the internal JavaScript types
-        $__forEach__.call('Array Boolean Date Function Number RegExp String'.split(' ') || [], function($type)
+        $__forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' ') || [], function($type)
         {
             // Get the type keyword
             var $keyword = $type.toLowerCase();
