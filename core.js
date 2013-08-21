@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b190';
+    var $_version = '2.1.3';
 
     // ########## LANGUAGE ##########
 
@@ -39,6 +39,7 @@
     var $_lang_$$_abstract_conflict_1              = 'Abstract classes cannot have the {0} modifier.';
     var $_lang_$$_abstract_instance                = 'Abstract classes cannot be instantiated.';
     var $_lang_$$_abstract_override                = 'Class must implement the inherited abstract {1} "{0}" with the override modifier.';
+    var $_lang_$$_derive_class                     = 'Structs cannot inherit from a class.';
     var $_lang_$$_derive_export                    = 'Class must inherit from an imported class to have a precompiled string.';
     var $_lang_$$_derive_import                    = 'Class must have a precompiled string to inherit from an imported class.';
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
@@ -73,8 +74,8 @@
     var $_lang_$$_member_property_name_invalid     = '"{0}" cannot have a "{1}" property accessor.';
     var $_lang_$$_member_property_name_null        = '"{0}" must have at least one property accessor.';
     var $_lang_$$_member_virtual                   = '"{0}" cannot have the virtual modifier in a sealed class.';
-    var $_lang_$$_struct_conflict_1                = 'Structs cannot have the {0} modifier.';
     var $_lang_$$_struct_expando                   = 'Structs cannot have expando instances.';
+    var $_lang_$$_struct_export                    = 'Structs cannot be exported.';
     var $_lang_export_import                       = 'An imported class cannot be exported.';
     var $_lang_export_struct                       = 'A struct cannot be exported.';
 
@@ -1321,7 +1322,7 @@
         switch ($definition[$_definition_member_type])
         {
             case 'field':
-                
+
                 // If an injections array was provided and the field is an injected field, construct the injected field descriptor
                 if ($injections && $definition[$_definition_member_field_injection])
                     $_constructRuntimeInjection($descriptor, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
@@ -2103,7 +2104,7 @@
                 {
                     // If the export modifier was provided, throw an exception
                     if ($export)
-                        throw $_exceptionFormat($_lang_$$_struct_conflict_1, 'export');
+                        throw $_exceptionFormat($_lang_$$_struct_export);
 
                     // If either expando private or expando public modifier was provided, throw an exception
                     if ($expandoPrivate || $expandoPublic)
@@ -2191,6 +2192,10 @@
             // If the class is optimized and the base class is not optimized, throw an exception
             if ($optimized && !$baseClass[$_definition_optimized])
                 throw $_exceptionFormat($_lang_$$_derive_unoptimized);
+
+            // If the class has the struct modifier and the base class does not, throw an exception
+            if ($struct && !$baseClass[$_definition_struct])
+                throw $_exceptionFormat($_lang_$$_derive_class);
 
             // Get the base protected and public definitions objects
             $baseProtected = $baseClass[$_definition_protected];
@@ -2346,7 +2351,7 @@
             // Create the injection objects array and get the cache matrix if the instance is a clone
             var $injections  = $unsafe ? $$.asArray(arguments[$_clone ? 1 : 0]) : null;
             var $matrixCache = $_clone ? arguments[0] : null;
-            
+
             // If lazy loading is not enabled and the class does not have the import flag and is not optimized
             if (!$_lazy && !$import && !$optimized)
             {
@@ -2681,7 +2686,7 @@
                 // Set the stack instance references (no protected)
                 else
                     $base = $stack[1];
-                
+
                 // Get the instance caches
                 var $cachePrivate   = $cache ? $cache[0] : null;
                 var $cacheProtected = $cache ? $cache[1] : null;
