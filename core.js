@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b189';
+    var $_version = '2.1.3b190';
 
     // ########## LANGUAGE ##########
 
@@ -36,9 +36,9 @@
     var $_lang_exception_prefix    = 'jTypes Error: ';
 
     // Create the language constants
+    var $_lang_$$_abstract_conflict_1              = 'Abstract classes cannot have the {0} modifier.';
     var $_lang_$$_abstract_instance                = 'Abstract classes cannot be instantiated.';
     var $_lang_$$_abstract_override                = 'Class must implement the inherited abstract {1} "{0}" with the override modifier.';
-    var $_lang_$$_abstract_sealed                  = 'Classes cannot have the abstract and sealed modifiers.';
     var $_lang_$$_derive_export                    = 'Class must inherit from an imported class to have a precompiled string.';
     var $_lang_$$_derive_import                    = 'Class must have a precompiled string to inherit from an imported class.';
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
@@ -73,6 +73,8 @@
     var $_lang_$$_member_property_name_invalid     = '"{0}" cannot have a "{1}" property accessor.';
     var $_lang_$$_member_property_name_null        = '"{0}" must have at least one property accessor.';
     var $_lang_$$_member_virtual                   = '"{0}" cannot have the virtual modifier in a sealed class.';
+    var $_lang_$$_struct_conflict_1                = 'Structs cannot have the {0} modifier.';
+    var $_lang_$$_struct_expando                   = 'Structs cannot have expando instances.';
     var $_lang_export_import                       = 'An imported class cannot be exported.';
     var $_lang_export_struct                       = 'A struct cannot be exported.';
 
@@ -1046,7 +1048,7 @@
     };
 
     // Create the construct runtime helper functions
-    var $_constructRuntimeClone       = function($class, $type, $private, $public, $cache)
+    var $_constructRuntimeClone       = function($class, $type, $private, $public, $cache, $injections)
     {
         // Return the clone method
         return function()
@@ -1062,7 +1064,7 @@
             $_clone    = true;
 
             // Create the cloned instance
-            var $instanceClone = $class.call($instanceNew, $cache);
+            var $instanceClone = $class.call($instanceNew, $cache, $injections);
 
             // Reset the clone flag
             $_clone = false;
@@ -1319,16 +1321,13 @@
         switch ($definition[$_definition_member_type])
         {
             case 'field':
-
-                // Get the field value
-                var $value = $cache ? $cache[$name] : $definition[$_definition_member_value];
-
+                
                 // If an injections array was provided and the field is an injected field, construct the injected field descriptor
                 if ($injections && $definition[$_definition_member_field_injection])
-                    $_constructRuntimeInjection($descriptor, $name, $value, $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
+                    $_constructRuntimeInjection($descriptor, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
                 // Construct the field descriptor
                 else
-                    $_constructRuntimeField($descriptor, false, $name, $value, $private, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
+                    $_constructRuntimeField($descriptor, false, $name, $cache ? $cache[$name] : $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
 
                 // If the field is protected or public
                 if ($isProtected || $isPublic)
@@ -2088,9 +2087,28 @@
                         throw $_exceptionFormat($_lang_$$_keyword, $keyword);
                 }
 
-                // If the class is abstract and final, throw an exception
-                if ($abstract && $final)
-                    throw $_exceptionFormat($_lang_$$_abstract_sealed);
+                // If the class is abstract
+                if ($abstract)
+                {
+                    // If the class is final, throw an exception
+                    if ($final)
+                        throw $_exceptionFormat($_lang_$$_abstract_conflict_1, 'sealed');
+
+                    // If the struct modifier was provided, throw an exception
+                    if ($struct)
+                        throw $_exceptionFormat($_lang_$$_abstract_conflict_1, 'struct');
+                }
+                // If the struct modifier was provided
+                else if ($struct)
+                {
+                    // If the export modifier was provided, throw an exception
+                    if ($export)
+                        throw $_exceptionFormat($_lang_$$_struct_conflict_1, 'export');
+
+                    // If either expando private or expando public modifier was provided, throw an exception
+                    if ($expandoPrivate || $expandoPublic)
+                        throw $_exceptionFormat($_lang_$$_struct_expando);
+                }
             }
             // Set the import flag
             else
@@ -2326,7 +2344,7 @@
             var $publicOverrides    = !$import && !$optimized ? {} : null;
 
             // Create the injection objects array and get the cache matrix if the instance is a clone
-            var $injections  = $unsafe ? $$.asArray(arguments[0]) : null;
+            var $injections  = $unsafe ? $$.asArray(arguments[$_clone ? 1 : 0]) : null;
             var $matrixCache = $_clone ? arguments[0] : null;
             
             // If lazy loading is not enabled and the class does not have the import flag and is not optimized
@@ -2392,7 +2410,7 @@
                     if ($struct)
                     {
                         // Create the clone method
-                        var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix);
+                        var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix, $injections);
 
                         // Define the clone method on the private and public instances
                         $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
@@ -2493,7 +2511,7 @@
                     if ($struct)
                     {
                         // Create the clone method
-                        var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix);
+                        var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix, $injections);
 
                         // Define the clone method on the private and public instances
                         $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
@@ -2519,8 +2537,8 @@
             // Create a reference for the return value of the constructor
             var $return = undefined;
 
-            // If the instance is not a clone
-            if (!$_clone)
+            // If the class is not a struct
+            if (!$struct)
             {
                 // If the class is unsafe
                 if ($unsafe)
@@ -2539,6 +2557,9 @@
                 else
                     $return = $private['~constructor'].call($private);
             }
+            // Execute the parameterless constructor
+            else
+                $private['~constructor'].call($private);
 
             // Set the initialized flag
             $isInit = true;
