@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.3b185';
+    var $_version = '2.1.3b189';
 
     // ########## LANGUAGE ##########
 
@@ -74,6 +74,7 @@
     var $_lang_$$_member_property_name_null        = '"{0}" must have at least one property accessor.';
     var $_lang_$$_member_virtual                   = '"{0}" cannot have the virtual modifier in a sealed class.';
     var $_lang_export_import                       = 'An imported class cannot be exported.';
+    var $_lang_export_struct                       = 'A struct cannot be exported.';
 
     // ########## NATIVE CODE ##########
 
@@ -369,7 +370,8 @@
 
     // ########## FLAGS ##########
 
-    // Create the lazy, and subclass flags
+    // Create the flags
+    var $_clone    = false;// DON'T CHANGE
     var $_debug    = true;// DEFAULT
     var $_lazy     = true;// DEFAULT
     var $_lock     = {};// DON'T CHANGE
@@ -1044,6 +1046,31 @@
     };
 
     // Create the construct runtime helper functions
+    var $_constructRuntimeClone       = function($class, $type, $private, $public, $cache)
+    {
+        // Return the clone method
+        return function()
+        {
+            // Set the subclass flag
+            $_subclass = true;
+
+            // Create the cloned instance prototype
+            var $instanceNew = new $class();
+
+            // Reset the subclass flag and set the clone flag
+            $_subclass = false;
+            $_clone    = true;
+
+            // Create the cloned instance
+            var $instanceClone = $class.call($instanceNew, $cache);
+
+            // Reset the clone flag
+            $_clone = false;
+
+            // Return the cloned instance casted as the current type
+            return $instanceClone.as($type);
+        };
+    };
     var $_constructRuntimeConstructor = function($private)
     {
         // Create the constructor instance
@@ -1280,7 +1307,7 @@
 
         return null;
     };
-    var $_constructRuntime            = function($key, $definitions, $overrides, $inherits, $inheritsBase, $readonly, $context, $isProtected, $isPublic, $base, $private, $protected, $public, $injections)
+    var $_constructRuntime            = function($key, $definitions, $overrides, $inherits, $inheritsBase, $readonly, $context, $isProtected, $isPublic, $base, $private, $protected, $public, $injections, $cache)
     {
         // Get the member definition from the definitions object
         var $definition = $definitions[$key];
@@ -1293,12 +1320,15 @@
         {
             case 'field':
 
+                // Get the field value
+                var $value = $cache ? $cache[$name] : $definition[$_definition_member_value];
+
                 // If an injections array was provided and the field is an injected field, construct the injected field descriptor
                 if ($injections && $definition[$_definition_member_field_injection])
-                    $_constructRuntimeInjection($descriptor, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
+                    $_constructRuntimeInjection($descriptor, $name, $value, $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
                 // Construct the field descriptor
                 else
-                    $_constructRuntimeField($descriptor, false, $name, $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
+                    $_constructRuntimeField($descriptor, false, $name, $value, $private, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
 
                 // If the field is protected or public
                 if ($isProtected || $isPublic)
@@ -2227,7 +2257,7 @@
 
             // Check if the new operator was used
             var $isInit = false;
-            var $isNew  = this instanceof $class && this.as === undefined && this.is === undefined;
+            var $isNew  = $_clone || this instanceof $class && this.as === undefined && this.is === undefined;
 
             // If the new operator was not used
             if (!$isNew)
@@ -2295,9 +2325,10 @@
             var $protectedOverrides = !$import && !$optimized ? {} : null;
             var $publicOverrides    = !$import && !$optimized ? {} : null;
 
-            // Create the injection objects array
-            var $injections = $unsafe ? $$.asArray(arguments[0]) : null;
-
+            // Create the injection objects array and get the cache matrix if the instance is a clone
+            var $injections  = $unsafe ? $$.asArray(arguments[0]) : null;
+            var $matrixCache = $_clone ? arguments[0] : null;
+            
             // If lazy loading is not enabled and the class does not have the import flag and is not optimized
             if (!$_lazy && !$import && !$optimized)
             {
@@ -2327,7 +2358,7 @@
                     var $publicInherits    = {};
 
                     // Build the matrix instance stack
-                    ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null);
+                    ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
 
                     // Append the instance stack into the instance matrix and constructor context into the contexts array
                     $matrix[$i]   = $stack;
@@ -2356,6 +2387,17 @@
                     // Define the type accessors on the private and public instances
                     $__defineProperty__.call($__object__, $private, '__type', { 'value': $type });
                     $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
+
+                    // If the instance is a struct
+                    if ($struct)
+                    {
+                        // Create the clone method
+                        var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix);
+
+                        // Define the clone method on the private and public instances
+                        $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
+                        $__defineProperty__.call($__object__, $public, 'clone', { 'value': $clone });
+                    }
 
                     // If the stack has a base class
                     if ($i !== $levels - 1)
@@ -2447,16 +2489,27 @@
                     if ($i !== $levels - 1)
                         $__defineProperty__.call($__object__, $private, '__base', { 'value': $matrix[$i + 1][3] });
 
+                    // If the instance is a struct
+                    if ($struct)
+                    {
+                        // Create the clone method
+                        var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix);
+
+                        // Define the clone method on the private and public instances
+                        $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
+                        $__defineProperty__.call($__object__, $public, 'clone', { 'value': $clone });
+                    }
+
                     // Create the matrix instance stack
                     $matrix[$i] = [$private, $protected, $public, $base];
                 }
 
-                // If the class does not have the import flag and is not optimized
-                if (!$import && !$optimized)
+                // If the instance is a clone or the class does not have the import flag and is not optimized
+                if ($_clone || !$import && !$optimized)
                 {
                     // Build the matrix instance stack
                     for (var $i = 0; $i < $levels; $i++)
-                        ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly, null, $unsafe ? $injections[$i] : null);
+                        ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly, null, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
                 }
                 // Build the precompiled matrix instance stack
                 else
@@ -2466,22 +2519,26 @@
             // Create a reference for the return value of the constructor
             var $return = undefined;
 
-            // If the class is unsafe
-            if ($unsafe)
+            // If the instance is not a clone
+            if (!$_clone)
             {
-                // If any additional arguments were provided, execute the constructor with the extra arguments
-                if (arguments.length > 1)
-                    $return = $private['~constructor'].apply($private, $__arrayProto__.slice.call(arguments, 1));
+                // If the class is unsafe
+                if ($unsafe)
+                {
+                    // If any additional arguments were provided, execute the constructor with the extra arguments
+                    if (arguments.length > 1)
+                        $return = $private['~constructor'].apply($private, $__arrayProto__.slice.call(arguments, 1));
+                    // Execute the constructor
+                    else
+                        $return = $private['~constructor'].call($private);
+                }
+                // If arguments were provided, execute the constructor with the arguments
+                else if (arguments.length)
+                    $return = $private['~constructor'].apply($private, arguments);
                 // Execute the constructor
                 else
                     $return = $private['~constructor'].call($private);
             }
-            // If arguments were provided, execute the constructor with the arguments
-            else if (arguments.length)
-                $return = $private['~constructor'].apply($private, arguments);
-            // Execute the constructor
-            else
-                $return = $private['~constructor'].call($private);
 
             // Set the initialized flag
             $isInit = true;
@@ -2581,7 +2638,7 @@
             var $classPublicKeys    = $__keys__.call($__object__, $classPublic) || [];
 
             // Create the construct and precompile helper functions
-            $construct  = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections)
+            $construct  = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections, $cache)
             {
                 // If this function was not internally called, return
                 if (this !== $_lock)
@@ -2603,18 +2660,23 @@
                 // Set the stack instance references (no protected)
                 else
                     $base = $stack[1];
+                
+                // Get the instance caches
+                var $cachePrivate   = $cache ? $cache[0] : null;
+                var $cacheProtected = $cache ? $cache[1] : null;
+                var $cachePublic    = $cache ? $cache[2] : null;
 
                 // Construct each private member in the instance matrix
                 for (var $i = 0, $j = $classPrivateKeys.length; $i < $j; $i++)
-                    $_constructRuntime($classPrivateKeys[$i], $classPrivate, null, null, null, $readonly, null, false, false, $base, $private, $protected, $public, $injections);
+                    $_constructRuntime($classPrivateKeys[$i], $classPrivate, null, null, null, $readonly, null, false, false, $base, $private, $protected, $public, $injections, $cachePrivate);
 
                 // Construct each protected member in the instance matrix
                 for (var $i = 0, $j = $classProtectedKeys.length; $i < $j; $i++)
-                    $_constructRuntime($classProtectedKeys[$i], $classProtected, $protectedOverrides, $protectedInherits, $baseInherits, $readonly, $context, true, false, $base, $private, $protected, $public, $injections);
+                    $_constructRuntime($classProtectedKeys[$i], $classProtected, $protectedOverrides, $protectedInherits, $baseInherits, $readonly, $context, true, false, $base, $private, $protected, $public, $injections, $cacheProtected);
 
                 // Construct each public member in the instance matrix
                 for (var $i = 0, $j = $classPublicKeys.length; $i < $j; $i++)
-                    $_constructRuntime($classPublicKeys[$i], $classPublic, $publicOverrides, $publicInherits, $baseInherits, $readonly, null, false, true, $base, $private, $protected, $public, $injections);
+                    $_constructRuntime($classPublicKeys[$i], $classPublic, $publicOverrides, $publicInherits, $baseInherits, $readonly, null, false, true, $base, $private, $protected, $public, $injections, $cachePublic);
 
                 // If lazy loading is enabled
                 if ($_lazy)
@@ -3157,6 +3219,17 @@
             // If the debug flag is set, throw an exception
             if ($$.debug)
                 throw $_exceptionFormat($_lang_export_import);
+
+            // Return an empty string
+            return '';
+        }
+
+        // If the class has the struct flag
+        if ($class[$_definition_struct])
+        {
+            // If the debug flag is set, throw an exception
+            if ($$.debug)
+                throw $_exceptionFormat($_lang_export_struct);
 
             // Return an empty string
             return '';
