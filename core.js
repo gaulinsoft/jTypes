@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.4b197';
+    var $_version = '2.1.4b198';
 
     // ########## LANGUAGE ##########
 
@@ -301,14 +301,15 @@
     var $_inject_public    = $_inject_flagCount++;
     var $_inject_static    = $_inject_flagCount++;
 
-    // Create the member package obfuscated key hash flag and length setting
-    var $_package_keyHash   = true;
+    // Create the package flag and key lengths
+    var $_package_flagCount = 0;
     var $_package_keyLength = 3;
 
-    // Create the member package obfuscated keys
-    var $_package_modifiers = $_package_keyHash ? $_keyGenerator($_package_keyLength) : '~modifiers';
-    var $_package_type      = $_package_keyHash ? $_keyGenerator($_package_keyLength) : '~type';
-    var $_package_value     = $_package_keyHash ? $_keyGenerator($_package_keyLength) : '~value';
+    // Create the member package flags
+    var $_package_flag      = $_keyGenerator($_package_keyLength);
+    var $_package_modifiers = $_package_flagCount++;
+    var $_package_type      = $_package_flagCount++;
+    var $_package_value     = $_package_flagCount++;
 
     // Create the unsafe token
     var $_unsafe = '';
@@ -470,11 +471,14 @@
         var $name     = $$.asString($keywords.pop());
 
         // If the member is a package
-        if ($value && $__hasOwnProperty__.call($value, $_package_value))
+        if ($value && $value[$_package_flag] === $value)
         {
             // If any keywords were provided, throw an exception
             if ($keywords.length)
                 throw $_exceptionFormat($_lang_$$_member_name_package, $name);
+
+            // Unlock the package
+            $value = $value.call($_lock);
 
             // Extract the package data
             $keywords = $$.asString($value[$_package_modifiers]).split(' ') || [];
@@ -2881,7 +2885,7 @@
         $_defineMethod($modifier, function($modifiers, $value)
         {
             // Create the member package
-            var $package = {};
+            var $package = new Array($_package_flagCount);
 
             switch (arguments.length)
             {
@@ -2914,8 +2918,11 @@
                     return null;
             }
 
-            // Freeze the member package
-            $__freeze__.call($__object__, $package);
+            // Lock the member package
+            $package = $_definitionsCompilerLock($package);
+
+            // Set the member package flag
+            $package[$_package_flag] = $package;
 
             // Return the member package
             return $package;
