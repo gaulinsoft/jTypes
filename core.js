@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.4b196';
+    var $_version = '2.1.4b197';
 
     // ########## LANGUAGE ##########
 
@@ -1047,6 +1047,16 @@
                 $__defineProperty__.call($__object__, $cacheDefinitions, $injectionName, { 'enumerable': true, 'value': $injection[$_definition_member_value] });
         }
     };
+    var $_definitionsCompilerLock           = function($reference)
+    {
+        // Return the lock wrapper function
+        return function()
+        {
+            // If this function was internally called, return the reference
+            if (this === $_lock)
+                return $reference;
+        };
+    };
 
     // Create the construct runtime helper functions
     var $_constructRuntimeClone       = function($class, $type, $private, $public, $cache, $injections)
@@ -1786,9 +1796,9 @@
             $vars.push($_precompile_matrix + $i + '$3=' + $_precompile_matrix + $i + '[3]');
 
             // Get the private, protected, and public definitions objects 
-            var $private   = $class[$_definition_private];
-            var $protected = $class[$_definition_protected];
-            var $public    = $class[$_definition_public];
+            var $private   = $class[$_definition_private].call($_lock);
+            var $protected = $class[$_definition_protected].call($_lock);
+            var $public    = $class[$_definition_public].call($_lock);
 
             // Get the private, protected, and public keys
             var $privateKeys   = $__keys__.call($__object__, $private) || [];
@@ -2157,6 +2167,10 @@
         // If a base class was provided
         if ($baseClass)
         {
+            // Get the base protected and public definitions objects
+            $baseProtected = $baseClass[$_definition_protected].call($_lock);
+            $basePublic    = $baseClass[$_definition_public].call($_lock);
+
             // If the base class is final, throw an exception
             if ($baseClass[$_definition_final])
                 throw $_exceptionFormat($_lang_$$_derive_sealed);
@@ -2185,8 +2199,8 @@
 
                 // Create the chained cache, chained protected, and chained public definitions objects
                 $classCache     = $optimized ? $__create__.call($__object__, $baseClass[$_definition_cache]) : {};
-                $classProtected = $__create__.call($__object__, $baseClass[$_definition_protected]);
-                $classPublic    = $__create__.call($__object__, $baseClass[$_definition_public]);
+                $classProtected = $__create__.call($__object__, $baseProtected);
+                $classPublic    = $__create__.call($__object__, $basePublic);
             }
 
             // If the class is optimized and the base class is not optimized, throw an exception
@@ -2196,10 +2210,6 @@
             // If the class has the struct modifier and the base class does not, throw an exception
             if ($struct && !$baseClass[$_definition_struct])
                 throw $_exceptionFormat($_lang_$$_derive_class);
-
-            // Get the base protected and public definitions objects
-            $baseProtected = $baseClass[$_definition_protected];
-            $basePublic    = $baseClass[$_definition_public];
 
             // Set the subclass flag
             $_subclass = true;
@@ -2722,28 +2732,32 @@
             };
             $precompile = function()
             {
+                // If this function was not internally called, return
+                if (this !== $_lock)
+                    return;
+
                 // If the precompiled string is not found, generate it
                 if (!$eval)
                     $eval = $_constructRuntimePrecompile($chain);
 
                 // Create the precompiled string
-                var $precompile = '{' + $eval + '};';
+                var $evalExport = '{' + $eval + '};';
 
                 // Append the class data to the precompiled string
-                $precompile += '$.a=' + ($abstract ? '!0' : '!1') + ';';
-                $precompile += '$.f=' + ($final ? '!0' : '!1') + ';';
-                $precompile += '$.k0=' + $classPrivateKeys.length + ';';
-                $precompile += '$.k1=' + $classProtectedKeys.length + ';';
-                $precompile += '$.k2=' + $classPublicKeys.length + ';';
-                $precompile += '$.l=' + $levels + ';';
-                $precompile += '$.s=' + ($struct ? '!0' : '!1') + ';';
+                $evalExport += '$.a=' + ($abstract ? '!0' : '!1') + ';';
+                $evalExport += '$.f=' + ($final ? '!0' : '!1') + ';';
+                $evalExport += '$.k0=' + $classPrivateKeys.length + ';';
+                $evalExport += '$.k1=' + $classProtectedKeys.length + ';';
+                $evalExport += '$.k2=' + $classPublicKeys.length + ';';
+                $evalExport += '$.l=' + $levels + ';';
+                $evalExport += '$.s=' + ($struct ? '!0' : '!1') + ';';
 
                 // If the class is unsafe, append the unsafe (razor) class data to the precompiled string
                 if ($unsafe)
-                    $precompile += '$.u="@unsafe";';
+                    $evalExport += '$.u="@unsafe";';
 
                 // Return the precompiled string
-                return $_const_precompile_prefix + $precompile;
+                return $_const_precompile_prefix + $evalExport;
             };
         }
         else
@@ -2774,10 +2788,10 @@
         $cache[$_definition_final]             = { 'value': $final };
         $cache[$_definition_import]            = { 'value': $import };
         $cache[$_definition_optimized]         = { 'value': $optimized };
-        $cache[$_definition_private]           = { 'value': $classPrivate };
+        $cache[$_definition_private]           = { 'value': $_definitionsCompilerLock($classPrivate) };
         $cache[$_definition_precompile]        = { 'value': $precompile };
-        $cache[$_definition_protected]         = { 'value': $classProtected };
-        $cache[$_definition_public]            = { 'value': $classPublic };
+        $cache[$_definition_protected]         = { 'value': $_definitionsCompilerLock($classProtected) };
+        $cache[$_definition_public]            = { 'value': $_definitionsCompilerLock($classPublic) };
         $cache[$_definition_struct]            = { 'value': $struct };
         $cache[$_definition_unsafe]            = { 'value': $unsafe };
 
@@ -2840,7 +2854,7 @@
 
         // If the export flag is set, return the precompiled class
         if ($export)
-            return $precompile();
+            return $precompile.call($_lock);
 
         // Return the class
         return $class;
@@ -3280,7 +3294,7 @@
         }
 
         // Return the precompiled string
-        return $class[$_definition_precompile].call($class) || '';
+        return $class[$_definition_precompile].call($_lock) || '';
     });
 
     // ---------- FORMAT ----------
