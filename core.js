@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.4b193';
+    var $_version = '2.1.4b196';
 
     // ########## LANGUAGE ##########
 
@@ -2722,8 +2722,12 @@
             };
             $precompile = function()
             {
+                // If the precompiled string is not found, generate it
+                if (!$eval)
+                    $eval = $_constructRuntimePrecompile($chain);
+
                 // Create the precompiled string
-                var $precompile = '{' + ($optimized ? $eval : $_constructRuntimePrecompile($chain)) + '};';
+                var $precompile = '{' + $eval + '};';
 
                 // Append the class data to the precompiled string
                 $precompile += '$.a=' + ($abstract ? '!0' : '!1') + ';';
@@ -2770,10 +2774,10 @@
         $cache[$_definition_final]             = { 'value': $final };
         $cache[$_definition_import]            = { 'value': $import };
         $cache[$_definition_optimized]         = { 'value': $optimized };
-        $cache[$_definition_private]           = { 'value': !$final || !$optimized ? $classPrivate : {} };
+        $cache[$_definition_private]           = { 'value': $classPrivate };
         $cache[$_definition_precompile]        = { 'value': $precompile };
-        $cache[$_definition_protected]         = { 'value': !$final || !$optimized ? $classProtected : {} };
-        $cache[$_definition_public]            = { 'value': !$final || !$optimized ? $classPublic : {} };
+        $cache[$_definition_protected]         = { 'value': $classProtected };
+        $cache[$_definition_public]            = { 'value': $classPublic };
         $cache[$_definition_struct]            = { 'value': $struct };
         $cache[$_definition_unsafe]            = { 'value': $unsafe };
 
@@ -2781,14 +2785,14 @@
         $__defineProperties__.call($__object__, $class, $cache);
 
         // Set the prototype constructor
-        $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $class });//, 'writable': true });
+        $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $class });
 
         // If the prototype is not expando, freeze the prototype
         if (!$import && !$expandoPrototype)
             $__freeze__.call($__object__, $classPrototype);
 
         // Set the class prototype
-        $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype });//, 'writable': true });
+        $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype });
 
         // Set the class toString method
         $class.toString = $_class_toString;
@@ -2969,6 +2973,13 @@
         return $$.isClass($object) && !!$object[$_definition_abstract];
     });
 
+    // ---------- ARGUMENTS OBJECT ----------
+    $_defineMethod('isArgumentsObject', function($object)
+    {
+        // Return true if the object is an arguments object
+        return $__toString__.call($object) === '[object Arguments]';
+    });
+
     // ---------- CLASS ----------
     $_defineMethod('isClass', function($object)
     {
@@ -3087,6 +3098,13 @@
 
         // Return true if the prototype of the object is the object prototype
         return $__getPrototypeOf__.call($__object__, $object) === $__objectProto__;
+    });
+
+    // ---------- STRUCT ----------
+    $_defineMethod('isStruct', function($object)
+    {
+        // Return true if the object is a class and it has the struct modifier
+        return $$.isClass($object) && !!$object[$_definition_struct];
     });
 
     // ---------- UNDEFINED ----------
