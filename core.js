@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.4b198';
+    var $_version = '2.1.4b209';
 
     // ########## LANGUAGE ##########
 
@@ -166,7 +166,7 @@
     // ########## DEFINES ##########
 
     // Create the defines helpers
-    var $_defineField    = function($name, $field)
+    var $_defineField    = function($name, $field, $writable)
     {
         // Define an enumerable field on the jTypes object
         return $__defineProperty__.call($__object__, $$, $name,
@@ -174,7 +174,7 @@
             'configurable': false,
             'enumerable':   true,
             'value':        $field,
-            'writable':     false
+            'writable':     $writable
         });
     };
     var $_defineMethod   = function($name, $method)
@@ -2874,7 +2874,7 @@
     // ########## VERSION ##########
 
     // Define the version field
-    $_defineField('version', $_version);
+    $_defineField('version', $_version, false);
 
     // ########## PACKAGES ##########
 
@@ -3001,6 +3001,13 @@
         return $__toString__.call($object) === '[object Arguments]';
     });
 
+    // ---------- ARRAY-LIKE OBJECT ----------
+    $_defineMethod('isArrayLikeObject', function($object)
+    {
+        // Return true if the object is neither undefined nor null and has a length property that is a finite integer greater than or equal to zero
+        return $object !== undefined && $object !== null && $$.isFiniteInt($object.length) && $object.length >= 0;
+    });
+
     // ---------- CLASS ----------
     $_defineMethod('isClass', function($object)
     {
@@ -3024,6 +3031,13 @@
     {
         // Return true if the object is a number and is finite
         return $$.isNumber($number) && !!isFinite($number);
+    });
+
+    // ---------- FINITE INTEGER ----------
+    $_defineMethod('isFiniteInt', function($number)
+    {
+        // Return true if the object is a number, finite, and within the maximum and minimum representable integers
+        return $$.isFinite($number) && $number <= $$.intMax && $number >= $$.intMin;
     });
 
     // ---------- IMPORTED CLASS ----------
@@ -3220,11 +3234,11 @@
             return NaN;
 
         // If the number is greater than the maximum integer, return infinity
-        if ($object > 9007199254740992)
+        if ($object > $$.intMax)
             return Infinity;
 
         // If the number is less than the minimum integer, return negative infinity
-        if ($object < -9007199254740992)
+        if ($object < $$.intMin)
             return -Infinity;
 
         // If the number is less than zero, return the number as an integer (rounded towards zero)
@@ -3359,6 +3373,12 @@
         // Set the lazy flag
         $_lazy = $$.asBool($v);
     });
+
+    // ########## CONSTANTS ##########
+    
+    // ---------- INTEGER MAX/MIN ----------
+    $_defineField('intMax', 9007199254740992, false);
+    $_defineField('intMin', -9007199254740992, false);
 
     // ########## GLOBALS ##########
 

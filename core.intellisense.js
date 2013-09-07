@@ -191,12 +191,28 @@ jTypes['isAbstractClass']    = function()
     ///   <returns type="Boolean">true if object is a jTypes class with the abstract modifier; otherwise, false.</returns>
     /// </signature>
 };
+jTypes['isArgumentsObject']  = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is an arguments object passed to a function.</summary>
+    ///   <param name="object" type="Object">An object to test if it is an arguments object passed to a function.</param>
+    ///   <returns type="Boolean">true if object is an arguments object passed to a function; otherwise, false.</returns>
+    /// </signature>
+};
 jTypes['isArray']            = function()
 {
     /// <signature>
     ///   <summary>Indicates whether or not an object is an array using the internal [[Class]] property of the object.</summary>
     ///   <param name="object" type="Object">An object to test if it is an array.</param>
     ///   <returns type="Boolean">true if object is an array; otherwise, false.</returns>
+    /// </signature>
+};
+jTypes['isArrayLikeObject']  = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is an array-like object.</summary>
+    ///   <param name="object" type="Object">An object to test if it is an array-like object.</param>
+    ///   <returns type="Boolean">true if object has a length property that is a finite integer greater than or equal to zero; otherwise, false.</returns>
     /// </signature>
 };
 jTypes['isBoolean']          = function()
@@ -245,6 +261,14 @@ jTypes['isFinite']           = function()
     ///   <summary>Indicates whether or not a number has a finite value.</summary>
     ///   <param name="value" type="Number">A value to test if it is finite.</param>
     ///   <returns type="Boolean">true if value is a finite number; otherwise, false.</returns>
+    /// </signature>
+};
+jTypes['isFiniteInt']        = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not a number has a finite integer value.</summary>
+    ///   <param name="value" type="Number">A value to test if it is finite and an integer.</param>
+    ///   <returns type="Boolean">true if value is a finite number that is a representable integer in JavaScript; otherwise, false.</returns>
     /// </signature>
 };
 jTypes['isFunction']         = function()
@@ -375,6 +399,14 @@ jTypes['isString']           = function()
     ///   <returns type="Boolean">true if object is a string; otherwise, false.</returns>
     /// </signature>
 };
+jTypes['isStruct']           = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is a jTypes struct.</summary>
+    ///   <param name="object" type="Object">An object to test if it is a jTypes struct.</param>
+    ///   <returns type="Boolean">true if object is a jTypes class with the struct modifier; otherwise, false.</returns>
+    /// </signature>
+};
 jTypes['isUndefined']        = function()
 {
     /// <signature>
@@ -452,6 +484,12 @@ jTypes['type']               = function()
 
 /// <field type="Boolean">Indicates whether or not debugging is enabled.</field>
 jTypes['debug'] = true;
+
+/// <field type="Boolean">A number containing the maximum integer.</field>
+jTypes['intMax'] = 9007199254740992;
+
+/// <field type="Boolean">A number containing the minimum integer.</field>
+jTypes['intMin'] = -9007199254740992;
 
 /// <field type="Boolean">Indicates whether or not lazy-loading is enabled.</field>
 jTypes['lazy'] = true;
