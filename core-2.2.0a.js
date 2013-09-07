@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.2.0a213';
+    var $_version = '2.2.0a214';
 
     // ########## LANGUAGE ##########
 
@@ -2848,6 +2848,14 @@
 
         // Set the class prototype
         $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype });
+
+        // Set the class type method
+        $__defineProperty__.call($__object__, $class, 'type', { 'get': function()
+        {
+            // If the types flag is set, return the class type method
+            if ($_types)
+                return $_class_type;
+        } });
 
         // Set the class toString method
         $class.toString = $_class_toString;
