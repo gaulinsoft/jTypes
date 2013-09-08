@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.2.0a214';
+    var $_version = '2.2.0a215';
 
     // ########## LANGUAGE ##########
 
@@ -651,7 +651,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $name === 'is' || $name === '~constructor' || $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
+        if ($name === 'as' || $name === 'is' || $_types && $name === 'type' || $name === '~constructor' || $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
