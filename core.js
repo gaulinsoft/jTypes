@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.4b217';
+    var $_version = '2.1.4b220';
 
     // ########## LANGUAGE ##########
 
@@ -622,7 +622,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $name === '~constructor' || $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
+        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $name === '~constructor' || $name === 'constructor' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -2809,8 +2809,11 @@
         if (!$import && !$expandoPrototype)
             $__freeze__.call($__object__, $classPrototype);
 
-        // Set the class prototype
-        $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype });
+        // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
+        $class.prototype = $classPrototype;
+
+        // Set the class prototype without the "writable" flag
+        $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype, 'writable': false });
 
         // If a static "toString" definition was not provided, set the class toString method
         if (!$definitionsStatic.toString)
@@ -2882,8 +2885,8 @@
     // Define the package methods for class members
     $__forEach__.call('private protected public prototype static'.split(' ') || [], function($modifier)
     {
-        // Define the package method for the access modifier
-        $_defineMethod($modifier, function($modifiers, $value)
+        // Create the package method
+        var $method = function($modifiers, $value)
         {
             // Create the member package
             var $package = new Array($_package_flagCount);
@@ -2927,7 +2930,24 @@
 
             // Return the member package
             return $package;
-        });
+        };
+
+        // If the modifier is the prototype modifier
+        if ($modifier === 'prototype')
+        {
+            // Set the prototype method initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
+            $$.prototype = $method;
+
+            // Set the prototype method without the "writable" flag
+            $__defineProperty__.call($__object__, $$, 'prototype',
+            {
+                'value': $method,
+                'writable': false
+            });
+        }
+        // Define the package method for the access modifier
+        else
+            $_defineMethod($modifier, $method);
     });
 
     // ########## TYPES ##########
