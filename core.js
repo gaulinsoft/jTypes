@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.4b209';
+    var $_version = '2.1.4b217';
 
     // ########## LANGUAGE ##########
 
@@ -464,7 +464,7 @@
         else if ($baseDefinition && $baseDefinition[$_definition_member_method_abstract])
             throw $_exceptionFormat($_lang_$$_member_abstract_override, $key.charAt(0) === '~' ? $key.substr($key.indexOf('_') + 1) : $key, $type);
     };
-    var $_definitionsCompiler               = function($cacheDefinitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal, $isImport, $isOptimized)
+    var $_definitionsCompiler               = function($cacheDefinitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal, $isImport, $isOptimized, $isStruct)
     {
         // Break the key string into a keywords array and get the member name
         var $keywords = $__trim__.call($$.asString($key)).split(' ') || [];
@@ -622,7 +622,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $name === 'is' || $name === '~constructor' || $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
+        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $name === '~constructor' || $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -1926,7 +1926,7 @@
         // Set the property get/set accessor descriptors on the instance
         $__defineProperty__.call($__object__, $instance, $get && $get['name'] || $set && $set['name'] || '', { 'enumerable': true, 'get': $get && $get['value'] || undefined, 'set': $set && $set['value'] || undefined });
     };
-
+    
     // Create the compiler
     var $$ = function()
     {
@@ -2250,7 +2250,7 @@
                 continue;
 
             // Compile the the class definition into the definitions objects
-            $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, $definitionsStatic, $key, $prototype[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized);
+            $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, $definitionsStatic, $key, $prototype[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
         }
 
         // If any injections arguments were provided
@@ -2812,8 +2812,9 @@
         // Set the class prototype
         $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype });
 
-        // Set the class toString method
-        $class.toString = $_class_toString;
+        // If a static "toString" definition was not provided, set the class toString method
+        if (!$definitionsStatic.toString)
+            $class.toString = $_class_toString;
 
         // If the class is not expando, freeze the class
         if (!$import && !$expandoClass)
@@ -2879,7 +2880,7 @@
     // ########## PACKAGES ##########
 
     // Define the package methods for class members
-    $__forEach__.call('private protected public'.split(' ') || [], function($modifier)
+    $__forEach__.call('private protected public prototype static'.split(' ') || [], function($modifier)
     {
         // Define the package method for the access modifier
         $_defineMethod($modifier, function($modifiers, $value)
