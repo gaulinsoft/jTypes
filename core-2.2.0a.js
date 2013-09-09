@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.2.0a215';
+    var $_version = '2.2.0a221';
 
     // ########## LANGUAGE ##########
 
@@ -651,7 +651,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $name === 'is' || $_types && $name === 'type' || $name === '~constructor' || $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
+        if ($name === 'as' || $name === 'is' || $_types && $name === 'type' || $name === '~constructor' || !$_types && $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -2839,8 +2839,9 @@
         // Set the class cache
         $__defineProperties__.call($__object__, $class, $cache);
 
-        // Set the prototype constructor
-        $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $class });
+        // If the types flag is not set, set the prototype constructor
+        if (!$_types)
+            $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $class });
 
         // If the prototype is not expando, freeze the prototype
         if (!$import && !$expandoPrototype)
