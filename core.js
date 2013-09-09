@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.4b220';
+    var $_version = '2.1.4';
 
     // ########## LANGUAGE ##########
 
@@ -174,7 +174,7 @@
             'configurable': false,
             'enumerable':   true,
             'value':        $field,
-            'writable':     $writable
+            'writable':     !!$writable
         });
     };
     var $_defineMethod   = function($name, $method)
@@ -1017,7 +1017,7 @@
     var $_definitionsCompilerInjections     = function($definitions, $cacheDefinitions, $injections)
     {
         // If no injections array was provided, return
-        if (!$injections || !$definitions && !$cacheDefinitions)
+        if (!$$.isArrayLikeObject($injections) || !$definitions && !$cacheDefinitions)
             return;
 
         for (var $i = 0, $j = $injections.length; $i < $j; $i++)
@@ -1926,7 +1926,7 @@
         // Set the property get/set accessor descriptors on the instance
         $__defineProperty__.call($__object__, $instance, $get && $get['name'] || $set && $set['name'] || '', { 'enumerable': true, 'get': $get && $get['value'] || undefined, 'set': $set && $set['value'] || undefined });
     };
-    
+
     // Create the compiler
     var $$ = function()
     {
@@ -2363,7 +2363,7 @@
             var $publicOverrides    = !$import && !$optimized ? {} : null;
 
             // Create the injection objects array and get the cache matrix if the instance is a clone
-            var $injections  = $unsafe ? $$.asArray(arguments[$_clone ? 1 : 0]) : null;
+            var $injections  = $unsafe ? arguments[$_clone ? 1 : 0] : null;
             var $matrixCache = $_clone ? arguments[0] : null;
 
             // If lazy loading is not enabled and the class does not have the import flag and is not optimized
@@ -2803,7 +2803,7 @@
         $__defineProperties__.call($__object__, $class, $cache);
 
         // Set the prototype constructor
-        $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $class });
+        $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $class, 'writable': false });
 
         // If the prototype is not expando, freeze the prototype
         if (!$import && !$expandoPrototype)
@@ -3058,7 +3058,7 @@
     $_defineMethod('isFiniteInt', function($number)
     {
         // Return true if the object is a number, finite, and within the maximum and minimum representable integers
-        return $$.isFinite($number) && $number <= $$.intMax && $number >= $$.intMin;
+        return $$.isFinite($number) && $number <= $$.intMax && $number >= $$.intMin && $number === Math.floor($number);
     });
 
     // ---------- IMPORTED CLASS ----------
@@ -3396,7 +3396,7 @@
     });
 
     // ########## CONSTANTS ##########
-    
+
     // ---------- INTEGER MAX/MIN ----------
     $_defineField('intMax', 9007199254740992, false);
     $_defineField('intMin', -9007199254740992, false);
