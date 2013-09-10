@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.2.0a221';
+    var $_version = '2.2.0a229';
 
     // ########## LANGUAGE ##########
 
@@ -1149,7 +1149,7 @@
         // Return the constructor instance
         return $this;
     };
-    var $_constructRuntimeField       = function($descriptor, $configurable, $name, $value, $private, $public, $readonly)
+    var $_constructRuntimeField       = function($descriptor, $configurable, $name, $value, $private, $public, $type, $readonly)
     {
         // Set the descriptor data
         $descriptor['configurable'] = $configurable;
@@ -1160,10 +1160,12 @@
             return $value;
         };
 
-        // If read-only checking is enabled
-        if ($readonly)
+        // If type checking is enabled
+        if ($type)
         {
-            // Set the descriptor setting with read-only checking
+        }
+        // If read-only checking is enabled, set the descriptor setting with read-only checking
+        else if ($readonly)
             $descriptor['set'] = function($v)
             {
                 // If the field is read-only, throw an exception
@@ -1177,10 +1179,8 @@
                 else
                     $value = $v;
             };
-        }
+        // Set the descriptor setting without read-only or type checking
         else
-        {
-            // Set the descriptor setting without read-only checking
             $descriptor['set'] = function($v)
             {
                 // If the provided value is set to a private instance, set the value to the public instance
@@ -1190,7 +1190,6 @@
                 else
                     $value = $v;
             };
-        }
     };
     var $_constructRuntimeInjection   = function($descriptor, $name, $key, $injections, $type, $readonly)
     {
@@ -1295,7 +1294,7 @@
         // Return the descriptor
         return $descriptor;
     };
-    var $_constructRuntimeMethod      = function($descriptor, $configurable, $this, $function, $private, $public, $accessor)
+    var $_constructRuntimeMethod      = function($descriptor, $configurable, $this, $function, $private, $public, $type, $accessor)
     {
         // Set the descriptor data
         $descriptor['configurable'] = $configurable;
@@ -1371,7 +1370,7 @@
                     $_constructRuntimeInjection($descriptor, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
                 // Construct the field descriptor
                 else
-                    $_constructRuntimeField($descriptor, false, $name, $cache ? $cache[$name] : $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
+                    $_constructRuntimeField($descriptor, false, $name, $cache ? $cache[$name] : $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
 
                 // If the field is protected or public
                 if ($isProtected || $isPublic)
@@ -1415,7 +1414,7 @@
                     $this = $_lazy ? $_constructRuntimeConstructor($private) : $context;
 
                 // Construct the method descriptor
-                $_constructRuntimeMethod($descriptor, false, $this, $definition[$_definition_member_value], $private, $public);
+                $_constructRuntimeMethod($descriptor, false, $this, $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_method_type]);
 
                 // If the method is protected or public
                 if ($isProtected || $isPublic)
@@ -1465,7 +1464,7 @@
                 var $merge        = $mergeBase || $mergePrivate;
 
                 // Construct the property descriptor
-                $_constructRuntimeMethod($descriptor, $complex && !$merge, $private, $definition[$_definition_member_value], $private, $public, $accessor);
+                $_constructRuntimeMethod($descriptor, $complex && !$merge, $private, $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_method_type], $accessor);
 
                 // If the property is not complex or is being merged
                 if (!$complex || $merge)
@@ -1636,7 +1635,7 @@
             case 'method':
 
                 // Get the method definition data
-                var $returnType = $definition[$_definition_member_method_type];
+                var $methodType = $definition[$_definition_member_method_type];
 
                 // Set the helper handle
                 $handle = 'm';
@@ -1648,7 +1647,7 @@
                     '"' + $name + '"',                                        // NAME
                     $_precompile_matrix + $level + '$0',                      // PRIVATE
                     $_precompile_matrix + $level + '$2',                      // PUBLIC
-                    $returnType ? '"' + $returnType + '"' : $_precompile_null // TYPE
+                    $methodType ? '"' + $methodType + '"' : $_precompile_null // TYPE
                 ]);
 
                 break;
@@ -1656,8 +1655,8 @@
             case 'property':
 
                 // Get the property definition data
-                var $accessor   = $key.substr(1, 1);
-                var $returnType = $definition[$_definition_member_method_type];
+                var $accessor     = $key.substr(1, 1);
+                var $propertyType = $definition[$_definition_member_method_type];
 
                 // Set the helper handle
                 $handle = 'a';
@@ -1665,12 +1664,12 @@
                 // Create the helper arguments
                 $arguments = (
                 [
-                    $_precompile_cache + $level,                               // CACHE[NAME] => FUNCTION
-                    '"' + $name + '"',                                         // NAME
-                    $_precompile_matrix + $level + '$0',                       // PRIVATE
-                    $_precompile_matrix + $level + '$2',                       // PUBLIC
-                    $returnType ? '"' + $returnType + '"' : $_precompile_null, // TYPE
-                    '"' + $accessor + '"'                                      // ACCESSOR
+                    $_precompile_cache + $level,                                   // CACHE[NAME] => FUNCTION
+                    '"' + $name + '"',                                             // NAME
+                    $_precompile_matrix + $level + '$0',                           // PRIVATE
+                    $_precompile_matrix + $level + '$2',                           // PUBLIC
+                    $propertyType ? '"' + $propertyType + '"' : $_precompile_null, // TYPE
+                    '"' + $accessor + '"'                                          // ACCESSOR
                 ]);
 
                 break;
@@ -1883,8 +1882,11 @@
         // Create the accessor descriptor with the embedded property name
         var $descriptor = { 'name': $name };
 
+        // Format the accessor
+        $accessor += 'et';
+
         // Constructor the accessor descriptor
-        $_constructRuntimeMethod($descriptor, false, $private, $cache['~' + $accessor + 'et_' + $name], $private, $public);//, $type);
+        $_constructRuntimeMethod($descriptor, false, $private, $cache['~' + $accessor + '_' + $name], $private, $public, $type, $accessor);
 
         // Return the descriptor
         return $descriptor;
@@ -1913,7 +1915,7 @@
             $_constructRuntimeInjection($descriptor, $name, $cache[$name], $injections, $type, $readonly);
         // Construct the field descriptor
         else
-            $_constructRuntimeField($descriptor, false, $name, $cache[$name], $private, $public, /*$type,*/ $readonly);
+            $_constructRuntimeField($descriptor, false, $name, $cache[$name], $private, $public, $type, $readonly);
 
         // Return the descriptor
         return $descriptor;
@@ -1945,15 +1947,22 @@
             $this = $_constructRuntimeConstructor($private);
 
         // Construct the method descriptor
-        $_constructRuntimeMethod($descriptor, false, $this, $cache[$name], $private, $public);//, $type);
+        $_constructRuntimeMethod($descriptor, false, $this, $cache[$name], $private, $public, $type);
 
         // Return the descriptor
         return $descriptor;
     };
     var $_importRuntimeProperty    = function($instance, $get, $set)
     {
+        // Extract the property name
+        var $name = $get && $get['name'] || $set && $set['name'] || '';
+        
+        // Extract the get and set accessors
+        $get = $get && $get['get'] || undefined;
+        $set = $set && $set['set'] || undefined;
+
         // Set the property get/set accessor descriptors on the instance
-        $__defineProperty__.call($__object__, $instance, $get && $get['name'] || $set && $set['name'] || '', { 'enumerable': true, 'get': $get && $get['value'] || undefined, 'set': $set && $set['value'] || undefined });
+        $__defineProperty__.call($__object__, $instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
     };
 
     // Create the compiler
