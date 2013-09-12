@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.2.0a229';
+    var $_version = '2.2.0a230';
 
     // ########## LANGUAGE ##########
 
@@ -98,6 +98,7 @@
     var $__preventExtensions__        = $__object__.preventExtensions;
     var $__propertyIsEnumerable__     = $__object__.propertyIsEnumerable;
     var $__seal__                     = $__object__.seal;
+    var $__setPrototypeOf__           = $__object__.setPrototypeOf || null;
     var $__hasOwnProperty__           = $__objectProto__.hasOwnProperty;
     var $__isPrototypeOf__            = $__objectProto__.isPrototypeOf;
     var $__toString__                 = $__objectProto__.toString;
@@ -135,6 +136,94 @@
     if (!$__create__ || !$__defineProperty__ || !$__freeze__ || !$__getPrototypeOf__ || !$__preventExtensions__ || !$__seal__ || !$__isArray__ || !$__forEach__ || !$__indexOf__ || !$__trim__)
         throw $_lang_exception_prefix + $_lang_compatibility;
 
+    // ########## SHIMS ##########
+
+    // If ECMAScript 6 is not supported
+    if (!$__setPrototypeOf__)
+        (function()
+        {
+            // Create a simple object
+            var $set  = null;
+            var $test = {};
+
+            // If the browser does not support the special __proto__ property, return
+            if ($test.__proto__ !== $__objectProto__)
+                return;
+            
+            try
+            {
+                // Get the descriptor for the special __proto__ property
+                var $descriptor = $__getOwnPropertyDescriptor__.call($__object__, $__objectProto__, '__proto__') || null;
+                
+                // Get the set accessor from the descriptor
+                $set = $descriptor && $descriptor['set'] || null;
+
+                // If a set accessor was not found, return
+                if (!$set)
+                    return;
+
+                // Set the prototype of the object to null
+                $set.call($test, null);
+            }
+            catch (e)
+            {
+                return;
+            }
+
+            // If the prototype of the object was not set to null, return
+            if ($__getPrototypeOf__.call($__object__, $test) !== null)
+                return;
+
+            // Create the shim
+            $__setPrototypeOf__ = function($object, $prototype)
+            {
+                // Set the object prototype
+                $set.call($object, $prototype);
+
+                // Return the object
+                return $object;
+            };
+        })();
+
+    // Create the temporary shim (which MUST be called on objects that inherit from the object prototype)
+    var $_shim_setPrototypeOf = $__setPrototypeOf__;
+
+    // If a shim was not created
+    if (!$_shim_setPrototypeOf)
+        (function()
+        {
+            // Create a simple object
+            var $test = {};
+
+            // If the browser does not support the special __proto__ property, return
+            if ($test.__proto__ !== $__objectProto__)
+                return;
+
+            try
+            {
+                // Set the prototype of the object to null
+                $test.__proto__ = null;
+            }
+            catch (e)
+            {
+                return;
+            }
+
+            // If the prototype of the object was not set to null, return
+            if ($__getPrototypeOf__.call($__object__, $test) !== null)
+                return;
+            
+            // Create a temporary shim
+            $_shim_setPrototypeOf = function($object, $prototype)
+            {
+                // Set the object prototype
+                $object.__proto__ = $prototype;
+
+                // Return the object
+                return $object;
+            };
+        })();
+    
     // ########## EXCEPTIONS ##########
 
     // Create the exceptions helpers
@@ -174,7 +263,7 @@
             'configurable': false,
             'enumerable':   true,
             'value':        $field,
-            'writable':     $writable
+            'writable':     !!$writable
         });
     };
     var $_defineMethod   = function($name, $method)
@@ -183,7 +272,7 @@
         return $__defineProperty__.call($__object__, $$, $name,
         {
             'configurable': false,
-            'enumerable':   false,
+            'enumerable':   true,
             'value':        $method,
             'writable':     false
         });
@@ -199,6 +288,11 @@
             'set':          $setMethod || undefined
         });
     };
+
+    // ########## LOCK ##########
+
+    // Create the internal lock
+    var $_lock = {};
 
     // ##########################
     // ########## CORE ##########
@@ -339,34 +433,39 @@
 
     // ########## CLASSES ##########
 
-    // Create the base class of all classes
-    var $_class = function()
+    // Create the base class of all classes and the base prototype of all prototypes
+    var $_class     = function()
     {
         //
     };
+    var $_prototype = $__create__.call($__object__, null);
 
-    // Create the base prototype of all prototypes
-    var $_prototype = (
+    // Define the class and instance toString methods
+    var $_class_toString     = function()
     {
-        'constructor': $_class,
-        'toString': function()
-        {
-            // Return an instance type string
-            return '[object Instance]';
-        }
-    });
+        // Return a class type string
+        return '[object Class]';
+    };
+    var $_prototype_toString = function()
+    {
+        // Return an instance type string
+        return '[object Instance]';
+    };
+
+    // Define the toString method on the base prototype of all prototypes
+    $__defineProperty__.call($__object__, $_prototype, 'toString', { 'value': $_prototype_toString });
 
     // Create the type methods
     var $_class_type     = function()
     {
         // Return the base class of all classes
         return $_class;
-    }
+    };
     var $_prototype_type = function()
     {
         // Return the base prototype of all prototypes
         return $_prototype;
-    }
+    };
 
     // Define the type method on the base prototype of all prototypes
     $__defineProperty__.call($__object__, $_prototype, 'type', { 'get': function()
@@ -376,12 +475,6 @@
             return $_prototype_type;
     } });
 
-    // Freeze the base prototype of all prototypes
-    $__freeze__.call($__object__, $_prototype);
-
-    // Set the base class of all classes base prototype of all prototypes
-    $_class.prototype = $_prototype;
-
     // Define the type method on the base class of all classes
     $__defineProperty__.call($__object__, $_class, 'type', { 'get': function()
     {
@@ -390,15 +483,11 @@
             return $_class_type;
     } });
 
+    // Set the base class of all classes base prototype of all prototypes
+    $_class.prototype = $_prototype;
+
     // Freeze the base class of all classes
     $__freeze__.call($__object__, $_class);
-
-    // Define the class toString method
-    var $_class_toString = function()
-    {
-        // Return a class type string
-        return '[object Class]';
-    };
 
     // ########## FLAGS ##########
 
@@ -406,7 +495,6 @@
     var $_clone    = false;// DON'T CHANGE
     var $_debug    = true;// DEFAULT
     var $_lazy     = true;// DEFAULT
-    var $_lock     = {};// DON'T CHANGE
     var $_subclass = false;// DON'T CHANGE
     var $_types    = false;// DON'T CHANGE
 
@@ -651,7 +739,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $name === 'is' || $_types && $name === 'type' || $name === '~constructor' || !$_types && $name === 'constructor' || $name === 'prototype' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
+        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $_types && $name === 'type' || $name === '~constructor' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -1090,6 +1178,8 @@
                 return $reference;
         };
     };
+
+    // ########## RUNTIME ##########
 
     // Create the construct runtime helper functions
     var $_constructRuntimeClone       = function($class, $type, $private, $public, $cache, $injections)
@@ -1964,6 +2054,8 @@
         // Set the property get/set accessor descriptors on the instance
         $__defineProperty__.call($__object__, $instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
     };
+
+    // ########## JTYPES ##########
 
     // Create the compiler
     var $$ = function()
@@ -3046,7 +3138,7 @@
         // Create the types array
         var $cache = [];
         var $names = 'Array Boolean Date Error Function Number Object RegExp String Window'.split(' ') || [];
-        var $types = [$__array__, Boolean, Date, Error, Function, Number, $__object__, RegExp, $__string__, Window];
+        var $types = [Array, Boolean, Date, Error, Function, Number, Object, RegExp, String, Window];
 
         // Create the inject and restore iterators
         var $inject  = function($type, $index)
