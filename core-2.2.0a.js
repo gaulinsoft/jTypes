@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.2.0a230';
+    var $_version = '2.2.0a233';
 
     // ########## LANGUAGE ##########
 
@@ -105,25 +105,47 @@
     var $__valueOf__                  = $__objectProto__.valueOf;
 
     // ---------- ARRAY ----------
-    var $__array__       = Array;
-    var $__arrayProto__  = $__array__.prototype;
-    var $__isArray__     = $__array__.isArray;
-    var $__every__       = $__arrayProto__.every;
-    var $__filter__      = $__arrayProto__.filter;
-    var $__forEach__     = $__arrayProto__.forEach;
-    var $__indexOf__     = $__arrayProto__.indexOf;
-    var $__lastIndexOf__ = $__arrayProto__.lastIndexOf;
-    var $__map__         = $__arrayProto__.map;
-    var $__reduce__      = $__arrayProto__.reduce;
-    var $__reduceRight__ = $__arrayProto__.reduceRight;
-    var $__some__        = $__arrayProto__.some;
+    var $__array__             = Array;
+    var $__arrayProto__        = $__array__.prototype;
+    var $__array_isArray__     = $__array__.isArray;
+    var $__array_every__       = $__arrayProto__.every;
+    var $__array_filter__      = $__arrayProto__.filter;
+    var $__array_forEach__     = $__arrayProto__.forEach;
+    var $__array_indexOf__     = $__arrayProto__.indexOf;
+    var $__array_lastIndexOf__ = $__arrayProto__.lastIndexOf;
+    var $__array_map__         = $__arrayProto__.map;
+    var $__array_reduce__      = $__arrayProto__.reduce;
+    var $__array_reduceRight__ = $__arrayProto__.reduceRight;
+    var $__array_some__        = $__arrayProto__.some;
+    var $__array_toString__    = $__arrayProto__.toString;
+
+    // ---------- BOOLEAN ----------
+    var $__boolean__          = Boolean;
+    var $__booleanProto__     = $__boolean__.prototype;
+    var $__boolean_toString__ = $__booleanProto__.toString;
+    var $__boolean_valueOf__  = $__booleanProto__.valueOf;
+
+    // ---------- NUMBER ----------
+    var $__number__          = Number;
+    var $__numberProto__     = $__number__.prototype;
+    var $__number_toString__ = $__numberProto__.toString;
+    var $__number_valueOf__  = $__numberProto__.valueOf;
+
+    var $__NaN__ = $__number_valueOf__.call($__number__.NaN);
+    
+    var $__number_maxValue         = $__number_valueOf__.call($__number__.MAX_VALUE);
+    var $__number_minValue         = $__number_valueOf__.call($__number__.MIN_VALUE);
+    var $__number_negativeInfinity = $__number_valueOf__.call($__number__.NEGATIVE_INFINITY);
+    var $__number_positiveInfinity = $__number_valueOf__.call($__number__.POSITIVE_INFINITY);
 
     // ---------- STRING ----------
-    var $__string__      = String;
-    var $__stringProto__ = $__string__.prototype;
-    var $__match__       = $__stringProto__.match;
-    var $__replace__     = $__stringProto__.replace;
-    var $__trim__        = $__stringProto__.trim;
+    var $__string__          = String;
+    var $__stringProto__     = $__string__.prototype;
+    var $__string_match__    = $__stringProto__.match;
+    var $__string_replace__  = $__stringProto__.replace;
+    var $__string_toString__ = $__stringProto__.toString;
+    var $__string_trim__     = $__stringProto__.trim;
+    var $__string_valueOf__  = $__stringProto__.valueOf;
 
     // ---------- WINDOW ----------
     var $__clearInterval__ = window.clearInterval;
@@ -133,7 +155,7 @@
     var $__setTimeout__    = window.setTimeout;
 
     // If any of the major native code methods from recent JavaScript versions are not found, throw an exception
-    if (!$__create__ || !$__defineProperty__ || !$__freeze__ || !$__getPrototypeOf__ || !$__preventExtensions__ || !$__seal__ || !$__isArray__ || !$__forEach__ || !$__indexOf__ || !$__trim__)
+    if (!$__create__ || !$__defineProperty__ || !$__freeze__ || !$__getPrototypeOf__ || !$__preventExtensions__ || !$__seal__ || !$__array_isArray__ || !$__array_forEach__ || !$__array_indexOf__ || !$__string_trim__)
         throw $_lang_exception_prefix + $_lang_compatibility;
 
     // ########## SHIMS ##########
@@ -268,25 +290,41 @@
     };
     var $_defineMethod   = function($name, $method)
     {
-        // Define a non-enumerable method on the jTypes object
-        return $__defineProperty__.call($__object__, $$, $name,
-        {
-            'configurable': false,
-            'enumerable':   true,
-            'value':        $method,
-            'writable':     false
-        });
+        // If the name does not contain a space, define a non-enumerable method on the jTypes object
+        if ($name.indexOf(' ') < 0)
+            return $__defineProperty__.call($__object__, $$, $name,
+            {
+                'configurable': false,
+                'enumerable':   true,
+                'value':        $method,
+                'writable':     false
+            });
+
+        // Create the method names array
+        var $names = $name.split(' ') || '';
+
+        // Define each method in the method names array
+        for (var $i = 0, $j = $names.length; $i < $j; $i++)
+            $_defineMethod($names[$i], $method);
     };
     var $_defineProperty = function($name, $getMethod, $setMethod)
     {
-        // Define an enumerable property on the jTypes object
-        return $__defineProperty__.call($__object__, $$, $name,
-        {
-            'configurable': false,
-            'enumerable':   true,
-            'get':          $getMethod || undefined,
-            'set':          $setMethod || undefined
-        });
+        // If the name does not contain a space, define an enumerable property on the jTypes object
+        if ($name.indexOf(' ') < 0)
+            return $__defineProperty__.call($__object__, $$, $name,
+            {
+                'configurable': false,
+                'enumerable':   true,
+                'get':          $getMethod || undefined,
+                'set':          $setMethod || undefined
+            });
+
+        // Create the property names array
+        var $names = $name.split(' ') || '';
+
+        // Define each property in the property names array
+        for (var $i = 0, $j = $names.length; $i < $j; $i++)
+            $_defineProperty($names[$i], $getMethod, $setMethod);
     };
 
     // ########## LOCK ##########
@@ -332,7 +370,7 @@
                 $key += $_characters.charAt(Math.floor($_characters.length * Math.random()));
         }
         // Break if the key was already found in the keys array
-        while ($__indexOf__.call($_keys, $key) >= 0);
+        while ($__array_indexOf__.call($_keys, $key) >= 0);
 
         // Push the key into the keys array
         $_keys.push($key);
@@ -584,7 +622,7 @@
     var $_definitionsCompiler               = function($cacheDefinitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal, $isImport, $isOptimized)
     {
         // Break the key string into a keywords array and get the member name
-        var $keywords = $__trim__.call($$.asString($key)).split(' ') || [];
+        var $keywords = $__string_trim__.call($$.asString($key)).split(' ') || [];
         var $name     = $$.asString($keywords.pop());
 
         // If the member is a package
@@ -623,12 +661,12 @@
                 var $hasSet = false;
 
                 // Create the has override flag
-                var $hasOverride = $__indexOf__.call($keywords, 'override') >= 0;
+                var $hasOverride = $__array_indexOf__.call($keywords, 'override') >= 0;
 
                 for (var $propertyKey in $value)
                 {
                     // Get the member name and value
-                    var $memberName  = $$.asString(($__trim__.call($$.asString($propertyKey)).split(' ') || []).pop());
+                    var $memberName  = $$.asString(($__string_trim__.call($$.asString($propertyKey)).split(' ') || []).pop());
                     var $memberValue = $value[$propertyKey];
 
                     // If the member name is not "get"
@@ -678,11 +716,11 @@
         }
 
         // If the name is empty or whitespace, throw an exception
-        if (!$__trim__.call($name))
+        if (!$__string_trim__.call($name))
             throw $_exceptionFormat($_lang_$$_member_name_null, $type);
 
         // If the name is not a valid member name, throw an exception
-        if (!$__match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
+        if (!$__string_match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
             throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
         var $abstract = false;
@@ -739,7 +777,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $_types && $name === 'type' || $name === '~constructor' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
+        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $_types && $name === 'type' || $name === '~constructor' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type' || $name === '__proto__')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -928,12 +966,12 @@
                 for (var $propertyKey in $value)
                 {
                     // Break the property key string into a keywords array and get the member name and value
-                    var $propertyKeywords = $__trim__.call($$.asString($propertyKey)).split(' ') || [];
+                    var $propertyKeywords = $__string_trim__.call($$.asString($propertyKey)).split(' ') || [];
                     var $memberName       = $$.asString($propertyKeywords.pop());
                     var $memberValue      = $value[$propertyKey];
 
                     // If the member name is empty or whitespace, throw an exception
-                    if (!$__trim__.call($memberName))
+                    if (!$__string_trim__.call($memberName))
                         throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
                     var $member = null;
@@ -2181,7 +2219,7 @@
             if ($modifiers.length <= $_const_precompile_prefix.length || $modifiers.substr(0, $_const_precompile_prefix.length) !== $_const_precompile_prefix)
             {
                 // Create the keywords array
-                var $keywords = $__trim__.call($modifiers).split(' ') || [];
+                var $keywords = $__string_trim__.call($modifiers).split(' ') || [];
 
                 for (var $i = 0, $j = $keywords.length; $i < $j; $i++)
                 {
@@ -2959,8 +2997,9 @@
                 return $_class_type;
         } });
 
-        // Set the class toString method
-        $class.toString = $_class_toString;
+        // If a static "toString" definition was not provided, set the class toString method
+        if (!$__hasOwnProperty__.call($definitionsStatic, 'toString'))
+            $class.toString = $_class_toString;
 
         // If the class is not expando, freeze the class
         if (!$import && !$expandoClass)
@@ -3011,47 +3050,75 @@
         return $class;
     };
 
-    // Define the compiler toString method
-    $_defineMethod('toString', function()
+    // Define the compiler .toString() method
+    $__defineProperty__.call($__object__, $$, 'toString', { 'value': function()
     {
-        // Return the type string
+        // Return the compiler type string
         return '[object jTypes]';
-    });
+    } });
 
-    // ########## VERSION ##########
+    // ########## CONSTANTS ##########
 
-    // Define the version field
+    // ---------- VERSION ----------
     $_defineField('version', $_version, false);
+    
+    // ---------- INTEGER MAX/MIN ----------
+    $_defineField('intMax', 9007199254740992, false);
+    $_defineField('intMin', -9007199254740992, false);
 
     // ########## PACKAGES ##########
 
     // Define the package methods for class members
-    $__forEach__.call('private protected public'.split(' ') || [], function($modifier)
+    $__array_forEach__.call('private protected public'.split(' ') || [], function($modifier)
     {
         // Define the package method for the access modifier
-        $_defineMethod($modifier, function($modifiers, $value)
+        $_defineMethod($modifier, function($modifiers, $type, $value)
         {
-            // Create the member package
-            var $package = new Array($_package_flagCount);
-
             switch (arguments.length)
             {
                 case 1:
 
-                    // Set the member package data
-                    $package[$_package_modifiers] = $modifier;
-                    $package[$_package_value]     = $modifiers;
+                    // Set the value
+                    $value = $modifiers;
+
+                    // Set the default modifiers and type
+                    $modifiers = '';
+                    $type      = null;
 
                     break;
 
                 case 2:
 
-                    // FORMAT $modifiers
-                    $modifiers = $$.asString($modifiers);
+                    if (!$$.isClass($modifiers))
+                    {
+                        // FORMAT $modifiers
+                        $modifiers = $$.asString($modifiers);
+                        $value     = $type;
+
+                        // Set the default type
+                        $type = null;
+                    }
+                    else
+                    {
+                        $value = $type;
+                        $type  = $modifiers;
+
+                        // Set the default modifiers
+                        $modifiers = '';
+                    }
 
                     // Set the member package data
                     $package[$_package_modifiers] = $modifiers ? $modifier + ' ' + $modifiers : $modifier;
                     $package[$_package_value]     = $value;
+
+                    break;
+
+                case 3:
+
+                    // FORMAT $modifiers
+                    $modifiers = $$.asString($modifiers);
+
+                    //
 
                     break;
 
@@ -3064,6 +3131,16 @@
                     // Return null
                     return null;
             }
+
+            // ADD HOOK FOR INTERNAL TYPES (MAYBE APPEND TO MODIFIERS STRING?)
+
+            // Create the member package
+            var $package = new Array($_package_flagCount);
+
+            // Set the member package data
+            $package[$_package_modifiers] = $modifiers ? $modifier + ' ' + $modifiers : $modifier;
+            $package[$_package_type]      = $type;
+            $package[$_package_value]     = $value;
 
             // Lock the member package
             $package = $_definitionsCompilerLock($package);
@@ -3085,7 +3162,7 @@
         var $types = {};
 
         // Iterate the internal JavaScript types
-        $__forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' ') || [], function($type)
+        $__array_forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' ') || [], function($type)
         {
             // Get the type keyword
             var $keyword = $type.toLowerCase();
@@ -3102,7 +3179,7 @@
         });
 
         // Iterate the known aliases of the internal JavaScript window type
-        $__forEach__.call('Window window Global global'.split(' ') || [], function($window)
+        $__array_forEach__.call('Window window Global global'.split(' ') || [], function($window)
         {
             // Insert the window into the types lookup
             $types['[object ' + $window + ']'] = 'window';
@@ -3205,11 +3282,11 @@
                 }
 
                 // Construct the injections
-                $__forEach__.call($types, $inject);
+                $__array_forEach__.call($types, $inject);
             }
             // Destruct the injections
             else
-                $__forEach__.call($types, $restore);
+                $__array_forEach__.call($types, $restore);
         });
     })();
 
@@ -3232,8 +3309,15 @@
     // ---------- ARRAY-LIKE OBJECT ----------
     $_defineMethod('isArrayLikeObject', function($object)
     {
-        // Return true if the object is neither undefined nor null and has a length property that is a finite integer greater than or equal to zero
-        return $object !== undefined && $object !== null && $$.isFiniteInt($object.length) && $object.length >= 0;
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
+
+        // Get the object length
+        var $length = $object.length;
+
+        // Return true if the length property is a finite integer greater than or equal to zero
+        return $$.isFiniteInt($length) && $length >= 0;
     });
 
     // ---------- CLASS ----------
@@ -3265,7 +3349,18 @@
     $_defineMethod('isFiniteInt', function($number)
     {
         // Return true if the object is a number, finite, and within the maximum and minimum representable integers
-        return $$.isFinite($number) && $number <= $$.intMax && $number >= $$.intMin;
+        return $$.isFinite($number) && $number <= $$.intMax && $number >= $$.intMin && $number === Math.floor($number);
+    });
+
+    // ---------- FLAT OBJECT ----------
+    $_defineMethod('isFlatObject', function($object)
+    {
+        // If the object is not an object, return false
+        if (!$object || $$.type($object) !== 'object')
+            return false;
+
+        // Return true if the prototype of the object is null
+        return $__getPrototypeOf__.call($__object__, $object) === null;
     });
 
     // ---------- IMPORTED CLASS ----------
@@ -3335,14 +3430,46 @@
         return $$.isNumber($number) && !isNaN($number) && !isFinite($number) && $number > 0;
     });
 
-    // ---------- REFERENCE-TYPE ----------
-    $_defineMethod('isReferenceType', function($object)
+    // ---------- PRIMITIVE ----------
+    $_defineMethod('isPrimitive', function($object)
     {
+        // If the object is a null reference or undefined, return true
+        if ($object === null || $object === undefined)
+            return true;
+
+        // Get the primitive type of the object
+        var $typeOf = typeof $object;
+
+        // Return true if the object is a boolean, number, or string primitive
+        return $typeOf === 'boolean' || $typeOf === 'number' || $typeOf === 'string';
+    });
+
+    // ---------- PRIMITIVE-TYPE ----------
+    $_defineMethod('isPrimitiveType', function($object)
+    {
+        // If the object is a null reference or undefined, return true
+        if ($object === null || $object === undefined)
+            return true;
+
         // Get the type of the object
         var $type = $$.type($object);
 
-        // Return true if the object is not null, undefined, or a value-type
-        return $type !== 'undefined' && $type !== 'null' && $type !== 'boolean' && $type !== 'number' && $type !== 'string';
+        // Return true if the object is a value-type
+        return $type === 'string' || $type === 'number' || $type === 'boolean';
+    });
+
+    // ---------- REFERENCE-TYPE ----------
+    $_defineMethod('isReferenceType', function($object)
+    {
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
+
+        // Get the type of the object
+        var $type = $$.type($object);
+
+        // Return true if the object is not a value-type
+        return $type !== 'string' && $type !== 'number' && $type !== 'boolean';
     });
 
     // ---------- SEALED CLASS ----------
@@ -3403,18 +3530,18 @@
     // ---------- ARRAY ----------
     $_defineMethod('asArray', function($object)
     {
-        // If the object is a null reference or undefined, return
+        // If the object is a null reference or undefined, return an empty array
         if ($object === null || $object === undefined)
             return [];
 
         // Get the type of the object
         var $type = $$.type($object);
 
-        // If the object is already an array, return it
+        // If the object is already an array, return the array
         if ($type === 'array')
             return $object;
 
-        // If the object is not a reference type, return
+        // If the object is a value type, return an empty array
         if ($type === 'boolean' || $type === 'number' || $type === 'string')
             return [];
 
@@ -3422,33 +3549,69 @@
         return $__arrayProto__.slice.call($object, 0) || [];
     });
 
-    // ---------- BOOL ----------
-    $_defineMethod('asBool', function($object)
+    // ---------- BOOLEAN ----------
+    $_defineMethod('asBool asBoolean', function($object)
     {
+        // If the object is a primitive boolean, return the object
+        if (typeof $object === 'boolean')
+            return $object;
+
+        // Get the object type
+        var $type = $$.type($object);
+        
+        // If the object is a boolean object, return the primitive value of the boolean object
+        if ($type === 'boolean')
+            return $__boolean_valueOf__.call($object);
+
+        // If the object is a number
+        if ($type === 'number')
+        {
+            // If the number is a number object, unbox it into a number primitive
+            if (typeof $object !== 'number')
+                $object = $__number_valueOf__.call($object);
+        }
+        // If the object is a string
+        else if ($type === 'string')
+        {
+            // If the string is a string object, unbox it into a string primitive
+            if (typeof $object !== 'string')
+                $object = $__string_valueOf__.call($object);
+        }
+        
         // Return the object cast as a boolean
         return !!$object;
     });
 
-    // ---------- FLOAT ----------
-    $_defineMethod('asFloat', function($object)
+    // ---------- FLOAT + NUMBER ----------
+    $_defineMethod('asFloat asNumber', function($object)
     {
+        // If the object is a primitive number, return the number
+        if (typeof $object === 'number')
+            return $object;
+
         // Get the object type
         var $type = $$.type($object);
 
-        // If the object is a string and matches a float
-        if ($type === 'string' && $__match__.call($__trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
+        // If the object is a number object, return the primitive value of the number object
+        if ($type === 'number')
+            return $__number_valueOf__.call($object);
+
+        // If the object is a string and matches a number
+        if ($type === 'string' && $__string_match__.call($__string_trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
         {
             // Cast the object as a float
             $object = parseFloat($object);
-            $type   = 'number';
+            
+            // If the number is a number object, unbox it into a number primitive
+            if (typeof $object !== 'number')
+                $object = $__number_valueOf__.call($object);
+
+            // Return the number primitive
+            return $object;
         }
 
-        // If the object is not a number, return NaN
-        if ($type !== 'number')
-            return NaN;
-
-        // Return the number
-        return $object;
+        // Return NaN
+        return $__NaN__;
     });
 
     // ---------- INTEGER ----------
@@ -3457,44 +3620,117 @@
         // Cast the object as a float
         $object = $$.asFloat($object);
 
-        // If the object is not a number, return NaN
-        if (isNaN($object))
-            return NaN;
+        // If the object is not not-a-number
+        if (!isNaN($object))
+        {
+            // If the number is greater than the maximum integer, return infinity
+            if ($object > $$.intMax)
+                return $__number_positiveInfinity;
 
-        // If the number is greater than the maximum integer, return infinity
-        if ($object > $$.intMax)
-            return Infinity;
+            // If the number is less than the minimum integer, return negative infinity
+            if ($object < $$.intMin)
+                return $__number_negativeInfinity;
 
-        // If the number is less than the minimum integer, return negative infinity
-        if ($object < $$.intMin)
-            return -Infinity;
+            // Round the number towards zero
+            $object = $object < 0 ? Math.ceil($object) : Math.floor($object);
 
-        // If the number is less than zero, return the number as an integer (rounded towards zero)
-        if ($object < 0)
-            return Math.ceil($object);
+            // If the number is a number object, unbox it into a number primitive
+            if (typeof $object !== 'number')
+                $object = $__number_valueOf__.call($object);
+        }
 
-        // Return the number as an integer (rounded towards zero)
-        return Math.floor($object);
+        // Return the number primitive
+        return $object;
+    });
+
+    // ---------- OBJECT ----------
+    $_defineMethod('asObject', function($object)
+    {
+        // If the object is a null reference or undefined, return an empty object
+        if ($object === null || $object === undefined)
+            return {};
+        
+        // Return the object
+        return $object;
     });
 
     // ---------- STRING ----------
     $_defineMethod('asString', function($object)
     {
+        // If the object is a primitive string, return the object
+        if (typeof $object === 'string')
+            return $object;
+
         // Get the object type
         var $type = $$.type($object);
 
-        // If the object is a string, return the object
+        // If the object is a string object, return the primitive value of the string object
         if ($type === 'string')
+            return $__string_valueOf__.call($object);
+
+        // If the object is a number object or primitive
+        if ($type === 'number')
+        {
+            // Convert the number to a string
+            $object = $__number_toString__.call($object);
+
+            // If the string is a string object, unbox it into a string primitive
+            if (typeof $object !== 'string')
+                $object = $__string_valueOf__.call($object);
+
+            // Return the string primitive
             return $object;
+        }
 
-        // If the object is a boolean or a number, return the object cast as a string
-        if ($type === 'boolean' || $type === 'number')
-            return $object + '';
+        // If the object is a boolean object or primitive
+        if ($type === 'boolean')
+        {
+            // Convert the boolean to a string
+            $object = $__boolean_toString__.call($object);
 
+            // If the string is a string object, unbox it into a string primitive
+            if (typeof $object !== 'string')
+                $object = $__string_valueOf__.call($object);
+
+            // Return the string primitive
+            return $object;
+        }
+        
+        // Return an empty string primitive
         return '';
     });
 
     // ########## HELPERS ##########
+
+    // ---------- BOX ----------
+    $_defineMethod('box', function($object)
+    {
+        // If the object is a null reference or undefined, return an empty object
+        if ($object === null || $object === undefined)
+            return {};
+
+        // If the object is a primitive object, return the object
+        if (typeof $object === 'object')
+            return $object;
+
+        // Get the object type
+        var $type = $$.type($object);
+
+        // If the object is a string primitive, return it as a string object
+        if ($type === 'string')
+            return new $__string__($object);
+
+        // If the object is a number primitive, return it as a number object
+        if ($type === 'number')
+            return new $__number__($object);
+
+        // If the object is a boolean primitive, return it as a boolean object
+        if ($type === 'boolean')
+            return new $__boolean__($object);
+        
+        // Return the object
+        return $object;
+    });
 
     // ---------- EMPTY ----------
     $_defineMethod('empty', function()
@@ -3516,7 +3752,7 @@
             if ($$.debug)
                 throw $_exceptionArguments('export', arguments);
 
-            // Return an empty string
+            // Return an empty string primitive
             return '';
         }
 
@@ -3527,7 +3763,7 @@
             if ($$.debug)
                 throw $_exceptionFormat($_lang_export_import);
 
-            // Return an empty string
+            // Return an empty string primitive
             return '';
         }
 
@@ -3538,12 +3774,12 @@
             if ($$.debug)
                 throw $_exceptionFormat($_lang_export_struct);
 
-            // Return an empty string
+            // Return an empty string primitive
             return '';
         }
 
         // Return the precompiled string
-        return $class[$_definition_precompile].call($_lock) || '';
+        return $$.asString($class[$_definition_precompile].call($_lock));
     });
 
     // ---------- FORMAT ----------
@@ -3556,7 +3792,7 @@
             if ($$.debug)
                 throw $_exceptionArguments('format', arguments);
 
-            // Return an empty string
+            // Return an empty string primitive
             return '';
         }
 
@@ -3564,18 +3800,51 @@
         var $arguments = arguments;
 
         // Return the formatted string
-        return $__replace__.call($string, /\{([0-9]{1,2})\}/g, function($0, $1)
+        return $$.asString($__string_replace__.call($string, /\{([0-9]{1,16})\}/g, function($0, $1)
         {
             // Get the argument index
-            var $argumentIndex = $$.asInt($1) + 1;
+            var $argumentIndex = $$.asInt($1);
 
-            // If the argument index exceeded the number of arguments, use the match as the replacement
-            if ($argumentIndex >= $arguments.length)
+            // If the argument index is not finite or exceeded the number of arguments, return the match as the replacement
+            if (!isFinite($argumentIndex) || ++$argumentIndex >= $arguments.length)
                 return $0;
 
-            // Use the argument as the replacement
+            // Return the argument as the replacement
             return $$.asString($arguments[$argumentIndex]);
-        });
+        }));
+    });
+
+    // ---------- UNBOX ----------
+    $_defineMethod('unbox', function($object)
+    {
+        // If the object is a null reference or undefined, return it
+        if ($object === null || $object === undefined)
+            return $object;
+
+        // Get the type of the object
+        var $typeOf = typeof $object;
+
+        // If the type is a primitive type, return the object
+        if ($typeOf === 'string' || $typeOf === 'number' || $typeOf === 'boolean')
+            return $object;
+
+        // Get the object type
+        var $type = $$.type($object);
+
+        // If the object is a string object, return the string primitive
+        if ($type === 'string')
+            return $__string_valueOf__.call($object);
+
+        // If the object is a number object, return the number primitive
+        if ($type === 'number')
+            return $__number_valueOf__.call($object);
+
+        // If the object is a boolean object, return the boolean primitive
+        if ($type === 'boolean')
+            return $__boolean_valueOf__.call($object);
+        
+        // Return the object
+        return $object;
     });
 
     // ########## SETTINGS ##########
@@ -3601,12 +3870,6 @@
         // Set the lazy flag
         $_lazy = $$.asBool($v);
     });
-
-    // ########## CONSTANTS ##########
-    
-    // ---------- INTEGER MAX/MIN ----------
-    $_defineField('intMax', 9007199254740992, false);
-    $_defineField('intMin', -9007199254740992, false);
 
     // ########## GLOBALS ##########
 
