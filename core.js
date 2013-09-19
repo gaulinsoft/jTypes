@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                                jTypes 2.1.4
+//                                jTypes 2.1.5
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.4';
+    var $_version = '2.1.5a240';
 
     // ########## LANGUAGE ##########
 
@@ -124,13 +124,6 @@
     var $__replace__     = $__stringProto__.replace;
     var $__trim__        = $__stringProto__.trim;
 
-    // ---------- WINDOW ----------
-    var $__clearInterval__ = window.clearInterval;
-    var $__clearTimeout__  = window.clearTimeout;
-    var $__document__      = window.document;
-    var $__setInterval__   = window.setInterval;
-    var $__setTimeout__    = window.setTimeout;
-
     // If any of the major native code methods from recent JavaScript versions are not found, throw an exception
     if (!$__create__ || !$__defineProperty__ || !$__freeze__ || !$__getPrototypeOf__ || !$__preventExtensions__ || !$__seal__ || !$__isArray__ || !$__forEach__ || !$__indexOf__ || !$__trim__)
         throw $_lang_exception_prefix + $_lang_compatibility;
@@ -148,7 +141,7 @@
             $name = '$$';
 
         // Create the types array
-        var $types = new Array($arguments.length);
+        var $types = new $__array__($arguments.length);
 
         // Set the argument types in the types array
         for (var $i = 0, $j = $types.length; $i < $j; $i++)
@@ -801,8 +794,8 @@
             case 'property':
 
                 // Create the get and set method data arrays
-                var $get = new Array($_accessor_flagCount);
-                var $set = new Array($_accessor_flagCount);
+                var $get = new $__array__($_accessor_flagCount);
+                var $set = new $__array__($_accessor_flagCount);
 
                 // Create the has get and set accessors flags
                 var $hasGet = false;
@@ -2034,6 +2027,7 @@
         var $export    = false;
         var $final     = false;
         var $import    = false;
+        var $internal  = false;
         var $optimized = false;
         var $struct    = false;
         var $unsafe    = false;
@@ -2085,6 +2079,9 @@
                     // If the keyword is export, set the export flag
                     else if ($keyword === 'export')
                         $export = true;
+                    // If the keyword is internal, set the internal flag
+                    else if ($keyword === 'internal')
+                        $internal = true;
                     // If the keyword is optimized, set the optimized flag
                     else if ($keyword === 'optimized')
                         $optimized = true;
@@ -2290,7 +2287,7 @@
 
             // Create the instance reference and matrix
             var $instance = this;
-            var $matrix   = new Array($levels);
+            var $matrix   = new $__array__($levels);
 
             // Check if the new operator was used
             var $isInit = false;
@@ -2370,8 +2367,8 @@
             if (!$_lazy && !$import && !$optimized)
             {
                 // Create the contexts and inherits arrays
-                var $contexts = new Array($levels);
-                var $inherits = new Array($levels);
+                var $contexts = new $__array__($levels);
+                var $inherits = new $__array__($levels);
 
                 for (var $i = 0; $i < $levels; $i++)
                 {
@@ -2582,13 +2579,6 @@
 
             // Set the initialized flag
             $isInit = true;
-
-            // ----- DEBUG -----
-            //console.log('$$: ----- INSTANTIATOR -----');
-            //console.log('$$: Instance Matrix');
-            //console.log($matrix);
-            //console.log('$$: Differential inheritance ' + ($_lazy ? 'IS' : 'IS NOT') + ' enabled...');
-            // ----- DEBUG -----
 
             // If the "new" keyword was not used and the return value of the constructor was not undefined, return it
             if (!$isNew && $return !== undefined)
@@ -2803,7 +2793,7 @@
         $__defineProperties__.call($__object__, $class, $cache);
 
         // Set the prototype constructor
-        $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $class, 'writable': false });
+        $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $internal ? $_class : $class, 'writable': false });
 
         // If the prototype is not expando, freeze the prototype
         if (!$import && !$expandoPrototype)
@@ -2816,7 +2806,7 @@
         $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype, 'writable': false });
 
         // If a static "toString" definition was not provided, set the class toString method
-        if (!$definitionsStatic.toString)
+        if (!$__hasOwnProperty__.call($definitionsStatic, 'toString'))
             $class.toString = $_class_toString;
 
         // If the class is not expando, freeze the class
@@ -2850,16 +2840,6 @@
             );
         }
 
-        // ----- DEBUG -----
-        //console.log('$$: ----- COMPILER -----');
-        //console.log('$$: Private Definitions');
-        //console.log($classPrivate);
-        //console.log('$$: Protected Definitions');
-        //console.log($classProtected);
-        //console.log('$$: Public Definitions');
-        //console.log($classPublic);
-        // ----- DEBUG -----
-
         // If the export flag is set, return the precompiled class
         if ($export)
             return $precompile.call($_lock);
@@ -2889,7 +2869,7 @@
         var $method = function($modifiers, $value)
         {
             // Create the member package
-            var $package = new Array($_package_flagCount);
+            var $package = new $__array__($_package_flagCount);
 
             switch (arguments.length)
             {
@@ -3061,11 +3041,29 @@
         return $$.isFinite($number) && $number <= $$.intMax && $number >= $$.intMin && $number === Math.floor($number);
     });
 
+    // ---------- FLAT OBJECT ----------
+    $_defineMethod('isFlatObject', function($object)
+    {
+        // If the object is not an object, return false
+        if (!$object || $$.type($object) !== 'object')
+            return false;
+
+        // Return true if the prototype of the object is null
+        return $__getPrototypeOf__.call($__object__, $object) === null;
+    });
+
     // ---------- IMPORTED CLASS ----------
     $_defineMethod('isImportedClass', function($object)
     {
         // Return true if the object is a class and it has the import flag
         return $$.isClass($object) && !!$object[$_definition_import];
+    });
+
+    // ---------- INTERNAL CLASS ----------
+    $_defineMethod('isInternalClass', function($object)
+    {
+        // Return true if the object is a class and it has the internal flag
+        return $$.isClass($object) && !!$object[$_definition_internal];
     });
 
     // ---------- INFINITY ----------
@@ -3126,6 +3124,20 @@
     {
         // Return true if the object is a number, is not NaN, is not finite, and is greater than zero
         return $$.isNumber($number) && !isNaN($number) && !isFinite($number) && $number > 0;
+    });
+
+    // ---------- PRIMITIVE-TYPE ----------
+    $_defineMethod('isPrimitiveType', function($object)
+    {
+        // If the object is a null reference or undefined, return true
+        if ($object === null || $object === undefined)
+            return true;
+
+        // Get the type of the object
+        var $type = $$.type($object);
+
+        // Return true if the object is a value-type
+        return $type === 'string' || $type === 'number' || $type === 'boolean';
     });
 
     // ---------- REFERENCE-TYPE ----------
@@ -3191,28 +3203,43 @@
         return $$.type($object) === 'window';
     });
 
+    // ---------- WINDOW-LIKE OBJECT ----------
+    $_defineMethod('isWindowLikeObject', function($object)
+    {
+        // Return true if the object is neither undefined nor null and has a window property that is a self reference
+        return $object !== undefined && $object !== null && $object.window === $object;
+    });
+
     // ########## CASTS ##########
 
     // ---------- ARRAY ----------
     $_defineMethod('asArray', function($object)
     {
-        // If the object is a null reference or undefined, return
+        // If the object is a null reference or undefined, return an empty array
         if ($object === null || $object === undefined)
             return [];
 
         // Get the type of the object
         var $type = $$.type($object);
 
-        // If the object is already an array, return it
+        // If the object is already an array, return the array
         if ($type === 'array')
             return $object;
 
-        // If the object is not a reference type, return
+        // If the object is a value type, return an empty array
         if ($type === 'boolean' || $type === 'number' || $type === 'string')
             return [];
 
-        // Return the object cast as an array
-        return $__arrayProto__.slice.call($object, 0) || [];
+        // Get the object collection length and create the array
+        var $length = $$.asInt($object.length, true);
+        var $array  = new $__array__($length);
+
+        // Convert the object to an array
+        for (var $i = 0; $i < $length; $i++)
+            $array[$i] = $object[$i];
+
+        // Return the array
+        return $array;
     });
 
     // ---------- BOOL ----------
@@ -3223,7 +3250,7 @@
     });
 
     // ---------- FLOAT ----------
-    $_defineMethod('asFloat', function($object)
+    $_defineMethod('asFloat', function($object, $finite)
     {
         // Get the object type
         var $type = $$.type($object);
@@ -3245,7 +3272,7 @@
     });
 
     // ---------- INTEGER ----------
-    $_defineMethod('asInt', function($object)
+    $_defineMethod('asInt', function($object, $finite)
     {
         // Cast the object as a float
         $object = $$.asFloat($object);
@@ -3270,6 +3297,17 @@
         return Math.floor($object);
     });
 
+    // ---------- OBJECT ----------
+    $_defineMethod('asObject', function($object)
+    {
+        // If the object is a null reference or undefined, return an empty object
+        if ($object === null || $object === undefined)
+            return {};
+        
+        // Return the object
+        return $object;
+    });
+
     // ---------- STRING ----------
     $_defineMethod('asString', function($object)
     {
@@ -3288,6 +3326,36 @@
     });
 
     // ########## HELPERS ##########
+
+    // ---------- BASE ----------
+    $_defineMethod('base', function($class)
+    {
+        // CHECK $class
+        if (!$$.isClass($class))
+            return null;
+
+        // Return the base class
+        return $class[$_definition_baseClass] || null;
+    });
+
+    // ---------- DERIVED ----------
+    $_defineMethod('derived', function($class)
+    {
+        // CHECK $class
+        if (!$$.isClass($class))
+            return null;
+
+        // Get the derived classes
+        var $derived = $class[$_definition_derivedClasses].call($_lock) || [];
+        var $return  = new $__array__($derived.length);
+
+        // Copy the derived classes to the return array
+        for (var $i = 0, $j = $return.length; $i < $j; $i++)
+            $return[$i] = $derived[$i];
+
+        // Return the return array
+        return $return;
+    });
 
     // ---------- EMPTY ----------
     $_defineMethod('empty', function()
@@ -3337,6 +3405,20 @@
 
         // Return the precompiled string
         return $class[$_definition_precompile].call($_lock) || '';
+    });
+
+    var $_flat = function()
+    {
+        //
+    };
+
+    $_flat.prototype = null;
+
+    // ---------- FLAT ----------
+    $_defineMethod('flat', function()
+    {
+        // Return a new flat object
+        return new $_flat();
     });
 
     // ---------- FORMAT ----------
