@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.5a241';
+    var $_version = '2.1.5a244';
 
     // ########## LANGUAGE ##########
 
@@ -42,6 +42,7 @@
     var $_lang_$$_derive_class                     = 'Structs cannot inherit from a class.';
     var $_lang_$$_derive_export                    = 'Class must inherit from an imported class to have a precompiled string.';
     var $_lang_$$_derive_import                    = 'Class must have a precompiled string to inherit from an imported class.';
+    var $_lang_$$_derive_internal                  = 'Class must have the internal modifier to inherit from an internal class.';
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
     var $_lang_$$_derive_unoptimized               = 'Class must inherit from an optimized class to have the optimized modifier.';
     var $_lang_$$_derive_unsafe                    = 'Classes cannot inherit from a .NET class.';
@@ -259,6 +260,7 @@
     var $_definition_expando_public    = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoPublic';
     var $_definition_final             = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~final';
     var $_definition_import            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~import';
+    var $_definition_internal          = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~internal';
     var $_definition_optimized         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~optimized';
     var $_definition_private           = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~private';
     var $_definition_precompile        = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~precompile';
@@ -332,38 +334,34 @@
 
     // ########## CLASSES ##########
 
-    // Create the base class of all classes
-    var $_class = function()
+    // Create the base class of all classes and the base prototype of all prototypes
+    var $_class     = function()
     {
         //
     };
+    var $_prototype = {};
 
-    // Create the base prototype of all prototypes
-    var $_prototype = (
-    {
-        'constructor': $_class,
-        'toString': function()
-        {
-            // Return an instance type string
-            return '[object Instance]';
-        }
-    });
-
-    // Freeze the base prototype of all prototypes
-    $__freeze__.call($__object__, $_prototype);
-
-    // Set the base class of all classes base prototype of all prototypes
-    $_class.prototype = $_prototype;
-
-    // Freeze the base class of all classes
-    $__freeze__.call($__object__, $_class);
-
-    // Define the class toString method
-    var $_class_toString = function()
+    // Define the class and instance toString methods
+    var $_class_toString     = function()
     {
         // Return a class type string
         return '[object Class]';
     };
+    var $_prototype_toString = function()
+    {
+        // Return an instance type string
+        return '[object Instance]';
+    };
+
+    // Define the toString methods on the the base class of all classes and the base prototype of all prototypes
+    $__defineProperty__.call($__object__, $_class, 'toString', { 'value': $_class_toString });
+    $__defineProperty__.call($__object__, $_prototype, 'toString', { 'value': $_prototype_toString });
+    
+    // Set the base class of all classes base prototype of all prototypes initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
+    $_class.prototype = $_prototype;
+
+    // Set the base class of all classes base prototype of all prototypes without the "writable" flag
+    $__defineProperty__.call($__object__, $_class, 'prototype', { 'value': $_prototype, 'writable': false });
 
     // ########## FLAGS ##########
 
@@ -2205,6 +2203,10 @@
                 $classPublic    = $__create__.call($__object__, $basePublic);
             }
 
+            // If the class is not internal and the base class is internal, throw an exception
+            if (!$internal && $baseClass[$_definition_internal])
+                throw $_exceptionFormat($_lang_$$_derive_internal);
+
             // If the class is optimized and the base class is not optimized, throw an exception
             if ($optimized && !$baseClass[$_definition_optimized])
                 throw $_exceptionFormat($_lang_$$_derive_unoptimized);
@@ -2382,10 +2384,13 @@
                     var $context = $__create__.call($__object__, $private);
                     var $stack   = [$private, $base, $public];
 
-                    // Define the self reference accessors and the public instance accessor on the private and public instances
+                    // Define the self reference and public instance accessors on the private instance
                     $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
-                    $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
                     $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
+
+                    // If the class is not internal, define the self reference accessor and the public instance
+                    if (!$internal)
+                        $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
 
                     // Create the inherits objects
                     var $baseInherits      = {};
@@ -2421,7 +2426,10 @@
 
                     // Define the type accessors on the private and public instances
                     $__defineProperty__.call($__object__, $private, '__type', { 'value': $type });
-                    $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
+
+                    // If the class is not internal, define the type accessor and the public instance
+                    if (!$internal)
+                        $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
 
                     // If the instance is a struct
                     if ($struct)
@@ -2429,9 +2437,13 @@
                         // Create the clone method
                         var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix, $injections);
 
-                        // Define the clone method on the private and public instances
+                        // Define the clone method on the base and private instances
+                        $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
                         $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
-                        $__defineProperty__.call($__object__, $public, 'clone', { 'value': $clone });
+
+                        // If the class is not internal, define the clone method on the public instance
+                        if (!$internal)
+                            $__defineProperty__.call($__object__, $public, 'clone', { 'value': $clone });
                     }
 
                     // If the stack has a base class
@@ -2508,17 +2520,23 @@
                     // Create the private instance
                     $private = $__create__.call($__object__, $protected);
 
-                    // Define the self reference accessors and the public instance accessor on the private and public instances
+                    // Define the self reference and public instance accessors on the private instance
                     $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
-                    $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
                     $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
 
                     // Get the current type
                     var $type = $chain[$i];
 
-                    // Define the type accessors on the private and public instances
+                    // Define the type accessor on the private instance
                     $__defineProperty__.call($__object__, $private, '__type', { 'value': $type });
-                    $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
+
+                    // If the class is not internal
+                    if (!$internal)
+                    {
+                        // Define the self reference and type accessors and the public instance
+                        $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
+                        $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
+                    }
 
                     // If the stack has a base class, define the base instance reference on the private instance
                     if ($i !== $levels - 1)
@@ -2529,10 +2547,14 @@
                     {
                         // Create the clone method
                         var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix, $injections);
-
-                        // Define the clone method on the private and public instances
+                        
+                        // Define the clone method on the base and private instances
+                        $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
                         $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
-                        $__defineProperty__.call($__object__, $public, 'clone', { 'value': $clone });
+
+                        // If the class is not internal, define the clone method on the public instance
+                        if (!$internal)
+                            $__defineProperty__.call($__object__, $public, 'clone', { 'value': $clone });
                     }
 
                     // Create the matrix instance stack
@@ -2771,6 +2793,10 @@
         $__freeze__.call($__object__, $classProtected);
         $__freeze__.call($__object__, $classPublic);
 
+        // If the prototype is not expando, freeze the prototype
+        if (!$import && !$expandoPrototype)
+            $__freeze__.call($__object__, $classPrototype);
+
         // Set the class cache data
         $cache[$_definition_abstract]          = { 'value': $abstract };
         $cache[$_definition_baseClass]         = { 'value': $baseClass };
@@ -2782,6 +2808,7 @@
         $cache[$_definition_expando_public]    = { 'value': $expandoPublic };
         $cache[$_definition_final]             = { 'value': $final };
         $cache[$_definition_import]            = { 'value': $import };
+        $cache[$_definition_internal]          = { 'value': $internal };
         $cache[$_definition_optimized]         = { 'value': $optimized };
         $cache[$_definition_private]           = { 'value': $_definitionsCompilerLock($classPrivate) };
         $cache[$_definition_precompile]        = { 'value': $precompile };
@@ -2792,13 +2819,6 @@
 
         // Set the class cache
         $__defineProperties__.call($__object__, $class, $cache);
-
-        // Set the prototype constructor
-        $__defineProperty__.call($__object__, $classPrototype, 'constructor', { 'value': $internal ? $_class : $class, 'writable': false });
-
-        // If the prototype is not expando, freeze the prototype
-        if (!$import && !$expandoPrototype)
-            $__freeze__.call($__object__, $classPrototype);
 
         // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
         $class.prototype = $classPrototype;
@@ -2856,10 +2876,18 @@
         return '[object jTypes]';
     });
 
-    // ########## VERSION ##########
+    // ########## DATA ##########
 
-    // Define the version field
+    // ---------- VERSION ----------
     $_defineField('version', $_version, false);
+    
+    // ---------- CLASS + PROTOTYPE ----------
+    $_defineField('__class', $_class, false);
+    $_defineField('__proto', $_prototype, false);
+    
+    // ---------- INTEGER MAX/MIN ----------
+    $_defineField('intMax', 9007199254740992, false);
+    $_defineField('intMin', -9007199254740992, false);
 
     // ########## PACKAGES ##########
 
@@ -3477,12 +3505,6 @@
         // Set the lazy flag
         $_lazy = $$.asBool($v);
     });
-
-    // ########## CONSTANTS ##########
-
-    // ---------- INTEGER MAX/MIN ----------
-    $_defineField('intMax', 9007199254740992, false);
-    $_defineField('intMin', -9007199254740992, false);
 
     // ########## GLOBALS ##########
 
