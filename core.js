@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.5a240';
+    var $_version = '2.1.5a241';
 
     // ########## LANGUAGE ##########
 
@@ -615,7 +615,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $name === '~constructor' || $name === 'constructor' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
+        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $name === 'constructor' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -1099,7 +1099,7 @@
                 {
                     // Get the base constructor
                     $constructor = $private.__base;
-                    $constructor = $constructor && $constructor['~constructor'] || null;
+                    $constructor = $constructor && $constructor.constructor || null;
                 }
 
                 // Return the base constructor
@@ -1259,11 +1259,11 @@
         // Return the descriptor
         return $descriptor;
     };
-    var $_constructRuntimeMethod      = function($descriptor, $configurable, $this, $function, $private, $public, $accessor)
+    var $_constructRuntimeMethod      = function($descriptor, $configurable, $enumerable, $this, $function, $private, $public, $accessor)
     {
         // Set the descriptor data
         $descriptor['configurable'] = $configurable;
-        $descriptor['enumerable']   = true;
+        $descriptor['enumerable']   = $enumerable;
 
         // Create the method wrapper
         var $method = function()
@@ -1372,14 +1372,15 @@
             case 'method':
 
                 // Create the method context
-                var $this = $private;
+                var $this        = $private;
+                var $constructor = $isProtected && $name === 'constructor';
 
                 // If the method is the constructor, set the instance as the constructor instance
-                if ($isProtected && $name === '~constructor')
+                if ($constructor)
                     $this = $_lazy ? $_constructRuntimeConstructor($private) : $context;
 
                 // Construct the method descriptor
-                $_constructRuntimeMethod($descriptor, false, $this, $definition[$_definition_member_value], $private, $public);
+                $_constructRuntimeMethod($descriptor, false, !$constructor, $this, $definition[$_definition_member_value], $private, $public);
 
                 // If the method is protected or public
                 if ($isProtected || $isPublic)
@@ -1429,7 +1430,7 @@
                 var $merge        = $mergeBase || $mergePrivate;
 
                 // Construct the property descriptor
-                $_constructRuntimeMethod($descriptor, $complex && !$merge, $private, $definition[$_definition_member_value], $private, $public, $accessor);
+                $_constructRuntimeMethod($descriptor, $complex && !$merge, true, $private, $definition[$_definition_member_value], $private, $public, $accessor);
 
                 // If the property is not complex or is being merged
                 if (!$complex || $merge)
@@ -1848,7 +1849,7 @@
         var $descriptor = { 'name': $name };
 
         // Constructor the accessor descriptor
-        $_constructRuntimeMethod($descriptor, false, $private, $cache['~' + $accessor + 'et_' + $name], $private, $public);//, $type);
+        $_constructRuntimeMethod($descriptor, false, true, $private, $cache['~' + $accessor + 'et_' + $name], $private, $public);//, $type);
 
         // Return the descriptor
         return $descriptor;
@@ -1905,11 +1906,11 @@
         var $this       = $private;
 
         // If the method is the constructor, create the constructor context
-        if ($name === '~constructor')
+        if ($name === 'constructor')
             $this = $_constructRuntimeConstructor($private);
 
         // Construct the method descriptor
-        $_constructRuntimeMethod($descriptor, false, $this, $cache[$name], $private, $public);//, $type);
+        $_constructRuntimeMethod($descriptor, false, true, $this, $cache[$name], $private, $public);//, $type);
 
         // Return the descriptor
         return $descriptor;
@@ -2446,7 +2447,7 @@
                         var $context = $contexts[$i];
 
                         // Mask the base instance reference with the base constructor
-                        $__defineProperty__.call($__object__, $context, '__base', { 'value': $privateBase['~constructor'] });
+                        $__defineProperty__.call($__object__, $context, '__base', { 'value': $privateBase.constructor });
 
                         // Freeze the constructor context
                         $__freeze__.call($__object__, $context);
@@ -2561,21 +2562,21 @@
                 {
                     // If any additional arguments were provided, execute the constructor with the extra arguments
                     if (arguments.length > 1)
-                        $return = $private['~constructor'].apply($private, $__arrayProto__.slice.call(arguments, 1));
+                        $return = $private.constructor.apply($private, $__arrayProto__.slice.call(arguments, 1));
                     // Execute the constructor
                     else
-                        $return = $private['~constructor'].call($private);
+                        $return = $private.constructor.call($private);
                 }
                 // If arguments were provided, execute the constructor with the arguments
                 else if (arguments.length)
-                    $return = $private['~constructor'].apply($private, arguments);
+                    $return = $private.constructor.apply($private, arguments);
                 // Execute the constructor
                 else
-                    $return = $private['~constructor'].call($private);
+                    $return = $private.constructor.call($private);
             }
             // Execute the parameterless constructor
             else
-                $private['~constructor'].call($private);
+                $private.constructor.call($private);
 
             // Set the initialized flag
             $isInit = true;
@@ -2593,7 +2594,7 @@
 
         // If the class has the import flag or is optimized, set the constructor in the cache definitions object
         if ($import || $optimized)
-            $__defineProperty__.call($__object__, $classCache, '~constructor', { 'enumerable': true, 'value': $constructor });
+            $__defineProperty__.call($__object__, $classCache, 'constructor', { 'enumerable': true, 'value': $constructor });
 
         // Create the class cache
         var $cache      = {};
@@ -2652,7 +2653,7 @@
             $constructorDefinition[$_definition_member_method_abstract] = false;
             $constructorDefinition[$_definition_member_method_final]    = false;
             $constructorDefinition[$_definition_member_method_virtual]  = false;
-            $constructorDefinition[$_definition_member_name]            = '~constructor';
+            $constructorDefinition[$_definition_member_name]            = 'constructor';
             $constructorDefinition[$_definition_member_type]            = 'method';
             $constructorDefinition[$_definition_member_value]           = $constructor;
 
@@ -2660,7 +2661,7 @@
             $__freeze__.call($__object__, $constructorDefinition);
 
             // Set the constructor in the protected definitions object
-            $__defineProperty__.call($__object__, $classProtected, '~constructor', { 'enumerable': true, 'value': $constructorDefinition });
+            $__defineProperty__.call($__object__, $classProtected, 'constructor', { 'enumerable': true, 'value': $constructorDefinition });
 
             // Get the arrays of private, protected, and public member keys
             var $classPrivateKeys   = $__keys__.call($__object__, $classPrivate) || [];
