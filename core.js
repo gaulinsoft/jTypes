@@ -23,14 +23,14 @@
     // Enable strict mode
     'use strict';
 
-    // ########## VERSION ##########
+    // ########## BUILD ##########
 
-    // Set the jTypes version
-    var $_version = '2.1.5b250';
+    // Create the build version
+    var $_version = '2.1.5b252';
 
     // ########## LANGUAGE ##########
 
-    // Create the language prefix and arguments exception
+    // Create the compatibility exception message, arguments exception format string, and the exception prefix constants
     var $_lang_compatibility       = 'A browser that supports JavaScript 1.8.5 (MSIE 9+) is required.';
     var $_lang_exception_arguments = '"{0}({1})" has some invalid arguments.';
     var $_lang_exception_prefix    = 'jTypes Error: ';
@@ -39,7 +39,7 @@
     var $_lang_$$_abstract_conflict_1              = 'Abstract classes cannot have the {0} modifier.';
     var $_lang_$$_abstract_instance                = 'Abstract classes cannot be instantiated.';
     var $_lang_$$_abstract_override                = 'Class must implement the inherited abstract {1} "{0}" with the override modifier.';
-    var $_lang_$$_derive_class                     = 'Structs cannot inherit from a class.';
+    var $_lang_$$_derive_class                     = 'Structs cannot inherit from a class that does not have the struct modifier.';
     var $_lang_$$_derive_export                    = 'Class must inherit from an imported class to have a precompiled string.';
     var $_lang_$$_derive_import                    = 'Class must have a precompiled string to inherit from an imported class.';
     var $_lang_$$_derive_internal                  = 'Class must have the internal modifier to inherit from an internal class.';
@@ -129,15 +129,20 @@
     if (!$__create__ || !$__defineProperty__ || !$__freeze__ || !$__getPrototypeOf__ || !$__preventExtensions__ || !$__seal__ || !$__isArray__ || !$__forEach__ || !$__indexOf__ || !$__trim__)
         throw $_lang_exception_prefix + $_lang_compatibility;
 
+    // ########## NAMESPACE ##########
+
+    // Create the global namespace
+    var $$ = null;
+
     // ########## EXCEPTIONS ##########
 
-    // Create the exceptions helpers
+    // Create the exception helpers
     var $_exceptionArguments = function($name, $arguments)
     {
-        // If a name was provided, prepend "$$." for reference
+        // If a name was provided, prepend "$$." to the name for reference
         if ($name)
             $name = '$$.' + $name;
-        // The jTypes function is throwing the exception instead
+        // Set the namespace function as throwing the exception instead
         else
             $name = '$$';
 
@@ -148,21 +153,21 @@
         for (var $i = 0, $j = $types.length; $i < $j; $i++)
             $types[$i] = $$.type($arguments[$i]);
 
-        // Return the exception string
+        // Return the formatted arguments exception string
         return $_lang_exception_prefix + $$.format($_lang_exception_arguments, $name, $types.join(', '));
     };
     var $_exceptionFormat    = function($message)
     {
-        // Return the exception string
+        // Return the prefixed formatted exception string with the given arguments
         return $_lang_exception_prefix + $$.format.apply($$, arguments);
     };
 
     // ########## DEFINES ##########
 
-    // Create the defines helpers
+    // Create the define helpers
     var $_defineField    = function($name, $field, $writable)
     {
-        // Define an enumerable field on the jTypes object
+        // Define an enumerable field on the global namespace object
         return $__defineProperty__.call($__object__, $$, $name,
         {
             'configurable': false,
@@ -173,7 +178,7 @@
     };
     var $_defineMethod   = function($name, $method)
     {
-        // Define a non-enumerable method on the jTypes object
+        // Define a non-enumerable method on the global namespace object
         return $__defineProperty__.call($__object__, $$, $name,
         {
             'configurable': false,
@@ -184,7 +189,7 @@
     };
     var $_defineProperty = function($name, $getMethod, $setMethod)
     {
-        // Define an enumerable property on the jTypes object
+        // Define an enumerable property on the global namespace object
         return $__defineProperty__.call($__object__, $$, $name,
         {
             'configurable': false,
@@ -194,20 +199,28 @@
         });
     };
 
+    // ########## LOCKS ##########
+
+    // Create the internal lock reference
+    var $_lock = {};
+
     // ##########################
     // ########## CORE ##########
     // ##########################
 
     // ########## CONSTANTS ##########
 
+    // Create the internal constants
     var $_const_construct_arguments = 'c,k,f,m,a,d,d2,p,l';
+    var $_const_int_max             = 9007199254740992;
+    var $_const_int_min             = -$_const_int_max;
     var $_const_precompile_prefix   = '~jT_';
 
     // ########## KEYS ##########
 
     // Create the characters string and keys array
     var $_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    var $_keys       = $_const_construct_arguments.split(',') || [];
+    var $_keys       = $_const_construct_arguments.split(',');
 
     // Append the lowercase characters to the characters string
     $_characters += $_characters.toLowerCase();
@@ -219,8 +232,8 @@
         if (!$length)
             $length = 3;
 
-        // Create the key
-        var $key = '';
+        // Create the key reference
+        var $key = null;
 
         do
         {
@@ -228,22 +241,24 @@
             $key = '';
 
             // Append random characters to the key
-            for (var $i = 0; $i < $length; $i++)
-                $key += $_characters.charAt(Math.floor($_characters.length * Math.random()));
+            for (var $i = 0, $j = $_characters.length; $i < $length; $i++)
+                $key += $_characters.charAt(Math.floor($j * Math.random()));
         }
-        // Break if the key was already found in the keys array
+        // Continue if the key was already found in the keys array
         while ($__indexOf__.call($_keys, $key) >= 0);
 
         // Push the key into the keys array
         $_keys.push($key);
 
-        // If the no tidle flag is set, return the key
+        // If the no tilde flag is set, return the key
         if ($noTilde)
             return $key;
 
-        // Return the key
+        // Return the key with a tilde
         return '~' + $key;
     };
+
+    // ---------- DEFINITION ----------
 
     // Create the definition obfuscated key hash flag and length setting
     var $_definition_keyHash   = true;
@@ -273,38 +288,50 @@
     // ########## BEGIN jTypes.NET INJECTIONS ##########
     // #################################################
 
-    // Create the definition member obfuscated keys
-    var $_definition_member_field_injection    = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~fieldInjection';
-    var $_definition_member_field_readonly     = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~fieldReadOnly';
-    var $_definition_member_field_type         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~fieldType';
-    var $_definition_member_method_abstract    = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~methodAbstract';
-    var $_definition_member_method_final       = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~methodFinal';
-    var $_definition_member_method_type        = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~methodType';
-    var $_definition_member_method_virtual     = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~methodVirtual';
-    var $_definition_member_name               = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~name';
-    var $_definition_member_property_accessors = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~propertyAccessors';
-    var $_definition_member_type               = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~type';
-    var $_definition_member_value              = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~value';
+    // ---------- DEFINITION (MEMBER) ----------
 
-    // Create the injection flags length
-    var $_inject_flagCount = 0;
+    // Create the definition member flags
+    var $_definition_member_name               = 0;
+    var $_definition_member_value              = 1;
+    var $_definition_member_type               = 2;
+    var $_definition_member_field_readonly     = 3;
+    var $_definition_member_field_type         = 4;
+    var $_definition_member_field_injection    = 5;
+    var $_definition_member_method_abstract    = 6;
+    var $_definition_member_method_final       = 7;
+    var $_definition_member_method_virtual     = 8;
+    var $_definition_member_method_type        = 9;
+    var $_definition_member_property_accessors = 10;
+
+    // Create the definition member flags length
+    var $_definition_member_flagCount = 11;
+
+    // ---------- INJECTIONS ----------
 
     // Create the injection flags
-    var $_inject_private   = $_inject_flagCount++;
-    var $_inject_protected = $_inject_flagCount++;
-    var $_inject_prototype = $_inject_flagCount++;
-    var $_inject_public    = $_inject_flagCount++;
-    var $_inject_static    = $_inject_flagCount++;
+    var $_inject_private   = 0;
+    var $_inject_protected = 1;
+    var $_inject_prototype = 2;
+    var $_inject_public    = 3;
+    var $_inject_static    = 4;
 
-    // Create the package flag and key lengths
-    var $_package_flagCount = 0;
-    var $_package_keyLength = 3;
+    // Create the injection flags length
+    var $_inject_flagCount = 5;
+
+    // ---------- PACKAGES (MEMBER) ----------
+
+    // Create the member package flag hint key
+    var $_package_flag = $_keyGenerator(3);
 
     // Create the member package flags
-    var $_package_flag      = $_keyGenerator($_package_keyLength);
-    var $_package_modifiers = $_package_flagCount++;
-    var $_package_type      = $_package_flagCount++;
-    var $_package_value     = $_package_flagCount++;
+    var $_package_value     = 0;
+    var $_package_modifiers = 1;
+    var $_package_type      = 2;
+
+    // Create the member package flags length
+    var $_package_flagCount = 3;
+
+    // ---------- .NET ----------
 
     // Create the unsafe token
     var $_unsafe = '';
@@ -313,16 +340,20 @@
     // ########## END jTypes.NET INJECTIONS ##########
     // ###############################################
 
-    // Create the accessor member flags length
-    var $_accessor_flagCount = 0;
+    // ---------- ACCESSOR ----------
 
     // Create the accessor member flags
-    var $_accessor_modifiers = $_accessor_flagCount++;
-    var $_accessor_name      = $_accessor_flagCount++;
-    var $_accessor_private   = $_accessor_flagCount++;
-    var $_accessor_protected = $_accessor_flagCount++;
-    var $_accessor_public    = $_accessor_flagCount++;
-    var $_accessor_value     = $_accessor_flagCount++;
+    var $_accessor_name      = 0;
+    var $_accessor_value     = 1;
+    var $_accessor_modifiers = 2;
+    var $_accessor_private   = 3;
+    var $_accessor_protected = 4;
+    var $_accessor_public    = 5;
+
+    // Create the accessor member flags length
+    var $_accessor_flagCount = 6;
+
+    // ---------- PRECOMPILE ----------
 
     // Create the precompile obfuscated keys
     var $_precompile_cache      = $_keyGenerator(1, true);
@@ -334,14 +365,14 @@
 
     // ########## CLASSES ##########
 
-    // Create the base class of all classes and the base prototype of all prototypes
+    // Create the base class of all classes and the base prototype of all class prototypes
     var $_class     = function()
     {
         //
     };
     var $_prototype = {};
 
-    // Define the class and instance toString methods
+    // Define the class and prototype "toString()" methods
     var $_class_toString     = function()
     {
         // Return a class type string
@@ -353,23 +384,22 @@
         return '[object Instance]';
     };
 
-    // Define the toString methods on the the base class of all classes and the base prototype of all prototypes
+    // Define the "toString()" methods on the base class of all classes and the base prototype of all class prototypes
     $__defineProperty__.call($__object__, $_class, 'toString', { 'value': $_class_toString });
     $__defineProperty__.call($__object__, $_prototype, 'toString', { 'value': $_prototype_toString });
     
-    // Set the base class of all classes base prototype of all prototypes initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
+    // Set the base class of all classes prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
     $_class.prototype = $_prototype;
 
-    // Set the base class of all classes base prototype of all prototypes without the "writable" flag
+    // Set the base class of all classes prototype without the "writable" flag
     $__defineProperty__.call($__object__, $_class, 'prototype', { 'value': $_prototype, 'writable': false });
 
     // ########## FLAGS ##########
 
-    // Create the flags
+    // Create the internal flags
     var $_clone    = false;// DON'T CHANGE
     var $_debug    = true;// DEFAULT
     var $_lazy     = true;// DEFAULT
-    var $_lock     = {};// DON'T CHANGE
     var $_subclass = false;// DON'T CHANGE
 
     // ########## COMPILER ##########
@@ -377,14 +407,14 @@
     // Create the definitions compiler helper functions
     var $_definitionsCompilerAccessorMethod = function($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $accessor, $type, $abstract, $override, $sealed, $virtual, $hasTwoAccessors)
     {
-        // Create the property method definition object
-        var $method = {};
+        // Create the property method definition array
+        var $method = new $__array__($_definition_member_flagCount);
 
         // Reference some accessor data
         var $accessorName    = $accessor[$_accessor_name];
         var $accessorPrivate = $accessor[$_accessor_private];
 
-        // Set the method definition object data
+        // Set the method definition data
         $method[$_definition_member_method_abstract]    = !$accessorPrivate && $abstract;
         $method[$_definition_member_method_final]       = !$accessorPrivate && $sealed;
         $method[$_definition_member_method_virtual]     = !$accessorPrivate && ($virtual || $abstract || $override);
@@ -392,9 +422,6 @@
         $method[$_definition_member_property_accessors] = $hasTwoAccessors;
         $method[$_definition_member_type]               = $type;
         $method[$_definition_member_value]              = $accessor[$_accessor_value];
-
-        // Freeze the method definition object
-        $__freeze__.call($__object__, $method);
 
         // If the accessor has an access modifier
         if ($accessor[$_accessor_modifiers])
@@ -415,7 +442,7 @@
     };
     var $_definitionsCompilerBaseAbstract   = function($definitions, $baseDefinitions, $baseKey)
     {
-        // Get the base definition object from the base definitions object
+        // Get the base definition from the base definitions object
         var $baseDefinition = $baseDefinitions[$baseKey];
 
         // If the base definition is not abstract, return
@@ -437,10 +464,10 @@
 
         var $baseDefinition = null;
 
-        // If the method has the protected access modifier, get the protected base definition object
+        // If the method has the protected access modifier, get the protected base definition
         if ($protected)
             $baseDefinition = $baseProtected[$key] || null;
-        // If the method has the public access modifier, get the public base definition object
+        // If the method has the public access modifier, get the public base definition
         else if ($public)
             $baseDefinition = $basePublic[$key] || null;
 
@@ -458,11 +485,11 @@
     var $_definitionsCompiler               = function($cacheDefinitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal, $isImport, $isOptimized, $isStruct)
     {
         // Break the key string into a keywords array and get the member name
-        var $keywords = $__trim__.call($$.asString($key)).split(' ') || [];
-        var $name     = $$.asString($keywords.pop());
+        var $keywords = $__trim__.call($key || '').split(' ');
+        var $name     = $keywords.pop() || '';
 
         // If the member is a package
-        if ($value && $value[$_package_flag] === $value)
+        if (typeof $value === 'function' && $value[$_package_flag] === $value)
         {
             // If any keywords were provided, throw an exception
             if ($keywords.length)
@@ -472,7 +499,7 @@
             $value = $value.call($_lock);
 
             // Extract the package data
-            $keywords = $$.asString($value[$_package_modifiers]).split(' ') || [];
+            $keywords = ($value[$_package_modifiers] || '').split(' ');
             $value    = $value[$_package_value];
         }
 
@@ -480,12 +507,12 @@
         var $type = 'field';
 
         // If the value is a function, set the type as a method
-        if ($$.isFunction($value))
+        if (typeof $value === 'function')
             $type = 'method';
         // If the value is a simple object, set the type as a property
-        else if ($$.isSimpleObject($value))
+        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf__.call($__object__, $value) === $__objectProto__)
             $type = 'property';
-
+        
         // If the class has the import flag
         if ($isImport)
         {
@@ -502,7 +529,7 @@
                 for (var $propertyKey in $value)
                 {
                     // Get the member name and value
-                    var $memberName  = $$.asString(($__trim__.call($$.asString($propertyKey)).split(' ') || []).pop());
+                    var $memberName  = $__trim__.call($propertyKey || '').split(' ').pop() || '';
                     var $memberValue = $value[$propertyKey];
 
                     // If the member name is not "get"
@@ -735,21 +762,25 @@
         {
             case 'field':
 
-                // If the field has a reference-type value, set it to null
-                if ($$.isReferenceType($value))
-                    $value = null;
+                // If the value is neither undefined nor null
+                if ($value !== undefined && $value !== null)
+                {
+                    // Get the type of the value
+                    var $valueType = typeof $value;
 
-                // Create the field definition object
-                var $field = {};
+                    // If the field does not have a primitive value, set it to null
+                    if ($valueType !== 'boolean' && $valueType !== 'number' && $valueType !== 'string')
+                        $value = null;
+                }
 
-                // Set the field definition object data
+                // Create the field definition array
+                var $field = new $__array__($_definition_member_flagCount);
+
+                // Set the field definition data
                 $field[$_definition_member_field_readonly] = $readonly;
                 $field[$_definition_member_name]           = $name;
                 $field[$_definition_member_type]           = $type;
                 $field[$_definition_member_value]          = $value;
-
-                // Freeze the field definition object
-                $__freeze__.call($__object__, $field);
 
                 // Set the field in the definitions object
                 $__defineProperty__.call($__object__, $definitions, $name, { 'enumerable': true, 'value': $field });
@@ -766,19 +797,16 @@
                 if ($baseProtected || $basePublic)
                     $_definitionsCompilerBaseMethod($name, $type, null, $baseProtected, $basePublic, $override, $protected, $public);
 
-                // Create the method definition object
-                var $method = {};
+                // Create the method definition array
+                var $method = new $__array__($_definition_member_flagCount);
 
-                // Set the field definition object data
+                // Set the field definition data
                 $method[$_definition_member_method_abstract] = $abstract;
                 $method[$_definition_member_method_final]    = $sealed;
                 $method[$_definition_member_method_virtual]  = $virtual || $abstract || $override;
                 $method[$_definition_member_name]            = $name;
                 $method[$_definition_member_type]            = $type;
                 $method[$_definition_member_value]           = $value;
-
-                // Freeze the method definition object
-                $__freeze__.call($__object__, $method);
 
                 // Set the method in the definitions object
                 $__defineProperty__.call($__object__, $definitions, $name, { 'enumerable': true, 'value': $method });
@@ -802,8 +830,8 @@
                 for (var $propertyKey in $value)
                 {
                     // Break the property key string into a keywords array and get the member name and value
-                    var $propertyKeywords = $__trim__.call($$.asString($propertyKey)).split(' ') || [];
-                    var $memberName       = $$.asString($propertyKeywords.pop());
+                    var $propertyKeywords = $__trim__.call($propertyKey || '').split(' ');
+                    var $memberName       = $propertyKeywords.pop() || '';
                     var $memberValue      = $value[$propertyKey];
 
                     // If the member name is empty or whitespace, throw an exception
@@ -881,7 +909,7 @@
                     }
 
                     // If the member is not a function, throw an exception
-                    if (!$$.isFunction($memberValue))
+                    if (typeof $memberValue !== 'function')
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
                     // Set the member access modifier flags and value
@@ -984,16 +1012,13 @@
             case 'prototype':
             case 'static':
 
-                // Create the member definition object
-                var $member = {};
+                // Create the member definition array
+                var $member = new $__array__($_definition_member_flagCount);
 
-                // Set the member definition object data
+                // Set the member definition data
                 $member[$_definition_member_name]  = $name;
                 $member[$_definition_member_type]  = $type;
                 $member[$_definition_member_value] = $value;
-
-                // Freeze the member definition object
-                $__freeze__.call($__object__, $member);
 
                 // If the member has the prototype flag, set the member in the prototype definitions object
                 if ($typePrototype)
@@ -1027,15 +1052,9 @@
             if (!$injectionName)
                 continue;
 
-            // If the class has a definitions object
+            // If the class has a definitions object, set the injected definition array into the definitions object
             if ($definitions)
-            {
-                // Freeze the injected definition object
-                $__freeze__.call($__object__, $injection);
-
-                // Set the injected definition object into the definitions object
                 $__defineProperty__.call($__object__, $definitions, $injectionName, { 'enumerable': true, 'value': $injection });
-            }
 
             // If the class has a definitions cache, set the definition into the cache definitions object
             if ($cacheDefinitions)
@@ -1052,6 +1071,8 @@
                 return $reference;
         };
     };
+
+    // ########## RUNTIME ##########
 
     // Create the construct runtime helper functions
     var $_constructRuntimeClone       = function($type, $class, $cache, $injections)
@@ -1797,9 +1818,9 @@
             var $public    = $class[$_definition_public].call($_lock);
 
             // Get the private, protected, and public keys
-            var $privateKeys   = $__keys__.call($__object__, $private) || [];
-            var $protectedKeys = $__keys__.call($__object__, $protected) || [];
-            var $publicKeys    = $__keys__.call($__object__, $public) || [];
+            var $privateKeys   = $__keys__.call($__object__, $private);
+            var $protectedKeys = $__keys__.call($__object__, $protected);
+            var $publicKeys    = $__keys__.call($__object__, $public);
 
             // Create the references container
             var $references = $__create__.call($__object__, null);
@@ -1977,8 +1998,10 @@
         $__defineProperty__.call($__object__, $instance, $get && $get['name'] || $set && $set['name'] || '', { 'enumerable': true, 'get': $get && $get['value'] || undefined, 'set': $set && $set['value'] || undefined });
     };
 
+    // ########## NAMESPACE ##########
+
     // Create the compiler
-    var $$ = function()
+    $$ = function()
     {
         // Get the initial arguments
         var $argument    = 0;
@@ -2102,7 +2125,7 @@
             if ($modifiers.length <= $_const_precompile_prefix.length || $modifiers.substr(0, $_const_precompile_prefix.length) !== $_const_precompile_prefix)
             {
                 // Create the keywords array
-                var $keywords = $__trim__.call($modifiers).split(' ') || [];
+                var $keywords = $__trim__.call($modifiers).split(' ');
 
                 for (var $i = 0, $j = $keywords.length; $i < $j; $i++)
                 {
@@ -2391,7 +2414,7 @@
             var $as = function($as)
             {
                 // If the type is not a class or the instance is not an instance of type, return null
-                if (!$$.isClass($as) || !($instance instanceof $as))
+                if (!$as || typeof $as[$_definition_construct] !== 'function' || !($instance instanceof $as))
                     return null;
 
                 // Create the level tracker
@@ -2690,14 +2713,14 @@
             if ($baseClass && $baseClass[$_definition_abstract])
             {
                 // Get the array of keys for the base protected and public definitions objects
-                var $baseProtectedKeys = $__keys__.call($__object__, $baseProtected) || [];
-                var $basePublicKeys    = $__keys__.call($__object__, $basePublic) || [];
+                var $baseProtectedKeys = $__keys__.call($__object__, $baseProtected);
+                var $basePublicKeys    = $__keys__.call($__object__, $basePublic);
 
-                // Compile the protected definition object for each property defined in the base protected definition object
+                // Compile the protected definitions for each property defined in the base protected definitions
                 for (var $i = 0, $j = $baseProtectedKeys.length; $i < $j; $i++)
                     $_definitionsCompilerBaseAbstract($classProtected, $baseProtected, $baseProtectedKeys[$i]);
 
-                // Compile the public definition object for each property defined in the base public definition object
+                // Compile the public definitions for each property defined in the base public definitions
                 for (var $i = 0, $j = $basePublicKeys.length; $i < $j; $i++)
                     $_definitionsCompilerBaseAbstract($classPublic, $basePublic, $basePublicKeys[$i]);
             }
@@ -2728,10 +2751,10 @@
                 $__defineProperty__.call($__object__, $class, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value] });
             }
 
-            // Create the constructor definition object
-            var $constructorDefinition = {};
+            // Create the constructor definition array
+            var $constructorDefinition = new $__array__($_definition_member_flagCount);
 
-            // Set the constructor definition object data
+            // Set the constructor definition data
             $constructorDefinition[$_definition_member_method_abstract] = false;
             $constructorDefinition[$_definition_member_method_final]    = false;
             $constructorDefinition[$_definition_member_method_virtual]  = false;
@@ -2739,16 +2762,13 @@
             $constructorDefinition[$_definition_member_type]            = 'method';
             $constructorDefinition[$_definition_member_value]           = $constructor;
 
-            // Freeze the constructor definition object
-            $__freeze__.call($__object__, $constructorDefinition);
-
             // Set the constructor in the protected definitions object
             $__defineProperty__.call($__object__, $classProtected, 'constructor', { 'enumerable': true, 'value': $constructorDefinition });
 
             // Get the arrays of private, protected, and public member keys
-            var $classPrivateKeys   = $__keys__.call($__object__, $classPrivate) || [];
-            var $classProtectedKeys = $__keys__.call($__object__, $classProtected) || [];
-            var $classPublicKeys    = $__keys__.call($__object__, $classPublic) || [];
+            var $classPrivateKeys   = $__keys__.call($__object__, $classPrivate);
+            var $classProtectedKeys = $__keys__.call($__object__, $classProtected);
+            var $classPublicKeys    = $__keys__.call($__object__, $classPublic);
 
             // Create the construct and precompile helper functions
             $construct  = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections, $cache)
@@ -2841,7 +2861,7 @@
         else
         {
             // Get the array of cached member keys
-            var $classCacheKeys = $__keys__.call($__object__, $classCache) || [];
+            var $classCacheKeys = $__keys__.call($__object__, $classCache);
 
             // If the imported class data doesn't validate, throw an exception
             if ($levels !== $construct['l'] || $classCacheKeys.length !== $construct['k0'] + $construct['k1'] + $construct['k2'])
@@ -2930,10 +2950,10 @@
         return $class;
     };
 
-    // Define the compiler toString method
+    // Define the compiler "toString()" method
     $_defineMethod('toString', function()
     {
-        // Return the type string
+        // Return the global namespace type string
         return '[object jTypes]';
     });
 
@@ -2947,13 +2967,13 @@
     $_defineField('__proto', $_prototype, false);
     
     // ---------- INTEGER MAX/MIN ----------
-    $_defineField('intMax', 9007199254740992, false);
-    $_defineField('intMin', -9007199254740992, false);
+    $_defineField('intMax', $_const_int_max, false);
+    $_defineField('intMin', $_const_int_min, false);
 
     // ########## PACKAGES ##########
 
     // Define the package methods for class members
-    $__forEach__.call('private protected public prototype static'.split(' ') || [], function($modifier)
+    $__forEach__.call('private protected public prototype static'.split(' '), function($modifier)
     {
         // Create the package method
         var $method = function($modifiers, $value)
@@ -3009,11 +3029,7 @@
             $$.prototype = $method;
 
             // Set the prototype method without the "writable" flag
-            $__defineProperty__.call($__object__, $$, 'prototype',
-            {
-                'value': $method,
-                'writable': false
-            });
+            $__defineProperty__.call($__object__, $$, 'prototype', { 'value': $method, 'writable': false });
         }
         // Define the package method for the access modifier
         else
@@ -3029,7 +3045,7 @@
         var $types = $__create__.call($__object__, null);
 
         // Iterate the internal JavaScript types
-        $__forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' ') || [], function($type)
+        $__forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' '), function($type)
         {
             // Get the type keyword
             var $keyword = $type.toLowerCase();
@@ -3046,7 +3062,7 @@
         });
 
         // Iterate the known aliases of the internal JavaScript window type
-        $__forEach__.call('Window window Global global'.split(' ') || [], function($window)
+        $__forEach__.call('global Window DOMWindow'.split(' '), function($window)
         {
             // Insert the window into the types lookup
             $types['[object ' + $window + ']'] = 'window';
@@ -3551,23 +3567,23 @@
         // Define the module
         define(function()
         {
-            // Return the jTypes reference
+            // Return the global namespace
             return $$;
         });
     }
     // If the CommonJS module pattern is being used
     else if (typeof module !== 'undefined' && module && module.exports)
     {
-        // Define the module exports
+        // Set the module exports as the global namespace
         module.exports = $$;
     }
     else
     {
-        // If the "$$" shorthand global variable is not already defined or should be overwritten, define/overwrite it
+        // If the "$$" shorthand global namespace is not already defined or should be overwritten, define/overwrite it
         if (window.$$ === undefined || window.$$ === window.jTypes)
             window.$$ = $$;
 
-        // Define/overwrite the global variable
+        // Define/overwrite the global namespace
         window.jTypes = $$;
     }
 })(typeof window !== 'undefined' ? window : {});
