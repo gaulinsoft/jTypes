@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.5b254';
+    var $_version = '2.1.5b255';
 
     // ########## LANGUAGE ##########
 
@@ -2015,10 +2015,7 @@
         $set = $set && $set['set'] || undefined;
 
         // Set the property get/set accessor descriptors on the instance
-        $__defineProperty($instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
-
-        // Set the property get/set accessor descriptors on the instance
-        $__defineProperty__.call($__object__, $instance, $get && $get['name'] || $set && $set['name'] || '', { 'enumerable': true, 'get': $get && $get['value'] || undefined, 'set': $set && $set['value'] || undefined });
+        $__defineProperty__.call($__object__, $instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
     };
 
     // ########## NAMESPACE ##########
