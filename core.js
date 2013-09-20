@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.5b247';
+    var $_version = '2.1.5b248';
 
     // ########## LANGUAGE ##########
 
@@ -1839,18 +1839,22 @@
         // Return the precompiled string
         return $precompile;
     };
-    var $_constructRuntimeStack       = function($class, $last, $switch, $instance, $private, $base, $public, $typeExternal, $typeInternal, $isExpandoPrivate, $isExpandoPublic, $isInternal)
+    var $_constructRuntimeStack       = function($class, $last, $switch, $instance, $base, $private, $protected, $public, $typeExternal, $typeInternal, $isExpandoPrivate, $isExpandoPublic, $isInternal)
     {
-        // If this is the last stack or the chain has an expando private instance, define the self reference on the private instance
-        if ($last || $isExpandoPrivate)
+        // If this is the last stack, define the self reference on the protected instance
+        if ($protected && $last)
+            $__defineProperty__.call($__object__, $protected, '__self', { 'value': $instance });
+
+        // If the class has an expando private instance, define the self reference on the private instance
+        if (!$protected || $isExpandoPrivate)
             $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
 
         // If this is the last stack, define the self reference on the base instance
-        //if ($last)
+        //if (!$protected || $last)
         //    $__defineProperty__.call($__object__, $base, '__self', { 'value': $instance });
                     
-        // If this is the last stack or the chain has an expando public instance, define the self reference on the public instance
-        if ($last || $isExpandoPublic)
+        // If this is the last stack, a protected instance was not provided, or the class has an expando public instance, define the self reference on the public instance
+        if ($last || !$protected || $isExpandoPublic)
             $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
 
         // Define the public instance accessor on the private and base instances
@@ -1861,46 +1865,36 @@
         $__defineProperty__.call($__object__, $private, '__type', { 'value': $class });
         //$__defineProperty__.call($__object__, $base, '__type', { 'value': $class });
 
-        // If this is the last stack or the chain is switching to internal
-        if ($last || $switch)
-        {
-            // Define the chain type accessor on the public instance
+        // If this is the last stack, the chain is switching to internal, a protected instance was not provided, the class is not internal, or has an expando public instance, define the chain type accessor on the public instance
+        if ($last || $switch || !$protected || !$isInternal || $isExpandoPublic)
             $__defineProperty__.call($__object__, $public, '__type', { 'value': $isInternal ? null : $class });
+        
+        // If this is the last stack, define the type method on the protected instance
+        if ($protected && ($last || $switch))
+            $__defineProperty__.call($__object__, $protected, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
 
-            // Define the type method on the private and public instances
+        // If the class has an expando private instance, define the type method on the private instance
+        if (!$protected || $isExpandoPrivate)
             $__defineProperty__.call($__object__, $private, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+
+        // If this is the last stack, define the type method on the base instance
+        if ($last || $switch || !$protected)
+            $__defineProperty__.call($__object__, $base, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+
+        if ($last || !$protected || $isExpandoPublic)
             $__defineProperty__.call($__object__, $public, 'type', { 'value': $typeExternal });
-
-            // If this is the last stack, define the type method on the base instance
-            if ($last)
-                $__defineProperty__.call($__object__, $base, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
-        }
-        else
-        {
-            // If the chain is not internal or has an expando public instance, define the chain type accessor on the public instance
-            if (!$isInternal || $isExpandoPublic)
-                $__defineProperty__.call($__object__, $public, '__type', { 'value': $isInternal ? null : $class });
-
-            // If the chain has an expando private instance, define the type method on the private instance
-            if ($isExpandoPrivate)
-                $__defineProperty__.call($__object__, $private, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
-
-            // If the chain has an expando public instance, define the type method on the public instance
-            if ($isExpandoPublic)
-                $__defineProperty__.call($__object__, $public, 'type', { 'value': $typeExternal });
-        }
     };
-    var $_constructRuntimeStruct      = function($class, $type, $externalType, $cache, $injections, $private, $base, $public, $isExpandoPublic, $isInternal)
+    var $_constructRuntimeStruct      = function($class, $type, $externalType, $cache, $injections, $base, $private, $protected, $public, $isExpandoPublic, $isInternal)
     {
         // Create the clone method
         var $clone = $_constructRuntimeClone($type, $class, $cache, $injections);
                         
-        // Define the clone method on the base and private instances
-        $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
+        // Define the clone method on the private and base instances
         $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
+        $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
 
         // If the chain is not internal or has an expando public instance, define the clone method on the public instance
-        if (!$isInternal || $isExpandoPublic)
+        if (!$isInternal || !$protected || $isExpandoPublic)
             $__defineProperty__.call($__object__, $public, 'clone', { 'value': $isInternal ? $_constructRuntimeClone($type, $externalType, $cache, $injections) : $clone });
     };
     
@@ -2499,10 +2493,6 @@
                     $base    = $stack[1];
                     $private = $stack[0];
                     $public  = $stack[2];
-
-                    // If this is not the last matrix stack, define the base instance reference on the private instance
-                    //if (!$matrixLast)
-                    //    $__defineProperty__.call($__object__, $private, '__base', { 'value': $matrix[$i + 1][3] });
                     
                     // Get the chain type
                     var $chainInternal = $i < $external;
@@ -2514,11 +2504,11 @@
                     var $chainExpandoPublic  = $chainType[$_definition_expando_public];
                     
                     // Construct the stack
-                    $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $private, $base, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
+                    $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $base, $private, null, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
                     
                     // If the instance is a struct, construct the struct stack
                     if ($struct)
-                        $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $private, $base, $public, $chainExpandoPublic, $chainInternal);
+                        $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $base, $private, null, $public, $chainExpandoPublic, $chainInternal);
                     
                     // If this is not the last matrix stack
                     if (!$matrixLast)
@@ -2611,11 +2601,11 @@
                     var $chainExpandoPublic  = $chainType[$_definition_expando_public];
 
                     // Construct the stack
-                    $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $private, $base, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
+                    $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $base, $private, $protected, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
                     
                     // If the instance is a struct, construct the struct stack
                     if ($struct)
-                        $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $private, $base, $public, $chainExpandoPublic, $chainInternal);
+                        $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $base, $private, $protected, $public, $chainExpandoPublic, $chainInternal);
 
                     // Create the matrix instance stack
                     $matrix[$i] = [$private, $protected, $public, $base];
