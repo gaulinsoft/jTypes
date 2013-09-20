@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.5b248';
+    var $_version = '2.1.5b250';
 
     // ########## LANGUAGE ##########
 
@@ -1771,8 +1771,8 @@
         var $vars       = [];
 
         // Create the protected and public overrides containers
-        var $protectedOverrides = {};
-        var $publicOverrides    = {};
+        var $protectedOverrides = $__create__.call($__object__, null);
+        var $publicOverrides    = $__create__.call($__object__, null);
 
         for (var $i = 0, $j = $chain.length; $i < $j; $i++)
         {
@@ -1802,7 +1802,7 @@
             var $publicKeys    = $__keys__.call($__object__, $public) || [];
 
             // Create the references container
-            var $references = {};
+            var $references = $__create__.call($__object__, null);
 
             // Dump the private definitions into the variables and statements arrays
             for (var $k = 0, $l = $privateKeys.length; $k < $l; $k++)
@@ -2212,14 +2212,14 @@
 
         // Create the cache, private, protected, and public references along with the inherited prototype reference
         var $classCache     = null;
-        var $classPrivate   = {};
+        var $classPrivate   = $__create__.call($__object__, null);
         var $classProtected = null;
         var $classPrototype = null;
         var $classPublic    = null;
 
         // Create the prototype and static definitions objects
-        var $definitionsPrototype = {};
-        var $definitionsStatic    = {};
+        var $definitionsPrototype = $__create__.call($__object__, null);
+        var $definitionsStatic    = $__create__.call($__object__, null);
 
         // Create the base protected and public references
         var $baseProtected = null;
@@ -2249,8 +2249,8 @@
 
                 // Create the chained cache, protected, and public definitions objects
                 $classCache     = $__create__.call($__object__, $baseClass[$_definition_cache]);
-                $classProtected = {};
-                $classPublic    = {};
+                $classProtected = $__create__.call($__object__, null);
+                $classPublic    = $__create__.call($__object__, null);
             }
             else
             {
@@ -2259,7 +2259,7 @@
                     throw $_exceptionFormat($_lang_$$_derive_import);
 
                 // Create the chained cache, chained protected, and chained public definitions objects
-                $classCache     = $optimized ? $__create__.call($__object__, $baseClass[$_definition_cache]) : {};
+                $classCache     = $__create__.call($__object__, $optimized ? $baseClass[$_definition_cache] : null);
                 $classProtected = $__create__.call($__object__, $baseProtected);
                 $classPublic    = $__create__.call($__object__, $basePublic);
             }
@@ -2301,10 +2301,10 @@
         else
         {
             // Create the cache, protected, and public definitions objects along with the inherited prototype
-            $classCache     = {};
-            $classProtected = {};
+            $classCache     = $__create__.call($__object__, null);
+            $classProtected = $__create__.call($__object__, null);
             $classPrototype = new $_class();
-            $classPublic    = {};
+            $classPublic    = $__create__.call($__object__, null);
 
             $external = 0;
         }
@@ -2437,8 +2437,8 @@
             };
 
             // Create the public and protected override caches
-            var $protectedOverrides = !$import && !$optimized ? {} : null;
-            var $publicOverrides    = !$import && !$optimized ? {} : null;
+            var $protectedOverrides = !$import && !$optimized ? $__create__.call($__object__, null) : null;
+            var $publicOverrides    = !$import && !$optimized ? $__create__.call($__object__, null) : null;
 
             // Create the injection objects array
             var $injections  = $unsafe ? arguments[$_clone ? 1 : 0] : null;
@@ -2458,7 +2458,7 @@
                 {
                     // Create the base, private, and public instances
                     $base      = $__create__.call($__object__, $instance);
-                    $private   = {};
+                    $private   = $__create__.call($__object__, $instance);
                     $public    = $__create__.call($__object__, $instance);
 
                     // Create the constructor context and matrix instance stack
@@ -2466,9 +2466,9 @@
                     var $stack   = [$private, $base, $public];
 
                     // Create the inherits objects
-                    var $baseInherits      = {};
-                    var $protectedInherits = {};
-                    var $publicInherits    = {};
+                    var $baseInherits      = $__create__.call($__object__, null);
+                    var $protectedInherits = $__create__.call($__object__, null);
+                    var $publicInherits    = $__create__.call($__object__, null);
 
                     // Build the matrix instance stack
                     ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
@@ -3026,7 +3026,7 @@
     (function()
     {
         // Create the types lookup
-        var $types = {};
+        var $types = $__create__.call($__object__, null);
 
         // Iterate the internal JavaScript types
         $__forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' ') || [], function($type)
@@ -3480,18 +3480,11 @@
         return $class[$_definition_precompile].call($_lock) || '';
     });
 
-    var $_flat = function()
-    {
-        //
-    };
-
-    $_flat.prototype = null;
-
     // ---------- FLAT ----------
     $_defineMethod('flat', function()
     {
         // Return a new flat object
-        return new $_flat();
+        return $__create__.call($__object__, null);
     });
 
     // ---------- FORMAT ----------
