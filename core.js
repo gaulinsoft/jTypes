@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.5b252';
+    var $_version = '2.1.5b253';
 
     // ########## LANGUAGE ##########
 
@@ -260,8 +260,9 @@
 
     // ---------- DEFINITION ----------
 
-    // Create the definition obfuscated key hash flag and length setting
+    // Create the definition obfuscated key hash flag, key hint, and length setting
     var $_definition_keyHash   = true;
+    var $_definition_keyHint   = $_keyGenerator(3);
     var $_definition_keyLength = 3;
 
     // Create the definition obfuscated keys
@@ -320,8 +321,8 @@
 
     // ---------- PACKAGES (MEMBER) ----------
 
-    // Create the member package flag hint key
-    var $_package_flag = $_keyGenerator(3);
+    // Create the member package key hint
+    var $_package_keyHint = $_keyGenerator(3);
 
     // Create the member package flags
     var $_package_value     = 0;
@@ -489,7 +490,7 @@
         var $name     = $keywords.pop() || '';
 
         // If the member is a package
-        if (typeof $value === 'function' && $value[$_package_flag] === $value)
+        if (typeof $value === 'function' && $value[$_package_keyHint] === $value)
         {
             // If any keywords were provided, throw an exception
             if ($keywords.length)
@@ -1033,7 +1034,7 @@
     var $_definitionsCompilerInjections     = function($definitions, $cacheDefinitions, $injections)
     {
         // If no injections array was provided, return
-        if (!$$.isArrayLikeObject($injections) || !$definitions && !$cacheDefinitions)
+        if (!$__isArray__.call($__array__, $injections) || !$definitions && !$cacheDefinitions)
             return;
 
         for (var $i = 0, $j = $injections.length; $i < $j; $i++)
@@ -1041,8 +1042,8 @@
             // Get the current injection
             var $injection = $injections[$i];
 
-            // If no injection was found, continue
-            if (!$injection)
+            // If no injection array was found, continue
+            if (!$__isArray__.call($__array__, $injection))
                 continue;
 
             // Get the injection name
@@ -2011,26 +2012,26 @@
         var $prototype   = null;
 
         // If the constructor is not a simple object
-        if (!$$.isSimpleObject($constructor))
+        if ($constructor === null || typeof $constructor !== 'object' || $__getPrototypeOf__.call($__object__, $constructor) !== $__objectProto__)
         {
             // Get the prototype
             $prototype = arguments[$argument++];
 
-            // If the constructor is not a function
-            if (!$$.isFunction($constructor))
+            // If the constructor is not a function or is a class
+            if (typeof $constructor !== 'function' || $constructor[$_definition_keyHint] === $constructor)
             {
                 // If the constructor is not a class
-                if (!$$.isClass($constructor))
+                if (typeof $constructor !== 'function' || $constructor[$_definition_keyHint] !== $constructor)
                 {
                     // If the constructor is not a string, throw an exception
-                    if (!$$.isString($constructor))
+                    if (typeof $constructor !== 'string')
                         throw $_exceptionArguments(null, arguments);
 
                     // Use the first argument as the modifiers string
                     $modifiers = $constructor;
 
                     // If the prototype is a class
-                    if ($$.isClass($prototype))
+                    if (typeof $prototype === 'function' && $prototype[$_definition_keyHint] === $prototype)
                     {
                         // Use the second argument as the base class
                         $baseClass   = $prototype;
@@ -2040,8 +2041,8 @@
                     else
                         $constructor = $prototype;
 
-                    // If the constructor is not a function
-                    if (!$$.isFunction($constructor))
+                    // If the constructor is not a function or is a class
+                    if (typeof $constructor !== 'function' || $constructor[$_definition_keyHint] === $constructor)
                     {
                         // Use the third argument as the prototype
                         $prototype   = $constructor;
@@ -2056,8 +2057,8 @@
                     // Use the first argument as the base class
                     $baseClass = $constructor;
 
-                    // If the prototype is a function
-                    if ($$.isFunction($prototype))
+                    // If the prototype is a function and not a class
+                    if (typeof $prototype === 'function' && $prototype[$_definition_keyHint] !== $prototype)
                     {
                         // Use the second argument as the constructor
                         $constructor = $prototype;
@@ -2069,7 +2070,7 @@
             }
 
             // If the prototype is not a simple object, throw an exception
-            if (!$$.isSimpleObject($prototype))
+            if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf__.call($__object__, $prototype) !== $__objectProto__)
                 throw $_exceptionArguments(null, arguments);
         }
         else
@@ -2099,7 +2100,10 @@
             }
             // Use an empty function as the default constructor
             else
-                $constructor = $$.empty();
+                $constructor = function()
+                {
+                    //
+                };
         }
 
         // Create the flags
@@ -2309,7 +2313,7 @@
             $_subclass = false;
 
             // If a current class was found
-            while ($$.isClass($current))
+            while (typeof $current === 'function' && $current[$_definition_keyHint] === $current)
             {
                 // Add the current class to the chain array
                 $chain.push($current);
@@ -2413,12 +2417,20 @@
             // Create the casting and checking functions
             var $as = function($as)
             {
+                // If the type is the class, return the public instance
+                if ($as === $class)
+                    return $public;
+
+                // If the type is the external class, return the external public instance
+                if ($as === $type)
+                    return $matrix[$external][2];
+
                 // If the type is not a class or the instance is not an instance of type, return null
-                if (!$as || typeof $as[$_definition_construct] !== 'function' || !($instance instanceof $as))
+                if (typeof $as !== 'function' || $as[$_definition_keyHint] !== $as || !($instance instanceof $as))
                     return null;
 
                 // Create the level tracker
-                var $level = 0;
+                var $level = 1;
 
                 do
                 {
@@ -2434,8 +2446,12 @@
             };
             var $is = function($is)
             {
+                // If the type is the class or the external class, return true
+                if ($is === $class || $is === $type)
+                    return true;
+
                 // If no type was provided, return false
-                if (!$is)
+                if (typeof $is !== 'function')
                     return false;
 
                 // Return true if the instance is an instance of the type
@@ -2701,8 +2717,7 @@
         if ($import || $optimized)
             $__defineProperty__.call($__object__, $classCache, 'constructor', { 'enumerable': true, 'value': $constructor });
 
-        // Create the class cache
-        var $cache      = {};
+        // Create the precompile string and helper function references
         var $eval       = null;
         var $precompile = null;
 
@@ -2878,28 +2893,32 @@
         if (!$import && !$expandoPrototype)
             $__freeze__.call($__object__, $classPrototype);
 
-        // Set the class cache data
-        $cache[$_definition_abstract]          = { 'value': $abstract };
-        $cache[$_definition_baseClass]         = { 'value': $baseClass };
-        $cache[$_definition_cache]             = { 'value': $classCache };
-        $cache[$_definition_construct]         = { 'value': !$import && !$final ? $construct : $$.empty() };
-        $cache[$_definition_expando_class]     = { 'value': $expandoClass };
-        $cache[$_definition_expando_private]   = { 'value': $expandoPrivate };
-        $cache[$_definition_expando_prototype] = { 'value': $expandoPrototype };
-        $cache[$_definition_expando_public]    = { 'value': $expandoPublic };
-        $cache[$_definition_final]             = { 'value': $final };
-        $cache[$_definition_import]            = { 'value': $import };
-        $cache[$_definition_internal]          = { 'value': $internal };
-        $cache[$_definition_optimized]         = { 'value': $optimized };
-        $cache[$_definition_private]           = { 'value': $_definitionsCompilerLock($classPrivate) };
-        $cache[$_definition_precompile]        = { 'value': $precompile };
-        $cache[$_definition_protected]         = { 'value': $_definitionsCompilerLock($classProtected) };
-        $cache[$_definition_public]            = { 'value': $_definitionsCompilerLock($classPublic) };
-        $cache[$_definition_struct]            = { 'value': $struct };
-        $cache[$_definition_unsafe]            = { 'value': $unsafe };
+        // Create the class data
+        var $data = {};
 
-        // Set the class cache
-        $__defineProperties__.call($__object__, $class, $cache);
+        // Set the class cache data
+        $data[$_definition_abstract]          = { 'value': $abstract };
+        $data[$_definition_baseClass]         = { 'value': $baseClass };
+        $data[$_definition_cache]             = { 'value': $classCache };
+        $data[$_definition_construct]         = { 'value': !$import && !$final ? $construct : null};
+        $data[$_definition_expando_class]     = { 'value': $expandoClass };
+        $data[$_definition_expando_private]   = { 'value': $expandoPrivate };
+        $data[$_definition_expando_prototype] = { 'value': $expandoPrototype };
+        $data[$_definition_expando_public]    = { 'value': $expandoPublic };
+        $data[$_definition_final]             = { 'value': $final };
+        $data[$_definition_import]            = { 'value': $import };
+        $data[$_definition_internal]          = { 'value': $internal };
+        $data[$_definition_keyHint]           = { 'value': $class };
+        $data[$_definition_optimized]         = { 'value': $optimized };
+        $data[$_definition_private]           = { 'value': $_definitionsCompilerLock($classPrivate) };
+        $data[$_definition_precompile]        = { 'value': $precompile };
+        $data[$_definition_protected]         = { 'value': $_definitionsCompilerLock($classProtected) };
+        $data[$_definition_public]            = { 'value': $_definitionsCompilerLock($classPublic) };
+        $data[$_definition_struct]            = { 'value': $struct };
+        $data[$_definition_unsafe]            = { 'value': $unsafe };
+
+        // Set the class data
+        $__defineProperties__.call($__object__, $class, $data);
 
         // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
         $class.prototype = $classPrototype;
@@ -2994,7 +3013,8 @@
                 case 2:
 
                     // FORMAT $modifiers
-                    $modifiers = $$.asString($modifiers);
+                    if (typeof $modifiers !== 'string')
+                        $modifiers = '';
 
                     // Set the member package data
                     $package[$_package_modifiers] = $modifiers ? $modifier + ' ' + $modifiers : $modifier;
@@ -3015,8 +3035,8 @@
             // Lock the member package
             $package = $_definitionsCompilerLock($package);
 
-            // Set the member package flag
-            $package[$_package_flag] = $package;
+            // Set the member package key hint
+            $package[$_package_keyHint] = $package;
 
             // Return the member package
             return $package;
@@ -3071,23 +3091,27 @@
         // Define the type method
         $_defineMethod('type', function($object)
         {
-            // If the object is null or undefined, return the object cast as a string
-            if ($object === null || $object === undefined)
-                return $object + '';
+            // If the object is undefined, return the "undefined" type string
+            if ($object === undefined)
+                return 'undefined';
+
+            // If the object is null, return the "null" type string
+            if ($object === null)
+                return 'null';
+
+            // If the object is a function, return either the "class" or "function" type string
+            if (typeof $object === 'function')
+                return $object[$_definition_keyHint] === $object ? 'class': 'function';
 
             // If the object is the window object, return the "window" type string
             if ($object === window)
                 return 'window';
 
-            // If the object is a class, return the "class" type string
-            if ($__hasOwnProperty__.call($object, $_definition_construct) && typeof $object[$_definition_construct] === 'function')
-                return 'class';
-
             // If the object is a class instance, return the "instance" type string
             if ($object instanceof $_class)
                 return 'instance';
 
-            // Return the type string from the types lookup using the native "toString" function
+            // Return the type string from the types lookup using the native "toString()" function
             return $types[$__toString__.call($object)] || 'object';
         });
     })();
@@ -3119,7 +3143,7 @@
     $_defineMethod('isClass', function($object)
     {
         // Return true if the object has a class construct function
-        return $object && typeof $object[$_definition_construct] === 'function';
+        return typeof $object === 'function' && $object[$_definition_keyHint] === $object;
     });
 
     // ---------- COMPLEX OBJECT ----------
@@ -3144,7 +3168,7 @@
     $_defineMethod('isFiniteInt', function($number)
     {
         // Return true if the object is a number, finite, and within the maximum and minimum representable integers
-        return $$.isFinite($number) && $number <= $$.intMax && $number >= $$.intMin && $number === Math.floor($number);
+        return $$.isFinite($number) && $number <= $_const_int_max && $number >= $_const_int_min && $number === Math.floor($number);
     });
 
     // ---------- FLAT OBJECT ----------
@@ -3388,12 +3412,12 @@
             return $finite ? 0 : NaN;
 
         // If the number is greater than the maximum integer, return infinity
-        if ($object > $$.intMax)
-            return $finite ? $$.intMax : Infinity;
+        if ($object > $_const_int_max)
+            return $finite ? $_const_int_max : Infinity;
 
         // If the number is less than the minimum integer, return negative infinity
-        if ($object < $$.intMin)
-            return $finite ? $$.intMin : -Infinity;
+        if ($object < $_const_int_min)
+            return $finite ? $_const_int_min : -Infinity;
 
         // If the number is less than zero, return the number as an integer (rounded towards zero)
         if ($object < 0)
