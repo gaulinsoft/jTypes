@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.5b253';
+    var $_version = '2.1.5b254';
 
     // ########## LANGUAGE ##########
 
@@ -411,7 +411,7 @@
         // Create the property method definition array
         var $method = new $__array__($_definition_member_flagCount);
 
-        // Reference some accessor data
+        // Get the accessor accessor name and private access modifier flag
         var $accessorName    = $accessor[$_accessor_name];
         var $accessorPrivate = $accessor[$_accessor_private];
 
@@ -424,22 +424,25 @@
         $method[$_definition_member_type]               = $type;
         $method[$_definition_member_value]              = $accessor[$_accessor_value];
 
+        // Create the definition descriptor
+        var $descriptor = { 'enumerable': true, 'value': $method };
+
         // If the accessor has an access modifier
         if ($accessor[$_accessor_modifiers])
         {
             // If the accessor is private, set the method definition in the private definitions object
             if ($accessorPrivate)
-                $__defineProperty__.call($__object__, $privateDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
+                $__defineProperty__.call($__object__, $privateDefinitions, $accessorName, $descriptor);
             // If the accessor is protected, set the method definition in the protected definitions object
             else if ($accessor[$_accessor_protected])
-                $__defineProperty__.call($__object__, $protectedDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
+                $__defineProperty__.call($__object__, $protectedDefinitions, $accessorName, $descriptor);
             // If the accessor is public, set the method definition in the public definitions object
             else if ($accessor[$_accessor_public])
-                $__defineProperty__.call($__object__, $publicDefinitions, $accessorName, { 'enumerable': true, 'value': $method });
+                $__defineProperty__.call($__object__, $publicDefinitions, $accessorName, $descriptor);
         }
         // Set the method definition in the definitions object
         else
-            $__defineProperty__.call($__object__, $definitions, $accessorName, { 'enumerable': true, 'value': $method });
+            $__defineProperty__.call($__object__, $definitions, $accessorName, $descriptor);
     };
     var $_definitionsCompilerBaseAbstract   = function($definitions, $baseDefinitions, $baseKey)
     {
@@ -475,7 +478,7 @@
         // If the method has the override modifier
         if ($override)
         {
-            // If no base definition was found, or it is not a virtual base method, or it is a final base method, throw an exception
+            // If no base definition was found, it is not a virtual base method, or it is a final base method, throw an exception
             if (!$baseDefinition || $baseDefinition[$_definition_member_type] !== $type || !$baseDefinition[$_definition_member_method_virtual] || $baseDefinition[$_definition_member_method_final])
                 throw $_exceptionFormat($_lang_$$_member_override_null, $key.charAt(0) === '~' ? $key.substr($key.indexOf('_') + 1) : $key, $typeName);
         }
@@ -492,8 +495,8 @@
         // If the member is a package
         if (typeof $value === 'function' && $value[$_package_keyHint] === $value)
         {
-            // If any keywords were provided, throw an exception
-            if ($keywords.length)
+            // If any keywords were provided other than the static keyword, throw an exception
+            if ($keywords.length && $keywords[0] !== 'static')
                 throw $_exceptionFormat($_lang_$$_member_name_package, $name);
 
             // Unlock the package
@@ -533,6 +536,9 @@
                     var $memberName  = $__trim__.call($propertyKey || '').split(' ').pop() || '';
                     var $memberValue = $value[$propertyKey];
 
+                    // Create the member definition descriptor
+                    var $memberDescriptor = { 'enumerable': true, 'value': $memberValue };
+
                     // If the member name is not "get"
                     if ($memberName !== 'get')
                     {
@@ -544,7 +550,7 @@
                         $hasSet = true;
 
                         // Set the definition in the cache definitions object
-                        $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, { 'enumerable': true, 'value': $memberValue });
+                        $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, $memberDescriptor);
 
                         // If the set accessor has the override flag, no get accessor has been provided yet, and an inherited get accessor was found, create the default get accessor
                         if ($hasOverride && !$hasGet && $cacheDefinitions['~get_' + $name])
@@ -560,7 +566,7 @@
                         $hasGet = true;
 
                         // Set the definition in the cache definitions object
-                        $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, { 'enumerable': true, 'value': $memberValue });
+                        $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, $memberDescriptor);
 
                         // If the get accessor has the override flag, no set accessor has been provided yet, and an inherited set accessor was found, create the default set accessor
                         if ($hasOverride && !$hasSet && $cacheDefinitions['~set_' + $name])
@@ -1067,7 +1073,7 @@
         // Return the lock wrapper function
         return function()
         {
-            // If this function was internally called, return the reference
+            // If this function was internally unlocked, return the reference
             if (this === $_lock)
                 return $reference;
         };
@@ -1114,7 +1120,7 @@
         {
             'get': function()
             {
-                // If the constructor is not cached
+                // If the base constructor is not cached
                 if ($constructor === undefined)
                 {
                     // Get the base constructor
@@ -1195,8 +1201,8 @@
                 if ($constructor)
                     $this = $_lazy ? $_constructRuntimeConstructor($private) : $context;
 
-                // Construct the method descriptor
-                $_constructRuntimeMethod($descriptor, false, !$constructor, $this, $definition[$_definition_member_value], $private, $public);
+                // Construct the method and method descriptor
+                $descriptor = { 'enumerable': !$constructor, 'value': $_constructRuntimeMethod($definition[$_definition_member_value], $this, $private, $public) };
 
                 // If the method is protected or public
                 if ($isProtected || $isPublic)
@@ -1245,12 +1251,18 @@
                 var $mergePrivate = $complex && $__hasOwnProperty__.call($private, $name);
                 var $merge        = $mergeBase || $mergePrivate;
 
-                // Construct the property descriptor
-                $_constructRuntimeMethod($descriptor, $complex && !$merge, true, $private, $definition[$_definition_member_value], $private, $public, $accessor);
+                // Construct the accessor method
+                var $method = $_constructRuntimeMethod($definition[$_definition_member_value], $private, $private, $public);
 
                 // If the property is not complex or is being merged
                 if (!$complex || $merge)
                 {
+                    // Construct the property descriptor
+                    $descriptor = { 'enumerable': true };
+
+                    // Set the accessor method
+                    $descriptor[$accessor] = $method;
+
                     // Check if a public merge operation is being performed
                     var $mergePublic = $complex && $__hasOwnProperty__.call($public, $name);
 
@@ -1261,8 +1273,8 @@
                         $__defineProperty__.call($__object__, $base, $name, $mergeBase ? $_constructRuntimeMerge($descriptor, $base[$name], $accessor) : $descriptor);
 
                         // Get the override and inherited descriptors
-                        var $override = $_constructRuntimeOverride($descriptor, $key, $definition, $overrides);
-                        var $inherit  = $override ? $override : $descriptor;
+                        var $override = $_constructRuntimeOverride($method, $key, $definition, $overrides);
+                        var $inherit  = $override ? { 'enumerable': true, 'value': $override } : $descriptor;
 
                         // If lazy loading is not enabled
                         if (!$_lazy)
@@ -1283,7 +1295,7 @@
 
                             // If a private merge was found, set the private property descriptor
                             if ($mergePrivate)
-                                $__defineProperty__.call($__object__, $private, $name, $private[$name]);
+                                $__defineProperty__.call($__object__, $private, $name, $_constructRuntimeMerge(null, $private[$name], $accessor));
                         }
 
                         // If the property is public, set the public property descriptor (merge if a public descriptor was found)
@@ -1291,7 +1303,7 @@
                             $__defineProperty__.call($__object__, $public, $name, $mergePublic ? $_constructRuntimeMerge($inherit, $public[$name], $accessor) : $inherit);
                         // If a public merge was found, set the public property descriptor
                         else if ($mergePublic)
-                            $__defineProperty__.call($__object__, $public, $name, $public[$name]);
+                            $__defineProperty__.call($__object__, $public, $name, $_constructRuntimeMerge(null, $public[$name], $accessor));
                     }
                     // If the property is being merged
                     else if ($merge)
@@ -1303,16 +1315,16 @@
                         if ($mergeBase)
                         {
                             // Set the base property descriptor
-                            $__defineProperty__.call($__object__, $base, $name, $base[$name]);
+                            $__defineProperty__.call($__object__, $base, $name, $_constructRuntimeMerge(null, $base[$name], $accessor));
 
                             // If lazy loading is enabled, set the protected property descriptor
                             if ($_lazy)
-                                $__defineProperty__.call($__object__, $protected, $name, $protected[$name]);
+                                $__defineProperty__.call($__object__, $protected, $name, $_constructRuntimeMerge(null, $protected[$name], $accessor));
                         }
 
                         // If a public merge was found, set the public property descriptor
                         if ($mergePublic)
-                            $__defineProperty__.call($__object__, $public, $name, $public[$name]);
+                            $__defineProperty__.call($__object__, $public, $name, $_constructRuntimeMerge(null, $public[$name], $accessor));
                     }
                     // Set the private property descriptor
                     else
@@ -1320,39 +1332,45 @@
                 }
                 else
                 {
+                    // Create the wrapper descriptor
+                    var $descriptorWrapper = { 'configurable': true, 'value': $method };
+
                     // If the property is protected or public
                     if ($isProtected || $isPublic)
                     {
                         // Set the base property descriptor
-                        $__defineProperty__.call($__object__, $base, $name, { 'configurable': true, 'value': $descriptor });
+                        $__defineProperty__.call($__object__, $base, $name, $descriptorWrapper);
 
-                        // Get the override and inherited descriptors
-                        var $override = $_constructRuntimeOverride($descriptor, $key, $definition, $overrides);
-                        var $inherit  = $override ? $override : $descriptor;
+                        // Get the override and inherited methods
+                        var $override = $_constructRuntimeOverride($method, $key, $definition, $overrides);
+                        var $inherit  = $override ? $override : $method;
+
+                        // Create the inherit descriptor
+                        var $descriptorInherit = { 'configurable': true, 'value': $inherit };
 
                         // If lazy loading is not enabled
                         if (!$_lazy)
                         {
                             // Set the private property descriptor
-                            $__defineProperty__.call($__object__, $private, $name, { 'configurable': true, 'value': $inherit });
+                            $__defineProperty__.call($__object__, $private, $name, $descriptorInherit);
 
-                            // Set the property descriptor in the inherits object
+                            // Set the inherited accessor method in the inherits object
                             $inherits[$name] = $inherit;
 
-                            // Set the property descriptor in the base inherits object
-                            $inheritsBase[$name] = $descriptor;
+                            // Set the accessor method in the base inherits object
+                            $inheritsBase[$name] = $method;
                         }
                         // Set the protected property descriptor
                         else
-                            $__defineProperty__.call($__object__, $protected, $name, { 'configurable': true, 'value': $inherit });
+                            $__defineProperty__.call($__object__, $protected, $name, $descriptorInherit);
 
                         // If the property is public, set the public property descriptor
                         if ($isPublic)
-                            $__defineProperty__.call($__object__, $public, $name, { 'configurable': true, 'value': $inherit });
+                            $__defineProperty__.call($__object__, $public, $name, $descriptorInherit);
                     }
                     // Set the private property descriptor
                     else
-                        $__defineProperty__.call($__object__, $private, $name, { 'configurable': true, 'value': $descriptor });
+                        $__defineProperty__.call($__object__, $private, $name, $descriptorWrapper);
                 }
 
                 break;
@@ -1570,14 +1588,14 @@
         $descriptor['enumerable']   = true;
         $descriptor['get']          = function()
         {
-            // Return the field value
+            // Return the value
             return $value;
         };
 
         // If read-only checking is enabled
         if ($readonly)
         {
-            // Set the descriptor setting with read-only checking
+            // Set the descriptor set accessor with read-only checking
             $descriptor['set'] = function($v)
             {
                 // If the field is read-only, throw an exception
@@ -1594,7 +1612,7 @@
         }
         else
         {
-            // Set the descriptor setting without read-only checking
+            // Set the descriptor set accessor without read-only checking
             $descriptor['set'] = function($v)
             {
                 // If the provided value is set to a private instance, set the value to the public instance
@@ -1641,7 +1659,7 @@
             // If read-only checking is enabled
             if ($readonly)
             {
-                // Set the descriptor setting with read-only checking
+                // Set the descriptor set accessor with read-only and type checking
                 $descriptor['set'] = function($v)
                 {
                     // If the field is read-only, throw an exception
@@ -1658,7 +1676,7 @@
             }
             else
             {
-                // Set the descriptor setting without read-only checking
+                // Set the descriptor set accessor with type checking but without read-only checking
                 $descriptor['set'] = function($v)
                 {
                     // If the value does not match the type, throw an exception
@@ -1675,7 +1693,7 @@
             // If read-only checking is enabled
             if ($readonly)
             {
-                // Set the descriptor setting with read-only checking
+                // Set the descriptor set accessor with read-only checking but without type checking
                 $descriptor['set'] = function($v)
                 {
                     // If the field is read-only, throw an exception
@@ -1688,7 +1706,7 @@
             }
             else
             {
-                // Set the descriptor setting without read-only checking
+                // Set the descriptor set accessor without read-only and type checking
                 $descriptor['set'] = function($v)
                 {
                     // Set the injected value
@@ -1702,24 +1720,32 @@
         // If the method is a get accessor
         if ($accessor === 'get')
         {
+            // If no descriptor was provided, return a set wrapper descriptor
+            if (!$descriptor)
+                return { 'enumerable': true, 'set': $merge };
+
             // Return the merged descriptor (merge set accessor)
             return (
             {
                 'configurable': $descriptor['configurable'],
                 'enumerable':   $descriptor['enumerable'],
                 'get':          $descriptor['get'],
-                'set':          $merge['set']
+                'set':          $merge
             });
         }
-        // If the method is a set accessor, return the merged descriptor
+        // If the method is a set accessor
         else if ($accessor === 'set')
         {
+            // If no descriptor was provided, return a get wrapper descriptor
+            if (!$descriptor)
+                return { 'enumerable': true, 'get': $merge };
+
             // Return the merged descriptor (merge get accessor)
             return (
             {
                 'configurable': $descriptor['configurable'],
                 'enumerable':   $descriptor['enumerable'],
-                'get':          $merge['get'],
+                'get':          $merge,
                 'set':          $descriptor['set']
             });
         }
@@ -1727,14 +1753,10 @@
         // Return the descriptor
         return $descriptor;
     };
-    var $_constructRuntimeMethod      = function($descriptor, $configurable, $enumerable, $this, $function, $private, $public, $accessor)
+    var $_constructRuntimeMethod      = function($function, $this, $private, $public)
     {
-        // Set the descriptor data
-        $descriptor['configurable'] = $configurable;
-        $descriptor['enumerable']   = $enumerable;
-
-        // Create the method wrapper
-        var $method = function()
+        // Return the method wrapper
+        return function()
         {
             // Apply the function in the provided context with the current arguments
             var $return = $function.apply($this, arguments);
@@ -1746,18 +1768,8 @@
             // Return the return value
             return $return;
         };
-
-        // If the method is a get accessor, set the get descriptor to the method wrapper
-        if ($accessor === 'get')
-            $descriptor['get'] = $method;
-        // If the method is a set accessor, set the set descriptor to the method wrapper
-        else if ($accessor === 'set')
-            $descriptor['set'] = $method;
-        // Set the value descriptor to the method wrapper
-        else
-            $descriptor['value'] = $method;
     };
-    var $_constructRuntimeOverride    = function($descriptor, $key, $definition, $overrides)
+    var $_constructRuntimeOverride    = function($data, $key, $definition, $overrides)
     {
         // If the method is virtual
         if ($definition[$_definition_member_method_virtual])
@@ -1765,21 +1777,21 @@
             // If the method is not final
             if (!$definition[$_definition_member_method_final])
             {
-                // Get the override descriptor from the overrides object
+                // Get the override data from the overrides object
                 var $override = $overrides[$key] || null;
 
-                // If no descriptor was found in the overrides object, set the method descriptor in it
+                // If no override data was found in the overrides object, set the method data in it
                 if (!$override)
-                    $overrides[$key] = $descriptor;
+                    $overrides[$key] = $data;
 
-                // Return the override descriptor
+                // Return the override data
                 return $override;
             }
-            // Set the method descriptor in the overrides object
+            // Set the method data in the overrides object
             else
-                $overrides[$key] = $descriptor;
+                $overrides[$key] = $data;
         }
-        // Clear any method override that may have existed
+        // Clear any override data that may have existed
         else
             $overrides[$key] = null;
 
@@ -1924,10 +1936,10 @@
     var $_importRuntimeAccessor    = function($cache, $name, $private, $public, $type, $accessor)
     {
         // Create the accessor descriptor with the embedded property name
-        var $descriptor = { 'name': $name };
+        var $descriptor = { 'enumerable': true, 'name': $name };
 
-        // Constructor the accessor descriptor
-        $_constructRuntimeMethod($descriptor, false, true, $private, $cache['~' + $accessor + 'et_' + $name], $private, $public);//, $type);
+        // Construct the accessor method
+        $descriptor[$accessor + 'et'] = $_constructRuntimeMethod($cache['~' + $accessor + 'et_' + $name], $private, $private, $public);//, $type);
 
         // Return the descriptor
         return $descriptor;
@@ -1980,21 +1992,31 @@
     var $_importRuntimeMethod      = function($cache, $name, $private, $public, $type)
     {
         // Create the method descriptor with the embedded property name and the method context
-        var $descriptor = { 'name': $name };
+        var $descriptor = { 'enumerable': true, 'name': $name };
         var $this       = $private;
 
         // If the method is the constructor, create the constructor context
         if ($name === 'constructor')
             $this = $_constructRuntimeConstructor($private);
 
-        // Construct the method descriptor
-        $_constructRuntimeMethod($descriptor, false, true, $this, $cache[$name], $private, $public);//, $type);
+        // Construct the method
+        $descriptor['value'] = $_constructRuntimeMethod($cache[$name], $this, $private, $public);//, $type);
 
         // Return the descriptor
         return $descriptor;
     };
     var $_importRuntimeProperty    = function($instance, $get, $set)
     {
+        // Extract the property name
+        var $name = $get && $get['name'] || $set && $set['name'] || '';
+        
+        // Extract the get and set accessors
+        $get = $get && $get['get'] || undefined;
+        $set = $set && $set['set'] || undefined;
+
+        // Set the property get/set accessor descriptors on the instance
+        $__defineProperty($instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
+
         // Set the property get/set accessor descriptors on the instance
         $__defineProperty__.call($__object__, $instance, $get && $get['name'] || $set && $set['name'] || '', { 'enumerable': true, 'get': $get && $get['value'] || undefined, 'set': $set && $set['value'] || undefined });
     };
