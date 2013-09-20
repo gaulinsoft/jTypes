@@ -26,7 +26,7 @@
     // ########## VERSION ##########
 
     // Set the jTypes version
-    var $_version = '2.1.5a244';
+    var $_version = '2.1.5b247';
 
     // ########## LANGUAGE ##########
 
@@ -613,7 +613,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'is' || $name === 'constructor' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
+        if ($name === 'as' || $isStruct && $name === 'clone' || $name === 'constructor' || $name === 'is' || $name === 'type' || $name === '__base' || $name === '__self' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -1054,7 +1054,7 @@
     };
 
     // Create the construct runtime helper functions
-    var $_constructRuntimeClone       = function($class, $type, $private, $public, $cache, $injections)
+    var $_constructRuntimeClone       = function($type, $class, $cache, $injections)
     {
         // Return the clone method
         return function()
@@ -1063,20 +1063,20 @@
             $_subclass = true;
 
             // Create the cloned instance prototype
-            var $instanceNew = new $class();
+            var $instanceNew = new $type();
 
             // Reset the subclass flag and set the clone flag
             $_subclass = false;
             $_clone    = true;
 
             // Create the cloned instance
-            var $instanceClone = $class.call($instanceNew, $cache, $injections);
+            var $instanceClone = $type.call($instanceNew, $cache, $injections);
 
             // Reset the clone flag
             $_clone = false;
 
-            // Return the cloned instance casted as the current type
-            return $instanceClone.as($type);
+            // Return the cloned instance casted as the class
+            return $instanceClone.as($class);
         };
     };
     var $_constructRuntimeConstructor = function($private)
@@ -1111,211 +1111,7 @@
         // Return the constructor instance
         return $this;
     };
-    var $_constructRuntimeField       = function($descriptor, $configurable, $name, $value, $private, $public, $readonly)
-    {
-        // Set the descriptor data
-        $descriptor['configurable'] = $configurable;
-        $descriptor['enumerable']   = true;
-        $descriptor['get']          = function()
-        {
-            // Return the field value
-            return $value;
-        };
-
-        // If read-only checking is enabled
-        if ($readonly)
-        {
-            // Set the descriptor setting with read-only checking
-            $descriptor['set'] = function($v)
-            {
-                // If the field is read-only, throw an exception
-                if ($readonly())
-                    throw $_exceptionFormat($_lang_$$_field_readonly, $name);
-
-                // If the provided value is set to a private instance, set the value to the public instance
-                if ($v === $private)
-                    $value = $public;
-                // Set the value to the provided value
-                else
-                    $value = $v;
-            };
-        }
-        else
-        {
-            // Set the descriptor setting without read-only checking
-            $descriptor['set'] = function($v)
-            {
-                // If the provided value is set to a private instance, set the value to the public instance
-                if ($v === $private)
-                    $value = $public;
-                // Set the value to the provided value
-                else
-                    $value = $v;
-            };
-        }
-    };
-    var $_constructRuntimeInjection   = function($descriptor, $name, $key, $injections, $type, $readonly)
-    {
-        // Set the descriptor data
-        $descriptor['configurable'] = false;
-        $descriptor['enumerable']   = true;
-        $descriptor['get']          = function()
-        {
-            // Return the injected value
-            return $injections[$key];
-        };
-
-        // If type checking is enabled
-        if ($type)
-        {
-            // If read-only checking is enabled
-            if ($readonly)
-            {
-                // Set the descriptor setting with read-only checking
-                $descriptor['set'] = function($v)
-                {
-                    // If the field is read-only, throw an exception
-                    if ($readonly())
-                        throw $_exceptionFormat($_lang_$$_field_readonly, $name);
-
-                    // If the value does not match the type, throw an exception
-                    if ($v !== undefined && $v !== null && $$.type($v) !== $type)
-                        throw $_exceptionFormat($_lang_$$_field_type, $name, $type);
-
-                    // Set the injected value
-                    $injections[$key] = $v;
-                };
-            }
-            else
-            {
-                // Set the descriptor setting without read-only checking
-                $descriptor['set'] = function($v)
-                {
-                    // If the value does not match the type, throw an exception
-                    if ($v !== undefined && $v !== null && $$.type($v) !== $type)
-                        throw $_exceptionFormat($_lang_$$_field_type, $name, $type);
-
-                    // Set the injected value
-                    $injections[$key] = $v;
-                };
-            }
-        }
-        else
-        {
-            // If read-only checking is enabled
-            if ($readonly)
-            {
-                // Set the descriptor setting with read-only checking
-                $descriptor['set'] = function($v)
-                {
-                    // If the field is read-only, throw an exception
-                    if ($readonly())
-                        throw $_exceptionFormat($_lang_$$_field_readonly, $name);
-
-                    // Set the injected value
-                    $injections[$key] = $v;
-                };
-            }
-            else
-            {
-                // Set the descriptor setting without read-only checking
-                $descriptor['set'] = function($v)
-                {
-                    // Set the injected value
-                    $injections[$key] = $v;
-                };
-            }
-        }
-    };
-    var $_constructRuntimeMerge       = function($descriptor, $merge, $accessor)
-    {
-        // If the method is a get accessor
-        if ($accessor === 'get')
-        {
-            // Return the merged descriptor (merge set accessor)
-            return (
-            {
-                'configurable': $descriptor['configurable'],
-                'enumerable':   $descriptor['enumerable'],
-                'get':          $descriptor['get'],
-                'set':          $merge['set']
-            });
-        }
-        // If the method is a set accessor, return the merged descriptor
-        else if ($accessor === 'set')
-        {
-            // Return the merged descriptor (merge get accessor)
-            return (
-            {
-                'configurable': $descriptor['configurable'],
-                'enumerable':   $descriptor['enumerable'],
-                'get':          $merge['get'],
-                'set':          $descriptor['set']
-            });
-        }
-
-        // Return the descriptor
-        return $descriptor;
-    };
-    var $_constructRuntimeMethod      = function($descriptor, $configurable, $enumerable, $this, $function, $private, $public, $accessor)
-    {
-        // Set the descriptor data
-        $descriptor['configurable'] = $configurable;
-        $descriptor['enumerable']   = $enumerable;
-
-        // Create the method wrapper
-        var $method = function()
-        {
-            // Apply the function in the provided context with the current arguments
-            var $return = $function.apply($this, arguments);
-
-            // If the return value is a private instance, return the public instance
-            if ($return === $private)
-                return $public;
-
-            // Return the return value
-            return $return;
-        };
-
-        // If the method is a get accessor, set the get descriptor to the method wrapper
-        if ($accessor === 'get')
-            $descriptor['get'] = $method;
-        // If the method is a set accessor, set the set descriptor to the method wrapper
-        else if ($accessor === 'set')
-            $descriptor['set'] = $method;
-        // Set the value descriptor to the method wrapper
-        else
-            $descriptor['value'] = $method;
-    };
-    var $_constructRuntimeOverride    = function($descriptor, $key, $definition, $overrides)
-    {
-        // If the method is virtual
-        if ($definition[$_definition_member_method_virtual])
-        {
-            // If the method is not final
-            if (!$definition[$_definition_member_method_final])
-            {
-                // Get the override descriptor from the overrides object
-                var $override = $overrides[$key] || null;
-
-                // If no descriptor was found in the overrides object, set the method descriptor in it
-                if (!$override)
-                    $overrides[$key] = $descriptor;
-
-                // Return the override descriptor
-                return $override;
-            }
-            // Set the method descriptor in the overrides object
-            else
-                $overrides[$key] = $descriptor;
-        }
-        // Clear any method override that may have existed
-        else
-            $overrides[$key] = null;
-
-        return null;
-    };
-    var $_constructRuntime            = function($key, $definitions, $overrides, $inherits, $inheritsBase, $readonly, $context, $isProtected, $isPublic, $base, $private, $protected, $public, $injections, $cache)
+    var $_constructRuntimeDefinition  = function($key, $definitions, $overrides, $inherits, $inheritsBase, $readonly, $context, $isProtected, $isPublic, $base, $private, $protected, $public, $injections, $cache)
     {
         // Get the member definition from the definitions object
         var $definition = $definitions[$key];
@@ -1540,24 +1336,6 @@
                 break;
         }
     };
-    var $_constructRuntimeInherits    = function($inherits, $derivedInherits, $instance)
-    {
-        for (var $inheritKey in $inherits)
-        {
-            // If the instance redefined this member, continue
-            if ($__hasOwnProperty__.call($instance, $inheritKey))
-                continue;
-
-            // Get the inherited member
-            var $inherit = $inherits[$inheritKey];
-
-            // Set the instance member descriptor
-            $__defineProperty__.call($__object__, $instance, $inheritKey, $inherit);
-
-            // Set the member descriptor in the derived inherits object
-            $derivedInherits[$inheritKey] = $inherit;
-        }
-    };
     var $_constructRuntimeDump        = function($vars, $statements, $definitions, $references, $key, $index, $level, $protectedOverrides, $publicOverrides)
     {
         // Get the member definition from the definitions object along with the name and type
@@ -1763,6 +1541,228 @@
         else
             $statements.push('d(' + $_precompile_matrix + $level + '$0,' + $reference + ')');
     };
+    var $_constructRuntimeField       = function($descriptor, $configurable, $name, $value, $private, $public, $readonly)
+    {
+        // Set the descriptor data
+        $descriptor['configurable'] = $configurable;
+        $descriptor['enumerable']   = true;
+        $descriptor['get']          = function()
+        {
+            // Return the field value
+            return $value;
+        };
+
+        // If read-only checking is enabled
+        if ($readonly)
+        {
+            // Set the descriptor setting with read-only checking
+            $descriptor['set'] = function($v)
+            {
+                // If the field is read-only, throw an exception
+                if ($readonly())
+                    throw $_exceptionFormat($_lang_$$_field_readonly, $name);
+
+                // If the provided value is set to a private instance, set the value to the public instance
+                if ($v === $private)
+                    $value = $public;
+                // Set the value to the provided value
+                else
+                    $value = $v;
+            };
+        }
+        else
+        {
+            // Set the descriptor setting without read-only checking
+            $descriptor['set'] = function($v)
+            {
+                // If the provided value is set to a private instance, set the value to the public instance
+                if ($v === $private)
+                    $value = $public;
+                // Set the value to the provided value
+                else
+                    $value = $v;
+            };
+        }
+    };
+    var $_constructRuntimeInherits    = function($inherits, $derivedInherits, $instance)
+    {
+        for (var $inheritKey in $inherits)
+        {
+            // If the instance redefined this member, continue
+            if ($__hasOwnProperty__.call($instance, $inheritKey))
+                continue;
+
+            // Get the inherited member
+            var $inherit = $inherits[$inheritKey];
+
+            // Set the instance member descriptor
+            $__defineProperty__.call($__object__, $instance, $inheritKey, $inherit);
+
+            // Set the member descriptor in the derived inherits object
+            $derivedInherits[$inheritKey] = $inherit;
+        }
+    };
+    var $_constructRuntimeInjection   = function($descriptor, $name, $key, $injections, $type, $readonly)
+    {
+        // Set the descriptor data
+        $descriptor['configurable'] = false;
+        $descriptor['enumerable']   = true;
+        $descriptor['get']          = function()
+        {
+            // Return the injected value
+            return $injections[$key];
+        };
+
+        // If type checking is enabled
+        if ($type)
+        {
+            // If read-only checking is enabled
+            if ($readonly)
+            {
+                // Set the descriptor setting with read-only checking
+                $descriptor['set'] = function($v)
+                {
+                    // If the field is read-only, throw an exception
+                    if ($readonly())
+                        throw $_exceptionFormat($_lang_$$_field_readonly, $name);
+
+                    // If the value does not match the type, throw an exception
+                    if ($v !== undefined && $v !== null && $$.type($v) !== $type)
+                        throw $_exceptionFormat($_lang_$$_field_type, $name, $type);
+
+                    // Set the injected value
+                    $injections[$key] = $v;
+                };
+            }
+            else
+            {
+                // Set the descriptor setting without read-only checking
+                $descriptor['set'] = function($v)
+                {
+                    // If the value does not match the type, throw an exception
+                    if ($v !== undefined && $v !== null && $$.type($v) !== $type)
+                        throw $_exceptionFormat($_lang_$$_field_type, $name, $type);
+
+                    // Set the injected value
+                    $injections[$key] = $v;
+                };
+            }
+        }
+        else
+        {
+            // If read-only checking is enabled
+            if ($readonly)
+            {
+                // Set the descriptor setting with read-only checking
+                $descriptor['set'] = function($v)
+                {
+                    // If the field is read-only, throw an exception
+                    if ($readonly())
+                        throw $_exceptionFormat($_lang_$$_field_readonly, $name);
+
+                    // Set the injected value
+                    $injections[$key] = $v;
+                };
+            }
+            else
+            {
+                // Set the descriptor setting without read-only checking
+                $descriptor['set'] = function($v)
+                {
+                    // Set the injected value
+                    $injections[$key] = $v;
+                };
+            }
+        }
+    };
+    var $_constructRuntimeMerge       = function($descriptor, $merge, $accessor)
+    {
+        // If the method is a get accessor
+        if ($accessor === 'get')
+        {
+            // Return the merged descriptor (merge set accessor)
+            return (
+            {
+                'configurable': $descriptor['configurable'],
+                'enumerable':   $descriptor['enumerable'],
+                'get':          $descriptor['get'],
+                'set':          $merge['set']
+            });
+        }
+        // If the method is a set accessor, return the merged descriptor
+        else if ($accessor === 'set')
+        {
+            // Return the merged descriptor (merge get accessor)
+            return (
+            {
+                'configurable': $descriptor['configurable'],
+                'enumerable':   $descriptor['enumerable'],
+                'get':          $merge['get'],
+                'set':          $descriptor['set']
+            });
+        }
+
+        // Return the descriptor
+        return $descriptor;
+    };
+    var $_constructRuntimeMethod      = function($descriptor, $configurable, $enumerable, $this, $function, $private, $public, $accessor)
+    {
+        // Set the descriptor data
+        $descriptor['configurable'] = $configurable;
+        $descriptor['enumerable']   = $enumerable;
+
+        // Create the method wrapper
+        var $method = function()
+        {
+            // Apply the function in the provided context with the current arguments
+            var $return = $function.apply($this, arguments);
+
+            // If the return value is a private instance, return the public instance
+            if ($return === $private)
+                return $public;
+
+            // Return the return value
+            return $return;
+        };
+
+        // If the method is a get accessor, set the get descriptor to the method wrapper
+        if ($accessor === 'get')
+            $descriptor['get'] = $method;
+        // If the method is a set accessor, set the set descriptor to the method wrapper
+        else if ($accessor === 'set')
+            $descriptor['set'] = $method;
+        // Set the value descriptor to the method wrapper
+        else
+            $descriptor['value'] = $method;
+    };
+    var $_constructRuntimeOverride    = function($descriptor, $key, $definition, $overrides)
+    {
+        // If the method is virtual
+        if ($definition[$_definition_member_method_virtual])
+        {
+            // If the method is not final
+            if (!$definition[$_definition_member_method_final])
+            {
+                // Get the override descriptor from the overrides object
+                var $override = $overrides[$key] || null;
+
+                // If no descriptor was found in the overrides object, set the method descriptor in it
+                if (!$override)
+                    $overrides[$key] = $descriptor;
+
+                // Return the override descriptor
+                return $override;
+            }
+            // Set the method descriptor in the overrides object
+            else
+                $overrides[$key] = $descriptor;
+        }
+        // Clear any method override that may have existed
+        else
+            $overrides[$key] = null;
+
+        return null;
+    };
     var $_constructRuntimePrecompile  = function($chain)
     {
         // Create the closures string and the statements and variables arrays
@@ -1839,7 +1839,71 @@
         // Return the precompiled string
         return $precompile;
     };
+    var $_constructRuntimeStack       = function($class, $last, $switch, $instance, $private, $base, $public, $typeExternal, $typeInternal, $isExpandoPrivate, $isExpandoPublic, $isInternal)
+    {
+        // If this is the last stack or the chain has an expando private instance, define the self reference on the private instance
+        if ($last || $isExpandoPrivate)
+            $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
 
+        // If this is the last stack, define the self reference on the base instance
+        //if ($last)
+        //    $__defineProperty__.call($__object__, $base, '__self', { 'value': $instance });
+                    
+        // If this is the last stack or the chain has an expando public instance, define the self reference on the public instance
+        if ($last || $isExpandoPublic)
+            $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
+
+        // Define the public instance accessor on the private and base instances
+        $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
+        //$__defineProperty__.call($__object__, $base, '__this', { 'value': $public });
+
+        // Define the chain type accessor on the private and base instances
+        $__defineProperty__.call($__object__, $private, '__type', { 'value': $class });
+        //$__defineProperty__.call($__object__, $base, '__type', { 'value': $class });
+
+        // If this is the last stack or the chain is switching to internal
+        if ($last || $switch)
+        {
+            // Define the chain type accessor on the public instance
+            $__defineProperty__.call($__object__, $public, '__type', { 'value': $isInternal ? null : $class });
+
+            // Define the type method on the private and public instances
+            $__defineProperty__.call($__object__, $private, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+            $__defineProperty__.call($__object__, $public, 'type', { 'value': $typeExternal });
+
+            // If this is the last stack, define the type method on the base instance
+            if ($last)
+                $__defineProperty__.call($__object__, $base, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+        }
+        else
+        {
+            // If the chain is not internal or has an expando public instance, define the chain type accessor on the public instance
+            if (!$isInternal || $isExpandoPublic)
+                $__defineProperty__.call($__object__, $public, '__type', { 'value': $isInternal ? null : $class });
+
+            // If the chain has an expando private instance, define the type method on the private instance
+            if ($isExpandoPrivate)
+                $__defineProperty__.call($__object__, $private, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+
+            // If the chain has an expando public instance, define the type method on the public instance
+            if ($isExpandoPublic)
+                $__defineProperty__.call($__object__, $public, 'type', { 'value': $typeExternal });
+        }
+    };
+    var $_constructRuntimeStruct      = function($class, $type, $externalType, $cache, $injections, $private, $base, $public, $isExpandoPublic, $isInternal)
+    {
+        // Create the clone method
+        var $clone = $_constructRuntimeClone($type, $class, $cache, $injections);
+                        
+        // Define the clone method on the base and private instances
+        $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
+        $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
+
+        // If the chain is not internal or has an expando public instance, define the clone method on the public instance
+        if (!$isInternal || $isExpandoPublic)
+            $__defineProperty__.call($__object__, $public, 'clone', { 'value': $isInternal ? $_constructRuntimeClone($type, $externalType, $cache, $injections) : $clone });
+    };
+    
     // Create the import runtime helper functions
     var $_importRuntimeAccessor    = function($cache, $name, $private, $public, $type, $accessor)
     {
@@ -2130,7 +2194,9 @@
         var $chain     = [];
         var $construct = null;
         var $current   = $baseClass;
+        var $external  = $internal ? 1 : 0;
         var $levels    = 1;
+        var $type      = null;
 
         // If the class has the import flag
         if ($import)
@@ -2141,6 +2207,7 @@
             // Copy the imported construct data into the class
             $abstract = !!$construct['a'];
             $final    = !!$construct['f'];
+            $internal = !!$construct['i'];
             $struct   = !!$construct['s'];
             $unsafe   = $_unsafe && $construct['u'] === $_unsafe;
         }
@@ -2230,6 +2297,9 @@
                 // Add the current class to the chain array
                 $chain.push($current);
 
+                if ($internal && $current[$_definition_internal])
+                    $external++;
+
                 // Find the next class in the chain
                 $current = $current[$_definition_baseClass];
             }
@@ -2241,6 +2311,8 @@
             $classProtected = {};
             $classPrototype = new $_class();
             $classPublic    = {};
+
+            $external = 0;
         }
 
         for (var $key in $prototype)
@@ -2277,6 +2349,18 @@
             }
         }
 
+        var $typeExternal = function()
+        {
+            return $type;
+        };
+        var $typeInternal = null;
+
+        if ($internal)
+            $typeInternal = function()
+            {
+                return $class;
+            };
+
         // Create the class
         var $class = function()
         {
@@ -2310,10 +2394,10 @@
             }
 
             // Create the casting and checking functions
-            var $as = function($type)
+            var $as = function($as)
             {
                 // If the type is not a class or the instance is not an instance of type, return null
-                if (!$$.isClass($type) || !($instance instanceof $type))
+                if (!$$.isClass($as) || !($instance instanceof $as))
                     return null;
 
                 // Create the level tracker
@@ -2322,7 +2406,7 @@
                 do
                 {
                     // If the type was found in the chain array, break
-                    if ($chain[$level] === $type)
+                    if ($chain[$level] === $as)
                         break;
                 }
                 // If the level is still valid
@@ -2331,14 +2415,14 @@
                 // Return the public instance
                 return $matrix[$level][2];
             };
-            var $is = function($type)
+            var $is = function($is)
             {
                 // If no type was provided, return false
-                if (!$type)
+                if (!$is)
                     return false;
 
                 // Return true if the instance is an instance of the type
-                return !!($instance instanceof $type);
+                return !!($instance instanceof $is);
             };
 
             // Set the "as" and "is" methods in the construct base
@@ -2362,9 +2446,12 @@
             var $protectedOverrides = !$import && !$optimized ? {} : null;
             var $publicOverrides    = !$import && !$optimized ? {} : null;
 
-            // Create the injection objects array and get the cache matrix if the instance is a clone
+            // Create the injection objects array
             var $injections  = $unsafe ? arguments[$_clone ? 1 : 0] : null;
+
+            // Get the cache matrix if the instance is a clone and set the last flag
             var $matrixCache = $_clone ? arguments[0] : null;
+            var $matrixLast  = true;
 
             // If lazy loading is not enabled and the class does not have the import flag and is not optimized
             if (!$_lazy && !$import && !$optimized)
@@ -2383,14 +2470,6 @@
                     // Create the constructor context and matrix instance stack
                     var $context = $__create__.call($__object__, $private);
                     var $stack   = [$private, $base, $public];
-
-                    // Define the self reference and public instance accessors on the private instance
-                    $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
-                    $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
-
-                    // If the class is not internal, define the self reference accessor and the public instance
-                    if (!$internal)
-                        $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
 
                     // Create the inherits objects
                     var $baseInherits      = {};
@@ -2421,33 +2500,28 @@
                     $private = $stack[0];
                     $public  = $stack[2];
 
-                    // Get the current type
-                    var $type = $chain[$i];
-
-                    // Define the type accessors on the private and public instances
-                    $__defineProperty__.call($__object__, $private, '__type', { 'value': $type });
-
-                    // If the class is not internal, define the type accessor and the public instance
-                    if (!$internal)
-                        $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
-
-                    // If the instance is a struct
+                    // If this is not the last matrix stack, define the base instance reference on the private instance
+                    //if (!$matrixLast)
+                    //    $__defineProperty__.call($__object__, $private, '__base', { 'value': $matrix[$i + 1][3] });
+                    
+                    // Get the chain type
+                    var $chainInternal = $i < $external;
+                    var $chainSwitch   = $external > 0 && $i === $external - 1;
+                    var $chainType     = $chain[$i];
+                    
+                    // Get the chain expando flags
+                    var $chainExpandoPrivate = $chainType[$_definition_expando_private];
+                    var $chainExpandoPublic  = $chainType[$_definition_expando_public];
+                    
+                    // Construct the stack
+                    $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $private, $base, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
+                    
+                    // If the instance is a struct, construct the struct stack
                     if ($struct)
-                    {
-                        // Create the clone method
-                        var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix, $injections);
-
-                        // Define the clone method on the base and private instances
-                        $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
-                        $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
-
-                        // If the class is not internal, define the clone method on the public instance
-                        if (!$internal)
-                            $__defineProperty__.call($__object__, $public, 'clone', { 'value': $clone });
-                    }
-
-                    // If the stack has a base class
-                    if ($i !== $levels - 1)
+                        $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $private, $base, $public, $chainExpandoPublic, $chainInternal);
+                    
+                    // If this is not the last matrix stack
+                    if (!$matrixLast)
                     {
                         // Get the base instance reference
                         var $privateBase = $matrix[$i + 1][1];
@@ -2497,12 +2571,15 @@
                     $__freeze__.call($__object__, $base);
 
                     // If the class is not expando-private, freeze the private instance object
-                    if (!$type[$_definition_expando_private])
+                    if (!$chainExpandoPrivate)
                         $__freeze__.call($__object__, $private);
 
                     // If the class is not expando-public, freeze the public instance object
-                    if (!$type[$_definition_expando_public])
+                    if (!$chainExpandoPublic)
                         $__freeze__.call($__object__, $public);
+
+                    // Remove the last matrix stack flag
+                    $matrixLast = false;
                 }
             }
             else
@@ -2520,45 +2597,31 @@
                     // Create the private instance
                     $private = $__create__.call($__object__, $protected);
 
-                    // Define the self reference and public instance accessors on the private instance
-                    $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
-                    $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
-
-                    // Get the current type
-                    var $type = $chain[$i];
-
-                    // Define the type accessor on the private instance
-                    $__defineProperty__.call($__object__, $private, '__type', { 'value': $type });
-
-                    // If the class is not internal
-                    if (!$internal)
-                    {
-                        // Define the self reference and type accessors and the public instance
-                        $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
-                        $__defineProperty__.call($__object__, $public, '__type', { 'value': $type });
-                    }
-
-                    // If the stack has a base class, define the base instance reference on the private instance
-                    if ($i !== $levels - 1)
+                    // If this is not the last matrix stack, define the base instance reference on the private instance
+                    if (!$matrixLast)
                         $__defineProperty__.call($__object__, $private, '__base', { 'value': $matrix[$i + 1][3] });
+                    
+                    // Get the chain type
+                    var $chainInternal = $i < $external;
+                    var $chainSwitch   = $external > 0 && $i === $external - 1;
+                    var $chainType     = $chain[$i];
+                    
+                    // Get the chain expando flags
+                    var $chainExpandoPrivate = $chainType[$_definition_expando_private];
+                    var $chainExpandoPublic  = $chainType[$_definition_expando_public];
 
-                    // If the instance is a struct
+                    // Construct the stack
+                    $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $private, $base, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
+                    
+                    // If the instance is a struct, construct the struct stack
                     if ($struct)
-                    {
-                        // Create the clone method
-                        var $clone = $_constructRuntimeClone($class, $type, $private, $public, $matrix, $injections);
-                        
-                        // Define the clone method on the base and private instances
-                        $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
-                        $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
-
-                        // If the class is not internal, define the clone method on the public instance
-                        if (!$internal)
-                            $__defineProperty__.call($__object__, $public, 'clone', { 'value': $clone });
-                    }
+                        $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $private, $base, $public, $chainExpandoPublic, $chainInternal);
 
                     // Create the matrix instance stack
                     $matrix[$i] = [$private, $protected, $public, $base];
+
+                    // Remove the last matrix stack flag
+                    $matrixLast = false;
                 }
 
                 // If the instance is a clone or the class does not have the import flag and is not optimized
@@ -2613,6 +2676,13 @@
 
         // Prepend the class to the chain array and set the levels count
         $levels = $chain.unshift($class);
+
+        // If this class is internal and does not inherit from any non-internal classes, reset the external level
+        if ($internal && $external >= $levels)
+            $external = 0;
+        
+        // Get the external type
+        $type = $chain[$external];
 
         // If the class has the import flag or is optimized, set the constructor in the cache definitions object
         if ($import || $optimized)
@@ -2719,17 +2789,17 @@
                 var $cacheProtected = $cache ? $cache[1] : null;
                 var $cachePublic    = $cache ? $cache[2] : null;
 
-                // Construct each private member in the instance matrix
+                // Construct each private member definition in the instance matrix
                 for (var $i = 0, $j = $classPrivateKeys.length; $i < $j; $i++)
-                    $_constructRuntime($classPrivateKeys[$i], $classPrivate, null, null, null, $readonly, null, false, false, $base, $private, $protected, $public, $injections, $cachePrivate);
+                    $_constructRuntimeDefinition($classPrivateKeys[$i], $classPrivate, null, null, null, $readonly, null, false, false, $base, $private, $protected, $public, $injections, $cachePrivate);
 
-                // Construct each protected member in the instance matrix
+                // Construct each protected member definition in the instance matrix
                 for (var $i = 0, $j = $classProtectedKeys.length; $i < $j; $i++)
-                    $_constructRuntime($classProtectedKeys[$i], $classProtected, $protectedOverrides, $protectedInherits, $baseInherits, $readonly, $context, true, false, $base, $private, $protected, $public, $injections, $cacheProtected);
+                    $_constructRuntimeDefinition($classProtectedKeys[$i], $classProtected, $protectedOverrides, $protectedInherits, $baseInherits, $readonly, $context, true, false, $base, $private, $protected, $public, $injections, $cacheProtected);
 
-                // Construct each public member in the instance matrix
+                // Construct each public member definition in the instance matrix
                 for (var $i = 0, $j = $classPublicKeys.length; $i < $j; $i++)
-                    $_constructRuntime($classPublicKeys[$i], $classPublic, $publicOverrides, $publicInherits, $baseInherits, $readonly, null, false, true, $base, $private, $protected, $public, $injections, $cachePublic);
+                    $_constructRuntimeDefinition($classPublicKeys[$i], $classPublic, $publicOverrides, $publicInherits, $baseInherits, $readonly, null, false, true, $base, $private, $protected, $public, $injections, $cachePublic);
 
                 // If lazy loading is enabled
                 if ($_lazy)
@@ -2763,6 +2833,7 @@
                 // Append the class data to the precompiled string
                 $evalExport += '$.a=' + ($abstract ? '!0' : '!1') + ';';
                 $evalExport += '$.f=' + ($final ? '!0' : '!1') + ';';
+                $evalExport += '$.i=' + ($internal ? '!0' : '!1') + ';';
                 $evalExport += '$.k0=' + $classPrivateKeys.length + ';';
                 $evalExport += '$.k1=' + $classProtectedKeys.length + ';';
                 $evalExport += '$.k2=' + $classPublicKeys.length + ';';
@@ -3279,7 +3350,7 @@
     });
 
     // ---------- FLOAT ----------
-    $_defineMethod('asFloat', function($object, $finite)
+    $_defineMethod('asFloat', function($object)
     {
         // Get the object type
         var $type = $$.type($object);
@@ -3291,7 +3362,7 @@
             $object = parseFloat($object);
             $type   = 'number';
         }
-
+        
         // If the object is not a number, return NaN
         if ($type !== 'number')
             return NaN;
@@ -3308,15 +3379,15 @@
 
         // If the object is not a number, return NaN
         if (isNaN($object))
-            return NaN;
+            return $finite ? 0 : NaN;
 
         // If the number is greater than the maximum integer, return infinity
         if ($object > $$.intMax)
-            return Infinity;
+            return $finite ? $$.intMax : Infinity;
 
         // If the number is less than the minimum integer, return negative infinity
         if ($object < $$.intMin)
-            return -Infinity;
+            return $finite ? $$.intMin : -Infinity;
 
         // If the number is less than zero, return the number as an integer (rounded towards zero)
         if ($object < 0)
@@ -3359,31 +3430,14 @@
     // ---------- BASE ----------
     $_defineMethod('base', function($class)
     {
+        // debug throw?
+
         // CHECK $class
         if (!$$.isClass($class))
             return null;
 
         // Return the base class
         return $class[$_definition_baseClass] || null;
-    });
-
-    // ---------- DERIVED ----------
-    $_defineMethod('derived', function($class)
-    {
-        // CHECK $class
-        if (!$$.isClass($class))
-            return null;
-
-        // Get the derived classes
-        var $derived = $class[$_definition_derivedClasses].call($_lock) || [];
-        var $return  = new $__array__($derived.length);
-
-        // Copy the derived classes to the return array
-        for (var $i = 0, $j = $return.length; $i < $j; $i++)
-            $return[$i] = $derived[$i];
-
-        // Return the return array
-        return $return;
     });
 
     // ---------- EMPTY ----------
