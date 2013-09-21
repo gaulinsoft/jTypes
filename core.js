@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.5b256';
+    var $_version = '2.1.5b257';
 
     // ########## LANGUAGE ##########
 
@@ -1109,11 +1109,9 @@
     };
     var $_constructRuntimeConstructor = function($private)
     {
-        // Create the constructor instance
-        var $this = $__create__.call($__object__, $private);
-
-        // Create the constructor reference
+        // Create the constructor reference and instance
         var $constructor = undefined;
+        var $this        = $__create__.call($__object__, $private);
 
         // Mask the base instance reference with the base constructor get accessor
         $__defineProperty__.call($__object__, $this, '__base',
@@ -1193,9 +1191,9 @@
 
             case 'method':
 
-                // Create the method context
-                var $this        = $private;
+                // Create the constructor flag and method context
                 var $constructor = $isProtected && $name === 'constructor';
+                var $this        = $private;
 
                 // If the method is the constructor, set the instance as the constructor instance
                 if ($constructor)
@@ -1260,7 +1258,7 @@
                     // Construct the property descriptor
                     $descriptor = { 'enumerable': true };
 
-                    // Set the accessor method
+                    // Set the accessor method in the property descriptor
                     $descriptor[$accessor] = $method;
 
                     // Check if a public merge operation is being performed
@@ -1272,7 +1270,7 @@
                         // Set the base property descriptor (merge if a base descriptor was found)
                         $__defineProperty__.call($__object__, $base, $name, $mergeBase ? $_constructRuntimeMerge($descriptor, $base[$name], $accessor) : $descriptor);
 
-                        // Get the override and inherited descriptors
+                        // Get the override method and inherited descriptor
                         var $override = $_constructRuntimeOverride($method, $key, $definition, $overrides);
                         var $inherit  = $override ? { 'enumerable': true, 'value': $override } : $descriptor;
 
@@ -1457,24 +1455,24 @@
                 break;
         }
 
-        // Append the member definition into the vars string
+        // Push the member definition into the vars array
         $vars.push($reference + '=' + $handle + '(' + $arguments.join(',') + ')');
 
         // If the member is a property
         if ($type === 'property')
         {
-            // Get the complex and merge flags
+            // Get the complex flag and merge stack
             var $complex = $definition[$_definition_member_property_accessors];
             var $merge   = $references[$name];
 
             // If the property is not complex or is being merged
             if (!$complex || $merge)
             {
-                // Get the get and set accessor flags
+                // Get the accessor flags
                 var $get = $accessor === 'g';
                 var $set = $accessor === 's';
 
-                // Get the merge member references
+                // Get the merge references
                 var $mergeBase      = $merge && $merge[3] || null;
                 var $mergePrivate   = $merge && $merge[0] || null;
                 var $mergeProtected = $merge && $merge[1] || null;
@@ -1483,101 +1481,104 @@
                 // If the property is protected or public
                 if ($protectedOverrides || $publicOverrides)
                 {
-                    // Set the base property reference (merge if a base reference was found)
+                    // Push the base property reference into the statements array (merge if a base reference was found)
                     $statements.push('p(' + $_precompile_matrix + $level + '$3,' + ($get ? $reference : $mergeBase || $_precompile_null) + ',' + ($set ? $reference : $mergeBase || $_precompile_null) + ')');
 
+                    // Create the override reference
                     var $override = null;
 
                     // If the property is protected or public, get the override reference
                     if ($protectedOverrides || $publicOverrides)
                         $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
 
-                    // Set the protected property reference (merge if a base reference was found)
+                    // Push the protected property reference into the statements array (merge if a base reference was found)
                     $statements.push('p(' + $_precompile_matrix + $level + '$1,' + ($get ? ($override !== null ? $override : $reference) : $mergeProtected || $_precompile_null) + ',' + ($set ? ($override !== null ? $override : $reference) : $mergeProtected || $_precompile_null) + ')');
 
-                    // If a private merge was found, set the private property reference
+                    // If a private merge was found, push the private property reference into the statements array
                     if ($mergePrivate)
                         $statements.push('p(' + $_precompile_matrix + $level + '$0,' + ($get ? $_precompile_null : $mergePrivate) + ',' + ($set ? $_precompile_null : $mergePrivate) + ')');
 
-                    // If the property is public, set the public property reference (merge if a public reference was found)
+                    // If the property is public, push the public property reference into the statements array (merge if a public reference was found)
                     if ($publicOverrides)
                         $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? ($override !== null ? $override : $reference) : $mergePublic || $_precompile_null) + ',' + ($set ? ($override !== null ? $override : $reference) : $mergePublic || $_precompile_null) + ')');
-                    // If a public merge was found, set the public property reference
+                    // If a public merge was found, push the public property reference into the statements array
                     else if ($mergePublic)
                         $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? $_precompile_null : $mergePublic) + ',' + ($set ? $_precompile_null : $mergePublic) + ')');
                 }
                 // If the property is being merged
                 else if ($merge)
                 {
-                    // Set the private property reference (merge if a private reference was found)
+                    // Push the private property reference into the statements array (merge if a private reference was found)
                     $statements.push('p(' + $_precompile_matrix + $level + '$0,' + ($get ? $reference : $mergePrivate || $_precompile_null) + ',' + ($set ? $reference : $mergePrivate || $_precompile_null) + ')');
 
                     // If a protected merge was found
                     if ($mergeProtected)
                     {
-                        // Set the base and protected property references
+                        // Push the base and protected property references into the statements array
                         $statements.push('p(' + $_precompile_matrix + $level + '$3,' + ($get ? $_precompile_null : $mergeBase) + ',' + ($set ? $_precompile_null : $mergeBase) + ')');
                         $statements.push('p(' + $_precompile_matrix + $level + '$1,' + ($get ? $_precompile_null : $mergeProtected) + ',' + ($set ? $_precompile_null : $mergeProtected) + ')');
                     }
 
-                    // If a public merge was found, set the public property reference
+                    // If a public merge was found, push the public property reference into the statements array
                     if ($mergePublic)
                         $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? $_precompile_null : $mergePublic) + ',' + ($set ? $_precompile_null : $mergePublic) + ')');
                 }
-                // Set the private property reference
+                // Push the private property reference into the statements array
                 else
                     $statements.push('p(' + $_precompile_matrix + $level + '$0,' + ($get ? $reference : $_precompile_null) + ',' + ($set ? $reference : $_precompile_null) + ')');
             }
             else
             {
-                // Create the merge array
-                $merge = [null, null, null, null];
+                // Create the reference stack
+                var $referenceStack = [null, null, null, null];
 
                 // If the property is protected or public
                 if ($protectedOverrides || $publicOverrides)
                 {
+                    // Create the override reference
                     var $override = null;
 
                     // If the property is protected or public, get the override reference
                     if ($protectedOverrides || $publicOverrides)
                         $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
 
-                    // Set the base and protected property references
-                    $merge[1] = $override !== null ? $override : $reference;
-                    $merge[3] = $reference;
+                    // Set the base and protected property references in the reference stack
+                    $referenceStack[1] = $override !== null ? $override : $reference;
+                    $referenceStack[3] = $reference;
 
-                    // If the property is public, set the public property reference
+                    // If the property is public, set the public property reference in the reference stack
                     if ($publicOverrides)
-                        $merge[2] = $override !== null ? $override : $reference;
+                        $referenceStack[2] = $override !== null ? $override : $reference;
                 }
-                // Set the private property reference
+                // Set the private property reference in the reference stack
                 else
-                    $merge[0] = $reference;
+                    $referenceStack[0] = $reference;
 
-                // Store the merge array in the references collection
-                $references[$name] = $merge;
+                // Set the reference stack in the references lookup
+                $references[$name] = $referenceStack;
             }
         }
         // If the member is protected or public
         else if ($protectedOverrides || $publicOverrides)
         {
+            // Create the override reference
             var $override = null;
 
-            // If the member is a method, get the reference override
+            // If the member is a method, get the override reference
             if ($type === 'method')
                 $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
 
-            // Set the base member reference
+            // Push the base member reference into the statements array
             $statements.push('d(' + $_precompile_matrix + $level + '$3,' + $reference + ')');
 
-            // If the member is public, set the protected and public member references
+            // If the member is public, push the protected and public member references into the statements array
             if ($publicOverrides)
                 $statements.push('d2(' + $_precompile_matrix + $level + '$1,' + $_precompile_matrix + $level + '$2,' + ($override !== null ? $override : $reference) + ')');
-            // Set the protected member reference
+            // Push the protected member reference into the statements array
             else
                 $statements.push('d(' + $_precompile_matrix + $level + '$1,' + ($override !== null ? $override : $reference) + ')');
         }
-        // Set the private member reference
+        // Push the private member reference into the statements array
         else
             $statements.push('d(' + $_precompile_matrix + $level + '$0,' + $reference + ')');
     };
@@ -1730,7 +1731,7 @@
             if (!$descriptor)
                 return { 'enumerable': true, 'set': $merge };
 
-            // Return the merged descriptor (merge set accessor)
+            // Return the merged descriptor (merge the set accessor)
             return (
             {
                 'configurable': $descriptor['configurable'],
@@ -1746,7 +1747,7 @@
             if (!$descriptor)
                 return { 'enumerable': true, 'get': $merge };
 
-            // Return the merged descriptor (merge get accessor)
+            // Return the merged descriptor (merge the get accessor)
             return (
             {
                 'configurable': $descriptor['configurable'],
@@ -1841,7 +1842,7 @@
             var $protectedKeys = $__keys__.call($__object__, $protected);
             var $publicKeys    = $__keys__.call($__object__, $public);
 
-            // Create the references container
+            // Create the references lookup
             var $references = $__create__.call($__object__, null);
 
             // Dump the private definitions into the variables and statements arrays
@@ -1866,35 +1867,36 @@
             $statements.push('l(' + $_precompile_matrix + $i + '$3,' + ($class[$_definition_expando_private] ? $_precompile_null : $_precompile_matrix + $i + '$0') + ',' + $_precompile_matrix + $i + '$1,' + ($class[$_definition_expando_public] ? $_precompile_null : $_precompile_matrix + $i + '$2') + ')');
         }
 
-        // Create the precompiled string
+        // Create the precompile string
         var $precompile = '';
 
-        // Construct the precompiled string from the closures string, variables array, and statements array
+        // Construct the precompile string from the closures string, variables array, and statements array
         $precompile += 'var ' + $closures + ';';
         $precompile += 'return function(' + $_precompile_matrix + ',' + $_precompile_readonly + ',' + $_precompile_injections + '){';
         $precompile += 'var ' + $vars.join(',') + ';';
         $precompile += $statements.join(';') + ';';
         $precompile += '};';
 
-        // Return the precompiled string
+        // Return the precompile string
         return $precompile;
     };
     var $_constructRuntimeStack       = function($class, $last, $switch, $instance, $base, $private, $protected, $public, $typeExternal, $typeInternal, $isExpandoPrivate, $isExpandoPublic, $isInternal)
     {
-        // If this is the last stack, define the self reference on the protected instance
-        if ($protected && $last)
-            $__defineProperty__.call($__object__, $protected, '__self', { 'value': $instance });
+        // Get the define flags
+        var $defineBase    = !$protected || $last;
+        var $definePrivate = !$protected || $isExpandoPrivate;
+        var $definePublic  = $defineBase || $isExpandoPublic;
 
-        // If the class has an expando private instance, define the self reference on the private instance
-        if (!$protected || $isExpandoPrivate)
+        // If a private self reference is required, define the self reference on the private instance
+        if ($definePrivate)
             $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
 
-        // If this is the last stack, define the self reference on the base instance
-        //if (!$protected || $last)
+        // If a base self reference is required, define the self reference on the base instance
+        //if ($defineBase)
         //    $__defineProperty__.call($__object__, $base, '__self', { 'value': $instance });
                     
-        // If this is the last stack, a protected instance was not provided, or the class has an expando public instance, define the self reference on the public instance
-        if ($last || !$protected || $isExpandoPublic)
+        // If a public self reference is required, define the self reference on the public instance
+        if ($definePublic)
             $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
 
         // Define the public instance accessor on the private and base instances
@@ -1904,25 +1906,34 @@
         // Define the chain type accessor on the private and base instances
         $__defineProperty__.call($__object__, $private, '__type', { 'value': $class });
         //$__defineProperty__.call($__object__, $base, '__type', { 'value': $class });
-
-        // If this is the last stack, the chain is switching to internal, a protected instance was not provided, the class is not internal, or has an expando public instance, define the chain type accessor on the public instance
-        if ($last || $switch || !$protected || !$isInternal || $isExpandoPublic)
+        
+        // If the class is not internal, a public chain type accessor is required, or the chain is switching to internal, define the chain type accessor on the public instance
+        if (!$isInternal || $definePublic || $switch)
             $__defineProperty__.call($__object__, $public, '__type', { 'value': $isInternal ? null : $class });
         
-        // If this is the last stack, define the type method on the protected instance
-        if ($protected && ($last || $switch))
-            $__defineProperty__.call($__object__, $protected, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
-
-        // If the class has an expando private instance, define the type method on the private instance
-        if (!$protected || $isExpandoPrivate)
+        // If a private type method is required, define the type method on the private instance
+        if ($definePrivate)
             $__defineProperty__.call($__object__, $private, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
-
-        // If this is the last stack, define the type method on the base instance
-        if ($last || $switch || !$protected)
+        
+        // If a base type method is required or the chain is switching to internal, define the type method on the base instance
+        if ($defineBase || $switch)
             $__defineProperty__.call($__object__, $base, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
-
-        if ($last || !$protected || $isExpandoPublic)
+        
+        // If a public type method is required, define the type method on the public instance
+        if ($definePublic)
             $__defineProperty__.call($__object__, $public, 'type', { 'value': $typeExternal });
+
+        // If a protected instance was provided
+        if ($protected)
+        {
+            // If this is the last stack, define the self reference on the protected instance
+            if ($last)
+                $__defineProperty__.call($__object__, $protected, '__self', { 'value': $instance });
+
+            // If this is the last stack or the chain is switching to internal, define the type method on the protected instance
+            if ($last || $switch)
+                $__defineProperty__.call($__object__, $protected, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+        }
     };
     var $_constructRuntimeStruct      = function($class, $type, $externalType, $cache, $injections, $base, $private, $protected, $public, $isExpandoPublic, $isInternal)
     {
@@ -1945,7 +1956,7 @@
         var $descriptor = { 'enumerable': true, 'name': $name };
 
         // Construct the accessor method
-        $descriptor[$accessor + 'et'] = $_constructRuntimeMethod($cache['~' + $accessor + 'et_' + $name], $private, $private, $public);//, $type);
+        $descriptor[$accessor + 'et'] = $_constructRuntimeMethod($cache['~' + $accessor + 'et_' + $name], $private, $private, $public);
 
         // Return the descriptor
         return $descriptor;
@@ -1969,15 +1980,12 @@
         // Create the field descriptor with the embedded property name
         var $descriptor = { 'name': $name };
 
-        // If an injections array was provided, construct the injection descriptor
+        // If an injections array was provided, return the constructed injection descriptor
         if ($injections)
-            $_constructRuntimeInjection($descriptor, $name, $cache[$name], $injections, $type, $readonly);
-        // Construct the field descriptor
-        else
-            $_constructRuntimeField($descriptor, false, $name, $cache[$name], $private, $public, /*$type,*/ $readonly);
+            return $_constructRuntimeInjection($descriptor, $name, $cache[$name], $injections, $type, $readonly);
 
-        // Return the descriptor
-        return $descriptor;
+        // Return the constructed field descriptor
+        return $_constructRuntimeField($descriptor, false, $name, $cache[$name], $private, $public, $readonly);
     };
     var $_importRuntimeLock        = function($base, $private, $protected, $public)
     {
@@ -2006,7 +2014,7 @@
             $this = $_constructRuntimeConstructor($private);
 
         // Construct the method
-        $descriptor['value'] = $_constructRuntimeMethod($cache[$name], $this, $private, $public);//, $type);
+        $descriptor['value'] = $_constructRuntimeMethod($cache[$name], $this, $private, $public);
 
         // Return the descriptor
         return $descriptor;
@@ -2020,7 +2028,7 @@
         $get = $get && $get['get'] || undefined;
         $set = $set && $set['set'] || undefined;
 
-        // Set the property get/set accessor descriptors on the instance
+        // Set the property get/set accessors descriptor on the instance
         $__defineProperty__.call($__object__, $instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
     };
 
@@ -2988,7 +2996,7 @@
 
         // If the export flag is set, return the precompiled class
         if ($export)
-            return $precompile.call($_lock);
+            return $precompile.call($_lock) || '';
 
         // Return the class
         return $class;
@@ -3037,9 +3045,9 @@
 
                 case 2:
 
-                    // FORMAT $modifiers
+                    // If the modifiers string is not a string, throw an exception
                     if (typeof $modifiers !== 'string')
-                        $modifiers = '';
+                        throw $_exceptionArguments($modifier, arguments);
 
                     // Set the member package data
                     $package[$_package_modifiers] = $modifiers ? $modifier + ' ' + $modifiers : $modifier;
@@ -3049,12 +3057,8 @@
 
                 default:
 
-                    // If the debug flag is set, throw an exception
-                    if ($$.debug)
-                        throw $_exceptionArguments($modifier, arguments);
-
-                    // Return null
-                    return null;
+                    // Throw an exception
+                    throw $_exceptionArguments($modifier, arguments);
             }
 
             // Lock the member package
@@ -3083,7 +3087,7 @@
 
     // ########## TYPES ##########
 
-    // Define the types method and the "is" methods for internal JavaScript types
+    // Define the "type()" method and the "is()" methods for internal JavaScript types
     (function()
     {
         // Create the types lookup
@@ -3098,7 +3102,7 @@
             // Insert the keyword into the types lookup
             $types['[object ' + $type + ']'] = $keyword;
 
-            // Define the "is" method for the type
+            // Define the "is()" method for the type
             $_defineMethod('is' + $type, function($object)
             {
                 // Return true if the object matches the type
@@ -3109,7 +3113,7 @@
         // Iterate the known aliases of the internal JavaScript window type
         $__forEach__.call('global Window DOMWindow'.split(' '), function($window)
         {
-            // Insert the window into the types lookup
+            // Insert the window alias into the types lookup
             $types['[object ' + $window + ']'] = 'window';
         });
 
@@ -3160,14 +3164,21 @@
     // ---------- ARRAY-LIKE OBJECT ----------
     $_defineMethod('isArrayLikeObject', function($object)
     {
-        // Return true if the object is neither undefined nor null and has a length property that is a finite integer greater than or equal to zero
-        return $object !== undefined && $object !== null && $$.isFiniteInt($object.length) && $object.length >= 0;
+        // If the object is undefined or null, return false
+        if ($object === undefined || $object === null)
+            return false;
+
+        // Get the object length
+        var $length = $object.length;
+
+        // Return true if the length is a finite integer greater than or equal to zero
+        return $$.isFiniteInt($length) && $length >= 0;
     });
 
     // ---------- CLASS ----------
     $_defineMethod('isClass', function($object)
     {
-        // Return true if the object has a class construct function
+        // Return true if the object is a function and has a class key hint
         return typeof $object === 'function' && $object[$_definition_keyHint] === $object;
     });
 
@@ -3291,18 +3302,22 @@
         // Get the type of the object
         var $type = $$.type($object);
 
-        // Return true if the object is a value-type
+        // Return true if the object is a value type
         return $type === 'string' || $type === 'number' || $type === 'boolean';
     });
 
     // ---------- REFERENCE-TYPE ----------
     $_defineMethod('isReferenceType', function($object)
     {
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
+
         // Get the type of the object
         var $type = $$.type($object);
 
-        // Return true if the object is not null, undefined, or a value-type
-        return $type !== 'undefined' && $type !== 'null' && $type !== 'boolean' && $type !== 'number' && $type !== 'string';
+        // Return true if the object is not a value type
+        return $type !== 'boolean' && $type !== 'number' && $type !== 'string';
     });
 
     // ---------- SEALED CLASS ----------
@@ -3340,6 +3355,10 @@
     // ---------- VALUE-TYPE ----------
     $_defineMethod('isValueType', function($object)
     {
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
+
         // Get the type of the object
         var $type = $$.type($object);
 
@@ -3353,6 +3372,10 @@
         // If the object is the window object, return true
         if ($object === window)
             return true;
+
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
 
         // Return true if the object is a window reference
         return $$.type($object) === 'window';
@@ -3374,6 +3397,10 @@
         if ($object === null || $object === undefined)
             return [];
 
+        // If the object is already an array, return the array
+        if ($__isArray__.call($__array__, $object))
+            return $object;
+
         // Get the type of the object
         var $type = $$.type($object);
 
@@ -3389,7 +3416,7 @@
         var $length = $$.asInt($object.length, true);
         var $array  = new $__array__($length);
 
-        // Convert the object to an array
+        // Set the object values in the array
         for (var $i = 0; $i < $length; $i++)
             $array[$i] = $object[$i];
 
@@ -3410,13 +3437,9 @@
         // Get the object type
         var $type = $$.type($object);
 
-        // If the object is a string and matches a float
+        // If the object is a string and matches a float, return the object cast a a float
         if ($type === 'string' && $__match__.call($__trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
-        {
-            // Cast the object as a float
-            $object = parseFloat($object);
-            $type   = 'number';
-        }
+            return parseFloat($object);
         
         // If the object is not a number, return NaN
         if ($type !== 'number')
@@ -3477,6 +3500,7 @@
         if ($type === 'boolean' || $type === 'number')
             return $object + '';
 
+        // Return an empty string
         return '';
     });
 
@@ -3485,11 +3509,15 @@
     // ---------- BASE ----------
     $_defineMethod('base', function($class)
     {
-        // debug throw?
-
         // CHECK $class
         if (!$$.isClass($class))
+        {
+            // If the debug flag is set, throw an exception
+            if ($$.debug)
+                throw $_exceptionArguments('base', arguments);
+
             return null;
+        }
 
         // Return the base class
         return $class[$_definition_baseClass] || null;
