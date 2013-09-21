@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.5b257';
+    var $_version = '2.1.5b258';
 
     // ########## LANGUAGE ##########
 
@@ -319,7 +319,7 @@
     // Create the injection flags length
     var $_inject_flagCount = 5;
 
-    // ---------- PACKAGES (MEMBER) ----------
+    // ---------- PACKAGES ----------
 
     // Create the member package key hint
     var $_package_keyHint = $_keyGenerator(3);
@@ -411,7 +411,7 @@
         // Create the property method definition array
         var $method = new $__array__($_definition_member_flagCount);
 
-        // Get the accessor accessor name and private access modifier flag
+        // Get the accessor name and private access modifier flag
         var $accessorName    = $accessor[$_accessor_name];
         var $accessorPrivate = $accessor[$_accessor_private];
 
@@ -1374,7 +1374,7 @@
                 break;
         }
     };
-    var $_constructRuntimeDump        = function($vars, $statements, $definitions, $references, $key, $index, $level, $protectedOverrides, $publicOverrides)
+    var $_constructRuntimeDump        = function($vars, $statements, $definitions, $merges, $key, $index, $level, $protectedOverrides, $publicOverrides)
     {
         // Get the member definition from the definitions object along with the name and type
         var $definition = $definitions[$key];
@@ -1463,7 +1463,7 @@
         {
             // Get the complex flag and merge stack
             var $complex = $definition[$_definition_member_property_accessors];
-            var $merge   = $references[$name];
+            var $merge   = $merges[$name];
 
             // If the property is not complex or is being merged
             if (!$complex || $merge)
@@ -1472,7 +1472,7 @@
                 var $get = $accessor === 'g';
                 var $set = $accessor === 's';
 
-                // Get the merge references
+                // Get the merge instances
                 var $mergeBase      = $merge && $merge[3] || null;
                 var $mergePrivate   = $merge && $merge[0] || null;
                 var $mergeProtected = $merge && $merge[1] || null;
@@ -1529,8 +1529,8 @@
             }
             else
             {
-                // Create the reference stack
-                var $referenceStack = [null, null, null, null];
+                // Create the merge stack
+                $merge = [null, null, null, null];
 
                 // If the property is protected or public
                 if ($protectedOverrides || $publicOverrides)
@@ -1542,20 +1542,20 @@
                     if ($protectedOverrides || $publicOverrides)
                         $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
 
-                    // Set the base and protected property references in the reference stack
-                    $referenceStack[1] = $override !== null ? $override : $reference;
-                    $referenceStack[3] = $reference;
+                    // Set the base and protected property references in the merge stack
+                    $merge[1] = $override !== null ? $override : $reference;
+                    $merge[3] = $reference;
 
-                    // If the property is public, set the public property reference in the reference stack
+                    // If the property is public, set the public property reference in the merge stack
                     if ($publicOverrides)
-                        $referenceStack[2] = $override !== null ? $override : $reference;
+                        $merge[2] = $override !== null ? $override : $reference;
                 }
-                // Set the private property reference in the reference stack
+                // Set the private property reference in the merge stack
                 else
-                    $referenceStack[0] = $reference;
+                    $merge[0] = $reference;
 
-                // Set the reference stack in the references lookup
-                $references[$name] = $referenceStack;
+                // Set the merge stack in the merges lookup
+                $merges[$name] = $merge;
             }
         }
         // If the member is protected or public
@@ -1842,26 +1842,26 @@
             var $protectedKeys = $__keys__.call($__object__, $protected);
             var $publicKeys    = $__keys__.call($__object__, $public);
 
-            // Create the references lookup
-            var $references = $__create__.call($__object__, null);
+            // Create the merges lookup
+            var $merges = $__create__.call($__object__, null);
 
             // Dump the private definitions into the variables and statements arrays
             for (var $k = 0, $l = $privateKeys.length; $k < $l; $k++)
-                $_constructRuntimeDump($vars, $statements, $private, $references, $privateKeys[$k], $k, $i, null, null);
+                $_constructRuntimeDump($vars, $statements, $private, $merges, $privateKeys[$k], $k, $i, null, null);
 
             // Create the index offset
             var $index = $privateKeys.length;
 
             // Dump the protected definitions into the variables and statements arrays
             for (var $k = 0, $l = $protectedKeys.length; $k < $l; $k++)
-                $_constructRuntimeDump($vars, $statements, $protected, $references, $protectedKeys[$k], $k + $index, $i, $protectedOverrides, null);
+                $_constructRuntimeDump($vars, $statements, $protected, $merges, $protectedKeys[$k], $k + $index, $i, $protectedOverrides, null);
 
             // Increment the index offset
             $index += $protectedKeys.length;
 
             // Dump the public definitions into the variables and statements arrays
             for (var $k = 0, $l = $publicKeys.length; $k < $l; $k++)
-                $_constructRuntimeDump($vars, $statements, $public, $references, $publicKeys[$k], $k + $index, $i, null, $publicOverrides);
+                $_constructRuntimeDump($vars, $statements, $public, $merges, $publicKeys[$k], $k + $index, $i, null, $publicOverrides);
 
             // Push the lock statement into the statements array (without locking expandos)
             $statements.push('l(' + $_precompile_matrix + $i + '$3,' + ($class[$_definition_expando_private] ? $_precompile_null : $_precompile_matrix + $i + '$0') + ',' + $_precompile_matrix + $i + '$1,' + ($class[$_definition_expando_public] ? $_precompile_null : $_precompile_matrix + $i + '$2') + ')');
@@ -2043,63 +2043,61 @@
         var $constructor = arguments[$argument++];
         var $modifiers   = '';
         var $prototype   = null;
+        var $typeof      = typeof $constructor;
 
         // If the constructor is not a simple object
-        if ($constructor === null || typeof $constructor !== 'object' || $__getPrototypeOf__.call($__object__, $constructor) !== $__objectProto__)
+        if ($constructor === null || $typeof !== 'object' || $__getPrototypeOf__.call($__object__, $constructor) !== $__objectProto__)
         {
             // Get the prototype
             $prototype = arguments[$argument++];
 
-            // If the constructor is not a function or is a class
-            if (typeof $constructor !== 'function' || $constructor[$_definition_keyHint] === $constructor)
+            // If the constructor is not a function (and therefore not a class)
+            if ($typeof !== 'function')
             {
-                // If the constructor is not a class
-                if (typeof $constructor !== 'function' || $constructor[$_definition_keyHint] !== $constructor)
+                // If the constructor is not a string, throw an exception
+                if ($typeof !== 'string')
+                    throw $_exceptionArguments(null, arguments);
+
+                // Use the first argument as the modifiers string
+                $modifiers = $constructor;
+
+                // If the prototype is a class
+                if (typeof $prototype === 'function' && $prototype[$_definition_keyHint] === $prototype)
                 {
-                    // If the constructor is not a string, throw an exception
-                    if (typeof $constructor !== 'string')
-                        throw $_exceptionArguments(null, arguments);
+                    // Use the second argument as the base class
+                    $baseClass   = $prototype;
+                    $constructor = arguments[$argument++];
+                }
+                // Use the second argument as the constructor
+                else
+                    $constructor = $prototype;
 
-                    // Use the first argument as the modifiers string
-                    $modifiers = $constructor;
+                // If the constructor is not a function or is a class
+                if (typeof $constructor !== 'function' || $constructor[$_definition_keyHint] === $constructor)
+                {
+                    // Use the third argument as the prototype
+                    $prototype   = $constructor;
+                    $constructor = null;
+                }
+                // Use the fourth argument as the prototype
+                else
+                    $prototype = arguments[$argument++];
+            }
+            // If the constructor is a class
+            else if ($constructor[$_definition_keyHint] === $constructor)
+            {
+                // Use the first argument as the base class
+                $baseClass = $constructor;
 
-                    // If the prototype is a class
-                    if (typeof $prototype === 'function' && $prototype[$_definition_keyHint] === $prototype)
-                    {
-                        // Use the second argument as the base class
-                        $baseClass   = $prototype;
-                        $constructor = arguments[$argument++];
-                    }
+                // If the prototype is a function and not a class
+                if (typeof $prototype === 'function' && $prototype[$_definition_keyHint] !== $prototype)
+                {
                     // Use the second argument as the constructor
-                    else
-                        $constructor = $prototype;
-
-                    // If the constructor is not a function or is a class
-                    if (typeof $constructor !== 'function' || $constructor[$_definition_keyHint] === $constructor)
-                    {
-                        // Use the third argument as the prototype
-                        $prototype   = $constructor;
-                        $constructor = null;
-                    }
-                    // Use the fourth argument as the prototype
-                    else
-                        $prototype = arguments[$argument++];
+                    $constructor = $prototype;
+                    $prototype   = arguments[$argument++];
                 }
                 else
-                {
-                    // Use the first argument as the base class
-                    $baseClass = $constructor;
-
-                    // If the prototype is a function and not a class
-                    if (typeof $prototype === 'function' && $prototype[$_definition_keyHint] !== $prototype)
-                    {
-                        // Use the second argument as the constructor
-                        $constructor = $prototype;
-                        $prototype   = arguments[$argument++];
-                    }
-                    else
-                        $constructor = null;
-                }
+                    $constructor = null;
             }
 
             // If the prototype is not a simple object, throw an exception
@@ -2244,10 +2242,9 @@
                 $import = true;
         }
 
-        // Create the chain array and current class tracker
+        // Create the chain array, construct reference, external index, chain level count, and the external type reference
         var $chain     = [];
         var $construct = null;
-        var $current   = $baseClass;
         var $external  = $internal ? 1 : 0;
         var $levels    = 1;
         var $type      = null;
@@ -2345,16 +2342,20 @@
             // Reset the subclass flag
             $_subclass = false;
 
+            // Create the current class tracker
+            var $current = $baseClass;
+
             // If a current class was found
             while (typeof $current === 'function' && $current[$_definition_keyHint] === $current)
             {
                 // Add the current class to the chain array
                 $chain.push($current);
 
+                // If the class is internal and the current class is internal, increment the external index
                 if ($internal && $current[$_definition_internal])
                     $external++;
 
-                // Find the next class in the chain
+                // Get the next class in the chain
                 $current = $current[$_definition_baseClass];
             }
         }
@@ -2366,18 +2367,13 @@
             $classPrototype = new $_class();
             $classPublic    = $__create__.call($__object__, null);
 
+            // Reset the external index
             $external = 0;
         }
 
+        // Compile the class definitions into the definitions objects
         for (var $key in $prototype)
-        {
-            // If the property is a special member, continue
-            if ($key === 'constructor' || $key === 'prototype')
-                continue;
-
-            // Compile the the class definition into the definitions objects
             $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, $definitionsStatic, $key, $prototype[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
-        }
 
         // If any injections arguments were provided
         if ($unsafe && arguments[$argument])
@@ -2403,15 +2399,19 @@
             }
         }
 
+        // Create the external type method and internal type method reference
         var $typeExternal = function()
         {
+            // Return the external type
             return $type;
         };
         var $typeInternal = null;
 
+        // If the class is internal, create the internal type method
         if ($internal)
             $typeInternal = function()
             {
+                // Return the internal type
                 return $class;
             };
 
@@ -2458,7 +2458,7 @@
                 if ($as === $type)
                     return $matrix[$external][2];
 
-                // If the type is not a class or the instance is not an instance of type, return null
+                // If the type is not a class or the instance is not an instance of type, return
                 if (typeof $as !== 'function' || $as[$_definition_keyHint] !== $as || !($instance instanceof $as))
                     return null;
 
@@ -2471,7 +2471,7 @@
                     if ($chain[$level] === $as)
                         break;
                 }
-                // If the level is still valid
+                // Continue if the level is still valid
                 while (++$level < $levels);
 
                 // Return the public instance
@@ -2491,7 +2491,7 @@
                 return !!($instance instanceof $is);
             };
 
-            // Set the "as" and "is" methods in the construct base
+            // Set the "as()" and "is()" methods on the instance
             $__defineProperty__.call($__object__, $instance, 'as', { 'value': $as });
             $__defineProperty__.call($__object__, $instance, 'is', { 'value': $is });
 
@@ -2512,10 +2512,10 @@
             var $protectedOverrides = !$import && !$optimized ? $__create__.call($__object__, null) : null;
             var $publicOverrides    = !$import && !$optimized ? $__create__.call($__object__, null) : null;
 
-            // Create the injection objects array
+            // Get the injection objects array
             var $injections  = $unsafe ? arguments[$_clone ? 1 : 0] : null;
 
-            // Get the cache matrix if the instance is a clone and set the last flag
+            // Get the cache matrix if the instance is a clone and set the matrix last stack flag
             var $matrixCache = $_clone ? arguments[0] : null;
             var $matrixLast  = true;
 
@@ -2545,13 +2545,13 @@
                     // Build the matrix instance stack
                     ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
 
-                    // Append the instance stack into the instance matrix and constructor context into the contexts array
+                    // Set the instance stack in the instance matrix and constructor context in the contexts array
                     $matrix[$i]   = $stack;
                     $contexts[$i] = $context;
                     $inherits[$i] = [$baseInherits, $protectedInherits, $publicInherits];
                 }
 
-                // Define the derived inherits objects
+                // Define the derived inherits references
                 var $derivedBaseInherits      = null;
                 var $derivedProtectedInherits = null;
                 var $derivedPublicInherits    = null;
@@ -2566,7 +2566,7 @@
                     $private = $stack[0];
                     $public  = $stack[2];
                     
-                    // Get the chain type
+                    // Get the chain data
                     var $chainInternal = $i < $external;
                     var $chainSwitch   = $external > 0 && $i === $external - 1;
                     var $chainType     = $chain[$i];
@@ -2575,10 +2575,10 @@
                     var $chainExpandoPrivate = $chainType[$_definition_expando_private];
                     var $chainExpandoPublic  = $chainType[$_definition_expando_public];
                     
-                    // Construct the stack
+                    // Build the stack
                     $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $base, $private, null, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
                     
-                    // If the instance is a struct, construct the struct stack
+                    // If the instance is a struct, build the struct stack
                     if ($struct)
                         $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $base, $private, null, $public, $chainExpandoPublic, $chainInternal);
                     
@@ -2663,7 +2663,7 @@
                     if (!$matrixLast)
                         $__defineProperty__.call($__object__, $private, '__base', { 'value': $matrix[$i + 1][3] });
                     
-                    // Get the chain type
+                    // Get the chain data
                     var $chainInternal = $i < $external;
                     var $chainSwitch   = $external > 0 && $i === $external - 1;
                     var $chainType     = $chain[$i];
@@ -2672,10 +2672,10 @@
                     var $chainExpandoPrivate = $chainType[$_definition_expando_private];
                     var $chainExpandoPublic  = $chainType[$_definition_expando_public];
 
-                    // Construct the stack
+                    // Build the stack
                     $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $base, $private, $protected, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
                     
-                    // If the instance is a struct, construct the struct stack
+                    // If the instance is a struct, build the struct stack
                     if ($struct)
                         $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $base, $private, $protected, $public, $chainExpandoPublic, $chainInternal);
 
@@ -2689,17 +2689,18 @@
                 // If the instance is a clone or the class does not have the import flag and is not optimized
                 if ($_clone || !$import && !$optimized)
                 {
-                    // Build the matrix instance stack
+                    // Build the matrix
                     for (var $i = 0; $i < $levels; $i++)
                         ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly, null, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
                 }
-                // Build the precompiled matrix instance stack
+                // Build the precompiled matrix
                 else
                     $construct.call($_lock, $matrix, $getterReadonly, $unsafe ? $injections : null);
             }
 
-            // Create a reference for the return value of the constructor
-            var $return = undefined;
+            // Create a reference for the return value of the constructor and get the constructor wrapper
+            var $return  = undefined;
+            var $wrapper = $private.constructor;
 
             // If the class is not a struct
             if (!$struct)
@@ -2707,23 +2708,23 @@
                 // If the class is unsafe
                 if ($unsafe)
                 {
-                    // If any additional arguments were provided, execute the constructor with the extra arguments
+                    // If any additional arguments were provided, execute the constructor wrapper with the extra arguments
                     if (arguments.length > 1)
-                        $return = $private.constructor.apply($private, $__arrayProto__.slice.call(arguments, 1));
-                    // Execute the constructor
+                        $return = $wrapper.apply($private, $__arrayProto__.slice.call(arguments, 1));
+                    // Execute the constructor wrapper
                     else
-                        $return = $private.constructor.call($private);
+                        $return = $wrapper.call($private);
                 }
-                // If arguments were provided, execute the constructor with the arguments
+                // If arguments were provided, execute the constructor wrapper with the arguments
                 else if (arguments.length)
-                    $return = $private.constructor.apply($private, arguments);
-                // Execute the constructor
+                    $return = $wrapper.apply($private, arguments);
+                // Execute the constructor wrapper
                 else
-                    $return = $private.constructor.call($private);
+                    $return = $wrapper.call($private);
             }
-            // Execute the parameterless constructor
+            // Execute the parameterless constructor wrapper
             else
-                $private.constructor.call($private);
+                $wrapper.call($private);
 
             // Set the initialized flag
             $isInit = true;
@@ -2821,7 +2822,7 @@
             // Create the construct and precompile helper functions
             $construct  = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections, $cache)
             {
-                // If this function was not internally called, return
+                // If this function was not internally unlocked, return
                 if (this !== $_lock)
                     return;
 
@@ -2877,7 +2878,7 @@
             };
             $precompile = function()
             {
-                // If this function was not internally called, return
+                // If this function was not internally unlocked, return
                 if (this !== $_lock)
                     return;
 
@@ -2885,10 +2886,10 @@
                 if (!$eval)
                     $eval = $_constructRuntimePrecompile($chain);
 
-                // Create the precompiled string
+                // Create the precompiled export string
                 var $evalExport = '{' + $eval + '};';
 
-                // Append the class data to the precompiled string
+                // Append the class data to the precompiled export string
                 $evalExport += '$.a=' + ($abstract ? '!0' : '!1') + ';';
                 $evalExport += '$.f=' + ($final ? '!0' : '!1') + ';';
                 $evalExport += '$.i=' + ($internal ? '!0' : '!1') + ';';
@@ -2898,11 +2899,11 @@
                 $evalExport += '$.l=' + $levels + ';';
                 $evalExport += '$.s=' + ($struct ? '!0' : '!1') + ';';
 
-                // If the class is unsafe, append the unsafe (razor) class data to the precompiled string
+                // If the class is unsafe, append the unsafe (razor) class data to the precompiled export string
                 if ($unsafe)
                     $evalExport += '$.u="@unsafe";';
 
-                // Return the precompiled string
+                // Return the precompiled export string with the prepended precompile prefix (say that three times fast)
                 return $_const_precompile_prefix + $evalExport;
             };
         }
@@ -2959,11 +2960,11 @@
         // Set the class prototype without the "writable" flag
         $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype, 'writable': false });
 
-        // If a static "toString" definition was not provided, set the class toString method
+        // If a static "toString()" definition was not provided, set the class toString() method
         if (!$__hasOwnProperty__.call($definitionsStatic, 'toString'))
             $class.toString = $_class_toString;
 
-        // If the class is not expando, freeze the class
+        // If the class does not have the import flag and is not expando, freeze the class
         if (!$import && !$expandoClass)
             $__freeze__.call($__object__, $class);
 
@@ -2994,7 +2995,7 @@
             );
         }
 
-        // If the export flag is set, return the precompiled class
+        // If the export flag is set, return the precompiled export string
         if ($export)
             return $precompile.call($_lock) || '';
 
@@ -3402,18 +3403,14 @@
             return $object;
 
         // Get the type of the object
-        var $type = $$.type($object);
+        var $type = typeof $object;
 
-        // If the object is already an array, return the array
-        if ($type === 'array')
-            return $object;
-
-        // If the object is a value type, return an empty array
+        // If the object is a primitive type, return an empty array
         if ($type === 'boolean' || $type === 'number' || $type === 'string')
             return [];
 
         // Get the object collection length and create the array
-        var $length = $$.asInt($object.length, true);
+        var $length = Math.max(0, $$.asInt($object.length, true));
         var $array  = new $__array__($length);
 
         // Set the object values in the array
@@ -3437,7 +3434,7 @@
         // Get the object type
         var $type = $$.type($object);
 
-        // If the object is a string and matches a float, return the object cast a a float
+        // If the object is a string and matches a float, return the object cast as a float
         if ($type === 'string' && $__match__.call($__trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
             return parseFloat($object);
         
