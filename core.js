@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.5b255';
+    var $_version = '2.1.5b256';
 
     // ########## LANGUAGE ##########
 
@@ -1144,8 +1144,8 @@
         // Get the member definition from the definitions object
         var $definition = $definitions[$key];
 
-        // Create the descriptor and get the name
-        var $descriptor = {};
+        // Create the descriptor reference and get the name
+        var $descriptor = null;
         var $name       = $definition[$_definition_member_name];
 
         switch ($definition[$_definition_member_type])
@@ -1154,10 +1154,10 @@
 
                 // If an injections array was provided and the field is an injected field, construct the injected field descriptor
                 if ($injections && $definition[$_definition_member_field_injection])
-                    $_constructRuntimeInjection($descriptor, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
+                    $descriptor = $_constructRuntimeInjection({}, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
                 // Construct the field descriptor
                 else
-                    $_constructRuntimeField($descriptor, false, $name, $cache ? $cache[$name] : $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
+                    $descriptor = $_constructRuntimeField({}, false, $name, $cache ? $cache[$name] : $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
 
                 // If the field is protected or public
                 if ($isProtected || $isPublic)
@@ -1623,6 +1623,9 @@
                     $value = $v;
             };
         }
+
+        // Return the field descriptor
+        return $descriptor;
     };
     var $_constructRuntimeInherits    = function($inherits, $derivedInherits, $instance)
     {
@@ -1714,6 +1717,9 @@
                 };
             }
         }
+
+        // Return the field descriptor
+        return $descriptor;
     };
     var $_constructRuntimeMerge       = function($descriptor, $merge, $accessor)
     {
