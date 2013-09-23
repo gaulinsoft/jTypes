@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b266';
+    var $_version = '2.1.6b273';
 
     // ########## LANGUAGE ##########
 
@@ -3105,10 +3105,10 @@
         });
 
         // Iterate the known aliases of the internal JavaScript window type
-        $__forEach__.call('global Window DOMWindow'.split(' '), function($window)
+        $__forEach__.call('global Window DOMWindow'.split(' '), function($alias)
         {
             // Insert the window alias into the types lookup
-            $types['[object ' + $window + ']'] = 'window';
+            $types['[object ' + $alias + ']'] = 'window';
         });
 
         // Define the type method
@@ -3127,7 +3127,7 @@
                 return $object[$_definition_keyHint] === $object ? 'class': 'function';
 
             // If the object is the window object, return the "window" type string
-            if ($object === window)
+            if ($object === window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf__.call($__object__, $object) === null)
                 return 'window';
 
             // If the object is a class instance, return the "instance" type string
