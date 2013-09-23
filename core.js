@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.5b258';
+    var $_version = '2.1.5';
 
     // ########## LANGUAGE ##########
 
@@ -388,7 +388,7 @@
     // Define the "toString()" methods on the base class of all classes and the base prototype of all class prototypes
     $__defineProperty__.call($__object__, $_class, 'toString', { 'value': $_class_toString });
     $__defineProperty__.call($__object__, $_prototype, 'toString', { 'value': $_prototype_toString });
-    
+
     // Set the base class of all classes prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
     $_class.prototype = $_prototype;
 
@@ -516,7 +516,7 @@
         // If the value is a simple object, set the type as a property
         else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf__.call($__object__, $value) === $__objectProto__)
             $type = 'property';
-        
+
         // If the class has the import flag
         if ($isImport)
         {
@@ -1628,7 +1628,7 @@
         // Return the field descriptor
         return $descriptor;
     };
-    var $_constructRuntimeInherits    = function($inherits, $derivedInherits, $instance)
+    var $_constructRuntimeInherits    = function($instance, $inherits, $derivedInherits)
     {
         for (var $inheritKey in $inherits)
         {
@@ -1642,8 +1642,9 @@
             // Set the instance member descriptor
             $__defineProperty__.call($__object__, $instance, $inheritKey, $inherit);
 
-            // Set the member descriptor in the derived inherits object
-            $derivedInherits[$inheritKey] = $inherit;
+            // If a derived inherits object was provided, set the member descriptor in it
+            if ($derivedInherits)
+                $derivedInherits[$inheritKey] = $inherit;
         }
     };
     var $_constructRuntimeInjection   = function($descriptor, $name, $key, $injections, $type, $readonly)
@@ -1894,7 +1895,7 @@
         // If a base self reference is required, define the self reference on the base instance
         //if ($defineBase)
         //    $__defineProperty__.call($__object__, $base, '__self', { 'value': $instance });
-                    
+
         // If a public self reference is required, define the self reference on the public instance
         if ($definePublic)
             $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
@@ -1906,19 +1907,19 @@
         // Define the chain type accessor on the private and base instances
         $__defineProperty__.call($__object__, $private, '__type', { 'value': $class });
         //$__defineProperty__.call($__object__, $base, '__type', { 'value': $class });
-        
+
         // If the class is not internal, a public chain type accessor is required, or the chain is switching to internal, define the chain type accessor on the public instance
         if (!$isInternal || $definePublic || $switch)
             $__defineProperty__.call($__object__, $public, '__type', { 'value': $isInternal ? null : $class });
-        
+
         // If a private type method is required, define the type method on the private instance
         if ($definePrivate)
             $__defineProperty__.call($__object__, $private, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
-        
+
         // If a base type method is required or the chain is switching to internal, define the type method on the base instance
         if ($defineBase || $switch)
             $__defineProperty__.call($__object__, $base, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
-        
+
         // If a public type method is required, define the type method on the public instance
         if ($definePublic)
             $__defineProperty__.call($__object__, $public, 'type', { 'value': $typeExternal });
@@ -1939,7 +1940,7 @@
     {
         // Create the clone method
         var $clone = $_constructRuntimeClone($type, $class, $cache, $injections);
-                        
+
         // Define the clone method on the private and base instances
         $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
         $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
@@ -1948,7 +1949,7 @@
         if (!$isInternal || !$protected || $isExpandoPublic)
             $__defineProperty__.call($__object__, $public, 'clone', { 'value': $isInternal ? $_constructRuntimeClone($type, $externalType, $cache, $injections) : $clone });
     };
-    
+
     // Create the import runtime helper functions
     var $_importRuntimeAccessor    = function($cache, $name, $private, $public, $type, $accessor)
     {
@@ -2023,7 +2024,7 @@
     {
         // Extract the property name
         var $name = $get && $get['name'] || $set && $set['name'] || '';
-        
+
         // Extract the get and set accessors
         $get = $get && $get['get'] || undefined;
         $set = $set && $set['set'] || undefined;
@@ -2366,9 +2367,6 @@
             $classProtected = $__create__.call($__object__, null);
             $classPrototype = new $_class();
             $classPublic    = $__create__.call($__object__, null);
-
-            // Reset the external index
-            $external = 0;
         }
 
         // Compile the class definitions into the definitions objects
@@ -2565,23 +2563,23 @@
                     $base    = $stack[1];
                     $private = $stack[0];
                     $public  = $stack[2];
-                    
+
                     // Get the chain data
                     var $chainInternal = $i < $external;
                     var $chainSwitch   = $external > 0 && $i === $external - 1;
                     var $chainType     = $chain[$i];
-                    
+
                     // Get the chain expando flags
                     var $chainExpandoPrivate = $chainType[$_definition_expando_private];
                     var $chainExpandoPublic  = $chainType[$_definition_expando_public];
-                    
+
                     // Build the stack
                     $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $base, $private, null, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
-                    
+
                     // If the instance is a struct, build the struct stack
                     if ($struct)
                         $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $base, $private, null, $public, $chainExpandoPublic, $chainInternal);
-                    
+
                     // If this is not the last matrix stack
                     if (!$matrixLast)
                     {
@@ -2614,19 +2612,20 @@
                         $derivedPublicInherits    = $derivedInherits[2];
 
                         // Build the inherits descriptors for the base, private, and public instances
-                        $_constructRuntimeInherits($baseInherits, $derivedBaseInherits, $base);
-                        $_constructRuntimeInherits($protectedInherits, $derivedProtectedInherits, $private);
-                        $_constructRuntimeInherits($publicInherits, $derivedPublicInherits, $public);
+                        $_constructRuntimeInherits($base, $baseInherits, $derivedBaseInherits);
+                        $_constructRuntimeInherits($private, $protectedInherits, $derivedProtectedInherits);
+                        $_constructRuntimeInherits($private, $publicInherits);
+                        $_constructRuntimeInherits($public, $publicInherits, $derivedPublicInherits);
                     }
                     else
                     {
                         // Get the derived inherits array
-                        var $derivedInherit = $inherits[$i];
+                        var $derivedInherits = $inherits[$i];
 
                         // Get the derived inherits objects
-                        $derivedBaseInherits      = $derivedInherit[0];
-                        $derivedProtectedInherits = $derivedInherit[1];
-                        $derivedPublicInherits    = $derivedInherit[2];
+                        $derivedBaseInherits      = $derivedInherits[0];
+                        $derivedProtectedInherits = $derivedInherits[1];
+                        $derivedPublicInherits    = $derivedInherits[2];
                     }
 
                     // Freeze the base instance object
@@ -2662,19 +2661,19 @@
                     // If this is not the last matrix stack, define the base instance reference on the private instance
                     if (!$matrixLast)
                         $__defineProperty__.call($__object__, $private, '__base', { 'value': $matrix[$i + 1][3] });
-                    
+
                     // Get the chain data
                     var $chainInternal = $i < $external;
                     var $chainSwitch   = $external > 0 && $i === $external - 1;
                     var $chainType     = $chain[$i];
-                    
+
                     // Get the chain expando flags
                     var $chainExpandoPrivate = $chainType[$_definition_expando_private];
                     var $chainExpandoPublic  = $chainType[$_definition_expando_public];
 
                     // Build the stack
                     $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $base, $private, $protected, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
-                    
+
                     // If the instance is a struct, build the struct stack
                     if ($struct)
                         $_constructRuntimeStruct($chainType, $class, $type, $matrix, $injections, $base, $private, $protected, $public, $chainExpandoPublic, $chainInternal);
@@ -2737,15 +2736,9 @@
             return $public;
         };
 
-        // Prepend the class to the chain array and set the levels count
+        // Prepend the class to the chain array, set the levels count, and set the external type
         $levels = $chain.unshift($class);
-
-        // If this class is internal and does not inherit from any non-internal classes, reset the external level
-        if ($internal && $external >= $levels)
-            $external = 0;
-        
-        // Get the external type
-        $type = $chain[$external];
+        $type   = !$internal || $external < $levels ? $chain[$external] : $_class;
 
         // If the class has the import flag or is optimized, set the constructor in the cache definitions object
         if ($import || $optimized)
@@ -3014,11 +3007,11 @@
 
     // ---------- VERSION ----------
     $_defineField('version', $_version, false);
-    
+
     // ---------- CLASS + PROTOTYPE ----------
     $_defineField('__class', $_class, false);
     $_defineField('__proto', $_prototype, false);
-    
+
     // ---------- INTEGER MAX/MIN ----------
     $_defineField('intMax', $_const_int_max, false);
     $_defineField('intMin', $_const_int_min, false);
@@ -3437,7 +3430,7 @@
         // If the object is a string and matches a float, return the object cast as a float
         if ($type === 'string' && $__match__.call($__trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
             return parseFloat($object);
-        
+
         // If the object is not a number, return NaN
         if ($type !== 'number')
             return NaN;
@@ -3478,7 +3471,7 @@
         // If the object is a null reference or undefined, return an empty object
         if ($object === null || $object === undefined)
             return {};
-        
+
         // Return the object
         return $object;
     });

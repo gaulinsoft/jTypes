@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                               jTypes 2.1.4
+//                                jTypes 2.1.5
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -115,6 +115,13 @@ Instance.prototype = (
         ///   <param name="class" type="Class">A class to check the instance against.</param>
         ///   <returns type="Boolean">true if instance is an instance of class; otherwise false.</returns>
         /// </signature>
+    },
+    'type': function()
+    {
+        /// <signature>
+        ///   <summary>Gets the class type of a jTypes instance.</summary>
+        ///   <returns type="Class">A jTypes class that is the runtime type of the instance.</returns>
+        /// </signature>
     }
 });
 
@@ -147,7 +154,16 @@ jTypes['asInt']              = function()
     /// <signature>
     ///   <summary>Converts an object to an integer.</summary>
     ///   <param name="object" type="Object">An object to convert to an integer.</param>
+    ///   <param name="finite" type="Boolean">A flag indicating whether or not to convert to a finite integer.</param>
     ///   <returns type="Number">object if it is an integer; otherwise its number equivalent rounded towards zero.</returns>
+    /// </signature>
+};
+jTypes['asObject']           = function()
+{
+    /// <signature>
+    ///   <summary>Converts a reference to an object.</summary>
+    ///   <param name="reference" type="Object">A reference to convert to an object.</param>
+    ///   <returns type="Object">object if it is neither null nor undefined; otherwise a simple object.</returns>
     /// </signature>
 };
 jTypes['asString']           = function()
@@ -156,6 +172,14 @@ jTypes['asString']           = function()
     ///   <summary>Converts an object to a string.</summary>
     ///   <param name="object" type="Object">An object to convert to a string.</param>
     ///   <returns type="String">object if it is a string; otherwise its string equivalent.</returns>
+    /// </signature>
+};
+jTypes['base']               = function()
+{
+    /// <signature>
+    ///   <summary>Gets the base class of a jTypes class.</summary>
+    ///   <param name="class" type="Class">A class to get the base class of.</param>
+    ///   <returns type="Class">A jTypes class if class has a base class; otherwise null.</returns>
     /// </signature>
 };
 jTypes['empty']              = function()
@@ -168,9 +192,16 @@ jTypes['empty']              = function()
 jTypes['export']             = function()
 {
     /// <signature>
-    ///   <summary>Exports a class to a precompiled modifiers string.</summary>
+    ///   <summary>Exports a jTypes class to a precompiled modifiers string.</summary>
     ///   <param name="class" type="Class">A class to export to a precompiled modifiers string.</param>
     ///   <returns type="String">A precompiled modifiers string for optimized compiling.</returns>
+    /// </signature>
+};
+jTypes['flat']               = function()
+{
+    /// <signature>
+    ///   <summary>Creates a flat object.</summary>
+    ///   <returns type="Object">An object with a null prototype.</returns>
     /// </signature>
 };
 jTypes['format']             = function()
@@ -271,6 +302,14 @@ jTypes['isFiniteInt']        = function()
     ///   <returns type="Boolean">true if value is a finite number that is a representable integer in JavaScript; otherwise, false.</returns>
     /// </signature>
 };
+jTypes['isFlatObject']       = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is a flat object.</summary>
+    ///   <param name="object" type="Object">An object to test if it is a flat object.</param>
+    ///   <returns type="Boolean">true if object is an object and has a null prototype; otherwise, false.</returns>
+    /// </signature>
+};
 jTypes['isFunction']         = function()
 {
     /// <signature>
@@ -285,6 +324,14 @@ jTypes['isImportedClass']    = function()
     ///   <summary>Indicates whether or not an object is a jTypes imported class.</summary>
     ///   <param name="object" type="Object">An object to test if it is a jTypes imported class.</param>
     ///   <returns type="Boolean">true if object is a jTypes class that was compiled using a precompiled modifiers string; otherwise, false.</returns>
+    /// </signature>
+};
+jTypes['isInternalClass']    = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is a jTypes internal class.</summary>
+    ///   <param name="object" type="Object">An object to test if it is a jTypes internal class.</param>
+    ///   <returns type="Boolean">true if object is a jTypes class with the internal modifier; otherwise, false./returns>
     /// </signature>
 };
 jTypes['isInfinity']         = function()
@@ -359,6 +406,14 @@ jTypes['isPositiveInfinity'] = function()
     ///   <returns type="Boolean">true if value is positive infinity; otherwise, false.</returns>
     /// </signature>
 };
+jTypes['isPrimitiveType']    = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is a "primitive-type" object.</summary>
+    ///   <param name="object" type="Object">An object to test if it is a "primitive-type" object.</param>
+    ///   <returns type="Boolean">true if object is a type from the following collection: boolean, null, number, string, undefined; otherwise, false.</returns>
+    /// </signature>
+};
 jTypes['isReferenceType']    = function()
 {
     /// <signature>
@@ -431,18 +486,26 @@ jTypes['isWindow']           = function()
     ///   <returns type="Boolean">true if object is a global window object; otherwise, false.</returns>
     /// </signature>
 };
+jTypes['isWindowLikeObject'] = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is a window-like object.</summary>
+    ///   <param name="object" type="Object">An object to test if it is a window-like object.</param>
+    ///   <returns type="Boolean">true if object has a window property that is a self reference; otherwise, false.</returns>
+    /// </signature>
+};
 jTypes['private']            = function()
 {
     /// <signature>
     ///   <summary>Creates a private member definition for a jTypes class.</summary>
     ///   <param name="value" type="Object">A value for the private member.</param>
-    ///   <returns type="Object">A private member definition object for a jTypes class.</returns>
+    ///   <returns type="Object">A private member definition package for a jTypes class.</returns>
     /// </signature>
     /// <signature>
     ///   <summary>Creates a private member definition for a jTypes class.</summary>
     ///   <param name="modifiers" type="String">A space-separated string of modifiers for the private member.</param>
     ///   <param name="value" type="Object">A value for the private member.</param>
-    ///   <returns type="Object">A private member definition object for a jTypes class.</returns>
+    ///   <returns type="Object">A private member definition package for a jTypes class.</returns>
     /// </signature>
 };
 jTypes['protected']          = function()
@@ -450,13 +513,27 @@ jTypes['protected']          = function()
     /// <signature>
     ///   <summary>Creates a protected member definition for a jTypes class.</summary>
     ///   <param name="value" type="Object">A value for the protected member.</param>
-    ///   <returns type="Object">A protected member definition object for a jTypes class.</returns>
+    ///   <returns type="Object">A protected member definition package for a jTypes class.</returns>
     /// </signature>
     /// <signature>
     ///   <summary>Creates a protected member definition for a jTypes class.</summary>
     ///   <param name="modifiers" type="String">A space-separated string of modifiers for the protected member.</param>
     ///   <param name="value" type="Object">A value for the protected member.</param>
-    ///   <returns type="Object">A protected member definition object for a jTypes class.</returns>
+    ///   <returns type="Object">A protected member definition package for a jTypes class.</returns>
+    /// </signature>
+};
+jTypes['prototype']          = function()
+{
+    /// <signature>
+    ///   <summary>Creates a prototype member definition for a jTypes class.</summary>
+    ///   <param name="value" type="Object">A value for the prototype member.</param>
+    ///   <returns type="Object">A prototype member definition package for a jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Creates a prototype member definition for a jTypes class.</summary>
+    ///   <param name="modifiers" type="String">A space-separated string of modifiers for the prototype member.</param>
+    ///   <param name="value" type="Object">A value for the prototype member.</param>
+    ///   <returns type="Object">A prototype member definition package for a jTypes class.</returns>
     /// </signature>
 };
 jTypes['public']             = function()
@@ -464,13 +541,27 @@ jTypes['public']             = function()
     /// <signature>
     ///   <summary>Creates a public member definition for a jTypes class./summary>
     ///   <param name="value" type="Object">A value for the public member.</param>
-    ///   <returns type="Object">A public member definition object for a jTypes class.</returns>
+    ///   <returns type="Object">A public member definition package for a jTypes class.</returns>
     /// </signature>
     /// <signature>
     ///   <summary>Creates a public member definition for a jTypes class.</summary>
     ///   <param name="modifiers" type="String">A space-separated string of modifiers for the public member.</param>
     ///   <param name="value" type="Object">A value for the public member.</param>
-    ///   <returns type="Object">A public member definition object for a jTypes class.</returns>
+    ///   <returns type="Object">A public member definition package for a jTypes class.</returns>
+    /// </signature>
+};
+jTypes['static']             = function()
+{
+    /// <signature>
+    ///   <summary>Creates a static member definition for a jTypes class.</summary>
+    ///   <param name="value" type="Object">A value for the static member.</param>
+    ///   <returns type="Object">A static member definition package for a jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Creates a static member definition for a jTypes class.</summary>
+    ///   <param name="modifiers" type="String">A space-separated string of modifiers for the static member.</param>
+    ///   <param name="value" type="Object">A value for the static member.</param>
+    ///   <returns type="Object">A static member definition package for a jTypes class.</returns>
     /// </signature>
 };
 jTypes['type']               = function()
@@ -481,6 +572,12 @@ jTypes['type']               = function()
     ///   <returns type="String">A type string from the following collection of types: array, boolean, class, date, error, function, instance, null, number, object, regexp, string, undefined, window.</returns>
     /// </signature>
 };
+
+/// <field type="Function">Provides access to the base class of all jTypes classes.</field>
+jTypes['__class'] = true;
+
+/// <field type="Object">Provides access to the base prototype of all jTypes instances.</field>
+jTypes['__proto'] = true;
 
 /// <field type="Boolean">Indicates whether or not debugging is enabled.</field>
 jTypes['debug'] = true;
