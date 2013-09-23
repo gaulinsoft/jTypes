@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                                jTypes 2.1.5
+//                                jTypes 2.1.6
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.5';
+    var $_version = '2.1.6b266';
 
     // ########## LANGUAGE ##########
 
@@ -3272,6 +3272,17 @@
         return $object !== undefined && $object !== null;
     });
 
+    // ---------- OBJECT INSTANCE ----------
+    $_defineMethod('isObjectInstance', function($object)
+    {
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
+
+        // Return true if the object inherits from the object prototype
+        return !!($object instanceof $__object__);
+    });
+
     // ---------- OPTIMIZED CLASS ----------
     $_defineMethod('isOptimizedClass', function($object)
     {
@@ -3284,6 +3295,20 @@
     {
         // Return true if the object is a number, is not NaN, is not finite, and is greater than zero
         return $$.isNumber($number) && !isNaN($number) && !isFinite($number) && $number > 0;
+    });
+
+    // ---------- PRIMITIVE ----------
+    $_defineMethod('isPrimitive', function($object)
+    {
+        // If the object is a null reference or undefined, return true
+        if ($object === null || $object === undefined)
+            return true;
+
+        // Get the primitive type of the object
+        var $typeof = typeof $object;
+
+        // Return true if the object is a boolean, number, or string primitive
+        return $typeof === 'boolean' || $typeof === 'number' || $typeof === 'string';
     });
 
     // ---------- PRIMITIVE-TYPE ----------
