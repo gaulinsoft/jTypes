@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.0La276';
+    var $_version = '1.0.0La281';
 
     // ########## LANGUAGE ##########
 
@@ -34,6 +34,28 @@
     var $_lang_compatibility       = 'A browser that supports JavaScript 1.8.5 (MSIE 9+) is required.';
     var $_lang_exception_arguments = '"{0}({1})" has some invalid arguments.';
     var $_lang_exception_prefix    = 'jTypes Error: ';
+
+    // Create the language constants
+    var $_lang_$$_derive_internal                  = 'Class must have the internal modifier to inherit from an internal class.';
+    var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only field.';
+    var $_lang_$$_keyword                          = '"{0}" is not a valid class modifier.';
+    var $_lang_$$_member_keyword                   = '"{1}" has an invalid {0} modifier "{2}".';
+    var $_lang_$$_member_keyword_access_2          = '"{0}" cannot have more than one access modifier.';
+    var $_lang_$$_member_keyword_escapsulation     = '"{0}" cannot have the public, protected, or private modifiers because it is {1}.';
+    var $_lang_$$_member_keyword_readonly          = '"{0}" cannot have the readonly modifier because it is {1}.';
+    var $_lang_$$_member_name_2                    = '"{0}" cannot have more than one definition.';
+    var $_lang_$$_member_name_invalid              = '"{1}" is not a valid {0} name.';
+    var $_lang_$$_member_name_null                 = '"" is not a valid {0} name.';
+    var $_lang_$$_member_name_package              = '"{0}" cannot have modifiers because it is a packaged member definition.';
+    var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
+    var $_lang_$$_member_property_accessors        = '"{0}" must have both accessors to have an access modifier on the {1} accessor.';
+    var $_lang_$$_member_property_accessors_access = '"{0}" must have a more restrictive access modifier on the {1} accessor.';
+    var $_lang_$$_member_property_function         = '"{0}" must have a function for the {1} accessor.';
+    var $_lang_$$_member_property_keyword          = '"{0}" has an invalid modifier "{2}" on the {1} accessor.';
+    var $_lang_$$_member_property_keyword_access_2 = '"{0}" cannot have access modifiers on both property accessors.';
+    var $_lang_$$_member_property_name_2           = '"{0}" cannot have more than one definition for the {1} accessor.';
+    var $_lang_$$_member_property_name_invalid     = '"{0}" cannot have a "{1}" property accessor.';
+    var $_lang_$$_member_property_name_null        = '"{0}" must have at least one property accessor.';
 
     // ########## NATIVE CODE ##########
 
@@ -404,7 +426,7 @@
     var $_definitionsCompilerAccessorMethod = function($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $accessor, $type, $hasTwoAccessors)
     {
         // Create the property method definition array
-        var $method = new $__array__($_definition_member_flagCount);
+        var $method = new $__array($_definition_member_flagCount);
 
         // Get the accessor name and private access modifier flag
         var $accessorName    = $accessor[$_accessor_name];
@@ -424,22 +446,22 @@
         {
             // If the accessor is private, set the method definition in the private definitions object
             if ($accessorPrivate)
-                $__defineProperty__.call($__object__, $privateDefinitions, $accessorName, $descriptor);
+                $__defineProperty($privateDefinitions, $accessorName, $descriptor);
             // If the accessor is protected, set the method definition in the protected definitions object
             else if ($accessor[$_accessor_protected])
-                $__defineProperty__.call($__object__, $protectedDefinitions, $accessorName, $descriptor);
+                $__defineProperty($protectedDefinitions, $accessorName, $descriptor);
             // If the accessor is public, set the method definition in the public definitions object
             else if ($accessor[$_accessor_public])
-                $__defineProperty__.call($__object__, $publicDefinitions, $accessorName, $descriptor);
+                $__defineProperty($publicDefinitions, $accessorName, $descriptor);
         }
         // Set the method definition in the definitions object
         else
-            $__defineProperty__.call($__object__, $definitions, $accessorName, $descriptor);
+            $__defineProperty($definitions, $accessorName, $descriptor);
     };
     var $_definitionsCompiler               = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $staticDefinitions, $key, $value)
     {
         // Break the key string into a keywords array and get the member name
-        var $keywords = $__trim__.call($key || '').split(' ');
+        var $keywords = $__string_trim__.call($key || '').split(' ');
         var $name     = $keywords.pop() || '';
 
         // If the member is a package
@@ -464,15 +486,15 @@
         if (typeof $value === 'function')
             $type = 'method';
         // If the value is a simple object, set the type as a property
-        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf__.call($__object__, $value) === $__objectProto__)
+        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf($value) === $__objectProto__)
             $type = 'property';
 
         // If the name is empty or whitespace, throw an exception
-        if (!$__trim__.call($name))
+        if (!$__string_trim__.call($name))
             throw $_exceptionFormat($_lang_$$_member_name_null, $type);
 
         // If the name is not a valid member name, throw an exception
-        if (!$__match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
+        if (!$__string_match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
             throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
         var $readonly = false;
@@ -573,7 +595,7 @@
                 }
 
                 // Create the field definition array
-                var $field = new $__array__($_definition_member_flagCount);
+                var $field = new $__array($_definition_member_flagCount);
 
                 // Set the field definition data
                 $field[$_definition_member_field_readonly] = $readonly;
@@ -582,14 +604,14 @@
                 $field[$_definition_member_value]          = $value;
 
                 // Set the field in the definitions object
-                $__defineProperty__.call($__object__, $definitions, $name, { 'enumerable': true, 'value': $field });
+                $__defineProperty($definitions, $name, { 'enumerable': true, 'value': $field });
 
                 break;
 
             case 'method':
 
                 // Create the method definition array
-                var $method = new $__array__($_definition_member_flagCount);
+                var $method = new $__array($_definition_member_flagCount);
 
                 // Set the field definition data
                 $method[$_definition_member_name]  = $name;
@@ -597,15 +619,15 @@
                 $method[$_definition_member_value] = $value;
 
                 // Set the method in the definitions object
-                $__defineProperty__.call($__object__, $definitions, $name, { 'enumerable': true, 'value': $method });
+                $__defineProperty($definitions, $name, { 'enumerable': true, 'value': $method });
 
                 break;
 
             case 'property':
 
                 // Create the get and set method data arrays
-                var $get = new $__array__($_accessor_flagCount);
-                var $set = new $__array__($_accessor_flagCount);
+                var $get = new $__array($_accessor_flagCount);
+                var $set = new $__array($_accessor_flagCount);
 
                 // Create the has get and set accessors flags
                 var $hasGet = false;
@@ -614,12 +636,12 @@
                 for (var $propertyKey in $value)
                 {
                     // Break the property key string into a keywords array and get the member name and value
-                    var $propertyKeywords = $__trim__.call($propertyKey || '').split(' ');
+                    var $propertyKeywords = $__string_trim__.call($propertyKey || '').split(' ');
                     var $memberName       = $propertyKeywords.pop() || '';
                     var $memberValue      = $value[$propertyKey];
 
                     // If the member name is empty or whitespace, throw an exception
-                    if (!$__trim__.call($memberName))
+                    if (!$__string_trim__.call($memberName))
                         throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
                     var $member = null;
@@ -774,7 +796,7 @@
             case 'static':
 
                 // Create the member definition array
-                var $member = new $__array__($_definition_member_flagCount);
+                var $member = new $__array($_definition_member_flagCount);
 
                 // Set the member definition data
                 $member[$_definition_member_name]  = $name;
@@ -807,7 +829,233 @@
     // Create the compiler
     $$ = function()
     {
+        // Get the initial arguments
+        var $argument    = 0;
+        var $baseClass   = null;
+        var $constructor = arguments[$argument++];
+        var $modifiers   = '';
+        var $prototype   = null;
+        var $typeof      = typeof $constructor;
+
+        // If the constructor is not a simple object
+        if ($constructor === null || $typeof !== 'object' || $__getPrototypeOf($constructor) !== $__objectProto__)
+        {
+            // Get the prototype
+            $prototype = arguments[$argument++];
+
+            // If the constructor is not a function (and therefore not a class)
+            if ($typeof !== 'function')
+            {
+                // If the constructor is not a string, throw an exception
+                if ($typeof !== 'string')
+                    throw $_exceptionArguments(null, arguments);
+
+                // Use the first argument as the modifiers string
+                $modifiers = $constructor;
+
+                // If the prototype is a class
+                if (typeof $prototype === 'function' && $prototype[$_definition_keyHint] === $prototype)
+                {
+                    // Use the second argument as the base class
+                    $baseClass   = $prototype;
+                    $constructor = arguments[$argument++];
+                }
+                // Use the second argument as the constructor
+                else
+                    $constructor = $prototype;
+
+                // If the constructor is not a function or is a class
+                if (typeof $constructor !== 'function' || $constructor[$_definition_keyHint] === $constructor)
+                {
+                    // Use the third argument as the prototype
+                    $prototype   = $constructor;
+                    $constructor = null;
+                }
+                // Use the fourth argument as the prototype
+                else
+                    $prototype = arguments[$argument++];
+            }
+            // If the constructor is a class
+            else if ($constructor[$_definition_keyHint] === $constructor)
+            {
+                // Use the first argument as the base class
+                $baseClass = $constructor;
+
+                // If the prototype is a function and not a class
+                if (typeof $prototype === 'function' && $prototype[$_definition_keyHint] !== $prototype)
+                {
+                    // Use the second argument as the constructor
+                    $constructor = $prototype;
+                    $prototype   = arguments[$argument++];
+                }
+                else
+                    $constructor = null;
+            }
+
+            // If the prototype is not a simple object, throw an exception
+            if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf($prototype) !== $__objectProto__)
+                throw $_exceptionArguments(null, arguments);
+        }
+        else
+        {
+            // Use the first argument as the prototype
+            $prototype   = $constructor;
+            $constructor = null;
+        }
+
+        // If the argument count does not match the number of arguments, throw an exception
+        if (arguments.length !== $argument)
+            throw $_exceptionArguments(null, arguments);
+
+        // If no constructor was provided
+        if (!$constructor)
+        {
+            // If a base class was provided
+            if ($baseClass)
+            {
+                // Use a default constructor
+                $constructor = function()
+                {
+                    // If a base constructor exists, apply it with the arguments
+                    if (this.__base)
+                        return this.__base.apply(this, arguments);
+                };
+            }
+            // Use an empty function as the default constructor
+            else
+                $constructor = function()
+                {
+                    //
+                };
+        }
+
+        // Create the flags
+        var $final     = false;
+        var $internal  = false;
+
+        // Create the expando flags
+        var $expandoClass     = false;
+        var $expandoPrivate   = false;
+        var $expandoPrototype = false;
+        var $expandoPublic    = false;
+
+        // If a modifiers string was provided
+        if ($modifiers)
+        {
+            // Create the keywords array
+            var $keywords = $__string_trim__.call($modifiers).split(' ');
+
+            for (var $i = 0, $j = $keywords.length; $i < $j; $i++)
+            {
+                // Get the current keyword
+                var $keyword = $keywords[$i];
+
+                // If the keyword is expando
+                if ($keyword === 'expando')
+                {
+                    // Set all the expando flags
+                    $expandoClass     = true;
+                    $expandoPrivate   = true;
+                    $expandoPrototype = true;
+                    $expandoPublic    = true;
+                }
+                // If the keyword is expando-private, set the expando private flag
+                else if ($keyword === 'expando-private' || $keyword === 'private-expando')
+                    $expandoPrivate = true;
+                // If the keyword is expando-public, set the expando public flag
+                else if ($keyword === 'expando-public' || $keyword === 'public-expando')
+                    $expandoPublic = true;
+                // If the keyword is expando-prototype, set the expando prototype flag
+                else if ($keyword === 'expando-prototype' || $keyword === 'prototype-expando')
+                    $expandoPrototype = true;
+                // If the keyword is expando-static, set the expando class flag
+                else if ($keyword === 'expando-static' || $keyword === 'static-expando')
+                    $expandoClass = true;
+                // If the keyword is internal, set the internal flag
+                else if ($keyword === 'internal')
+                    $internal = true;
+                // If the keyword is sealed, set the final flag
+                else if ($keyword === 'sealed')
+                    $final = true;
+                // If a different keyword was provided, throw an exception
+                else if ($keyword)
+                    throw $_exceptionFormat($_lang_$$_keyword, $keyword);
+            }
+        }
+
         //
+
+        // Create the cache, private, protected, and public references along with the inherited prototype reference
+        var $classPrivate   = $__create(null);
+        var $classProtected = null;
+        var $classPrototype = null;
+        var $classPublic    = null;
+
+        //
+
+        // Compile the class definitions into the definitions objects
+        for (var $key in $prototype)
+            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $definitionsStatic, $key, $prototype[$key]);
+
+        // Create the constructor definition array
+        var $constructorDefinition = new $__array($_definition_member_flagCount);
+
+        // Set the constructor definition data
+        $constructorDefinition[$_definition_member_name]  = 'constructor';
+        $constructorDefinition[$_definition_member_type]  = 'method';
+        $constructorDefinition[$_definition_member_value] = $constructor;
+
+        // Set the constructor in the protected definitions object
+        $__defineProperty($classProtected, 'constructor', { 'enumerable': true, 'value': $constructorDefinition });
+
+        //
+
+        // Freeze the class definitions objects
+        $__freeze($classCache);
+        $__freeze($classPrivate);
+        $__freeze($classProtected);
+        $__freeze($classPublic);
+
+        // If the prototype is not expando, freeze the prototype
+        if (!$expandoPrototype)
+            $__freeze($classPrototype);
+
+        // Create the class data
+        var $data = {};
+
+        // Set the class cache data
+        $data[$_definition_baseClass]         = { 'value': $baseClass };
+        $data[$_definition_construct]         = { 'value': !$final ? $construct : null};
+        $data[$_definition_expando_class]     = { 'value': $expandoClass };
+        $data[$_definition_expando_private]   = { 'value': $expandoPrivate };
+        $data[$_definition_expando_prototype] = { 'value': $expandoPrototype };
+        $data[$_definition_expando_public]    = { 'value': $expandoPublic };
+        $data[$_definition_final]             = { 'value': $final };
+        $data[$_definition_internal]          = { 'value': $internal };
+        $data[$_definition_keyHint]           = { 'value': $class };
+        $data[$_definition_private]           = { 'value': $_definitionsCompilerLock($classPrivate) };
+        $data[$_definition_protected]         = { 'value': $_definitionsCompilerLock($classProtected) };
+        $data[$_definition_public]            = { 'value': $_definitionsCompilerLock($classPublic) };
+
+        // Set the class data
+        $__defineProperties($class, $data);
+
+        // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
+        $class.prototype = $classPrototype;
+
+        // Set the class prototype without the "writable" flag
+        $__defineProperty($class, 'prototype', { 'value': $classPrototype, 'writable': false });
+
+        // If a static "toString()" definition was not provided, set the class toString() method
+        if (!$__hasOwnProperty__.call($definitionsStatic, 'toString'))
+            $class.toString = $_class_toString;
+
+        // If the class is not expando, freeze the class
+        if (!$expandoClass)
+            $__freeze($class);
+
+        // Return the class
+        return $class;
     };
 
     // Define the compiler "toString()" method
@@ -943,6 +1191,263 @@
             return $types[$__toString__.call($object)] || 'object';
         });
     })();
+
+    // ########## CHECKS ##########
+
+    // ---------- CLASS ----------
+    $_defineMethod('isClass', function($object)
+    {
+        // Return true if the object is a function and has a class key hint
+        return typeof $object === 'function' && $object[$_definition_keyHint] === $object;
+    });
+
+    // ---------- INSTANCE ----------
+    $_defineMethod('isInstance', function($object)
+    {
+        // If the object is undefined or null, return false
+        if ($object === undefined || $object === null)
+            return false;
+
+        // Return true if the object is an instance of a class
+        return !!($object instanceof $_class);
+    });
+
+    // ---------- NULL ----------
+    $_defineMethod('isNull', function($argument)
+    {
+        // Return true if the argument is null
+        return $argument === null;
+    });
+
+    // ---------- OBJECT ----------
+    $_defineMethod('isObject', function($object)
+    {
+        // Return true if the object is neither undefined nor null
+        return $object !== undefined && $object !== null;
+    });
+
+    // ---------- PRIMITIVE ----------
+    $_defineMethod('isPrimitive', function($object)
+    {
+        // If the object is a null reference or undefined, return true
+        if ($object === null || $object === undefined)
+            return true;
+
+        // Get the primitive type of the object
+        var $typeof = typeof $object;
+
+        // Return true if the object is a boolean, number, or string primitive
+        return $typeof === 'boolean' || $typeof === 'number' || $typeof === 'string';
+    });
+
+    // ---------- UNDEFINED ----------
+    $_defineMethod('isUndefined', function($argument)
+    {
+        // Return true if the argument is undefined
+        return $argument === undefined;
+    });
+
+    // ---------- WINDOW ----------
+    $_defineMethod('isWindow', function($object)
+    {
+        // If the object is the window object, return true
+        if ($object === window)
+            return true;
+
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
+
+        // Return true if the object is a window reference
+        return $$.type($object) === 'window';
+    });
+
+    // ########## CASTS ##########
+
+    // ---------- ARRAY ----------
+    $_defineMethod('asArray', function($object)
+    {
+        // If the object is a null reference or undefined, return an empty array
+        if ($object === null || $object === undefined)
+            return [];
+
+        // If the object is already an array, return the array
+        if ($__array_isArray($object))
+            return $object;
+
+        // Get the type of the object
+        var $type = typeof $object;
+
+        // If the object is a primitive type, return an empty array
+        if ($type === 'boolean' || $type === 'number' || $type === 'string')
+            return [];
+
+        // Get the object collection length and create the array
+        var $length = Math.max(0, $$.asInt($object.length, true));
+        var $array  = new $__array($length);
+
+        // Set the object values in the array
+        for (var $i = 0; $i < $length; $i++)
+            $array[$i] = $object[$i];
+
+        // Return the array
+        return $array;
+    });
+
+    // ---------- BOOL ----------
+    $_defineMethod('asBool', function($object)
+    {
+        // Return the object cast as a boolean
+        return !!$object;
+    });
+
+    // ---------- FLOAT ----------
+    $_defineMethod('asFloat', function($object)
+    {
+        // Get the object type
+        var $type = $$.type($object);
+
+        // If the object is a string and matches a float, return the object cast as a float
+        if ($type === 'string' && $__string_match__.call($__string_trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
+            return parseFloat($object);
+
+        // If the object is not a number, return NaN
+        if ($type !== 'number')
+            return NaN;
+
+        // Return the number
+        return $object;
+    });
+
+    // ---------- INTEGER ----------
+    $_defineMethod('asInt', function($object, $finite)
+    {
+        // Cast the object as a float
+        $object = $$.asFloat($object);
+
+        // If the object is not a number, return NaN
+        if (isNaN($object))
+            return $finite ? 0 : NaN;
+
+        // If the number is greater than the maximum integer, return infinity
+        if ($object > $_const_int_max)
+            return $finite ? $_const_int_max : Infinity;
+
+        // If the number is less than the minimum integer, return negative infinity
+        if ($object < $_const_int_min)
+            return $finite ? $_const_int_min : -Infinity;
+
+        // If the number is less than zero, return the number as an integer (rounded towards zero)
+        if ($object < 0)
+            return Math.ceil($object);
+
+        // Return the number as an integer (rounded towards zero)
+        return Math.floor($object);
+    });
+
+    // ---------- OBJECT ----------
+    $_defineMethod('asObject', function($object)
+    {
+        // If the object is a null reference or undefined, return an empty object
+        if ($object === null || $object === undefined)
+            return {};
+
+        // Return the object
+        return $object;
+    });
+
+    // ---------- STRING ----------
+    $_defineMethod('asString', function($object)
+    {
+        // Get the object type
+        var $type = $$.type($object);
+
+        // If the object is a string, return the object
+        if ($type === 'string')
+            return $object;
+
+        // If the object is a boolean or a number, return the object cast as a string
+        if ($type === 'boolean' || $type === 'number')
+            return $object + '';
+
+        // Return an empty string
+        return '';
+    });
+
+    // ########## HELPERS ##########
+
+    // ---------- BASE ----------
+    $_defineMethod('base', function($class)
+    {
+        // CHECK $class
+        if (!$$.isClass($class))
+        {
+            // If the debug flag is set, throw an exception
+            if ($$.debug)
+                throw $_exceptionArguments('base', arguments);
+
+            return null;
+        }
+
+        // Return the base class
+        return $class[$_definition_baseClass] || null;
+    });
+
+    // ---------- EMPTY ----------
+    $_defineMethod('empty', function()
+    {
+        // Return an empty function
+        return function()
+        {
+            //
+        };
+    });
+
+    // ---------- FORMAT ----------
+    $_defineMethod('format', function($string)
+    {
+        // CHECK $string
+        if (!$$.isString($string))
+        {
+            // If the debug flag is set, throw an exception
+            if ($$.debug)
+                throw $_exceptionArguments('format', arguments);
+
+            // Return an empty string
+            return '';
+        }
+
+        // Get the arguments
+        var $arguments = arguments;
+
+        // Return the formatted string
+        return $__string_replace__.call($string, /([\{]+)([0-9]+)\}/g, function($0, $1, $2)
+        {
+            // Get the argument index and create the prepend string
+            var $index   = $$.asInt($2, true) + 1;
+            var $prepend = $$.asString($1);
+
+            // If an even number of opening-braces were provided or the argument index exceeded the number of arguments, return the unescaped match as the replacement
+            if ($prepend.length % 2 === 0 || $index >= $arguments.length)
+                return $prepend.substr($prepend.length / 2) + $2 + '}';
+
+            // Return the argument as the replacement
+            return $prepend.substr($prepend.length / 2 + 1) + $$.asString($arguments[$index]);
+        });
+    });
+
+    // ########## SETTINGS ##########
+
+    // ---------- DEBUG ----------
+    $_defineProperty('debug', function()
+    {
+        // Return the debug flag
+        return $_debug;
+    }, function($v)
+    {
+        // Set the debug flag
+        $_debug = $$.asBool($v);
+    });
 
     // ########## GLOBALS ##########
 
