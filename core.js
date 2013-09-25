@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b273';
+    var $_version = '2.1.6b277';
 
     // ########## LANGUAGE ##########
 
@@ -3613,17 +3613,18 @@
         var $arguments = arguments;
 
         // Return the formatted string
-        return $__replace__.call($string, /\{([0-9]{1,2})\}/g, function($0, $1)
+        return $__replace__.call($string, /([\{]+)([0-9]+)\}/g, function($0, $1, $2)
         {
-            // Get the argument index
-            var $argumentIndex = $$.asInt($1) + 1;
+            // Get the argument index and create the prepend string
+            var $index   = $$.asInt($2, true) + 1;
+            var $prepend = $$.asString($1);
 
-            // If the argument index exceeded the number of arguments, use the match as the replacement
-            if ($argumentIndex >= $arguments.length)
-                return $0;
+            // If an even number of opening-braces were provided or the argument index exceeded the number of arguments, return the unescaped match as the replacement
+            if ($prepend.length % 2 === 0 || $index >= $arguments.length)
+                return $prepend.substr($prepend.length / 2) + $2 + '}';
 
-            // Use the argument as the replacement
-            return $$.asString($arguments[$argumentIndex]);
+            // Return the argument as the replacement
+            return $prepend.substr($prepend.length / 2 + 1) + $$.asString($arguments[$index]);
         });
     });
 
