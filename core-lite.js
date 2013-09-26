@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.0La287';
+    var $_version = '1.0.0Lb288';
 
     // ########## LANGUAGE ##########
 
@@ -500,7 +500,7 @@
             return $return;
         };
     };
-    var $_definitionsCompiler       = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $staticDefinitions, $key, $value, $inherits, $cache, $index)
+    var $_definitionsCompiler       = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $staticDefinitions, $key, $value, $inherits, $cache, $index, $isExpandoPrivate)
     {
         // Break the key string into a keywords array and get the member name
         var $keywords = $__string_trim__.call($key || '').split(' ');
@@ -637,8 +637,8 @@
                         $value = null;
                 }
 
-                // If the field is not private
-                if (!$private)
+                // If the class is not expando private or the field is not private
+                if (!$isExpandoPrivate ||  !$private)
                 {
                     // Construct the field descriptor with the accessor method wrappers
                     $descriptor = $_definitionsCompilerField({ 'enumerable': true }, $name, $readonly, $index, $cache.length);
@@ -1125,7 +1125,7 @@
 
         // Compile the class definitions into the definitions objects
         for (var $key in $prototype)
-            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classStatic, $key, $prototype[$key], $inherits, $cache, $index);
+            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classStatic, $key, $prototype[$key], $inherits, $cache, $index, $expandoPrivate);
 
         // Create the external type method and internal type method reference
         var $typeExternal = function()
@@ -1143,8 +1143,10 @@
                 return;
 
             // Create the instance reference
+            var $base     = null;
             var $instance = this;
             var $store    = $__create($cache);
+            var $symbol   = $_definitionsCompilerSymbol($store);
 
             // Check if the new operator was used
             var $isInit = false;
@@ -1164,13 +1166,15 @@
             }
 
             // Build the store
-            for (var $i = 0; $i < $levels; $i++)
-                ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $store);
+            for (var $i = $levels - 1; $i >= 0; $i--)
+                $base = ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $instance, $symbol, $store, $base);
 
             // Define the symbol lock on the public instance
             $__defineProperty($instance, $_const_symbol, { 'value': $_definitionsCompilerSymbol($store) });
 
-            console.log($store);
+            // If the class is not expando public, freeze the public instance
+            if (!$expandoPublic)
+                $__freeze($instance);
 
             // Execute the constructor wrapper with the arguments and get the return value
             var $return = $constructor.apply($store[$index], arguments);
@@ -1203,7 +1207,7 @@
             $__defineProperty($class, $classStaticMember, $classStatic[$classStaticMember]);
         
         // Set the constructor in the protected definitions object
-        $_definitionsCompilerMethod($classProtected, 'constructor', $_definitionsCompilerMethod('constructor', $constructor, $index));
+        $__defineProperty($classProtected, 'constructor', { 'value': $_definitionsCompilerMethod('constructor', $constructor, $index) });
 
         // If a base class was provided
         if ($baseClass)
@@ -1229,22 +1233,37 @@
         }
 
         // Create the construct helper function
-        $construct = function($store)
+        $construct = function($instance, $symbol, $store, $base)
         {
             // If this function was not internally unlocked, return
             if (this !== $_lock)
                 return;
 
-            // Build the private instance
-            var $instancePrivate = $__create($classPrivate);
+            // Build the private and protected instances
+            var $instancePrivate   = $__create($classPrivate);
+            var $instanceProtected = $__create($classProtected);
 
-            // SET INTERNAL "__" PROPERTIES HERE (OR MAYBE USE ANOTHER CONSTRUCT STACK)
-
-            // Define the symbol lock on the private instance
-            $__defineProperty($instancePrivate, $_const_symbol, { 'value': $_definitionsCompilerSymbol($store) });
+            // Define the symbol lock on the private and protected instances
+            $__defineProperty($instancePrivate, $_const_symbol, { 'value': $symbol });
+            $__defineProperty($instanceProtected, $_const_symbol, { 'value': $symbol });
+            
+            // Define the base instance, public instance, and type accessors on the private instance
+            $__defineProperty($instancePrivate, '__base', { 'value': $base });
+            $__defineProperty($instancePrivate, '__this', { 'value': $instance });
+            $__defineProperty($instancePrivate, '__type', { 'value': $class });
 
             // Set the private instance in the instance store
             $store[$index] = $instancePrivate;
+            
+            // If the class is not expando private, freeze the private instance
+            if (!$expandoPrivate)
+                $__freeze($instancePrivate);
+
+            // Freeze the protected instance
+            $__freeze($instanceProtected);
+
+            // Return the protected instance
+            return $instanceProtected;
         };
 
         // Freeze the class definitions objects
