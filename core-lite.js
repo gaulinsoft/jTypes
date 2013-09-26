@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.0Lb289';
+    var $_version = '1.0.0Lb290';
 
     // ########## LANGUAGE ##########
 
@@ -342,6 +342,7 @@
     var $_definition_final             = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~final';
     var $_definition_inherits          = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~inherits';
     var $_definition_internal          = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~internal';
+    var $_definition_readonlys         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~readonlys';
 
     // ---------- PACKAGES ----------
 
@@ -415,15 +416,32 @@
     // Create the definitions compiler helper functions
     var $_definitionsCompilerField  = function($descriptor, $name, $readonly, $index, $indexField)
     {
+        // Set the descriptor get accessor
+        $descriptor['get'] = function()
+        {
+            // Get the private symbol
+            var $symbol = this && this[$_const_symbol];
+
+            // If the private symbol is not a function, throw an exception
+            if (typeof $symbol !== 'function')
+                throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+            // Unlock the symbol to get the cache
+            var $cache = $symbol($_lock);
+
+            // If the symbol was not unlocked, throw an exception
+            if ($cache !== $_symbol)
+                throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+            
+            // Return the value from the cache
+            return $cache[$indexField];
+        };
+
         // If read-only checking is enabled
-        //if ($readonly)
-        //{
-        //    //
-        //}
-        //else
-        //{
-            // Set the descriptor get and set accessors without read-only checking
-            $descriptor['get'] = function()
+        if ($readonly)
+        {
+            // Set the descriptor set accessor with read-only checking
+            $descriptor['set'] = function($v)
             {
                 // Get the private symbol
                 var $symbol = this && this[$_const_symbol];
@@ -438,10 +456,22 @@
                 // If the symbol was not unlocked, throw an exception
                 if ($cache !== $_symbol)
                     throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                // Get the init flag and the private instance
+                var $init = $cache[$indexField + 1];
+                var $this = $cache[$index];
+
+                // If the instance has been initialized, throw an exception
+                if ($init)
+                    throw $_exceptionFormat($_lang_$$_field_readonly, $name);
             
-                // Return the value from the cache
-                return $cache[$indexField];
+                // Set the value
+                $cache[$indexField] = $v === $this ? $this.__this : $v;
             };
+        }
+        else
+        {
+            // Set the descriptor set accessor without read-only checking
             $descriptor['set'] = function($v)
             {
                 // Get the private symbol
@@ -464,7 +494,7 @@
                 // Set the value
                 $cache[$indexField] = $v === $this ? $this.__this : $v;
             };
-        //}
+        }
 
         // Return the field descriptor
         return $descriptor;
@@ -500,7 +530,7 @@
             return $return;
         };
     };
-    var $_definitionsCompiler       = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $staticDefinitions, $key, $value, $inherits, $cache, $index, $isExpandoPrivate)
+    var $_definitionsCompiler       = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $staticDefinitions, $key, $value, $inherits, $cache, $index, $readonlys, $isExpandoPrivate)
     {
         // Break the key string into a keywords array and get the member name
         var $keywords = $__string_trim__.call($key || '').split(' ');
@@ -561,8 +591,8 @@
             else if ($keyword === 'public' || $keyword === 'prototype')
                 $public = true;
             // If the keyword is readonly, set the readonly flag
-            //else if ($type === 'field' && $keyword === 'readonly')
-            //    $readonly = true;
+            else if ($type === 'field' && $keyword === 'readonly')
+                $readonly = true;
             // If the keyword is static, set the static flag
             else if ($keyword === 'static')
                 $static = true;
@@ -645,6 +675,16 @@
 
                     // Push the field value into the cache array
                     $cache.push($value);
+                    
+                    // If the field is read-only
+                    if ($readonly)
+                    {
+                        // Push the index into the read-only array
+                        $readonlys.push($cache.length);
+
+                        // Push the init flag into the cache array
+                        $cache.push(false);
+                    }
                 }
                 // Create the field descriptor so the field is directly set on the definition
                 else
@@ -1049,6 +1089,7 @@
         var $index     = 0;
         var $inherits  = $__create(null);
         var $levels    = 1;
+        var $readonlys = null;
         var $type      = null;
 
         // Create the private, protected, and public references along with the static definitions object
@@ -1095,15 +1136,21 @@
             }
 
             // Get the base cache array
-            var $baseCache = $baseClass[$_definition_cache].call($_lock);
+            var $baseCache     = $baseClass[$_definition_cache].call($_lock);
+            var $baseReadOnlys = $baseClass[$_definition_readonlys].call($_lock);
 
-            // Set the cache starting index and create the cache array
-            $index = $baseCache.length;
-            $cache = new $__array($index + 1);
+            // Set the cache starting index and create the cache and readonlys arrays
+            $index     = $baseCache.length;
+            $cache     = new $__array($index + 1);
+            $readonlys = new $__array($baseReadOnlys.length);
 
             // Copy the base cache array into the cache array
             for (var $i = 0; $i < $index; $i++)
                 $cache[$i] = $baseCache[$i];
+
+            // Copy the base readonlys array into the readonlys array
+            for (var $i = 0, $j = $readonlys.length; $i < $j; $i++)
+                $readonlys[$i] = $baseReadOnlys[$i];
 
             // Set the placeholder for the context in the cache array
             $cache[$index] = null;
@@ -1114,8 +1161,9 @@
         }
         else
         {
-            // Create a cache array with a placeholder for the context
-            $cache = [null];
+            // Create a cache array with a placeholder for the context and an empty readonlys array
+            $cache     = [null];
+            $readonlys = [];
 
             // Create the private, protected, and public definitions objects
             $classPublic    = new $_class();
@@ -1125,7 +1173,7 @@
 
         // Compile the class definitions into the definitions objects
         for (var $key in $prototype)
-            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classStatic, $key, $prototype[$key], $inherits, $cache, $index, $expandoPrivate);
+            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classStatic, $key, $prototype[$key], $inherits, $cache, $index, $readonlys, $expandoPrivate);
 
         // Create the external type method and internal type method reference
         var $typeExternal = function()
@@ -1149,8 +1197,7 @@
             var $symbol   = $_definitionsCompilerSymbol($store);
 
             // Check if the new operator was used
-            var $isInit = false;
-            var $isNew  = this instanceof $class;
+            var $isNew = this instanceof $class;
 
             // If the new operator was not used
             if (!$isNew)
@@ -1179,8 +1226,9 @@
             // Execute the constructor wrapper with the arguments and get the return value
             var $return = $constructor.apply($store[$index], arguments);
 
-            // Set the initialized flag
-            $isInit = true;
+            // Set the initialized flags in the readonlys array
+            for (var $i = 0, $j = $readonlys.length; $i < $j; $i++)
+                $store[$readonlys[$i]] = true;
 
             // If the "new" keyword was not used and the return value of the constructor was not undefined, return it
             if (!$isNew && $return !== undefined)
@@ -1296,6 +1344,7 @@
         $data[$_definition_inherits]          = { 'value': $_definitionsCompilerLock($inherits) };
         $data[$_definition_internal]          = { 'value': $internal };
         $data[$_definition_keyHint]           = { 'value': $class };
+        $data[$_definition_readonlys]         = { 'value': $_definitionsCompilerLock($readonlys) };
 
         // Set the class data
         $__defineProperties($class, $data);
