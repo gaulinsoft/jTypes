@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.0Lb288';
+    var $_version = '1.0.0Lb289';
 
     // ########## LANGUAGE ##########
 
@@ -1167,7 +1167,7 @@
 
             // Build the store
             for (var $i = $levels - 1; $i >= 0; $i--)
-                $base = ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $instance, $symbol, $store, $base);
+                $base = ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $instance, $symbol, $store, $base, $i < $external ? $typeInternal : $typeExternal);
 
             // Define the symbol lock on the public instance
             $__defineProperty($instance, $_const_symbol, { 'value': $_definitionsCompilerSymbol($store) });
@@ -1197,6 +1197,9 @@
                 // Return the internal type
                 return $class;
             };
+        // Set the external type method on the public definitions object
+        else
+            $__defineProperty($classPublic, 'type', { 'value': $typeExternal });
 
         // Prepend the class to the chain array, set the levels count, and set the external type
         $levels = $chain.unshift($class);
@@ -1233,7 +1236,7 @@
         }
 
         // Create the construct helper function
-        $construct = function($instance, $symbol, $store, $base)
+        $construct = function($instance, $symbol, $store, $base, $type)
         {
             // If this function was not internally unlocked, return
             if (this !== $_lock)
@@ -1243,14 +1246,18 @@
             var $instancePrivate   = $__create($classPrivate);
             var $instanceProtected = $__create($classProtected);
 
-            // Define the symbol lock on the private and protected instances
+            // Set the symbol lock on the private and protected instances
             $__defineProperty($instancePrivate, $_const_symbol, { 'value': $symbol });
             $__defineProperty($instanceProtected, $_const_symbol, { 'value': $symbol });
             
-            // Define the base instance, public instance, and type accessors on the private instance
+            // Set the base instance, public instance, and type accessors on the private instance
             $__defineProperty($instancePrivate, '__base', { 'value': $base });
             $__defineProperty($instancePrivate, '__this', { 'value': $instance });
             $__defineProperty($instancePrivate, '__type', { 'value': $class });
+            
+            // If an internal type method was provided, set the internal type method on the protected instance
+            if ($type)
+                $__defineProperty($instanceProtected, 'type', { 'value': $type });
 
             // Set the private instance in the instance store
             $store[$index] = $instancePrivate;
