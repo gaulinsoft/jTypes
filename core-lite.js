@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.0La284';
+    var $_version = '1.0.0La287';
 
     // ########## LANGUAGE ##########
 
@@ -37,7 +37,9 @@
 
     // Create the language constants
     var $_lang_$$_derive_internal                  = 'Class must have the internal modifier to inherit from an internal class.';
+    var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
     var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only field.';
+    var $_lang_$$_field_symbol                     = '"{0}" cannot be accessed on a non-instance because it is not generic.';
     var $_lang_$$_keyword                          = '"{0}" is not a valid class modifier.';
     var $_lang_$$_member_keyword                   = '"{1}" has an invalid {0} modifier "{2}".';
     var $_lang_$$_member_keyword_access_2          = '"{0}" cannot have more than one access modifier.';
@@ -76,7 +78,6 @@
     var $__preventExtensions        = $__object.preventExtensions;
     var $__propertyIsEnumerable     = $__object.propertyIsEnumerable;
     var $__seal                     = $__object.seal;
-    var $__setPrototypeOf           = $__object.setPrototypeOf || null;
     var $__hasOwnProperty__         = $__objectProto__.hasOwnProperty;
     var $__isPrototypeOf__          = $__objectProto__.isPrototypeOf;
     var $__toString__               = $__objectProto__.toString;
@@ -332,6 +333,7 @@
 
     // Create the definition obfuscated keys
     var $_definition_baseClass         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~baseClass';
+    var $_definition_cache             = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~cache';
     var $_definition_construct         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~construct';
     var $_definition_expando_class     = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoClass';
     var $_definition_expando_private   = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoPrivate';
@@ -357,15 +359,14 @@
     // ---------- ACCESSOR ----------
 
     // Create the accessor member flags
-    var $_accessor_name      = 0;
-    var $_accessor_value     = 1;
-    var $_accessor_modifiers = 2;
-    var $_accessor_private   = 3;
-    var $_accessor_protected = 4;
-    var $_accessor_public    = 5;
+    var $_accessor_value     = 0;
+    var $_accessor_modifiers = 1;
+    var $_accessor_private   = 2;
+    var $_accessor_protected = 3;
+    var $_accessor_public    = 4;
 
     // Create the accessor member flags length
-    var $_accessor_flagCount = 6;
+    var $_accessor_flagCount = 5;
 
     // ########## CLASSES ##########
 
@@ -404,57 +405,102 @@
     var $_debug    = true;// DEFAULT
     var $_subclass = false;// DON'T CHANGE
 
+    // ########## SYMBOLS ##########
+
+    // Create the internal symbol reference
+    var $_symbol = null;
+
     // ########## COMPILER ##########
     
     // Create the definitions compiler helper functions
-    var $_definitionsCompilerAccessorMethod = function($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $accessor, $type, $hasTwoAccessors)
+    var $_definitionsCompilerField  = function($descriptor, $name, $readonly, $index, $indexField)
     {
-        // Create the property method definition array
-        var $method = new $__array($_definition_member_flagCount);
+        // If read-only checking is enabled
+        //if ($readonly)
+        //{
+        //    //
+        //}
+        //else
+        //{
+            // Set the descriptor get and set accessors without read-only checking
+            $descriptor['get'] = function()
+            {
+                // Get the private symbol
+                var $symbol = this && this[$_const_symbol];
 
-        // Get the accessor name and private access modifier flag
-        var $accessorName    = $accessor[$_accessor_name];
-        var $accessorPrivate = $accessor[$_accessor_private];
+                // If the private symbol is not a function, throw an exception
+                if (typeof $symbol !== 'function')
+                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
 
-        // Set the method definition data
-        $method[$_definition_member_name]               = $accessorName.substr(5);
-        $method[$_definition_member_property_accessors] = $hasTwoAccessors;
-        $method[$_definition_member_type]               = $type;
-        $method[$_definition_member_value]              = $accessor[$_accessor_value];
+                // Unlock the symbol to get the cache
+                var $cache = $symbol($_lock);
 
-        // Create the definition descriptor
-        var $descriptor = { 'enumerable': true, 'value': $method };
+                // If the symbol was not unlocked, throw an exception
+                if ($cache !== $_symbol)
+                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+            
+                // Return the value from the cache
+                return $cache[$indexField];
+            };
+            $descriptor['set'] = function($v)
+            {
+                // Get the private symbol
+                var $symbol = this && this[$_const_symbol];
 
-        // If the accessor has an access modifier
-        if ($accessor[$_accessor_modifiers])
+                // If the private symbol is not a function, throw an exception
+                if (typeof $symbol !== 'function')
+                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                // Unlock the symbol to get the cache
+                var $cache = $symbol($_lock);
+
+                // If the symbol was not unlocked, throw an exception
+                if ($cache !== $_symbol)
+                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                // Get the private instance
+                var $this = $cache[$index];
+            
+                // Set the value
+                $cache[$indexField] = $v === $this ? $this.__this : $v;
+            };
+        //}
+
+        // Return the field descriptor
+        return $descriptor;
+    };
+    var $_definitionsCompilerMethod = function($name, $function, $index)
+    {
+        // Return the method wrapper
+        return function()
         {
-            // If the accessor is private, set the method definition in the private definitions object
-            if ($accessorPrivate)
-                $__defineProperty($privateDefinitions, $accessorName, $descriptor);
-            // If the accessor is protected, set the method definition in the protected definitions object
-            else if ($accessor[$_accessor_protected])
-                $__defineProperty($protectedDefinitions, $accessorName, $descriptor);
-            // If the accessor is public, set the method definition in the public definitions object
-            else if ($accessor[$_accessor_public])
-                $__defineProperty($publicDefinitions, $accessorName, $descriptor);
-        }
-        // Set the method definition in the definitions object
-        else
-            $__defineProperty($definitions, $accessorName, $descriptor);
+            // Get the private symbol
+            var $symbol = this && this[$_const_symbol];
+
+            // If the private symbol is not a function, throw an exception
+            if (typeof $symbol !== 'function')
+                throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+            // Unlock the symbol to get the cache
+            var $cache = $symbol($_lock);
+
+            // If the symbol was not unlocked, throw an exception
+            if ($cache !== $_symbol)
+                throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+            // Get the private instance and apply the function in the provided context with the current arguments
+            var $this   = $cache[$index];
+            var $return = $function.apply($this, arguments);
+
+            // If the return value is the private instance, return the public instance
+            if ($return === $this)
+                return $this.__this;
+
+            // Return the return value
+            return $return;
+        };
     };
-    var $_definitionsCompilerField          = function($definitions, $name, $value, $readonly)
-    {
-        //
-    };
-    var $_definitionsCompilerMethod         = function($definitions, $name, $value)
-    {
-        //
-    };
-    var $_definitionsCompilerProperty       = function($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $name, $get, $set)
-    {
-        //
-    };
-    var $_definitionsCompiler               = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $staticDefinitions, $key, $value, $protectedInherits)
+    var $_definitionsCompiler       = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $staticDefinitions, $key, $value, $inherits, $cache, $index)
     {
         // Break the key string into a keywords array and get the member name
         var $keywords = $__string_trim__.call($key || '').split(' ');
@@ -515,8 +561,8 @@
             else if ($keyword === 'public' || $keyword === 'prototype')
                 $public = true;
             // If the keyword is readonly, set the readonly flag
-            else if ($type === 'field' && $keyword === 'readonly')
-                $readonly = true;
+            //else if ($type === 'field' && $keyword === 'readonly')
+            //    $readonly = true;
             // If the keyword is static, set the static flag
             else if ($keyword === 'static')
                 $static = true;
@@ -526,7 +572,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'as' || $name === 'constructor' || $name === 'is' || $name === 'type' || $name === '__base' || $name === '__this' || $name === '__type')
+        if ($name === 'constructor' || $name === 'type' || $name === '__base' || $name === '__this' || $name === '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -591,21 +637,45 @@
                         $value = null;
                 }
 
-                // Set the field in the definitions object
-                $descriptor = $_definitionsCompilerField($definitions, $name, $value, $readonly);
+                // If the field is not private
+                if (!$private)
+                {
+                    // Construct the field descriptor with the accessor method wrappers
+                    $descriptor = $_definitionsCompilerField({ 'enumerable': true }, $name, $readonly, $index, $cache.length);
+
+                    // Push the field value into the cache array
+                    $cache.push($value);
+                }
+                // Create the field descriptor so the field is directly set on the definition
+                else
+                    $descriptor = { 'enumerable': true, 'value': $value, 'writable': !!$readonly };
+                
+                // Set the field definition in the definitions object
+                $__defineProperty($definitions, $name, $descriptor);
+
+                // If the field is not protected, remove the inherited descriptor
+                if (!$protected)
+                    $descriptor = null;
 
                 break;
 
             case 'method':
                 
-                // Set the method in the definitions object
-                $descriptor = $_definitionsCompilerMethod($definitions, $name, $value);
+                // Construct the method descriptor with the method wrapper
+                $descriptor = { 'enumerable': true, 'value': $_definitionsCompilerMethod($name, $value, $index) };
+
+                // Set the method definition in the definitions object
+                $__defineProperty($definitions, $name, $descriptor);
+
+                // If the method is not protected, remove the inherited descriptor
+                if (!$protected)
+                    $descriptor = null;
 
                 break;
 
             case 'property':
 
-                // Create the get and set method data arrays
+                // Create the get and set accessor arrays
                 var $get = new $__array($_accessor_flagCount);
                 var $set = new $__array($_accessor_flagCount);
 
@@ -640,9 +710,6 @@
                         // Set the flag for the property having a set accessor
                         $hasSet = true;
 
-                        // Set the set method name
-                        $set[$_accessor_name] = '~set_' + $name;
-
                         // Set the set method data object as the member
                         $member = $set;
                     }
@@ -655,9 +722,6 @@
                         // Set the flag for the property having a get accessor
                         $hasGet = true;
 
-                        // Set the get method name
-                        $get[$_accessor_name] = '~get_' + $name;
-
                         // Set the get method data object as the member
                         $member = $get;
                     }
@@ -667,10 +731,9 @@
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
                     // Set the member access modifier flags and value
-                    $member[$_accessor_private]   = false;
-                    $member[$_accessor_protected] = false;
-                    $member[$_accessor_public]    = false;
-                    $member[$_accessor_value]     = $memberValue;
+                    var $memberPrivate   = false;
+                    var $memberProtected = false;
+                    var $memberPublic    = false;
 
                     for (var $i = 0, $j = $propertyKeywords.length; $i < $j; $i++)
                     {
@@ -679,31 +742,35 @@
 
                         // If the property keyword is private, set the private flag
                         if ($propertyKeyword === 'private')
-                            $member[$_accessor_private] = true;
+                            $memberPrivate = true;
                         // If the property keyword is protected, set the protected flag
                         else if ($propertyKeyword === 'protected')
-                            $member[$_accessor_protected] = true;
+                            $memberProtected = true;
                         // If the property keyword is public, set the public flag
                         else if ($propertyKeyword === 'public')
-                            $member[$_accessor_public] = true;
+                            $memberPublic = true;
                         // If the property keyword was defined, throw an exception
                         else if ($propertyKeyword)
                             throw $_exceptionFormat($_lang_$$_member_property_keyword, $name, $memberName, $propertyKeyword);
                     }
 
-                    // Check if the member has any access modifiers
-                    $member[$_accessor_modifiers] = $member[$_accessor_private] || $member[$_accessor_protected] || $member[$_accessor_public];
+                    // Set the member accessor data
+                    $member[$_accessor_modifiers] = '';
+                    $member[$_accessor_value]     = $memberValue;
 
                     // If the member has any access modifiers
-                    if ($member[$_accessor_modifiers])
+                    if ($memberPrivate || $memberProtected || $memberPublic)
                     {
                         // If the member has more than one access modifier, throw an exception
-                        if ($member[$_accessor_private] && $member[$_accessor_protected] || $member[$_accessor_private] && $member[$_accessor_public] || $member[$_accessor_protected] && $member[$_accessor_public])
+                        if ($memberPrivate && $memberProtected || $memberPrivate && $memberPublic || $memberProtected && $memberPublic)
                             throw $_exceptionFormat($_lang_$$_member_keyword_access_2, $memberName);
 
                         // If the member access modifier is not more restrictive than the property access modifier, throw an exception
-                        if ($member[$_accessor_public] || $member[$_accessor_protected] && !$public || $member[$_accessor_private] && $private)
+                        if ($memberPublic || $memberProtected && !$public || $memberPrivate && $private)
                             throw $_exceptionFormat($_lang_$$_member_property_accessors_access, $name, $memberName);
+
+                        // Set the member accessor modifier data
+                        $member[$_accessor_modifiers] = $memberPrivate ? 'private' : 'protected';
                     }
                 }
 
@@ -712,24 +779,68 @@
                     throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
                 // Check if the property has get and set accessor access modifiers
-                var $hasGetModifier = $get[$_accessor_modifiers];
-                var $hasSetModifier = $set[$_accessor_modifiers];
+                var $getModifier = $get[$_accessor_modifiers];
+                var $setModifier = $set[$_accessor_modifiers];
 
                 // If the get and set methods both have access modifiers, throw an exception
-                if ($hasGetModifier && $hasSetModifier)
+                if ($getModifier && $setModifier)
                     throw $_exceptionFormat($_lang_$$_member_property_keyword_access_2, $name);
 
                 // If there is no set accessor and the get method has an access modifier, throw an exception
-                if (!$hasSet && $hasGetModifier)
+                if (!$hasSet && $getModifier)
                     throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'get');
 
                 // If there is no get accessor and the set method has an access modifier, throw an exception
-                if (!$hasGet && $hasSetModifier)
+                if (!$hasGet && $setModifier)
                     throw $_exceptionFormat($_lang_$$_member_property_accessors, $name, 'set');
 
-                // Set the property in the definitions objects
-                $descriptor = $_definitionsCompilerProperty($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $name, $hasGet ? $get : null, $hasSet ? $set : null);
+                // Get the more restrictive access modifier
+                var $modifier = $getModifier || $setModifier;
 
+                // Construct the property descriptor with the accessor method wrappers
+                $descriptor = (
+                {
+                    'enumerable': true,
+                    'get': $hasGet ? $_definitionsCompilerMethod($name, $get[$_accessor_value], $index) : undefined,
+                    'set': $hasSet ? $_definitionsCompilerMethod($name, $set[$_accessor_value], $index) : undefined
+                });
+
+                // If a more restrictive access modifier was provided
+                if ($modifier)
+                {
+                    // Get the member modifier and value
+                    var $memberModifier = $getModifier ? 'get' : 'set';
+                    var $memberValue    = $descriptor[$memberModifier];
+
+                    // Remove the more restrictive member from the descriptor
+                    $descriptor[$memberModifier] = undefined;
+
+                    // Set the property definition in the definitions object
+                    $__defineProperty($definitions, $name, $descriptor);
+
+                    // Add the more restrictive member to the descriptor
+                    $descriptor[$memberModifier] = $memberValue;
+
+                    // Set the more restrictive property definition in the definitions object
+                    $__defineProperty($public && $modifier === 'protected' ? $protectedDefinitions : $privateDefinitions, $name, $descriptor);
+
+                    // If the property is protected, remove the private accessor from the inherited descriptor
+                    if ($protected)
+                        $descriptor[$memberModifier] = undefined;
+                    // If the more restrictive modifier is private, remove the inherited descriptor
+                    else if ($modifier === 'private')
+                            $descriptor = null;
+                }
+                else
+                {
+                    // Set the property definition in the definitions object
+                    $__defineProperty($definitions, $name, $descriptor);
+
+                    // If the property is not protected, remove the inherited descriptor
+                    if (!$protected)
+                        $descriptor = null;
+                }
+                
                 break;
 
             case 'static':
@@ -740,11 +851,11 @@
                 break;
         }
 
-        // If the member is protected, set the descriptor in the protected inherits object
-        if ($protected && $descriptor)
-            $protectedInherits[$name] = $descriptor;
+        // If an inherited descriptor was provided, set the descriptor in the inherits object
+        if ($descriptor)
+            $inherits[$name] = $descriptor;
     };
-    var $_definitionsCompilerLock           = function($reference)
+    var $_definitionsCompilerLock   = function($reference)
     {
         // Return the lock wrapper function
         return function()
@@ -754,10 +865,22 @@
                 return $reference;
         };
     };
+    var $_definitionsCompilerSymbol = function($reference)
+    {
+        // Return the symbol wrapper function
+        return function($lock)
+        {
+            // If this function was internally unlocked
+            if ($lock === $_lock)
+            {
+                // Set the symbol reference to the reference
+                $_symbol = $reference;
 
-    // ########## RUNTIME ##########
-
-    //
+                // Return the reference
+                return $reference;
+            }
+        };
+    };
 
     // ########## NAMESPACE ##########
 
@@ -853,7 +976,7 @@
                 {
                     // If a base constructor exists, apply it with the arguments
                     if (this.__base)
-                        return this.__base.apply(this, arguments);
+                        return this.__base.constructor.apply(this, arguments);
                 };
             }
             // Use an empty function as the default constructor
@@ -919,9 +1042,11 @@
         }
 
         // Create the chain array, construct reference, external index, chain level count, and the external type reference
+        var $cache     = null;
         var $chain     = [];
         var $construct = null;
         var $external  = $internal ? 1 : 0;
+        var $index     = 0;
         var $inherits  = $__create(null);
         var $levels    = 1;
         var $type      = null;
@@ -969,12 +1094,29 @@
                 $current = $current[$_definition_baseClass];
             }
 
+            // Get the base cache array
+            var $baseCache = $baseClass[$_definition_cache].call($_lock);
+
+            // Set the cache starting index and create the cache array
+            $index = $baseCache.length;
+            $cache = new $__array($index + 1);
+
+            // Copy the base cache array into the cache array
+            for (var $i = 0; $i < $index; $i++)
+                $cache[$i] = $baseCache[$i];
+
+            // Set the placeholder for the context in the cache array
+            $cache[$index] = null;
+
             // Create the private and protected definitions objects
             $classProtected = $__create($classPublic);
             $classPrivate   = $__create($classProtected);
         }
         else
         {
+            // Create a cache array with a placeholder for the context
+            $cache = [null];
+
             // Create the private, protected, and public definitions objects
             $classPublic    = new $_class();
             $classProtected = $__create($classPublic);
@@ -983,7 +1125,7 @@
 
         // Compile the class definitions into the definitions objects
         for (var $key in $prototype)
-            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classStatic, $key, $prototype[$key], $inherits);
+            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classStatic, $key, $prototype[$key], $inherits, $cache, $index);
 
         // Create the external type method and internal type method reference
         var $typeExternal = function()
@@ -996,7 +1138,52 @@
         // Create the class
         var $class = function()
         {
-            // CREATE PUBLIC INSTANCE (FOR WRAPPERS)
+            // If the subclass flag is set, return
+            if ($_subclass)
+                return;
+
+            // Create the instance reference
+            var $instance = this;
+            var $store    = $__create($cache);
+
+            // Check if the new operator was used
+            var $isInit = false;
+            var $isNew  = this instanceof $class;
+
+            // If the new operator was not used
+            if (!$isNew)
+            {
+                // Set the subclass flag
+                $_subclass = true;
+
+                // Create the class instance
+                $instance = new $class();
+
+                // Reset the subclass flag
+                $_subclass = false;
+            }
+
+            // Build the store
+            for (var $i = 0; $i < $levels; $i++)
+                ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $store);
+
+            // Define the symbol lock on the public instance
+            $__defineProperty($instance, $_const_symbol, { 'value': $_definitionsCompilerSymbol($store) });
+
+            console.log($store);
+
+            // Execute the constructor wrapper with the arguments and get the return value
+            var $return = $constructor.apply($store[$index], arguments);
+
+            // Set the initialized flag
+            $isInit = true;
+
+            // If the "new" keyword was not used and the return value of the constructor was not undefined, return it
+            if (!$isNew && $return !== undefined)
+                return $return;
+
+            // Return the public instance
+            return $instance;
         };
 
         // If the class is internal, create the internal type method
@@ -1014,31 +1201,50 @@
         // Set each static member descriptor from the static descriptors objects in the class
         for (var $classStaticMember in $classStatic)
             $__defineProperty($class, $classStaticMember, $classStatic[$classStaticMember]);
-
-        // Create the constructor definition array
-        var $constructorDefinition = new $__array($_definition_member_flagCount);
-
-        // Set the constructor definition data
-        $constructorDefinition[$_definition_member_name]  = 'constructor';
-        $constructorDefinition[$_definition_member_type]  = 'method';
-        $constructorDefinition[$_definition_member_value] = $constructor;
-
+        
         // Set the constructor in the protected definitions object
-        $__defineProperty($classProtected, 'constructor', { 'enumerable': true, 'value': $constructorDefinition });
+        $_definitionsCompilerMethod($classProtected, 'constructor', $_definitionsCompilerMethod('constructor', $constructor, $index));
 
-        // Get the arrays of private, protected, and public member keys
-        var $classPrivateKeys   = $__keys($classPrivate);
-        var $classProtectedKeys = $__keys($classProtected);
-        var $classPublicKeys    = $__keys($classPublic);
+        // If a base class was provided
+        if ($baseClass)
+        {
+            // Get the base inherits object
+            var $baseInherits = $baseClass[$_definition_inherits].call($_lock);
+            
+            for (var $baseInheritsName in $baseInherits)
+            {
+                // If the protected or public definitions objects re-defined the definition, continue
+                if ($__hasOwnProperty__.call($classProtected, $baseInheritsName) || $__hasOwnProperty__.call($classPublic, $baseInheritsName))
+                    continue;
+
+                // Get the inherited base definition
+                var $baseInherit = $baseInherits[$baseInheritsName];
+
+                // Set the inherited base definition on the protected definitions object
+                $__defineProperty($classProtected, $baseInheritsName, $baseInherit);
+
+                // Set the inherited base definition in the inherited definitions object
+                $inherits[$baseInheritsName] = $baseInherit;
+            }
+        }
 
         // Create the construct helper function
-        $construct = function($instance)
+        $construct = function($store)
         {
             // If this function was not internally unlocked, return
             if (this !== $_lock)
                 return;
 
-            // CREATE PRIVATE INSTANCE (FOR WRAPPERS)
+            // Build the private instance
+            var $instancePrivate = $__create($classPrivate);
+
+            // SET INTERNAL "__" PROPERTIES HERE (OR MAYBE USE ANOTHER CONSTRUCT STACK)
+
+            // Define the symbol lock on the private instance
+            $__defineProperty($instancePrivate, $_const_symbol, { 'value': $_definitionsCompilerSymbol($store) });
+
+            // Set the private instance in the instance store
+            $store[$index] = $instancePrivate;
         };
 
         // Freeze the class definitions objects
@@ -1054,12 +1260,14 @@
 
         // Set the class cache data
         $data[$_definition_baseClass]         = { 'value': $baseClass };
+        $data[$_definition_cache]             = { 'value': $_definitionsCompilerLock($cache) };
         $data[$_definition_construct]         = { 'value': !$final ? $construct : null};
         $data[$_definition_expando_class]     = { 'value': $expandoClass };
         $data[$_definition_expando_private]   = { 'value': $expandoPrivate };
         $data[$_definition_expando_prototype] = { 'value': $expandoPrototype };
         $data[$_definition_expando_public]    = { 'value': $expandoPublic };
         $data[$_definition_final]             = { 'value': $final };
+        $data[$_definition_inherits]          = { 'value': $_definitionsCompilerLock($inherits) };
         $data[$_definition_internal]          = { 'value': $internal };
         $data[$_definition_keyHint]           = { 'value': $class };
 
@@ -1254,6 +1462,17 @@
     {
         // Return true if the object is neither undefined nor null
         return $object !== undefined && $object !== null;
+    });
+
+    // ---------- OBJECT INSTANCE ----------
+    $_defineMethod('isObjectInstance', function($object)
+    {
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
+
+        // Return true if the object inherits from the object prototype
+        return !!($object instanceof $__object);
     });
 
     // ---------- PRIMITIVE ----------
