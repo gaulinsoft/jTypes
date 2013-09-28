@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.0Lb290';
+    var $_version = '1.0.0L';
 
     // ########## LANGUAGE ##########
 
@@ -129,7 +129,7 @@
     var $__numberProto__     = $__number.prototype;
     var $__number_toString__ = $__numberProto__.toString;
     var $__number_valueOf__  = $__numberProto__.valueOf;
-    
+
     // Get the number constants as number primitives
     var $__number_maxValue__         = $__number_valueOf__.call($__number.MAX_VALUE);
     var $__number_minValue__         = $__number_valueOf__.call($__number.MIN_VALUE);
@@ -169,7 +169,7 @@
         $__window_toString__ = $__windowProto__.toString;
         $__window_valueOf__  = $__windowProto__.valueOf;
     }
-    
+
     // If any of the major native code methods from recent JavaScript versions are not found, throw an exception
     if (!$__create || !$__defineProperty || !$__freeze || !$__getPrototypeOf || !$__preventExtensions || !$__seal || !$__array_forEach__ || !$__array_indexOf__ || !$__string_trim__)
         throw $_lang_exception_prefix + $_lang_compatibility;
@@ -276,11 +276,11 @@
     // ##########################
 
     // ########## CONSTANTS ##########
-    
+
     // Create the internal constants
     var $_const_int_max = 9007199254740992;
     var $_const_int_min = -$_const_int_max;
-    var $_const_symbol  = '~jT';
+    var $_const_symbol  = '__jT__';
 
     // ########## KEYS ##########
 
@@ -404,6 +404,7 @@
 
     // Create the internal flags
     var $_debug    = true;// DEFAULT
+    var $_lazy     = true;// DEFAULT
     var $_subclass = false;// DON'T CHANGE
 
     // ########## SYMBOLS ##########
@@ -412,7 +413,7 @@
     var $_symbol = null;
 
     // ########## COMPILER ##########
-    
+
     // Create the definitions compiler helper functions
     var $_definitionsCompilerField  = function($descriptor, $name, $readonly, $index, $indexField)
     {
@@ -432,7 +433,7 @@
             // If the symbol was not unlocked, throw an exception
             if ($cache !== $_symbol)
                 throw $_exceptionFormat($_lang_$$_field_symbol, $name);
-            
+
             // Return the value from the cache
             return $cache[$indexField];
         };
@@ -464,7 +465,7 @@
                 // If the instance has been initialized, throw an exception
                 if ($init)
                     throw $_exceptionFormat($_lang_$$_field_readonly, $name);
-            
+
                 // Set the value
                 $cache[$indexField] = $v === $this ? $this.__this : $v;
             };
@@ -490,7 +491,7 @@
 
                 // Get the private instance
                 var $this = $cache[$index];
-            
+
                 // Set the value
                 $cache[$indexField] = $v === $this ? $this.__this : $v;
             };
@@ -602,7 +603,7 @@
         }
 
         // If the member name is invalid, throw an exception
-        if ($name === 'constructor' || $name === 'type' || $name === '__base' || $name === '__this' || $name === '__type')
+        if ($name === 'constructor' || $name === 'type' || $name === '__base' || $name === '__this' || $name === '__type' || $name === $_const_symbol || $name === '__proto__')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -675,7 +676,7 @@
 
                     // Push the field value into the cache array
                     $cache.push($value);
-                    
+
                     // If the field is read-only
                     if ($readonly)
                     {
@@ -689,7 +690,7 @@
                 // Create the field descriptor so the field is directly set on the definition
                 else
                     $descriptor = { 'enumerable': true, 'value': $value, 'writable': !!$readonly };
-                
+
                 // Set the field definition in the definitions object
                 $__defineProperty($definitions, $name, $descriptor);
 
@@ -700,7 +701,7 @@
                 break;
 
             case 'method':
-                
+
                 // Construct the method descriptor with the method wrapper
                 $descriptor = { 'enumerable': true, 'value': $_definitionsCompilerMethod($name, $value, $index) };
 
@@ -880,11 +881,11 @@
                     if (!$protected)
                         $descriptor = null;
                 }
-                
+
                 break;
 
             case 'static':
-                
+
                 // Set the member in the static definitions object
                 $staticDefinitions[$name] = { 'enumerable': true, 'value': $value };
 
@@ -1183,6 +1184,9 @@
         };
         var $typeInternal = null;
 
+        // Get the cache length
+        var $cacheLength = $cache.length;
+
         // Create the class
         var $class = function()
         {
@@ -1193,8 +1197,13 @@
             // Create the instance reference
             var $base     = null;
             var $instance = this;
-            var $store    = $__create($cache);
+            var $store    = $_lazy ? $__create($cache) : new $__array($cacheLength);
             var $symbol   = $_definitionsCompilerSymbol($store);
+
+            // If lazy loading is not enabled, copy the cache array into the store array
+            if (!$_lazy)
+                for (var $i = 0; $i < $cacheLength; $i++)
+                    $store[$i] = $cache[$i];
 
             // Check if the new operator was used
             var $isNew = this instanceof $class;
@@ -1256,7 +1265,7 @@
         // Set each static member descriptor from the static descriptors objects in the class
         for (var $classStaticMember in $classStatic)
             $__defineProperty($class, $classStaticMember, $classStatic[$classStaticMember]);
-        
+
         // Set the constructor in the protected definitions object
         $__defineProperty($classProtected, 'constructor', { 'value': $_definitionsCompilerMethod('constructor', $constructor, $index) });
 
@@ -1265,7 +1274,7 @@
         {
             // Get the base inherits object
             var $baseInherits = $baseClass[$_definition_inherits].call($_lock);
-            
+
             for (var $baseInheritsName in $baseInherits)
             {
                 // If the protected or public definitions objects re-defined the definition, continue
@@ -1297,19 +1306,22 @@
             // Set the symbol lock on the private and protected instances
             $__defineProperty($instancePrivate, $_const_symbol, { 'value': $symbol });
             $__defineProperty($instanceProtected, $_const_symbol, { 'value': $symbol });
-            
+
             // Set the base instance, public instance, and type accessors on the private instance
             $__defineProperty($instancePrivate, '__base', { 'value': $base });
             $__defineProperty($instancePrivate, '__this', { 'value': $instance });
             $__defineProperty($instancePrivate, '__type', { 'value': $class });
-            
-            // If an internal type method was provided, set the internal type method on the protected instance
-            if ($type)
-                $__defineProperty($instanceProtected, 'type', { 'value': $type });
+
+            // Create the type method descriptor
+            var $typeDescriptor = { 'value': $type };
+
+            // Set the type method on the private and protected instances
+            $__defineProperty($instancePrivate, 'type', $typeDescriptor);
+            $__defineProperty($instanceProtected, 'type', $typeDescriptor);
 
             // Set the private instance in the instance store
             $store[$index] = $instancePrivate;
-            
+
             // If the class is not expando private, freeze the private instance
             if (!$expandoPrivate)
                 $__freeze($instancePrivate);
@@ -1771,6 +1783,17 @@
     {
         // Set the debug flag
         $_debug = $$.asBool($v);
+    });
+
+    // ---------- LAZY ----------
+    $_defineProperty('lazy', function()
+    {
+        // Return the lazy flag
+        return $_lazy;
+    }, function($v)
+    {
+        // Set the lazy flag
+        $_lazy = $$.asBool($v);
     });
 
     // ########## GLOBALS ##########
