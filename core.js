@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b277';
+    var $_version = '2.1.6b300';
 
     // ########## LANGUAGE ##########
 
@@ -513,8 +513,8 @@
         // If the value is a function, set the type as a method
         if (typeof $value === 'function')
             $type = 'method';
-        // If the value is a simple object, set the type as a property
-        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf__.call($__object__, $value) === $__objectProto__)
+        // If the value is a simple object or a non-empty array, set the type as a property
+        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf__.call($__object__, $value) === $__objectProto__ || $__isArray__.call($__array__, $value) && $value.length !== 0)
             $type = 'property';
 
         // If the class has the import flag
@@ -523,6 +523,23 @@
             // If the member is a property
             if ($type === 'property')
             {
+                // If the value is an array
+                if ($__isArray__.call($__array__, $value))
+                {
+                    // Set the definitions in the cache definitions object
+                    $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $value[2] });
+                    $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, { 'enumerable': true, 'value': function()
+                    {
+                        // Return the private property data
+                        return this['#' + $name];
+                    } });
+                    $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, { 'enumerable': true, 'value': function($v)
+                    {
+                        // Set the private property data
+                        this['#' + $name] = $v;
+                    } });
+                }
+
                 // Create the has get and set accessors flags
                 var $hasGet = false;
                 var $hasSet = false;
@@ -830,9 +847,44 @@
                 var $get = new $__array__($_accessor_flagCount);
                 var $set = new $__array__($_accessor_flagCount);
 
-                // Create the has get and set accessors flags
-                var $hasGet = false;
-                var $hasSet = false;
+                // Create the has data and get/set accessors flags
+                var $hasData = !!$__isArray__.call($__array__, $value);
+                var $hasGet  = false;
+                var $hasSet  = false;
+
+                // If the member is a data property
+                if ($hasData)
+                {
+                    // If the value array does not have get/set accessors strings, throw an exception
+                    if ($value.length !== 2 && $value.length !== 3)
+                        throw '';
+
+                    // Set the data as the array
+                    var $data = $value;
+                    
+                    // Create the property object
+                    $value = {};
+                    
+                    // Set the accessors in the propery object
+                    $value[$data[0]] = null;
+                    $value[$data[1]] = null;
+
+                    // Create the private property data definition array
+                    var $field = new $__array__($_definition_member_flagCount);
+
+                    // Set the private property data definition data
+                    $field[$_definition_member_field_readonly] = false;
+                    $field[$_definition_member_name]           = '#' + $name;
+                    $field[$_definition_member_type]           = 'field';
+                    $field[$_definition_member_value]          = $data[2];
+
+                    // Set the private property data definition in the definitions object
+                    $__defineProperty__.call($__object__, $privateDefinitions, '#' + $name, { 'enumerable': true, 'value': $field });
+
+                    // If the class is optimized, set the private property data in the cache definitions object
+                    if ($isOptimized)
+                        $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $data[2] });
+                }
 
                 for (var $propertyKey in $value)
                 {
@@ -915,8 +967,8 @@
                         }
                     }
 
-                    // If the member is not a function, throw an exception
-                    if (typeof $memberValue !== 'function')
+                    // If the member is not a data property and not a function, throw an exception
+                    if (!$hasData && typeof $memberValue !== 'function')
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
                     // Set the member access modifier flags and value
@@ -983,6 +1035,22 @@
                 // Check if the property has any inherited get or set accessors
                 $hasGet = $hasGet || !!$get[$_accessor_name];
                 $hasSet = $hasSet || !!$set[$_accessor_name];
+
+                // If the member is a data property
+                if ($hasData)
+                {
+                    // Set the data property get and set accessors
+                    $get[$_accessor_value] = function()
+                    {
+                        // Return the private property data
+                        return this['#' + $name];
+                    };
+                    $set[$_accessor_value] = function($v)
+                    {
+                        // Set the private property data
+                        this['#' + $name] = $v;
+                    };
+                }
 
                 // If a get method was provided
                 if ($hasGet)
@@ -1586,7 +1654,7 @@
     {
         // Set the descriptor data
         $descriptor['configurable'] = $configurable;
-        $descriptor['enumerable']   = true;
+        $descriptor['enumerable']   = $name.substr(0, 1) !== '#';
         $descriptor['get']          = function()
         {
             // Return the value
@@ -2405,14 +2473,6 @@
         };
         var $typeInternal = null;
 
-        // If the class is internal, create the internal type method
-        if ($internal)
-            $typeInternal = function()
-            {
-                // Return the internal type
-                return $class;
-            };
-
         // Create the class
         var $class = function()
         {
@@ -2736,6 +2796,14 @@
             return $public;
         };
 
+        // If the class is internal, create the internal type method
+        if ($internal)
+            $typeInternal = function()
+            {
+                // Return the internal type
+                return $class;
+            };
+
         // Prepend the class to the chain array, set the levels count, and set the external type
         $levels = $chain.unshift($class);
         $type   = !$internal || $external < $levels ? $chain[$external] : $_class;
@@ -2952,6 +3020,10 @@
 
         // Set the class prototype without the "writable" flag
         $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype, 'writable': false });
+
+        // If a static "constructor" definition was not provided, set the class constructor reference
+        if (!$__hasOwnProperty__.call($definitionsStatic, 'constructor'))
+            $class.constructor = $$;
 
         // If a static "toString()" definition was not provided, set the class toString() method
         if (!$__hasOwnProperty__.call($definitionsStatic, 'toString'))
@@ -3670,7 +3742,8 @@
         // Set the module exports as the global namespace
         module.exports = $$;
     }
-    else
+    // If a global reference was found
+    else if (window)
     {
         // If the "$$" shorthand global namespace is not already defined or should be overwritten, define/overwrite it
         if (window.$$ === undefined || window.$$ === window.jTypes)
@@ -3679,4 +3752,7 @@
         // Define/overwrite the global namespace
         window.jTypes = $$;
     }
-})(typeof window !== 'undefined' ? window : {});
+    // Return the global namespace
+    else
+        return $$;
+})(typeof window !== 'undefined' ? window : this);
