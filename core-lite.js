@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                             jTypes Lite 1.0.0
+//                             jTypes Lite 1.0.1
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.0L';
+    var $_version = '1.0.1Lb303';
 
     // ########## LANGUAGE ##########
 
@@ -52,6 +52,8 @@
     var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
     var $_lang_$$_member_property_accessors        = '"{0}" must have both accessors to have an access modifier on the {1} accessor.';
     var $_lang_$$_member_property_accessors_access = '"{0}" must have a more restrictive access modifier on the {1} accessor.';
+    var $_lang_$$_member_property_accessors_array  = '"{0}" cannot have more than one default value for the automatically implemented property.';
+    var $_lang_$$_member_property_accessors_auto   = '"{0}" must have both accessors because it is an automatically implemented property.';
     var $_lang_$$_member_property_function         = '"{0}" must have a function for the {1} accessor.';
     var $_lang_$$_member_property_keyword          = '"{0}" has an invalid modifier "{2}" on the {1} accessor.';
     var $_lang_$$_member_property_keyword_access_2 = '"{0}" cannot have access modifiers on both property accessors.';
@@ -558,8 +560,8 @@
         // If the value is a function, set the type as a method
         if (typeof $value === 'function')
             $type = 'method';
-        // If the value is a simple object, set the type as a property
-        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf($value) === $__objectProto__)
+        // If the value is a simple object or a non-empty array, set the type as a property
+        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf($value) === $__objectProto__ || $__array_isArray($value) && $value.length !== 0)
             $type = 'property';
 
         // If the name is empty or whitespace, throw an exception
@@ -720,9 +722,49 @@
                 var $get = new $__array($_accessor_flagCount);
                 var $set = new $__array($_accessor_flagCount);
 
-                // Create the has get and set accessors flags
-                var $hasGet = false;
-                var $hasSet = false;
+                // Create the has automatically implemented properties and get/set accessors flags
+                var $hasAuto = !!$__array_isArray($value);
+                var $hasGet  = false;
+                var $hasSet  = false;
+
+                // If the property is automatically implemented
+                if ($hasAuto)
+                {
+                    // Set the data as the array
+                    var $data = $value;
+
+                    // If the data does not have get and set accessor strings, throw an exception
+                    if ($data.length < 2 || !$data[0] || !$data[1])
+                        throw $_exceptionFormat($_lang_$$_member_property_accessors_auto, $name);
+
+                    // If the data has more than just a default value, throw an exception
+                    if ($data.length > 3)
+                        throw $_exceptionFormat($_lang_$$_member_property_accessors_array, $name);
+                    
+                    // Create the property object
+                    $value = {};
+                    
+                    // Set the accessors in the propery object
+                    $value[$data[0]] = null;
+                    $value[$data[1]] = null;
+
+                    // Get the default value
+                    var $default = $data[2];
+
+                    // If the default value is neither undefined nor null
+                    if ($default !== undefined && $default !== null)
+                    {
+                        // Get the type of the default value
+                        var $defaultType = typeof $default;
+
+                        // If the default value is not a primitive value, set it to null
+                        if ($defaultType !== 'boolean' && $defaultType !== 'number' && $defaultType !== 'string')
+                            $default = null;
+                    }
+
+                    // Push the default value into the cache array
+                    $cache.push($default);
+                }
 
                 for (var $propertyKey in $value)
                 {
@@ -767,8 +809,8 @@
                         $member = $get;
                     }
 
-                    // If the member is not a function, throw an exception
-                    if (typeof $memberValue !== 'function')
+                    // If the property is not automatically implemented and the member is not a function, throw an exception
+                    if (!$hasAuto && typeof $memberValue !== 'function')
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
                     // Set the member access modifier flags and value
@@ -838,13 +880,17 @@
                 // Get the more restrictive access modifier
                 var $modifier = $getModifier || $setModifier;
 
-                // Construct the property descriptor with the accessor method wrappers
-                $descriptor = (
-                {
-                    'enumerable': true,
-                    'get': $hasGet ? $_definitionsCompilerMethod($name, $get[$_accessor_value], $index) : undefined,
-                    'set': $hasSet ? $_definitionsCompilerMethod($name, $set[$_accessor_value], $index) : undefined
-                });
+                // If the property is not automatically implemented, construct the property descriptor with the accessor method wrappers
+                if (!$hasAuto)
+                    $descriptor = (
+                    {
+                        'enumerable': true,
+                        'get': $hasGet ? $_definitionsCompilerMethod($name, $get[$_accessor_value], $index) : undefined,
+                        'set': $hasSet ? $_definitionsCompilerMethod($name, $set[$_accessor_value], $index) : undefined
+                    });
+                // Construct the property descriptor with the automatically implemented property wrappers
+                else
+                    $descriptor = $_definitionsCompilerField({ 'enumerable': true }, $name, false, $index, $cache.length - 1);
 
                 // If a more restrictive access modifier was provided
                 if ($modifier)

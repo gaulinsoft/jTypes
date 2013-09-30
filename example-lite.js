@@ -50,13 +50,11 @@ var Employee = $$(Person, function($fName, $lName, $age, $salary)
     // call the base constructor
     this.__base.constructor($fName, $lName, $age);
 
-    // set the protected salary field (cast the number)
-    this._salary = $$.asInt($salary, true);
+    // set the protected salary automatically implemented property (cast the number)
+    this.salary = $$.asInt($salary, true);
 },
 {
     // value-syntax definitions
-
-    _salary: $$.protected(0),
 
     triggerOneYearOlder: $$.public(function()
     {
@@ -64,17 +62,12 @@ var Employee = $$(Person, function($fName, $lName, $age, $salary)
         this.__base.triggerOneYearOlder();
 
         // increase the salary by three percent
-        this._salary *= 1.03;
+        this.salary *= 1.03;
     }),
 
-    salary: $$.public(
-    {
-        'get': function()
-        {
-            // return the salary
-            return this._salary;
-        }
-    })
+    // automatically implemented property syntax
+
+    salary: $$.public(['get', 'protected set', 0])
 });
 
 // instantiate a person object
