@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b301';
+    var $_version = '2.1.6b302';
 
     // ########## LANGUAGE ##########
 
@@ -875,21 +875,33 @@
                     $value[$data[0]] = null;
                     $value[$data[1]] = null;
 
-                    // Create the private property data definition array
-                    var $field = new $__array__($_definition_member_flagCount);
+                    // Get the default value and create the private property data definition array
+                    var $default = $data[2];
+                    var $field   = new $__array__($_definition_member_flagCount);
+
+                    // If the default value is neither undefined nor null
+                    if ($default !== undefined && $default !== null)
+                    {
+                        // Get the type of the default value
+                        var $defaultType = typeof $default;
+
+                        // If the field does not have a primitive value, set it to null
+                        if ($defaultType !== 'boolean' && $defaultType !== 'number' && $defaultType !== 'string')
+                            $default = null;
+                    }
 
                     // Set the private property data definition data
                     $field[$_definition_member_field_readonly] = false;
                     $field[$_definition_member_name]           = '#' + $name;
                     $field[$_definition_member_type]           = 'field';
-                    $field[$_definition_member_value]          = $data[2];
+                    $field[$_definition_member_value]          = $default;
 
                     // Set the private property data definition in the definitions object
                     $__defineProperty__.call($__object__, $privateDefinitions, '#' + $name, { 'enumerable': true, 'value': $field });
 
                     // If the class is optimized, set the private property data in the cache definitions object
                     if ($isOptimized)
-                        $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $data[2] });
+                        $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $default });
                 }
 
                 for (var $propertyKey in $value)
