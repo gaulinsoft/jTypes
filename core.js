@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b300';
+    var $_version = '2.1.6b301';
 
     // ########## LANGUAGE ##########
 
@@ -68,6 +68,8 @@
     var $_lang_$$_member_override_null             = '"{0}" has no suitable {1} to override.';
     var $_lang_$$_member_property_accessors        = '"{0}" must have both accessors to have an access modifier on the {1} accessor.';
     var $_lang_$$_member_property_accessors_access = '"{0}" must have a more restrictive access modifier on the {1} accessor.';
+    var $_lang_$$_member_property_accessors_array  = '"{0}" cannot have more than one default value for the automatically implemented property.';
+    var $_lang_$$_member_property_accessors_auto   = '"{0}" must have both accessors because it is an automatically implemented property.';
     var $_lang_$$_member_property_function         = '"{0}" must have a function for the {1} accessor.';
     var $_lang_$$_member_property_keyword          = '"{0}" has an invalid modifier "{2}" on the {1} accessor.';
     var $_lang_$$_member_property_keyword_access_2 = '"{0}" cannot have access modifiers on both property accessors.';
@@ -855,9 +857,13 @@
                 // If the member is a data property
                 if ($hasData)
                 {
-                    // If the value array does not have get/set accessors strings, throw an exception
-                    if ($value.length !== 2 && $value.length !== 3)
-                        throw '';
+                    // If the value array does not have get and set accessor strings, throw an exception
+                    if ($value.length < 2)
+                        throw $_exceptionFormat($_lang_$$_member_property_accessors_auto, $name);
+
+                    // If the value array has more than just a default property value, throw an exception
+                    if ($value.length > 3)
+                        throw $_exceptionFormat($_lang_$$_member_property_accessors_array, $name);
 
                     // Set the data as the array
                     var $data = $value;
