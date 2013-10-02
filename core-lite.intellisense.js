@@ -129,7 +129,7 @@ jTypes['asInt']            = function()
     /// <signature>
     ///   <summary>Converts an object to an integer.</summary>
     ///   <param name="object" type="Object">An object to convert to an integer.</param>
-    ///   <param name="finite" type="Boolean">A flag indicating whether or not to convert to a finite integer.</param>
+    ///   <param name="finite" type="Boolean">A flag indicating whether or not to force a finite cast.</param>
     ///   <returns type="Number">object if it is an integer; otherwise its number equivalent rounded towards zero.</returns>
     /// </signature>
 };

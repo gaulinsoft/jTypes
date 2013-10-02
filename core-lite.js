@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.1Lb303';
+    var $_version = '1.0.1L';
 
     // ########## LANGUAGE ##########
 
@@ -180,6 +180,15 @@
 
     // Create the global namespace
     var $$ = null;
+
+    // ########## WINDOW ##########
+
+    // Create the window reference
+    var $_window = window ? window : this;
+
+    // If the window reference is either null or undefined, create a reference
+    if ($_window === null || $_window === undefined)
+        $_window = {};
 
     // ########## EXCEPTIONS ##########
 
@@ -425,16 +434,28 @@
             // Get the private symbol
             var $symbol = this && this[$_const_symbol];
 
-            // If the private symbol is not a function, throw an exception
+            // If the private symbol is not a function
             if (typeof $symbol !== 'function')
-                throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+            {
+                // If debugging is enabled, throw an exception
+                if ($$.debug)
+                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                return;
+            }
 
             // Unlock the symbol to get the cache
             var $cache = $symbol($_lock);
 
-            // If the symbol was not unlocked, throw an exception
+            // If the symbol was not unlocked
             if ($cache !== $_symbol)
-                throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+            {
+                // If debugging is enabled, throw an exception
+                if ($$.debug)
+                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                return;
+            }
 
             // Return the value from the cache
             return $cache[$indexField];
@@ -449,16 +470,28 @@
                 // Get the private symbol
                 var $symbol = this && this[$_const_symbol];
 
-                // If the private symbol is not a function, throw an exception
+                // If the private symbol is not a function
                 if (typeof $symbol !== 'function')
-                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+                {
+                    // If debugging is enabled, throw an exception
+                    if ($$.debug)
+                        throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                    return;
+                }
 
                 // Unlock the symbol to get the cache
                 var $cache = $symbol($_lock);
 
-                // If the symbol was not unlocked, throw an exception
+                // If the symbol was not unlocked
                 if ($cache !== $_symbol)
-                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+                {
+                    // If debugging is enabled, throw an exception
+                    if ($$.debug)
+                        throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                    return;
+                }
 
                 // Get the init flag and the private instance
                 var $init = $cache[$indexField + 1];
@@ -480,16 +513,28 @@
                 // Get the private symbol
                 var $symbol = this && this[$_const_symbol];
 
-                // If the private symbol is not a function, throw an exception
+                // If the private symbol is not a function
                 if (typeof $symbol !== 'function')
-                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+                {
+                    // If debugging is enabled, throw an exception
+                    if ($$.debug)
+                        throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                    return;
+                }
 
                 // Unlock the symbol to get the cache
                 var $cache = $symbol($_lock);
 
-                // If the symbol was not unlocked, throw an exception
+                // If the symbol was not unlocked
                 if ($cache !== $_symbol)
-                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+                {
+                    // If debugging is enabled, throw an exception
+                    if ($$.debug)
+                        throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                    return;
+                }
 
                 // Get the private instance
                 var $this = $cache[$index];
@@ -510,16 +555,28 @@
             // Get the private symbol
             var $symbol = this && this[$_const_symbol];
 
-            // If the private symbol is not a function, throw an exception
+            // If the private symbol is not a function
             if (typeof $symbol !== 'function')
-                throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+            {
+                // If debugging is enabled, throw an exception
+                if ($$.debug)
+                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                return;
+            }
 
             // Unlock the symbol to get the cache
             var $cache = $symbol($_lock);
 
-            // If the symbol was not unlocked, throw an exception
+            // If the symbol was not unlocked
             if ($cache !== $_symbol)
-                throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+            {
+                // If debugging is enabled, throw an exception
+                if ($$.debug)
+                    throw $_exceptionFormat($_lang_$$_field_symbol, $name);
+
+                return;
+            }
 
             // Get the private instance and apply the function in the provided context with the current arguments
             var $this   = $cache[$index];
@@ -554,14 +611,15 @@
             $value    = $value[$_package_value];
         }
 
-        // Create the type
+        // Get the automatically implemented property flag and create the type
+        var $auto = $__array_isArray($value) && $value.length !== 0;
         var $type = 'field';
 
         // If the value is a function, set the type as a method
         if (typeof $value === 'function')
             $type = 'method';
-        // If the value is a simple object or a non-empty array, set the type as a property
-        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf($value) === $__objectProto__ || $__array_isArray($value) && $value.length !== 0)
+        // If the value is a non-empty array or a simple object, set the type as a property
+        else if ($auto || $value !== null && typeof $value === 'object' && $__getPrototypeOf($value) === $__objectProto__)
             $type = 'property';
 
         // If the name is empty or whitespace, throw an exception
@@ -594,7 +652,7 @@
             else if ($keyword === 'public' || $keyword === 'prototype')
                 $public = true;
             // If the keyword is readonly, set the readonly flag
-            else if ($type === 'field' && $keyword === 'readonly')
+            else if ($keyword === 'readonly' && ($type === 'field' || $auto && $type === 'property'))
                 $readonly = true;
             // If the keyword is static, set the static flag
             else if ($keyword === 'static')
@@ -722,13 +780,12 @@
                 var $get = new $__array($_accessor_flagCount);
                 var $set = new $__array($_accessor_flagCount);
 
-                // Create the has automatically implemented properties and get/set accessors flags
-                var $hasAuto = !!$__array_isArray($value);
-                var $hasGet  = false;
-                var $hasSet  = false;
+                // Create get and set accessor flags
+                var $hasGet = false;
+                var $hasSet = false;
 
                 // If the property is automatically implemented
-                if ($hasAuto)
+                if ($auto)
                 {
                     // Set the data as the array
                     var $data = $value;
@@ -740,10 +797,10 @@
                     // If the data has more than just a default value, throw an exception
                     if ($data.length > 3)
                         throw $_exceptionFormat($_lang_$$_member_property_accessors_array, $name);
-                    
+
                     // Create the property object
                     $value = {};
-                    
+
                     // Set the accessors in the propery object
                     $value[$data[0]] = null;
                     $value[$data[1]] = null;
@@ -764,6 +821,16 @@
 
                     // Push the default value into the cache array
                     $cache.push($default);
+
+                    // If the property is read-only
+                    if ($readonly)
+                    {
+                        // Push the index into the read-only array
+                        $readonlys.push($cache.length);
+
+                        // Push the init flag into the cache array
+                        $cache.push(false);
+                    }
                 }
 
                 for (var $propertyKey in $value)
@@ -810,7 +877,7 @@
                     }
 
                     // If the property is not automatically implemented and the member is not a function, throw an exception
-                    if (!$hasAuto && typeof $memberValue !== 'function')
+                    if (!$auto && typeof $memberValue !== 'function')
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
                     // Set the member access modifier flags and value
@@ -881,7 +948,7 @@
                 var $modifier = $getModifier || $setModifier;
 
                 // If the property is not automatically implemented, construct the property descriptor with the accessor method wrappers
-                if (!$hasAuto)
+                if (!$auto)
                     $descriptor = (
                     {
                         'enumerable': true,
@@ -890,7 +957,7 @@
                     });
                 // Construct the property descriptor with the automatically implemented property wrappers
                 else
-                    $descriptor = $_definitionsCompilerField({ 'enumerable': true }, $name, false, $index, $cache.length - 1);
+                    $descriptor = $_definitionsCompilerField({ 'enumerable': true }, $name, $readonly, $index, $cache.length - ($readonly ? 2 : 1));
 
                 // If a more restrictive access modifier was provided
                 if ($modifier)
@@ -1551,7 +1618,7 @@
                 return $object[$_definition_keyHint] === $object ? 'class': 'function';
 
             // If the object is the window object, return the "window" type string
-            if ($object === window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf($object) === null)
+            if ($object === $_window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf($object) === null)
                 return 'window';
 
             // If the object is a class instance, return the "instance" type string
@@ -1632,8 +1699,8 @@
     // ---------- WINDOW ----------
     $_defineMethod('isWindow', function($object)
     {
-        // If the object is the window object, return true
-        if ($object === window)
+        // If the object is the window reference, return true
+        if ($object === $_window)
             return true;
 
         // If the object is a null reference or undefined, return false
@@ -1860,7 +1927,8 @@
         // Set the module exports as the global namespace
         module.exports = $$;
     }
-    else
+    // If a global reference was found
+    else if (window)
     {
         // If the "$$" shorthand global namespace is not already defined or should be overwritten, define/overwrite it
         if (window.$$ === undefined || window.$$ === window.jTypes)
@@ -1869,4 +1937,7 @@
         // Define/overwrite the global namespace
         window.jTypes = $$;
     }
-})(typeof window !== 'undefined' ? window : {});
+    // Return the global namespace
+    else
+        return $$;
+})(typeof window !== 'undefined' ? window : null);
