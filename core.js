@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b302';
+    var $_version = '2.1.6b315';
 
     // ########## LANGUAGE ##########
 
@@ -63,6 +63,7 @@
     var $_lang_$$_member_name_invalid              = '"{1}" is not a valid {0} name.';
     var $_lang_$$_member_name_null                 = '"" is not a valid {0} name.';
     var $_lang_$$_member_name_package              = '"{0}" cannot have modifiers because it is a packaged member definition.';
+    var $_lang_$$_member_name_package_separated    = '"{0}" cannot be a packaged member definition because it is defined in a {1} definition object';
     var $_lang_$$_member_name_prototype_2          = '"{0}" cannot have more than one definition or hide an inherited non-prototype member.';
     var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
     var $_lang_$$_member_override_null             = '"{0}" has no suitable {1} to override.';
@@ -135,6 +136,15 @@
 
     // Create the global namespace
     var $$ = null;
+
+    // ########## WINDOW ##########
+
+    // Create the window reference
+    var $_window = window ? window : this;
+
+    // If the window reference is either null or undefined, create a reference
+    if ($_window === null || $_window === undefined)
+        $_window = {};
 
     // ########## EXCEPTIONS ##########
 
@@ -497,6 +507,10 @@
         // If the member is a package
         if (typeof $value === 'function' && $value[$_package_keyHint] === $value)
         {
+            // If this is a separated definition object (no static definitions object), throw an exception
+            if ($staticDefinitions === null)
+                throw $_exceptionFormat($_lang_$$_member_name_package_separated, $name, $key.substr(0, $key.indexOf(' ')));
+
             // If any keywords were provided other than the static keyword, throw an exception
             if ($keywords.length && $keywords[0] !== 'static')
                 throw $_exceptionFormat($_lang_$$_member_name_package, $name);
@@ -867,10 +881,10 @@
 
                     // Set the data as the array
                     var $data = $value;
-                    
+
                     // Create the property object
                     $value = {};
-                    
+
                     // Set the accessors in the propery object
                     $value[$data[0]] = null;
                     $value[$data[1]] = null;
@@ -2198,10 +2212,6 @@
             $constructor = null;
         }
 
-        // If the argument count does not match the number of arguments, throw an exception
-        if (!$_unsafe && arguments.length !== $argument)
-            throw $_exceptionArguments(null, arguments);
-
         // If no constructor was provided
         if (!$constructor)
         {
@@ -2350,10 +2360,6 @@
             $unsafe   = $_unsafe && $construct['u'] === $_unsafe;
         }
 
-        // If the argument count does not match the number of arguments, throw an exception
-        if (!$unsafe && arguments.length !== $argument)
-            throw $_exceptionArguments(null, arguments);
-
         // Create the cache, private, protected, and public references along with the inherited prototype reference
         var $classCache     = null;
         var $classPrivate   = $__create__.call($__object__, null);
@@ -2455,9 +2461,49 @@
             $classPublic    = $__create__.call($__object__, null);
         }
 
-        // Compile the class definitions into the definitions objects
-        for (var $key in $prototype)
-            $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, $definitionsStatic, $key, $prototype[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
+        // If the argument count does not match the number of arguments
+        if (arguments.length !== $argument)
+        {
+            // Get the private, protected, and public prototypes
+            var $prototypePrivate   = $prototype;
+            var $prototypeProtected = arguments[$argument++];
+            var $prototypePublic    = arguments[$argument++];
+
+            // If the neither the protected nor public prototypes are simple objects, throw an exception
+            if ($prototypeProtected === null || typeof $prototypeProtected !== 'object' || $__getPrototypeOf__.call($__object__, $prototypeProtected) !== $__objectProto__ || $prototypePublic === null || typeof $prototypePublic !== 'object' || $__getPrototypeOf__.call($__object__, $prototypePublic) !== $__objectProto__)
+                throw $_exceptionArguments(null, arguments);
+
+            // Set the extra prototype definition object
+            $prototype = arguments[$argument];
+
+            // If the extra prototype is not a simple object, set it to null
+            if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf__.call($__object__, $prototype) !== $__objectProto__)
+                $prototype = null;
+            // Increment the argument count
+            else
+                $argument++;
+
+            // If the argument count does not match the number of arguments, throw an exception
+            if (!$unsafe && arguments.length !== $argument)
+                throw $_exceptionArguments(null, arguments);
+
+            // Compile the private class definitions into the definitions objects
+            for (var $key in $prototypePrivate)
+                $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'private ' + $key, $prototypePrivate[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
+
+            // Compile the protected class definitions into the definitions objects
+            for (var $key in $prototypeProtected)
+                $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'protected ' + $key, $prototypeProtected[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
+
+            // Compile the public class definitions into the definitions objects
+            for (var $key in $prototypePublic)
+                $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'public ' + $key, $prototypePublic[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
+        }
+
+        // If a prototype was provided, compile the class definitions into the definitions objects
+        if ($prototype)
+            for (var $key in $prototype)
+                $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, $definitionsStatic, $key, $prototype[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
 
         // If any injections arguments were provided
         if ($unsafe && arguments[$argument])
@@ -3217,7 +3263,7 @@
                 return $object[$_definition_keyHint] === $object ? 'class': 'function';
 
             // If the object is the window object, return the "window" type string
-            if ($object === window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf__.call($__object__, $object) === null)
+            if ($object === $_window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf__.call($__object__, $object) === null)
                 return 'window';
 
             // If the object is a class instance, return the "instance" type string
@@ -3478,8 +3524,8 @@
     // ---------- WINDOW ----------
     $_defineMethod('isWindow', function($object)
     {
-        // If the object is the window object, return true
-        if ($object === window)
+        // If the object is the window reference, return true
+        if ($object === $_window)
             return true;
 
         // If the object is a null reference or undefined, return false
@@ -3773,4 +3819,4 @@
     // Return the global namespace
     else
         return $$;
-})(typeof window !== 'undefined' ? window : this);
+})(typeof window !== 'undefined' ? window : null);
