@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b315';
+    var $_version = '2.1.6b319';
 
     // ########## LANGUAGE ##########
 
@@ -1393,7 +1393,7 @@
 
                             // If a private merge was found, set the private property descriptor
                             if ($mergePrivate)
-                                $__defineProperty__.call($__object__, $private, $name, $_constructRuntimeMerge(null, $private[$name], $accessor));
+                                $__defineProperty__.call($__object__, $private, $name, $_constructRuntimeMerge($inherit, $private[$name], $accessor));
                         }
 
                         // If the property is public, set the public property descriptor (merge if a public descriptor was found)
@@ -1403,30 +1403,9 @@
                         else if ($mergePublic)
                             $__defineProperty__.call($__object__, $public, $name, $_constructRuntimeMerge(null, $public[$name], $accessor));
                     }
-                    // If the property is being merged
-                    else if ($merge)
-                    {
-                        // Set the private property descriptor (merge if a private descriptor was found)
-                        $__defineProperty__.call($__object__, $private, $name, $mergePrivate ? $_constructRuntimeMerge($descriptor, $private[$name], $accessor) : $descriptor);
-
-                        // If a base merge was found
-                        if ($mergeBase)
-                        {
-                            // Set the base property descriptor
-                            $__defineProperty__.call($__object__, $base, $name, $_constructRuntimeMerge(null, $base[$name], $accessor));
-
-                            // If lazy loading is enabled, set the protected property descriptor
-                            if ($_lazy)
-                                $__defineProperty__.call($__object__, $protected, $name, $_constructRuntimeMerge(null, $protected[$name], $accessor));
-                        }
-
-                        // If a public merge was found, set the public property descriptor
-                        if ($mergePublic)
-                            $__defineProperty__.call($__object__, $public, $name, $_constructRuntimeMerge(null, $public[$name], $accessor));
-                    }
-                    // Set the private property descriptor
+                    // Set the private property descriptor (merge if a private descriptor was found)
                     else
-                        $__defineProperty__.call($__object__, $private, $name, $descriptor);
+                        $__defineProperty__.call($__object__, $private, $name, $mergePrivate ? $_constructRuntimeMerge($descriptor, $private[$name], $accessor) : $descriptor);
                 }
                 else
                 {
@@ -1584,48 +1563,27 @@
                     // Push the base property reference into the statements array (merge if a base reference was found)
                     $statements.push('p(' + $_precompile_matrix + $level + '$3,' + ($get ? $reference : $mergeBase || $_precompile_null) + ',' + ($set ? $reference : $mergeBase || $_precompile_null) + ')');
 
-                    // Create the override reference
-                    var $override = null;
-
-                    // If the property is protected or public, get the override reference
-                    if ($protectedOverrides || $publicOverrides)
-                        $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
+                    // Get the override and inherit references
+                    var $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
+                    var $inherit  = $override ? $override : $reference;
 
                     // Push the protected property reference into the statements array (merge if a base reference was found)
-                    $statements.push('p(' + $_precompile_matrix + $level + '$1,' + ($get ? ($override !== null ? $override : $reference) : $mergeProtected || $_precompile_null) + ',' + ($set ? ($override !== null ? $override : $reference) : $mergeProtected || $_precompile_null) + ')');
+                    $statements.push('p(' + $_precompile_matrix + $level + '$1,' + ($get ? $inherit : $mergeProtected || $_precompile_null) + ',' + ($set ? $inherit : $mergeProtected || $_precompile_null) + ')');
 
                     // If a private merge was found, push the private property reference into the statements array
                     if ($mergePrivate)
-                        $statements.push('p(' + $_precompile_matrix + $level + '$0,' + ($get ? $_precompile_null : $mergePrivate) + ',' + ($set ? $_precompile_null : $mergePrivate) + ')');
+                        $statements.push('p(' + $_precompile_matrix + $level + '$0,' + ($get ? $inherit : $mergePrivate || $_precompile_null) + ',' + ($set ? $inherit : $mergePrivate || $_precompile_null) + ')');
 
                     // If the property is public, push the public property reference into the statements array (merge if a public reference was found)
                     if ($publicOverrides)
-                        $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? ($override !== null ? $override : $reference) : $mergePublic || $_precompile_null) + ',' + ($set ? ($override !== null ? $override : $reference) : $mergePublic || $_precompile_null) + ')');
+                        $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? $inherit : $mergePublic || $_precompile_null) + ',' + ($set ? $inherit : $mergePublic || $_precompile_null) + ')');
                     // If a public merge was found, push the public property reference into the statements array
                     else if ($mergePublic)
                         $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? $_precompile_null : $mergePublic) + ',' + ($set ? $_precompile_null : $mergePublic) + ')');
                 }
-                // If the property is being merged
-                else if ($merge)
-                {
-                    // Push the private property reference into the statements array (merge if a private reference was found)
-                    $statements.push('p(' + $_precompile_matrix + $level + '$0,' + ($get ? $reference : $mergePrivate || $_precompile_null) + ',' + ($set ? $reference : $mergePrivate || $_precompile_null) + ')');
-
-                    // If a protected merge was found
-                    if ($mergeProtected)
-                    {
-                        // Push the base and protected property references into the statements array
-                        $statements.push('p(' + $_precompile_matrix + $level + '$3,' + ($get ? $_precompile_null : $mergeBase) + ',' + ($set ? $_precompile_null : $mergeBase) + ')');
-                        $statements.push('p(' + $_precompile_matrix + $level + '$1,' + ($get ? $_precompile_null : $mergeProtected) + ',' + ($set ? $_precompile_null : $mergeProtected) + ')');
-                    }
-
-                    // If a public merge was found, push the public property reference into the statements array
-                    if ($mergePublic)
-                        $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? $_precompile_null : $mergePublic) + ',' + ($set ? $_precompile_null : $mergePublic) + ')');
-                }
-                // Push the private property reference into the statements array
+                // Push the private property reference into the statements array (merge if a private reference was found)
                 else
-                    $statements.push('p(' + $_precompile_matrix + $level + '$0,' + ($get ? $reference : $_precompile_null) + ',' + ($set ? $reference : $_precompile_null) + ')');
+                    $statements.push('p(' + $_precompile_matrix + $level + '$0,' + ($get ? $reference : $mergePrivate || $_precompile_null) + ',' + ($set ? $reference : $mergePrivate || $_precompile_null) + ')');
             }
             else
             {
@@ -1635,20 +1593,16 @@
                 // If the property is protected or public
                 if ($protectedOverrides || $publicOverrides)
                 {
-                    // Create the override reference
-                    var $override = null;
-
-                    // If the property is protected or public, get the override reference
-                    if ($protectedOverrides || $publicOverrides)
-                        $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
+                    // Get the override reference
+                    var $override = $_constructRuntimeOverride($reference, $key, $definition, $protectedOverrides ? $protectedOverrides : $publicOverrides);
 
                     // Set the base and protected property references in the merge stack
-                    $merge[1] = $override !== null ? $override : $reference;
+                    $merge[1] = $override ? $override : $reference;
                     $merge[3] = $reference;
 
                     // If the property is public, set the public property reference in the merge stack
                     if ($publicOverrides)
-                        $merge[2] = $override !== null ? $override : $reference;
+                        $merge[2] = $override ? $override : $reference;
                 }
                 // Set the private property reference in the merge stack
                 else
