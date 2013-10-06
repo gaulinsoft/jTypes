@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                             jTypes Lite 1.0.1
+//                             jTypes Lite 1.0.2
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.1L';
+    var $_version = '1.0.2Lb318';
 
     // ########## LANGUAGE ##########
 
@@ -43,12 +43,14 @@
     var $_lang_$$_keyword                          = '"{0}" is not a valid class modifier.';
     var $_lang_$$_member_keyword                   = '"{1}" has an invalid {0} modifier "{2}".';
     var $_lang_$$_member_keyword_access_2          = '"{0}" cannot have more than one access modifier.';
+    var $_lang_$$_member_keyword_conflict_2        = '"{0}" cannot have the {1} and {2} modifiers.';
     var $_lang_$$_member_keyword_escapsulation     = '"{0}" cannot have the public, protected, or private modifiers because it is {1}.';
     var $_lang_$$_member_keyword_readonly          = '"{0}" cannot have the readonly modifier because it is {1}.';
     var $_lang_$$_member_name_2                    = '"{0}" cannot have more than one definition.';
     var $_lang_$$_member_name_invalid              = '"{1}" is not a valid {0} name.';
     var $_lang_$$_member_name_null                 = '"" is not a valid {0} name.';
     var $_lang_$$_member_name_package              = '"{0}" cannot have modifiers because it is a packaged member definition.';
+    var $_lang_$$_member_name_package_separated    = '"{0}" cannot be a packaged member definition because it is defined in a {1} definition object';
     var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
     var $_lang_$$_member_property_accessors        = '"{0}" must have both accessors to have an access modifier on the {1} accessor.';
     var $_lang_$$_member_property_accessors_access = '"{0}" must have a more restrictive access modifier on the {1} accessor.';
@@ -590,7 +592,7 @@
             return $return;
         };
     };
-    var $_definitionsCompiler       = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $staticDefinitions, $key, $value, $inherits, $cache, $index, $readonlys, $isExpandoPrivate)
+    var $_definitionsCompiler       = function($privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $inherits, $cache, $index, $readonlys, $isExpandoPrivate)
     {
         // Break the key string into a keywords array and get the member name
         var $keywords = $__string_trim__.call($key || '').split(' ');
@@ -599,6 +601,10 @@
         // If the member is a package
         if (typeof $value === 'function' && $value[$_package_keyHint] === $value)
         {
+            // If this is a separated definition object (no static definitions object), throw an exception
+            if ($staticDefinitions === null)
+                throw $_exceptionFormat($_lang_$$_member_name_package_separated, $name, $key.substr(0, $key.indexOf(' ')));
+
             // If any keywords were provided other than the static keyword, throw an exception
             if ($keywords.length && $keywords[0] !== 'static')
                 throw $_exceptionFormat($_lang_$$_member_name_package, $name);
@@ -630,8 +636,9 @@
         if (!$__string_match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
             throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
-        var $readonly = false;
-        var $static   = false;
+        var $prototype = false;
+        var $readonly  = false;
+        var $static    = false;
 
         var $private   = false;
         var $protected = false;
@@ -648,8 +655,11 @@
             // If the keyword is protected, set the protected flag
             else if ($keyword === 'protected')
                 $protected = true;
-            // If the keyword is public or prototype, set the public flag
-            else if ($keyword === 'public' || $keyword === 'prototype')
+            // If the keyword is prototype, set the prototype flag
+            else if ($keyword === 'prototype')
+                $prototype = true;
+            // If the keyword is public, set the public flag
+            else if ($keyword === 'public')
                 $public = true;
             // If the keyword is readonly, set the readonly flag
             else if ($keyword === 'readonly' && ($type === 'field' || $auto && $type === 'property'))
@@ -673,13 +683,35 @@
         // If the member has the static flag
         if ($static)
         {
+            // If the member has the prototype flag, throw an exception
+            if ($prototype)
+                throw $_exceptionFormat($_lang_$$_member_keyword_conflict_2, $name, 'prototype', 'static');
+
             // Set the "static" type
             $type = 'static';
 
             // If the member was already defined in the static definitions object, throw an exception
             if ($__hasOwnProperty__.call($staticDefinitions, $name))
                 throw $_exceptionFormat($_lang_$$_member_name_static_2, $name);
+        }
+        else
+        {
+            // If the member was already defined in the non-static definitions objects, throw an exception
+            if ($__hasOwnProperty__.call($privateDefinitions, $name) || $__hasOwnProperty__.call($protectedDefinitions, $name) || $__hasOwnProperty__.call($publicDefinitions, $name) || $__hasOwnProperty__.call($prototypeDefinitions, $name))
+                throw $_exceptionFormat($_lang_$$_member_name_2, $name);
 
+            // If the member has the prototype flag, set the "prototype" type
+            if ($prototype)
+                $type = 'prototype';
+            else
+            // If the member is neither protected nor public, set the private flag
+            if (!$protected && !$public)
+                $private = true;
+        }
+
+        // If the member has the prototype or static flags
+        if ($prototype || $static)
+        {
             // If the member has encapsulation, throw an exception
             if ($private || $protected || $public)
                 throw $_exceptionFormat($_lang_$$_member_keyword_escapsulation, $name, $type);
@@ -687,16 +719,6 @@
             // If the member has the read-only flag, throw an exception
             if ($readonly)
                 throw $_exceptionFormat($_lang_$$_member_keyword_readonly, $name, $type);
-        }
-        else
-        {
-            // If the member was already defined in the non-static definitions objects, throw an exception
-            if ($__hasOwnProperty__.call($privateDefinitions, $name) || $__hasOwnProperty__.call($protectedDefinitions, $name) || $__hasOwnProperty__.call($publicDefinitions, $name))
-                throw $_exceptionFormat($_lang_$$_member_name_2, $name);
-
-            // If the member is neither protected nor public, set the private flag
-            if (!$protected && !$public)
-                $private = true;
         }
 
         // Create the definitions object and descriptor references
@@ -729,7 +751,7 @@
                 }
 
                 // If the class is not expando private or the field is not private
-                if (!$isExpandoPrivate ||  !$private)
+                if (!$isExpandoPrivate || !$private)
                 {
                     // Construct the field descriptor with the accessor method wrappers
                     $descriptor = $_definitionsCompilerField({ 'enumerable': true }, $name, $readonly, $index, $cache.length);
@@ -997,6 +1019,13 @@
 
                 break;
 
+            case 'prototype':
+
+                // Set the member in the prototype definitions object
+                $prototypeDefinitions[$name] = { 'enumerable': true, 'value': $value };
+
+                break;
+
             case 'static':
 
                 // Set the member in the static definitions object
@@ -1115,10 +1144,6 @@
             $constructor = null;
         }
 
-        // If the argument count does not match the number of arguments, throw an exception
-        if (arguments.length !== $argument)
-            throw $_exceptionArguments(null, arguments);
-
         // If no constructor was provided
         if (!$constructor)
         {
@@ -1209,6 +1234,7 @@
         // Create the private, protected, and public references along with the static definitions object
         var $classPrivate   = null;
         var $classProtected = null;
+        var $classPrototype = $__create(null);
         var $classPublic    = null;
         var $classStatic    = $__create(null);
 
@@ -1285,9 +1311,49 @@
             $classPrivate   = $__create($classProtected);
         }
 
-        // Compile the class definitions into the definitions objects
-        for (var $key in $prototype)
-            $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classStatic, $key, $prototype[$key], $inherits, $cache, $index, $readonlys, $expandoPrivate);
+        // If the argument count does not match the number of arguments
+        if (arguments.length !== $argument)
+        {
+            // Get the private, protected, and public prototypes
+            var $prototypePrivate   = $prototype;
+            var $prototypeProtected = arguments[$argument++];
+            var $prototypePublic    = arguments[$argument++];
+
+            // If the neither the protected nor public prototypes are simple objects, throw an exception
+            if ($prototypeProtected === null || typeof $prototypeProtected !== 'object' || $__getPrototypeOf($prototypeProtected) !== $__objectProto__ || $prototypePublic === null || typeof $prototypePublic !== 'object' || $__getPrototypeOf($prototypePublic) !== $__objectProto__)
+                throw $_exceptionArguments(null, arguments);
+
+            // Set the extra prototype definition object
+            $prototype = arguments[$argument];
+
+            // If the extra prototype is not a simple object, set it to null
+            if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf($prototype) !== $__objectProto__)
+                $prototype = null;
+            // Increment the argument count
+            else
+                $argument++;
+
+            // If the argument count does not match the number of arguments, throw an exception
+            if (arguments.length !== $argument)
+                throw $_exceptionArguments(null, arguments);
+
+            // Compile the private class definitions into the definitions objects
+            for (var $key in $prototypePrivate)
+                $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classPrototype, null, 'private ' + $key, $prototypePrivate[$key], $inherits, $cache, $index, $readonlys, $expandoPrivate);
+
+            // Compile the protected class definitions into the definitions objects
+            for (var $key in $prototypeProtected)
+                $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classPrototype, null, 'protected ' + $key, $prototypeProtected[$key], $inherits, $cache, $index, $readonlys, $expandoPrivate);
+
+            // Compile the public class definitions into the definitions objects
+            for (var $key in $prototypePublic)
+                $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classPrototype, null, 'public ' + $key, $prototypePublic[$key], $inherits, $cache, $index, $readonlys, $expandoPrivate);
+        }
+
+        // If a prototype was provided, compile the class definitions into the definitions objects
+        if ($prototype)
+            for (var $key in $prototype)
+                $_definitionsCompiler($classPrivate, $classProtected, $classPublic, $classPrototype, $classStatic, $key, $prototype[$key], $inherits, $cache, $index, $readonlys, $expandoPrivate);
 
         // Create the external type method and internal type method reference
         var $typeExternal = function()
@@ -1375,7 +1441,11 @@
         $levels = $chain.unshift($class);
         $type   = !$internal || $external < $levels ? $chain[$external] : $_class;
 
-        // Set each static member descriptor from the static descriptors objects in the class
+        // Set each prototype member descriptor from the prototype descriptors object in the class public definition object
+        for (var $classPrototypeMember in $classPrototype)
+            $__defineProperty($classPublic, $classPrototypeMember, $classPrototype[$classPrototypeMember]);
+
+        // Set each static member descriptor from the static descriptors object in the class
         for (var $classStaticMember in $classStatic)
             $__defineProperty($class, $classStaticMember, $classStatic[$classStaticMember]);
 
@@ -1519,10 +1589,10 @@
     // ########## PACKAGES ##########
 
     // Define the package methods for class members
-    $__array_forEach__.call('private protected public static'.split(' '), function($modifier)
+    $__array_forEach__.call('private protected public prototype static'.split(' '), function($modifier)
     {
-        // Define the package method for the access modifier
-        $_defineMethod($modifier, function($modifiers, $value)
+        // Create the package method
+        var $method = function($modifiers, $value)
         {
             // Create the member package
             var $package = new $__array($_package_flagCount);
@@ -1563,7 +1633,20 @@
 
             // Return the member package
             return $package;
-        });
+        };
+
+        // If the modifier is the prototype modifier
+        if ($modifier === 'prototype')
+        {
+            // Set the prototype method initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
+            $$.prototype = $method;
+
+            // Set the prototype method without the "writable" flag
+            $__defineProperty($$, 'prototype', { 'value': $method, 'writable': false });
+        }
+        // Define the package method for the access modifier
+        else
+            $_defineMethod($modifier, $method);
     });
 
     // ########## TYPES ##########

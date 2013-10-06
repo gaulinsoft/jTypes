@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                             jTypes Lite 1.0.1
+//                             jTypes Lite 1.0.2
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -78,6 +78,82 @@ window.jTypes   = function()
     ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
     ///   <param name="constructor" type="Function">A constructor for the class.</param>
     ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
+    ///   <returns type="Class">A compiled jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Compiles a jTypes class.</summary>
+    ///   <param name="privateDefinitions" type="Object">A collection of private member definitions for the class.</param>
+    ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
+    ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
+    ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
+    ///   <returns type="Class">A compiled jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Compiles a jTypes class.</summary>
+    ///   <param name="constructor" type="Function">A constructor for the class.</param>
+    ///   <param name="privateDefinitions" type="Object">A collection of private member definitions for the class.</param>
+    ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
+    ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
+    ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
+    ///   <returns type="Class">A compiled jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Compiles a jTypes class.</summary>
+    ///   <param name="modifiers" type="String">A space-separated string of modifiers for the class.</param>
+    ///   <param name="constructor" type="Function">A constructor for the class.</param>
+    ///   <param name="privateDefinitions" type="Object">A collection of private member definitions for the class.</param>
+    ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
+    ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
+    ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
+    ///   <returns type="Class">A compiled jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Compiles a jTypes class.</summary>
+    ///   <param name="modifiers" type="String">A space-separated string of modifiers for the class.</param>
+    ///   <param name="privateDefinitions" type="Object">A collection of private member definitions for the class.</param>
+    ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
+    ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
+    ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
+    ///   <returns type="Class">A compiled jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Compiles a jTypes class.</summary>
+    ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
+    ///   <param name="constructor" type="Function">A constructor for the class.</param>
+    ///   <param name="privateDefinitions" type="Object">A collection of private member definitions for the class.</param>
+    ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
+    ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
+    ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
+    ///   <returns type="Class">A compiled jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Compiles a jTypes class.</summary>
+    ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
+    ///   <param name="privateDefinitions" type="Object">A collection of private member definitions for the class.</param>
+    ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
+    ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
+    ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
+    ///   <returns type="Class">A compiled jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Compiles a jTypes class.</summary>
+    ///   <param name="modifiers" type="String">A space-separated string of modifiers for the class.</param>
+    ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
+    ///   <param name="privateDefinitions" type="Object">A collection of private member definitions for the class.</param>
+    ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
+    ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
+    ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
+    ///   <returns type="Class">A compiled jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Compiles a jTypes class.</summary>
+    ///   <param name="modifiers" type="String">A space-separated string of modifiers for the class.</param>
+    ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
+    ///   <param name="constructor" type="Function">A constructor for the class.</param>
+    ///   <param name="privateDefinitions" type="Object">A collection of private member definitions for the class.</param>
+    ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
+    ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
+    ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
     ///   <returns type="Class">A compiled jTypes class.</returns>
     /// </signature>
 };
@@ -328,6 +404,20 @@ jTypes['protected']        = function()
     ///   <param name="modifiers" type="String">A space-separated string of modifiers for the protected member.</param>
     ///   <param name="value" type="Object">A value for the protected member.</param>
     ///   <returns type="Object">A protected member definition package for a jTypes class.</returns>
+    /// </signature>
+};
+jTypes['prototype']        = function()
+{
+    /// <signature>
+    ///   <summary>Creates a prototype member definition for a jTypes class./summary>
+    ///   <param name="value" type="Object">A value for the prototype member.</param>
+    ///   <returns type="Object">A prototype member definition package for a jTypes class.</returns>
+    /// </signature>
+    /// <signature>
+    ///   <summary>Creates a public member definition for a jTypes class.</summary>
+    ///   <param name="modifiers" type="String">A space-separated string of modifiers for the public member.</param>
+    ///   <param name="value" type="Object">A value for the public member.</param>
+    ///   <returns type="Object">A public member definition package for a jTypes class.</returns>
     /// </signature>
 };
 jTypes['public']           = function()
