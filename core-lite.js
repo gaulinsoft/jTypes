@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.2Lb318';
+    var $_version = '1.0.2L';
 
     // ########## LANGUAGE ##########
 
@@ -50,7 +50,7 @@
     var $_lang_$$_member_name_invalid              = '"{1}" is not a valid {0} name.';
     var $_lang_$$_member_name_null                 = '"" is not a valid {0} name.';
     var $_lang_$$_member_name_package              = '"{0}" cannot have modifiers because it is a packaged member definition.';
-    var $_lang_$$_member_name_package_separated    = '"{0}" cannot be a packaged member definition because it is defined in a {1} definition object';
+    var $_lang_$$_member_name_package_separated    = '"{0}" cannot be a packaged member definition because it is defined in a {1} definition object.';
     var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
     var $_lang_$$_member_property_accessors        = '"{0}" must have both accessors to have an access modifier on the {1} accessor.';
     var $_lang_$$_member_property_accessors_access = '"{0}" must have a more restrictive access modifier on the {1} accessor.';
@@ -683,12 +683,12 @@
         // If the member has the static flag
         if ($static)
         {
+            // Set the "static" type
+            $type = 'static';
+
             // If the member has the prototype flag, throw an exception
             if ($prototype)
                 throw $_exceptionFormat($_lang_$$_member_keyword_conflict_2, $name, 'prototype', 'static');
-
-            // Set the "static" type
-            $type = 'static';
 
             // If the member was already defined in the static definitions object, throw an exception
             if ($__hasOwnProperty__.call($staticDefinitions, $name))
@@ -696,17 +696,16 @@
         }
         else
         {
-            // If the member was already defined in the non-static definitions objects, throw an exception
-            if ($__hasOwnProperty__.call($privateDefinitions, $name) || $__hasOwnProperty__.call($protectedDefinitions, $name) || $__hasOwnProperty__.call($publicDefinitions, $name) || $__hasOwnProperty__.call($prototypeDefinitions, $name))
-                throw $_exceptionFormat($_lang_$$_member_name_2, $name);
-
             // If the member has the prototype flag, set the "prototype" type
             if ($prototype)
                 $type = 'prototype';
-            else
             // If the member is neither protected nor public, set the private flag
-            if (!$protected && !$public)
+            else if (!$protected && !$public)
                 $private = true;
+
+            // If the member was already defined in the non-static definitions objects, throw an exception
+            if ($__hasOwnProperty__.call($privateDefinitions, $name) || $__hasOwnProperty__.call($protectedDefinitions, $name) || $__hasOwnProperty__.call($publicDefinitions, $name) || $__hasOwnProperty__.call($prototypeDefinitions, $name))
+                throw $_exceptionFormat($_lang_$$_member_name_2, $name);
         }
 
         // If the member has the prototype or static flags
