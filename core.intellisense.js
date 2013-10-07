@@ -162,6 +162,8 @@ Instance.prototype = (
 {
     /// <field type="Instance">Provides a jTypes private instance access to the protected instance of its base class.</field>
     '__base': null,
+    /// <field type="Instance">Provides a jTypes constructor access to the private instance.</field>
+    '__data': null,
     /// <field type="Instance">Provides a jTypes instance access to its self reference object.</field>
     '__self': null,
     /// <field type="Instance">Provides a jTypes private instance access to the public instance.</field>

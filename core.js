@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b320';
+    var $_version = '2.1.6';
 
     // ########## LANGUAGE ##########
 
@@ -1352,7 +1352,7 @@
                 var $mergeBase    = $complex && $__hasOwnProperty__.call($base, $name);
                 var $mergePrivate = $complex && $__hasOwnProperty__.call($private, $name);
                 var $merge        = $mergeBase || $mergePrivate;
-                
+
                 // If the property is not complex or is being merged
                 if (!$complex || $merge)
                 {
@@ -1361,7 +1361,7 @@
 
                     // Set the accessor method in the property descriptor
                     $descriptor[$accessor] = $method;
-                    
+
                     // If the property is protected or public
                     if ($isProtected || $isPublic)
                     {
@@ -1655,7 +1655,7 @@
                     // Throw an exception
                     throw $_exceptionFormat($_lang_$$_field_readonly, $name, 'field');
                 }
-                
+
                 // If the provided value is set to a private instance, set the value to the public instance
                 if ($v === $private)
                     $value = $public;
@@ -2422,35 +2422,42 @@
             var $prototypeProtected = arguments[$argument++];
             var $prototypePublic    = arguments[$argument++];
 
-            // If the neither the protected nor public prototypes are simple objects, throw an exception
-            if ($prototypeProtected === null || typeof $prototypeProtected !== 'object' || $__getPrototypeOf__.call($__object__, $prototypeProtected) !== $__objectProto__ || $prototypePublic === null || typeof $prototypePublic !== 'object' || $__getPrototypeOf__.call($__object__, $prototypePublic) !== $__objectProto__)
-                throw $_exceptionArguments(null, arguments);
+            // If the next argument is not an array
+            if (!$__isArray__.call($__array__, $prototypeProtected))
+            {
+                // If the neither the protected nor public prototypes are simple objects, throw an exception
+                if ($prototypeProtected === null || typeof $prototypeProtected !== 'object' || $__getPrototypeOf__.call($__object__, $prototypeProtected) !== $__objectProto__ || $prototypePublic === null || typeof $prototypePublic !== 'object' || $__getPrototypeOf__.call($__object__, $prototypePublic) !== $__objectProto__)
+                    throw $_exceptionArguments(null, arguments);
 
-            // Set the extra prototype definition object
-            $prototype = arguments[$argument];
+                // Set the extra prototype definition object
+                $prototype = arguments[$argument];
 
-            // If the extra prototype is not a simple object, set it to null
-            if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf__.call($__object__, $prototype) !== $__objectProto__)
-                $prototype = null;
-            // Increment the argument count
+                // If the extra prototype is not a simple object, set it to null
+                if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf__.call($__object__, $prototype) !== $__objectProto__)
+                    $prototype = null;
+                // Increment the argument count
+                else
+                    $argument++;
+
+                // If the argument count does not match the number of arguments, throw an exception
+                if (!$unsafe && arguments.length !== $argument)
+                    throw $_exceptionArguments(null, arguments);
+
+                // Compile the private class definitions into the definitions objects
+                for (var $key in $prototypePrivate)
+                    $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'private ' + $key, $prototypePrivate[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
+
+                // Compile the protected class definitions into the definitions objects
+                for (var $key in $prototypeProtected)
+                    $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'protected ' + $key, $prototypeProtected[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
+
+                // Compile the public class definitions into the definitions objects
+                for (var $key in $prototypePublic)
+                    $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'public ' + $key, $prototypePublic[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
+            }
+            // Reset the argument count
             else
-                $argument++;
-
-            // If the argument count does not match the number of arguments, throw an exception
-            if (!$unsafe && arguments.length !== $argument)
-                throw $_exceptionArguments(null, arguments);
-
-            // Compile the private class definitions into the definitions objects
-            for (var $key in $prototypePrivate)
-                $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'private ' + $key, $prototypePrivate[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
-
-            // Compile the protected class definitions into the definitions objects
-            for (var $key in $prototypeProtected)
-                $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'protected ' + $key, $prototypeProtected[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
-
-            // Compile the public class definitions into the definitions objects
-            for (var $key in $prototypePublic)
-                $_definitionsCompiler($classCache, $classPrivate, $classProtected, $classPublic, $definitionsPrototype, null, 'public ' + $key, $prototypePublic[$key], $baseProtected, $basePublic, $abstract, $final, $import, $optimized, $struct);
+                $argument -= 2;
         }
 
         // If a prototype was provided, compile the class definitions into the definitions objects
