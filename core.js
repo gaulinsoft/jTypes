@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6b319';
+    var $_version = '2.1.6b320';
 
     // ########## LANGUAGE ##########
 
@@ -46,7 +46,7 @@
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
     var $_lang_$$_derive_unoptimized               = 'Class must inherit from an optimized class to have the optimized modifier.';
     var $_lang_$$_derive_unsafe                    = 'Classes cannot inherit from a .NET class.';
-    var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only field.';
+    var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only {1}.';
     var $_lang_$$_field_type                       = '"{0}" must have a value of the type {1}, null, or undefined.';
     var $_lang_$$_import                           = 'Class cannot be imported because the definitions have been altered.';
     var $_lang_$$_keyword                          = '"{0}" is not a valid class modifier.';
@@ -523,14 +523,15 @@
             $value    = $value[$_package_value];
         }
 
-        // Create the type
+        // Get the automatically implemented property flag and create the type
+        var $auto = $__isArray__.call($__array__, $value) && $value.length !== 0;
         var $type = 'field';
 
         // If the value is a function, set the type as a method
         if (typeof $value === 'function')
             $type = 'method';
         // If the value is a simple object or a non-empty array, set the type as a property
-        else if ($value !== null && typeof $value === 'object' && $__getPrototypeOf__.call($__object__, $value) === $__objectProto__ || $__isArray__.call($__array__, $value) && $value.length !== 0)
+        else if ($auto || $value !== null && typeof $value === 'object' && $__getPrototypeOf__.call($__object__, $value) === $__objectProto__)
             $type = 'property';
 
         // If the class has the import flag
@@ -539,8 +540,8 @@
             // If the member is a property
             if ($type === 'property')
             {
-                // If the value is an array
-                if ($__isArray__.call($__array__, $value))
+                // If the value is an automatically implemented property
+                if ($auto)
                 {
                     // Set the definitions in the cache definitions object
                     $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $value[2] });
@@ -645,10 +646,10 @@
             var $keyword = $keywords[$i];
 
             // If the keyword is abstract, set the abstract flag
-            if ($type !== 'field' && $keyword === 'abstract')
+            if ($keyword === 'abstract' && $type !== 'field')
                 $abstract = true;
             // If the keyword is override, set the override flag
-            else if ($type !== 'field' && $keyword === 'override')
+            else if ($keyword === 'override' && $type !== 'field')
                 $override = true;
             // If the keyword is private, set the private flag
             else if ($keyword === 'private')
@@ -663,16 +664,16 @@
             else if ($keyword === 'public')
                 $public = true;
             // If the keyword is readonly, set the readonly flag
-            else if ($type === 'field' && $keyword === 'readonly')
+            else if ($keyword === 'readonly' && ($type === 'field' || $auto && $type === 'property'))
                 $readonly = true;
             // If the keyword is sealed, set the sealed flag
-            else if ($type !== 'field' && $keyword === 'sealed')
+            else if ($keyword === 'sealed' && $type !== 'field')
                 $sealed = true;
             // If the keyword is static, set the static flag
             else if ($keyword === 'static')
                 $typeStatic = true;
             // If the keyword is virtual, set the virtual flag
-            else if ($type !== 'field' && $keyword === 'virtual')
+            else if ($keyword === 'virtual' && $type !== 'field')
                 $virtual = true;
             // If a keyword was defined, throw an exception
             else if ($keyword)
@@ -863,13 +864,12 @@
                 var $get = new $__array__($_accessor_flagCount);
                 var $set = new $__array__($_accessor_flagCount);
 
-                // Create the has data and get/set accessors flags
-                var $hasData = !!$__isArray__.call($__array__, $value);
-                var $hasGet  = false;
-                var $hasSet  = false;
+                // Create the get and set accessors flags
+                var $hasGet = false;
+                var $hasSet = false;
 
-                // If the member is a data property
-                if ($hasData)
+                // If the property is automatically implemented
+                if ($auto)
                 {
                     // If the value array does not have get and set accessor strings, throw an exception
                     if ($value.length < 2)
@@ -905,7 +905,7 @@
                     }
 
                     // Set the private property data definition data
-                    $field[$_definition_member_field_readonly] = false;
+                    $field[$_definition_member_field_readonly] = $readonly;
                     $field[$_definition_member_name]           = '#' + $name;
                     $field[$_definition_member_type]           = 'field';
                     $field[$_definition_member_value]          = $default;
@@ -999,8 +999,8 @@
                         }
                     }
 
-                    // If the member is not a data property and not a function, throw an exception
-                    if (!$hasData && typeof $memberValue !== 'function')
+                    // If the property is not automatically implemented and is not a function, throw an exception
+                    if (!$auto && typeof $memberValue !== 'function')
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
                     // Set the member access modifier flags and value
@@ -1068,8 +1068,8 @@
                 $hasGet = $hasGet || !!$get[$_accessor_name];
                 $hasSet = $hasSet || !!$set[$_accessor_name];
 
-                // If the member is a data property
-                if ($hasData)
+                // If the property is automatically implemented
+                if ($auto)
                 {
                     // Set the data property get and set accessors
                     $get[$_accessor_value] = function()
@@ -1231,6 +1231,9 @@
             }
         });
 
+        // Create a data reference to the private instance
+        $__defineProperty__.call($__object__, $this, '__data', { 'value': $private });
+
         // Freeze the constructor instance object
         $__freeze__.call($__object__, $this);
 
@@ -1340,18 +1343,16 @@
 
             case 'property':
 
-                // Get the property accessor
+                // Get the property accessor and construct the accessor method
                 var $accessor = $key.substr(1, 3);
+                var $method   = $_constructRuntimeMethod($definition[$_definition_member_value], $private, $private, $public);
 
                 // Check if the property is complex and if a merge operation is being performed
                 var $complex      = $definition[$_definition_member_property_accessors];
                 var $mergeBase    = $complex && $__hasOwnProperty__.call($base, $name);
                 var $mergePrivate = $complex && $__hasOwnProperty__.call($private, $name);
                 var $merge        = $mergeBase || $mergePrivate;
-
-                // Construct the accessor method
-                var $method = $_constructRuntimeMethod($definition[$_definition_member_value], $private, $private, $public);
-
+                
                 // If the property is not complex or is being merged
                 if (!$complex || $merge)
                 {
@@ -1360,10 +1361,7 @@
 
                     // Set the accessor method in the property descriptor
                     $descriptor[$accessor] = $method;
-
-                    // Check if a public merge operation is being performed
-                    var $mergePublic = $complex && $__hasOwnProperty__.call($public, $name);
-
+                    
                     // If the property is protected or public
                     if ($isProtected || $isPublic)
                     {
@@ -1398,10 +1396,7 @@
 
                         // If the property is public, set the public property descriptor (merge if a public descriptor was found)
                         if ($isPublic)
-                            $__defineProperty__.call($__object__, $public, $name, $mergePublic ? $_constructRuntimeMerge($inherit, $public[$name], $accessor) : $inherit);
-                        // If a public merge was found, set the public property descriptor
-                        else if ($mergePublic)
-                            $__defineProperty__.call($__object__, $public, $name, $_constructRuntimeMerge(null, $public[$name], $accessor));
+                            $__defineProperty__.call($__object__, $public, $name, $complex && $__hasOwnProperty__.call($public, $name) ? $_constructRuntimeMerge($inherit, $public[$name], $accessor) : $inherit);
                     }
                     // Set the private property descriptor (merge if a private descriptor was found)
                     else
@@ -1577,9 +1572,6 @@
                     // If the property is public, push the public property reference into the statements array (merge if a public reference was found)
                     if ($publicOverrides)
                         $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? $inherit : $mergePublic || $_precompile_null) + ',' + ($set ? $inherit : $mergePublic || $_precompile_null) + ')');
-                    // If a public merge was found, push the public property reference into the statements array
-                    else if ($mergePublic)
-                        $statements.push('p(' + $_precompile_matrix + $level + '$2,' + ($get ? $_precompile_null : $mergePublic) + ',' + ($set ? $_precompile_null : $mergePublic) + ')');
                 }
                 // Push the private property reference into the statements array (merge if a private reference was found)
                 else
@@ -1653,10 +1645,17 @@
             // Set the descriptor set accessor with read-only checking
             $descriptor['set'] = function($v)
             {
-                // If the field is read-only, throw an exception
+                // If the field is read-only
                 if ($readonly())
-                    throw $_exceptionFormat($_lang_$$_field_readonly, $name);
+                {
+                    // If the field was internally created for an automatically implemented property, throw an exception
+                    if ($name.substr(0, 1) === '#')
+                        throw $_exceptionFormat($_lang_$$_field_readonly, $name.substr(1), 'property');
 
+                    // Throw an exception
+                    throw $_exceptionFormat($_lang_$$_field_readonly, $name, 'field');
+                }
+                
                 // If the provided value is set to a private instance, set the value to the public instance
                 if ($v === $private)
                     $value = $public;
@@ -1723,7 +1722,7 @@
                 {
                     // If the field is read-only, throw an exception
                     if ($readonly())
-                        throw $_exceptionFormat($_lang_$$_field_readonly, $name);
+                        throw $_exceptionFormat($_lang_$$_field_readonly, $name, 'injection');
 
                     // If the value does not match the type, throw an exception
                     if ($v !== undefined && $v !== null && $$.type($v) !== $type)
@@ -1757,7 +1756,7 @@
                 {
                     // If the field is read-only, throw an exception
                     if ($readonly())
-                        throw $_exceptionFormat($_lang_$$_field_readonly, $name);
+                        throw $_exceptionFormat($_lang_$$_field_readonly, $name, 'injection');
 
                     // Set the injected value
                     $injections[$key] = $v;
@@ -2672,6 +2671,7 @@
 
                         // Mask the base instance reference with the base constructor
                         $__defineProperty__.call($__object__, $context, '__base', { 'value': $privateBase.constructor });
+                        $__defineProperty__.call($__object__, $context, '__data', { 'value': $private });
 
                         // Freeze the constructor context
                         $__freeze__.call($__object__, $context);
@@ -3257,6 +3257,20 @@
 
         // Return true if the length is a finite integer greater than or equal to zero
         return $$.isFiniteInt($length) && $length >= 0;
+    });
+
+    // ---------- CALLABLE-TYPE ----------
+    $_defineMethod('isCallableType', function($object)
+    {
+        // If the object is a null reference or undefined, return false
+        if ($object === null || $object === undefined)
+            return false;
+
+        // Get the type of the object
+        var $type = $$.type($object);
+
+        // Return true if the object a class or a function
+        return $type === 'class' || $type === 'function';
     });
 
     // ---------- CLASS ----------

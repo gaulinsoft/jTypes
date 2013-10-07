@@ -330,6 +330,14 @@ jTypes['isBoolean']          = function()
     ///   <returns type="Boolean">true if object is a boolean; otherwise, false.</returns>
     /// </signature>
 };
+jTypes['isCallableType']    = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is a "callable-type" object.</summary>
+    ///   <param name="object" type="Object">An object to test if it is a "callable-type" object.</param>
+    ///   <returns type="Boolean">true if object is a type of either class or function; otherwise, false.</returns>
+    /// </signature>
+};
 jTypes['isClass']            = function()
 {
     /// <signature>
@@ -466,6 +474,14 @@ jTypes['isObject']           = function()
     ///   <returns type="Boolean">true if object is neither null nor undefined; otherwise, false.</returns>
     /// </signature>
 };
+jTypes['isObjectInstance']   = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is an object instance.</summary>
+    ///   <param name="object" type="Object">An object to test if it is an object instance.</param>
+    ///   <returns type="Boolean">true if object is an instance of Object; otherwise, false.</returns>
+    /// </signature>
+};
 jTypes['isOptimizedClass']   = function()
 {
     /// <signature>
@@ -480,6 +496,14 @@ jTypes['isPositiveInfinity'] = function()
     ///   <summary>Indicates whether or not a number has a value of positive infinity.</summary>
     ///   <param name="value" type="Number">A value to test if it is positive infinity.</param>
     ///   <returns type="Boolean">true if value is positive infinity; otherwise, false.</returns>
+    /// </signature>
+};
+jTypes['isPrimitive']        = function()
+{
+    /// <signature>
+    ///   <summary>Indicates whether or not an object is a JavaScript primitive.</summary>
+    ///   <param name="object" type="Object">An object to test if it is a JavaScript primitive.</param>
+    ///   <returns type="Boolean">true if object is either null or has a typeof in the following collection: boolean, number, string, undefined; otherwise, false.</returns>
     /// </signature>
 };
 jTypes['isPrimitiveType']    = function()
