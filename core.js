@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                                jTypes 2.1.6
+//                                jTypes 2.1.7
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.6';
+    var $_version = '2.1.7b328';
 
     // ########## LANGUAGE ##########
 
@@ -555,6 +555,8 @@
                         // Set the private property data
                         this['#' + $name] = $v;
                     } });
+
+                    return;
                 }
 
                 // Create the has get and set accessors flags
@@ -904,16 +906,16 @@
                             $default = null;
                     }
 
-                    // Set the private property data definition data
+                    // Set the private field definition data
                     $field[$_definition_member_field_readonly] = $readonly;
                     $field[$_definition_member_name]           = '#' + $name;
                     $field[$_definition_member_type]           = 'field';
                     $field[$_definition_member_value]          = $default;
 
-                    // Set the private property data definition in the definitions object
+                    // Set the private field definition in the definitions object
                     $__defineProperty__.call($__object__, $privateDefinitions, '#' + $name, { 'enumerable': true, 'value': $field });
 
-                    // If the class is optimized, set the private property data in the cache definitions object
+                    // If the class is optimized, set the private field in the cache definitions object
                     if ($isOptimized)
                         $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $default });
                 }
@@ -999,7 +1001,7 @@
                         }
                     }
 
-                    // If the property is not automatically implemented and is not a function, throw an exception
+                    // If the property is not automatically implemented and the member is not a function, throw an exception
                     if (!$auto && typeof $memberValue !== 'function')
                         throw $_exceptionFormat($_lang_$$_member_property_function, $name, $memberName);
 
@@ -1071,7 +1073,7 @@
                 // If the property is automatically implemented
                 if ($auto)
                 {
-                    // Set the data property get and set accessors
+                    // Set the automatic get and set accessors
                     $get[$_accessor_value] = function()
                     {
                         // Return the private property data

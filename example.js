@@ -8,10 +8,12 @@ var Person = $$(cachedPerson ? cachedPerson : '', function($fName, $lName, $age)
     this.firstName = $$.asString($fName);
     this.lastName  = $$.asString($lName);
 
-    // set the protected field (cast the number arguments)
-    this._age = $$.asInt($age);
+    // set the protected field (cast the number)
+    this._age = $$.asInt($age, true);
 },
 {
+    // key-syntax definitions
+
     'public readonly firstName': '',
     'public readonly lastName': '',
 
@@ -58,29 +60,24 @@ var Employee = $$(cachedEmployee ? cachedEmployee : '', Person, function($fName,
     // call the base constructor
     this.__base($fName, $lName, $age);
 
-    // set the protected salary field
-    this._salary = $salary;
+    // set the protected salary automatically implemented property (cast the number)
+    this.salary = $$.asInt($salary, true);
 },
 {
-    'protected _salary': 0,
-
-    'public override triggerOneYearOlder': function()
+    // value-syntax definitions
+    
+    triggerOneYearOlder: $$.public('override', function()
     {
         // increment the protected age field (by calling the base method)
         this.__base.triggerOneYearOlder();
 
         // increase the salary by three percent
-        this._salary *= 1.03;
-    },
+        this.salary *= 1.03;
+    }),
 
-    'public salary':
-    {
-        'get': function()
-        {
-            // return the salary
-            return this._salary;
-        }
-    }
+    // automatically implemented property syntax
+
+    salary: $$.public(['get', 'protected set', 0])
 });
 
 // if the employee class was not cached, store a local copy of the precompiled export string
