@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.7b328';
+    var $_version = '2.1.7b333';
 
     // ########## LANGUAGE ##########
 
@@ -39,11 +39,12 @@
     var $_lang_$$_abstract_conflict_1              = 'Abstract classes cannot have the {0} modifier.';
     var $_lang_$$_abstract_instance                = 'Abstract classes cannot be instantiated.';
     var $_lang_$$_abstract_override                = 'Class must implement the inherited abstract {1} "{0}" with the override modifier.';
-    var $_lang_$$_derive_class                     = 'Structs cannot inherit from a class that does not have the struct modifier.';
+    var $_lang_$$_derive_class                     = 'Structs cannot inherit from classes.';
     var $_lang_$$_derive_export                    = 'Class must inherit from an imported class to have a precompiled string.';
     var $_lang_$$_derive_import                    = 'Class must have a precompiled string to inherit from an imported class.';
     var $_lang_$$_derive_internal                  = 'Class must have the internal modifier to inherit from an internal class.';
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
+    var $_lang_$$_derive_struct                    = 'Classes cannot inherit from structs.';
     var $_lang_$$_derive_unoptimized               = 'Class must inherit from an optimized class to have the optimized modifier.';
     var $_lang_$$_derive_unsafe                    = 'Classes cannot inherit from a .NET class.';
     var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only {1}.';
@@ -63,7 +64,7 @@
     var $_lang_$$_member_name_invalid              = '"{1}" is not a valid {0} name.';
     var $_lang_$$_member_name_null                 = '"" is not a valid {0} name.';
     var $_lang_$$_member_name_package              = '"{0}" cannot have modifiers because it is a packaged member definition.';
-    var $_lang_$$_member_name_package_separated    = '"{0}" cannot be a packaged member definition because it is defined in a {1} definition object';
+    var $_lang_$$_member_name_package_separated    = '"{0}" cannot be a packaged member definition because it is defined in a {1} definition object.';
     var $_lang_$$_member_name_prototype_2          = '"{0}" cannot have more than one definition or hide an inherited non-prototype member.';
     var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
     var $_lang_$$_member_override_null             = '"{0}" has no suitable {1} to override.';
@@ -2377,8 +2378,15 @@
             if ($optimized && !$baseClass[$_definition_optimized])
                 throw $_exceptionFormat($_lang_$$_derive_unoptimized);
 
-            // If the class has the struct modifier and the base class does not, throw an exception
-            if ($struct && !$baseClass[$_definition_struct])
+            // If the base class has the struct modifier
+            if ($baseClass[$_definition_struct])
+            {
+                // If the class does not have the struct modifier, throw an exception
+                if (!$struct)
+                    throw $_exceptionFormat($_lang_$$_derive_struct);
+            }
+            // If the class has the struct modifier, throw an exception
+            else if ($struct)
                 throw $_exceptionFormat($_lang_$$_derive_class);
 
             // Set the subclass flag
