@@ -51,7 +51,7 @@
             kind: $kind || 'reserved',
             glyph: $glyph || '',
             parentObject: {},
-            value: $value,
+            value: intellisense.nullWithCompletionsOf($value),
             comments: $comments || '',
             scope: 'member'
         });
@@ -197,14 +197,15 @@
         var $constructor = arguments[$argument++];
         var $modifiers   = '';
         var $prototype   = null;
+        var $typeof      = typeof $constructor;
 
-        if (!jTypes.isSimpleObject($constructor))
+        if ($constructor === null || $typeof !== 'object' || Object.getPrototypeOf($constructor) !== Object.prototype)
         {
             $prototype = arguments[$argument++];
 
-            if (typeof $constructor !== 'function')
+            if ($typeof !== 'function')
             {
-                if (typeof $constructor !== 'string')
+                if ($typeof !== 'string')
                     return;
 
                 $modifiers = $constructor;
@@ -237,8 +238,8 @@
                 else
                     $constructor = null;
             }
-
-            if (!jTypes.isSimpleObject($prototype))
+            
+            if ($prototype === null || typeof $prototype !== 'object' || Object.getPrototypeOf($prototype) !== Object.prototype)
                 return;
         }
         else
@@ -260,15 +261,13 @@
         var $itemsPublic    = [];
         var $itemsStatic    = [];
 
-        // Hide the private items in the the private context
-        $thisPrivate['~jT'] = $itemsPrivate;
+        // Hide the private items in the private context and the public items in the public context
+        Object.defineProperty($thisPrivate, '~jT', { 'value': $itemsPrivate });
+        Object.defineProperty($thisPublic, '~jT', { 'value': $itemsPublic });
 
-        // Set the public context and set the hidden public items
-        $thisPrivate.__this        = $thisPublic;
-        $thisPrivate.__this['~jT'] = $itemsPublic;
-
-        // Set the private context "__type" accessor as the class
-        $thisPrivate.__type = $class;
+        // Set the public context and the "__type" accessor in the private context
+        Object.defineProperty($thisPrivate, '__this', { 'value': $thisPublic });
+        Object.defineProperty($thisPrivate, '__type', { 'value': $class });
         
         intellisense.annotate($thisPrivate,
         {
@@ -427,15 +426,13 @@
             else if (!$isPrototype && !$isStatic && ($auto || $value !== null && typeof $value === 'object' && Object.getPrototypeOf($value) === Object.prototype))
                 $type = 'property';
 
-            // Create the item
-            var $item = $_item($name, $type, $type !== 'property' ? $value : null);
+            // Get the intellisense value and create the item
+            var $valueInstance = $type !== 'property' ? $value : $auto ? $value[2] : null;
+            var $item          = $_item($name, $type, $valueInstance);
 
             // If the member is not static
             if (!$isStatic)
             {
-                // Get the intellisense value
-                var $valueInstance = $type !== 'property' ? $value : $auto ? $value[2] : null;
-
                 // If the member is public (and neither private, protected, nor a prototype member) or a prototype member (and neither private, protected, nor public)
                 if ($isPublic && !$isPrivate && !$isProtected && !$isPrototype || $isPrototype && !$isPrivate && !$isProtected && !$isPublic)
                 {
@@ -445,8 +442,8 @@
                     $itemsPublic.push($item);
                     
                     // Set the intellisense value in the private and public contexts
-                    $thisPrivate[$name] = $valueInstance;
-                    $thisPublic[$name]  = $valueInstance;
+                    Object.defineProperty($thisPrivate, $name, { 'value': intellisense.nullWithCompletionsOf($valueInstance) });
+                    Object.defineProperty($thisPublic, $name, { 'value': intellisense.nullWithCompletionsOf($valueInstance) });
                 }
                 // If the member is protected (and neither private, public, or a prototype member)
                 else if ($isProtected && !$isPrivate && !$isPublic && !$isPrototype)
@@ -456,16 +453,16 @@
                     $itemsProtected.push($item);
 
                     // Set the intellisense value in the private context
-                    $thisPrivate[$name] = $valueInstance;
+                    Object.defineProperty($thisPrivate, $name, { 'value': intellisense.nullWithCompletionsOf($valueInstance) });
                 }
                 // If the member is neither protected, public, nor a prototype member
                 else if (!$isProtected && !$isPublic && !$isPrototype)
                 {
-                    // Set the intellisense value in the private context
-                    $thisPrivate[$name] = $valueInstance;
-
                     // Push the item into the private items array
                     $itemsPrivate.push($item);
+
+                    // Set the intellisense value in the private context
+                    Object.defineProperty($thisPrivate, $name, { 'value': intellisense.nullWithCompletionsOf($valueInstance) });
                 }
 
                 // If the value is a property
@@ -544,7 +541,7 @@
         $itemsProtected.push($constructorInstance);
 
         // Set the constructor on the private context
-        $thisPrivate.constructor = $constructor;
+        Object.defineProperty($thisPrivate, 'constructor', { 'value': intellisense.nullWithCompletionsOf($constructor) });
 
         // Set the constructor call context as the private context
         intellisense.setCallContext($constructor, { 'thisArg': $thisPrivate });
