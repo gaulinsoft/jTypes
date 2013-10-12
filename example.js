@@ -11,27 +11,32 @@ var Person = $$(cachedPerson ? cachedPerson : '', function($fName, $lName, $age)
     // set the protected field (cast the number)
     this._age = $$.asInt($age, true);
 },
+// ##### PRIVATE #####
 {
-    // key-syntax definitions
+    //
+},
+// ##### PROTECTED #####
+{
+    '_age': 0
+},
+// ##### PUBLIC #####
+{
+    'readonly firstName': '',
+    'readonly lastName': '',
 
-    'public readonly firstName': '',
-    'public readonly lastName': '',
-
-    'protected _age': 0,
-
-    'public getFullName': function()
+    'getFullName': function()
     {
         // return the concatenated full name
         return this.firstName + ' ' + this.lastName;
     },
 
-    'public virtual triggerOneYearOlder': function()
+    'virtual triggerOneYearOlder': function()
     {
         // increment the protected field
         this._age++;
     },
 
-    'public age':
+    'age':
     {
         'get': function()
         {
@@ -40,6 +45,9 @@ var Person = $$(cachedPerson ? cachedPerson : '', function($fName, $lName, $age)
         },
         'set': function($v)
         {
+            // cast the value
+            $v = $$.asInt($v, true);
+
             // if the incoming property value is valid, set the protected field
             if ($v > 0)
                 this._age = $v;
@@ -63,21 +71,28 @@ var Employee = $$(cachedEmployee ? cachedEmployee : '', Person, function($fName,
     // set the protected salary automatically implemented property (cast the number)
     this.salary = $$.asInt($salary, true);
 },
+// ##### PRIVATE #####
 {
-    // value-syntax definitions
-    
-    triggerOneYearOlder: $$.public('override', function()
+    //
+},
+// ##### PROTECTED #####
+{
+    //
+},
+// ##### PUBLIC #####
+{
+    'override triggerOneYearOlder': function()
     {
         // increment the protected age field (by calling the base method)
         this.__base.triggerOneYearOlder();
 
         // increase the salary by three percent
         this.salary *= 1.03;
-    }),
+    },
 
     // automatically implemented property syntax
 
-    salary: $$.public(['get', 'protected set', 0])
+    'salary': ['get', 'protected set', 0]
 });
 
 // if the employee class was not cached, store a local copy of the precompiled export string
