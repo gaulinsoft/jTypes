@@ -351,10 +351,10 @@
         Object.defineProperty($self, 'as', { 'value': $as });
         Object.defineProperty($self, 'is', { 'value': $is });
 
-        // Define the "__self", "__this", and "__type" accessors on the private context
-        $definePrivate('__self', 'reserved', $self);
+        // Define the "__this" accessor on the private context and the "__self" and "__type" accessors on the public context
+        $definePublic('__self', 'reserved', $self);
         $definePrivate('__this', 'reserved', $thisPublic);
-        $definePrivate('__type', 'reserved', $class);
+        $definePublic('__type', 'reserved', $class);
 
         intellisense.annotate($thisPrivate,
         {
@@ -362,6 +362,22 @@
             __self: null,
             /// <field type="Instance">Provides a jTypes private instance access to the public instance.</field>
             __this: {},
+            /// <field type="Class">Provides a jTypes instance access to the instance type.</field>
+            __type: null
+        });
+
+        intellisense.annotate($thisProtected,
+        {
+            /// <field type="Instance">Provides a jTypes instance access to its self reference object.</field>
+            __self: null,
+            /// <field type="Class">Provides a jTypes instance access to the instance type.</field>
+            __type: null
+        });
+
+        intellisense.annotate($thisPublic,
+        {
+            /// <field type="Instance">Provides a jTypes instance access to its self reference object.</field>
+            __self: null,
             /// <field type="Class">Provides a jTypes instance access to the instance type.</field>
             __type: null
         });
