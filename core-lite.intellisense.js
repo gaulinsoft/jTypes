@@ -32,6 +32,7 @@
     // Create the protected cache
     var $_cacheProtected = [];
     var $_itemsProtected = [];
+    var $_thisProtected  = [];
 
     // Create the public cache
     var $_cachePublic = [];
@@ -252,8 +253,9 @@
             $constructor = function(){};
         
         // Create the private and public contexts
-        var $thisPrivate = Object.create($class.prototype);
-        var $thisPublic  = Object.create($class.prototype);
+        var $thisPrivate   = Object.create($class.prototype);
+        var $thisProtected = Object.create($class.prototype);
+        var $thisPublic    = Object.create($class.prototype);
         
         // Create the items arrays
         var $itemsPrivate   = [];
@@ -261,14 +263,59 @@
         var $itemsPublic    = [];
         var $itemsStatic    = [];
 
-        // Hide the private items in the private context and the public items in the public context
-        Object.defineProperty($thisPrivate, '~jT', { 'value': $itemsPrivate });
-        Object.defineProperty($thisPublic, '~jT', { 'value': $itemsPublic });
+        // Create the define helpers
+        var $definePrivate   = function($name, $kind, $value)
+        {
+            // Push the item into the private items array
+            $itemsPrivate.push($_item($name, $kind, $value));
 
-        // Set the public context and the "__type" accessor in the private context
-        Object.defineProperty($thisPrivate, '__this', { 'value': $thisPublic });
-        Object.defineProperty($thisPrivate, '__type', { 'value': $class });
+            // Set the intellisense value in the private context
+            Object.defineProperty($thisPrivate, $name, { 'value': intellisense.nullWithCompletionsOf($value) });
+        };
+        var $defineProtected = function($name, $kind, $value)
+        {
+            // Create the item
+            var $item = $_item($name, $kind, $value);
+
+            // Push the item into the private and protected items arrays
+            $itemsPrivate.push($item);
+            $itemsProtected.push($item);
+
+            // Create the descriptor
+            var $descriptor = { 'value': $value };
+
+            // Set the intellisense value in the private and protected contexts
+            Object.defineProperty($thisPrivate, $name, $descriptor);
+            Object.defineProperty($thisProtected, $name, $descriptor);
+        };
+        var $definePublic    = function($name, $kind, $value)
+        {
+            // Create the item
+            var $item = $_item($name, $kind, $value);
+
+            // Push the item into the private, protected, and public items arrays
+            $itemsPrivate.push($item);
+            $itemsProtected.push($item);
+            $itemsPublic.push($item);
+
+            // Create the descriptor
+            var $descriptor = { 'value': $value };
+
+            // Set the intellisense value in the private, protected, and public contexts
+            Object.defineProperty($thisPrivate, $name, $descriptor);
+            Object.defineProperty($thisProtected, $name, $descriptor);
+            Object.defineProperty($thisPublic, $name, $descriptor);
+        };
+
+        // Create the hidden item references for the contexts
+        Object.defineProperty($thisPrivate, '~jT', { 'value': $itemsPrivate });
+        Object.defineProperty($thisProtected, '~jT', { 'value': $itemsProtected });
+        Object.defineProperty($thisPublic, '~jT', { 'value': $itemsPublic });
         
+        // Define the "__this" and "__type" accessors on the private context
+        $definePrivate('__this', 'reserved', $thisPublic);
+        $definePrivate('__type', 'reserved', $class);
+
         intellisense.annotate($thisPrivate,
         {
             /// <field type="Instance">Provides a jTypes private instance access to the public instance.</field>
@@ -276,60 +323,12 @@
             /// <field type="Class">Provides a jTypes instance access to the instance type.</field>
             __type: null
         });
-        
-        // Create the reserved accessor items
-        var $__thisInstance = $_item('__this', 'reserved', $thisPrivate.__this);
-        var $__typeInstance = $_item('__type', 'reserved', $thisPrivate.__type);
 
-        // Push the reserved accessor items into the private items array
-        $itemsPrivate.push($__thisInstance);
-        $itemsPrivate.push($__typeInstance);
-
-        // If a base class was provided
-        if ($baseClass)
+        // If a base class was not provided
+        if (!$baseClass)
         {
-            // Get the inherited protected and public items arrays
-            var $inheritProtected = $_itemsProtected[$_cacheProtected.indexOf($baseClass)];
-            var $inheritPublic    = $_itemsPublic[$_cachePublic.indexOf($baseClass)];
-
-            // Create the base context and set the hidden inherited protected items
-            $thisPrivate.__base        = Object.create($baseClass.prototype);
-            $thisPrivate.__base['~jT'] = $inheritProtected;
-
-            // Create the reserved "__base" accessor item
-            var $__baseInstance = $_item('__base', 'reserved', $thisPrivate.__base);
-            
-            // Push the reserved "__base" accessor item into the private items array
-            $itemsPrivate.push($__baseInstance);
-
-            for (var $i = 0, $j = $inheritProtected.length; $i < $j; $i++)
-            {
-                // Get the current inherited protected item
-                var $itemCurrent = $inheritProtected[$i];
-
-                // If the inherited protected item is the constructor, continue
-                if ($itemCurrent.name === 'constructor')
-                    continue;
-                
-                // Push the inherited protected item into the private and protected items arrays
-                $itemsPrivate.push($itemCurrent);
-                $itemsProtected.push($itemCurrent);
-            }
-
-            // Push each inherited public item into the public items array
-            for (var $i = 0, $j = $inheritPublic.length; $i < $j; $i++)
-                $itemsPublic.push($inheritPublic[$i]);
-
-            intellisense.annotate($thisPrivate,
-            {
-                /// <field type="Instance">Provides a jTypes private instance access to the protected instance of its base class.</field>
-                __base: null
-            });
-        }
-        else
-        {
-            // Create the method items
-            var $asInstance    = $_item('as', 'method', function()
+            // Define the special methods
+            $definePublic('as', 'method', function()
             {
                 /// <signature>
                 ///   <summary>Casts a jTypes instance as an instance of a given class.</summary>
@@ -337,14 +336,7 @@
                 ///   <returns type="Instance">instance casted as class if it is an instance of class; otherwise null.</returns>
                 /// </signature>
             });
-            var $cloneInstance = $_item('clone', 'method', function()
-            {
-                /// <signature>
-                ///   <summary>Creates a shallow copy of a jTypes instance.</summary>
-                ///   <returns type="Instance">A shallow copy of instance if it is an instance of a jTypes class compiled with the struct modifier; otherwise null.</returns>
-                /// </signature>
-            });
-            var $isInstance    = $_item('is', 'method', function()
+            $definePublic('is', 'method', function()
             {
                 /// <signature>
                 ///   <summary>Checks if a jTypes instance is an instance of a given class.</summary>
@@ -352,7 +344,7 @@
                 ///   <returns type="Boolean">true if instance is an instance of class; otherwise false.</returns>
                 /// </signature>
             });
-            var $typeInstance  = $_item('type', 'method', function()
+            $definePublic('type', 'method', function()
             {
                 /// <signature>
                 ///   <summary>Gets the class type of a jTypes instance.</summary>
@@ -360,29 +352,15 @@
                 /// </signature>
             });
 
-            // Push the method items into the private items array
-            $itemsPrivate.push($asInstance);
-            $itemsPrivate.push($isInstance);
-            $itemsPrivate.push($typeInstance);
-
-            // Push the method items into the protected items array
-            $itemsProtected.push($asInstance);
-            $itemsProtected.push($isInstance);
-            $itemsProtected.push($typeInstance);
-
-            // Push the method items into the public items array
-            $itemsPublic.push($asInstance);
-            $itemsPublic.push($isInstance);
-            $itemsPublic.push($typeInstance);
-
-            // If the class is a struct
+            // If the class is a struct, define the special clone method
             //if (jTypes.isStruct($class))
-            //{
-            //    // Push the clone method item into the private, protected, and public items arrays
-            //    $itemsPrivate.push($cloneInstance);
-            //    $itemsProtected.push($cloneInstance);
-            //    $itemsPublic.push($cloneInstance);
-            //}
+            //    $definePublic('clone', 'method', function()
+            //    {
+            //        /// <signature>
+            //        ///   <summary>Creates a shallow copy of a jTypes instance.</summary>
+            //        ///   <returns type="Instance">A shallow copy of instance if it is an instance of a jTypes class compiled with the struct modifier; otherwise null.</returns>
+            //        /// </signature>
+            //    });
         }
         
         // Push the private items into the cache
@@ -392,6 +370,7 @@
         // Push the protected items into the cache
         $_cacheProtected.push($class);
         $_itemsProtected.push($itemsProtected);
+        $_thisProtected.push($thisProtected);
 
         // Push the public items into the cache
         $_cachePublic.push($class);
@@ -426,44 +405,21 @@
             else if (!$isPrototype && !$isStatic && ($auto || $value !== null && typeof $value === 'object' && Object.getPrototypeOf($value) === Object.prototype))
                 $type = 'property';
 
-            // Get the intellisense value and create the item
-            var $valueInstance = $type !== 'property' ? $value : $auto ? $value[2] : null;
-            var $item          = $_item($name, $type, $valueInstance);
-
+            // Get the intellisense value
+            var $valueInstance = intellisense.nullWithCompletionsOf($type !== 'property' ? $value : $auto ? $value[2] : null);
+            
             // If the member is not static
             if (!$isStatic)
             {
-                // If the member is public (and neither private, protected, nor a prototype member) or a prototype member (and neither private, protected, nor public)
+                // If the member is public (and neither private, protected, nor a prototype member) or a prototype member (and neither private, protected, nor public), define the public intellisense value
                 if ($isPublic && !$isPrivate && !$isProtected && !$isPrototype || $isPrototype && !$isPrivate && !$isProtected && !$isPublic)
-                {
-                    // Push the item into the private, protected, and public items arrays
-                    $itemsPrivate.push($item);
-                    $itemsProtected.push($item);
-                    $itemsPublic.push($item);
-                    
-                    // Set the intellisense value in the private and public contexts
-                    Object.defineProperty($thisPrivate, $name, { 'value': intellisense.nullWithCompletionsOf($valueInstance) });
-                    Object.defineProperty($thisPublic, $name, { 'value': intellisense.nullWithCompletionsOf($valueInstance) });
-                }
+                    $definePublic($name, $type, $valueInstance);
                 // If the member is protected (and neither private, public, or a prototype member)
                 else if ($isProtected && !$isPrivate && !$isPublic && !$isPrototype)
-                {
-                    // Push the item into the private and protected items arrays
-                    $itemsPrivate.push($item);
-                    $itemsProtected.push($item);
-
-                    // Set the intellisense value in the private context
-                    Object.defineProperty($thisPrivate, $name, { 'value': intellisense.nullWithCompletionsOf($valueInstance) });
-                }
+                    $defineProtected($name, $type, $valueInstance);
                 // If the member is neither protected, public, nor a prototype member
                 else if (!$isProtected && !$isPublic && !$isPrototype)
-                {
-                    // Push the item into the private items array
-                    $itemsPrivate.push($item);
-
-                    // Set the intellisense value in the private context
-                    Object.defineProperty($thisPrivate, $name, { 'value': intellisense.nullWithCompletionsOf($valueInstance) });
-                }
+                    $definePrivate($name, $type, $valueInstance);
 
                 // If the value is a property
                 if ($type === 'property')
@@ -484,7 +440,7 @@
             }
             // If the member is neither private, protected, public, or a prototype member, push the item into the static items array
             else if (!$isPrivate && !$isProtected && !$isPublic && !$isPrototype)
-                $itemsStatic.push($item);
+                $itemsStatic.push($_item($name, $type, $valueInstance));
             
             // If the value is a method, set the function call context (account for the special static and prototype cases)
             if ($type === 'method')
@@ -533,16 +489,62 @@
             for (var $key in $prototype)
                 $cache($key, $prototype[$key]);
 
-        // Create the constructor item
-        var $constructorInstance = $_item('constructor', 'method', $constructor);
+        // If a base class was provided
+        if ($baseClass)
+        {
+            // Get the inherited protected and public indices
+            var $indexProtected = $_cacheProtected.indexOf($baseClass);
+            var $indexPublic    = $_cachePublic.indexOf($baseClass);
+
+            // Get the inherited protected and public items arrays
+            var $inheritProtected = $_itemsProtected[$indexProtected];
+            var $inheritPublic    = $_itemsPublic[$indexPublic];
+
+            // Define the "__base" accessor on the private context
+            $definePrivate('__base', 'reserved', $_thisProtected[$indexProtected]);
+
+            intellisense.annotate($thisPrivate,
+            {
+                /// <field type="Instance">Provides a jTypes private instance access to the protected instance of its base class.</field>
+                __base: null
+            });
+
+            for (var $i = 0, $j = $inheritProtected.length; $i < $j; $i++)
+            {
+                // Get the current inherited protected item and its name
+                var $itemCurrent = $inheritProtected[$i];
+                var $itemName    = $itemCurrent.name;
+
+                // If the inherited protected item is the constructor, continue
+                if ($itemName === 'constructor')
+                    continue;
+
+                // If the inherited protected item is already defined, continue
+                if ($thisProtected.hasOwnProperty($itemName))
+                    continue;
+
+                // Define the inherited protected item
+                $defineProtected($itemName, $itemCurrent.kind, $itemCurrent.value);
+            }
+
+            for (var $i = 0, $j = $inheritPublic.length; $i < $j; $i++)
+            {
+                // Get the current inherited public item and its name
+                var $itemCurrent = $inheritPublic[$i];
+                var $itemName    = $itemCurrent.name;
+
+                // If the inherited public item is already defined, continue
+                if ($thisPublic.hasOwnProperty($itemName))
+                    continue;
+
+                // Define the inherited public item
+                $definePublic($itemName, $itemCurrent.kind, $itemCurrent.value);
+            }
+        }
+
+        // Define the constructor on the protected context
+        $defineProtected('constructor', 'method', intellisense.nullWithCompletionsOf($constructor));
         
-        // Push the constructor item into the private and protected items arrays
-        $itemsPrivate.push($constructorInstance);
-        $itemsProtected.push($constructorInstance);
-
-        // Set the constructor on the private context
-        Object.defineProperty($thisPrivate, 'constructor', { 'value': intellisense.nullWithCompletionsOf($constructor) });
-
         // Set the constructor call context as the private context
         intellisense.setCallContext($constructor, { 'thisArg': $thisPrivate });
 
