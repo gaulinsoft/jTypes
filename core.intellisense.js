@@ -354,7 +354,7 @@
         // Define the "__this" accessor on the private context and the "__self" and "__type" accessors on the public context
         $definePublic('__self', 'reserved', $self);
         $definePrivate('__this', 'reserved', $thisPublic);
-        $definePublic('__type', 'reserved', $class);
+        $definePublic('__type', 'reserved', !jTypes.isInternalClass($class) ? $class : null);
 
         intellisense.annotate($thisPrivate,
         {
