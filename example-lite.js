@@ -8,27 +8,32 @@ var Person = $$(function($fName, $lName, $age)
     // set the protected field (cast the number)
     this._age = $$.asInt($age, true);
 },
+// ##### PRIVATE #####
 {
-    // key-syntax definitions
+    //
+},
+// ##### PROTECTED #####
+{
+    '_age': 0
+},
+// ##### PUBLIC #####
+{
+    'readonly firstName': '',
+    'readonly lastName': '',
 
-    'public readonly firstName': '',
-    'public readonly lastName': '',
-
-    'protected _age': 0,
-
-    'public getFullName': function()
+    'getFullName': function()
     {
         // return the concatenated full name
         return this.firstName + ' ' + this.lastName;
     },
 
-    'public triggerOneYearOlder': function()
+    'triggerOneYearOlder': function()
     {
         // increment the protected field
         this._age++;
     },
 
-    'public age':
+    'age':
     {
         'get': function()
         {
@@ -53,21 +58,28 @@ var Employee = $$(Person, function($fName, $lName, $age, $salary)
     // set the protected salary automatically implemented property (cast the number)
     this.salary = $$.asInt($salary, true);
 },
+// ##### PRIVATE #####
 {
-    // value-syntax definitions
-
-    triggerOneYearOlder: $$.public(function()
+    //
+},
+// ##### PROTECTED #####
+{
+    //
+},
+// ##### PUBLIC #####
+{
+    'triggerOneYearOlder': function()
     {
         // increment the protected age field (by calling the base method)
         this.__base.triggerOneYearOlder();
 
         // increase the salary by three percent
         this.salary *= 1.03;
-    }),
+    },
 
     // automatically implemented property syntax
 
-    salary: $$.public(['get', 'protected set', 0])
+    'salary': ['get', 'protected set', 0]
 });
 
 // instantiate a person object

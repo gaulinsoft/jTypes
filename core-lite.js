@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                             jTypes Lite 1.0.2
+//                             jTypes Lite 1.0.3
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '1.0.2L';
+    var $_version = '1.0.3Lb332';
 
     // ########## LANGUAGE ##########
 
@@ -683,12 +683,12 @@
         // If the member has the static flag
         if ($static)
         {
-            // Set the "static" type
-            $type = 'static';
-
             // If the member has the prototype flag, throw an exception
             if ($prototype)
                 throw $_exceptionFormat($_lang_$$_member_keyword_conflict_2, $name, 'prototype', 'static');
+
+            // Set the "static" type
+            $type = 'static';
 
             // If the member was already defined in the static definitions object, throw an exception
             if ($__hasOwnProperty__.call($staticDefinitions, $name))
