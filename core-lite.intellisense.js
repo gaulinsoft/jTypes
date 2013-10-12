@@ -52,7 +52,7 @@
             kind: $kind || 'reserved',
             glyph: $glyph || '',
             parentObject: {},
-            value: intellisense.nullWithCompletionsOf($value),
+            value: $value,
             comments: $comments || '',
             scope: 'member'
         });
@@ -252,7 +252,7 @@
         if (!$constructor)
             $constructor = function(){};
         
-        // Create the private and public contexts
+        // Create the private, protected and public contexts
         var $thisPrivate   = Object.create($class.prototype);
         var $thisProtected = Object.create($class.prototype);
         var $thisPublic    = Object.create($class.prototype);
@@ -270,7 +270,7 @@
             $itemsPrivate.push($_item($name, $kind, $value));
 
             // Set the intellisense value in the private context
-            Object.defineProperty($thisPrivate, $name, { 'value': intellisense.nullWithCompletionsOf($value) });
+            Object.defineProperty($thisPrivate, $name, { 'value': $value });
         };
         var $defineProtected = function($name, $kind, $value)
         {
@@ -328,39 +328,39 @@
         if (!$baseClass)
         {
             // Define the special methods
-            $definePublic('as', 'method', function()
+            $definePublic('as', 'method', intellisense.nullWithCompletionsOf(function()
             {
                 /// <signature>
                 ///   <summary>Casts a jTypes instance as an instance of a given class.</summary>
                 ///   <param name="class" type="Class">A class to cast the instance to.</param>
                 ///   <returns type="Instance">instance casted as class if it is an instance of class; otherwise null.</returns>
                 /// </signature>
-            });
-            $definePublic('is', 'method', function()
+            }));
+            $definePublic('is', 'method', intellisense.nullWithCompletionsOf(function()
             {
                 /// <signature>
                 ///   <summary>Checks if a jTypes instance is an instance of a given class.</summary>
                 ///   <param name="class" type="Class">A class to check the instance against.</param>
                 ///   <returns type="Boolean">true if instance is an instance of class; otherwise false.</returns>
                 /// </signature>
-            });
-            $definePublic('type', 'method', function()
+            }));
+            $definePublic('type', 'method', intellisense.nullWithCompletionsOf(function()
             {
                 /// <signature>
                 ///   <summary>Gets the class type of a jTypes instance.</summary>
                 ///   <returns type="Class">A jTypes class that is the runtime type of the instance.</returns>
                 /// </signature>
-            });
+            }));
 
             // If the class is a struct, define the special clone method
             //if (jTypes.isStruct($class))
-            //    $definePublic('clone', 'method', function()
+            //    $definePublic('clone', 'method', intellisense.nullWithCompletionsOf(function()
             //    {
             //        /// <signature>
             //        ///   <summary>Creates a shallow copy of a jTypes instance.</summary>
             //        ///   <returns type="Instance">A shallow copy of instance if it is an instance of a jTypes class compiled with the struct modifier; otherwise null.</returns>
             //        /// </signature>
-            //    });
+            //    }));
         }
         
         // Push the private items into the cache
@@ -489,6 +489,12 @@
             for (var $key in $prototype)
                 $cache($key, $prototype[$key]);
 
+         // Define the constructor on the protected context
+        $defineProtected('constructor', 'method', intellisense.nullWithCompletionsOf($constructor));
+        
+        // Set the constructor call context as the private context
+        intellisense.setCallContext($constructor, { 'thisArg': $thisPrivate });
+
         // If a base class was provided
         if ($baseClass)
         {
@@ -541,12 +547,6 @@
                 $definePublic($itemName, $itemCurrent.kind, $itemCurrent.value);
             }
         }
-
-        // Define the constructor on the protected context
-        $defineProtected('constructor', 'method', intellisense.nullWithCompletionsOf($constructor));
-        
-        // Set the constructor call context as the private context
-        intellisense.setCallContext($constructor, { 'thisArg': $thisPrivate });
 
         // Return the class
         return $class;
