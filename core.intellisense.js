@@ -351,25 +351,55 @@
         Object.defineProperty($self, 'as', { 'value': $as });
         Object.defineProperty($self, 'is', { 'value': $is });
 
-        // Define the "__this" accessor on the private context and the "__self" and "__type" accessors on the public context
-        $definePublic('__self', 'reserved', $self);
+        // Define the "__this" accessor on the private context
         $definePrivate('__this', 'reserved', $thisPublic);
-        $definePublic('__type', 'reserved', !jTypes.isInternalClass($class) ? $class : null);
+
+        // Create the external, internal, and self reference items
+        var $itemExternal = $_item('__type', 'reserved', !jTypes.isInternalClass($class) ? $class : null);
+        var $itemInternal = $_item('__type', 'reserved', $class);
+        var $itemSelf     = $_item('__self', 'reserved', $self);
+
+        // Push the external and internal items into the constructor, private, and public items arrays
+        $itemsConstructor.push($itemInternal);
+        $itemsPrivate.push($itemInternal);
+        $itemsPublic.push($itemExternal);
+
+        // Push the self reference item into the constructor, private, and public items arrays
+        $itemsConstructor.push($itemSelf);
+        $itemsPrivate.push($itemSelf);
+        $itemsPublic.push($itemSelf);
+
+        // Create the external, internal, and self reference descriptors
+        var $descriptorExternal = { 'value': $itemExternal.value };
+        var $descriptorInternal = { 'value': $itemInternal.value };
+        var $descriptorSelf     = { 'value': $itemSelf.value };
+
+        // Set the external and internal intellisense references in the constructor, private, and public contexts
+        Object.defineProperty($thisConstructor, '__type', $descriptorInternal);
+        Object.defineProperty($thisPrivate, '__type', $descriptorInternal);
+        Object.defineProperty($thisPublic, '__type', $descriptorExternal);
+
+        // Set the self reference intellisense reference in the constructor, private, and public contexts
+        Object.defineProperty($thisConstructor, '__self', $descriptorSelf);
+        Object.defineProperty($thisPrivate, '__self', $descriptorSelf);
+        Object.defineProperty($thisPublic, '__self', $descriptorSelf);
+
+        intellisense.annotate($thisConstructor,
+        {
+            /// <field type="Instance">Provides a jTypes instance access to its self reference object.</field>
+            __self: null,
+            /// <field type="Instance">Provides a jTypes private instance access to the public instance.</field>
+            __this: null,
+            /// <field type="Class">Provides a jTypes instance access to the instance type.</field>
+            __type: null
+        });
 
         intellisense.annotate($thisPrivate,
         {
             /// <field type="Instance">Provides a jTypes instance access to its self reference object.</field>
             __self: null,
             /// <field type="Instance">Provides a jTypes private instance access to the public instance.</field>
-            __this: {},
-            /// <field type="Class">Provides a jTypes instance access to the instance type.</field>
-            __type: null
-        });
-
-        intellisense.annotate($thisProtected,
-        {
-            /// <field type="Instance">Provides a jTypes instance access to its self reference object.</field>
-            __self: null,
+            __this: null,
             /// <field type="Class">Provides a jTypes instance access to the instance type.</field>
             __type: null
         });
