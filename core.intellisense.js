@@ -24,11 +24,15 @@
     var jTypes = window.jTypes;
 
     // ########## CACHE ##########
-    
+
+    // Create the constructor cache
+    var $_cacheConstructor  = [];
+    var $_methodConstructor = [];
+
     // Create the private cache
     var $_cachePrivate = [];
     var $_itemsPrivate = [];
-    
+
     // Create the protected cache
     var $_cacheProtected = [];
     var $_itemsProtected = [];
@@ -59,7 +63,7 @@
     };
 
     // ########## NAMESPACE ##########
-    
+
     var $$ = function()
     {
         /// <signature>
@@ -190,7 +194,7 @@
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
         ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
-        
+
         // Compile the class
         var $class       = jTypes.apply(jTypes, arguments);
         var $argument    = 0;
@@ -256,7 +260,7 @@
         var $thisPrivate     = Object.create($class.prototype);
         var $thisProtected   = Object.create($class.prototype);
         var $thisPublic      = Object.create($class.prototype);
-        
+
         // Create the items arrays
         var $itemsConstructor = [];
         var $itemsPrivate     = [];
@@ -439,7 +443,7 @@
 
         // Push the item into the constructor items array
         $itemsConstructor.push($_item('__data', 'reserved', $thisPrivate));
-        
+
         // Set the intellisense value in the constructor context
         Object.defineProperty($thisConstructor, '__data', { 'value': $thisPrivate });
 
@@ -448,11 +452,15 @@
             /// <field type="Instance">Provides a jTypes constructor access to the private instance.</field>
             __data: null
         });
-        
+
+        // Push the constructor items into the cache
+        $_cacheConstructor.push($class);
+        $_methodConstructor.push($constructor);
+
         // Push the private items into the cache
         $_cachePrivate.push($class);
         $_itemsPrivate.push($itemsPrivate);
-        
+
         // Push the protected items into the cache
         $_cacheProtected.push($class);
         $_itemsProtected.push($itemsProtected);
@@ -479,11 +487,11 @@
             var $isPrototype = $keywords.indexOf('prototype') >= 0;
             var $isPublic    = $keywords.indexOf('public') >= 0;
             var $isStatic    = $keywords.indexOf('static') >= 0;
-            
+
             // Create the type and check if the member is an automatically implemented property
             var $auto = Array.isArray($value) && $value.length !== 0;
             var $type = 'field';
-            
+
             // If the value is a function, set the type as a method
             if (typeof $value === 'function')
                 $type = 'method';
@@ -518,7 +526,7 @@
                         // If the accessor is not a function, continue
                         if (jTypes.type($function) !== 'function')
                             continue;
-                        
+
                         // Set the accessor function call context
                         intellisense.setCallContext($function, { 'thisArg': $thisPrivate });
                     }
@@ -527,7 +535,7 @@
             // If the member is neither private, protected, public, or a prototype member, push the item into the static items array
             else if (!$isPrivate && !$isProtected && !$isPublic && !$isPrototype)
                 $itemsStatic.push($_item($name, $type, $valueInstance));
-            
+
             // If the value is a method, set the function call context (account for the special static and prototype cases)
             if ($type === 'method')
                 intellisense.setCallContext($value, { 'thisArg': $isStatic ? $class : $isPrototype ? $thisPublic : $thisPrivate });
@@ -581,18 +589,20 @@
         // If a base class was provided
         if ($baseClass)
         {
-            // Get the inherited protected and public indices
-            var $indexProtected = $_cacheProtected.indexOf($baseClass);
-            var $indexPublic    = $_cachePublic.indexOf($baseClass);
+            // Get the inherited constructor, protected, and public indices
+            var $indexConstructor = $_cacheConstructor.indexOf($baseClass);
+            var $indexProtected   = $_cacheProtected.indexOf($baseClass);
+            var $indexPublic      = $_cachePublic.indexOf($baseClass);
 
-            // Get the inherited protected and public items arrays along with the inherited protected context
+            // Get the inherited constructor along with the protected and public items arrays (and the inherited protected context)
+            var $inheritConstructor   = $_methodConstructor[$indexConstructor];
             var $inheritProtected     = $_itemsProtected[$indexProtected];
             var $inheritProtectedThis = $_thisProtected[$indexProtected];
             var $inheritPublic        = $_itemsPublic[$indexPublic];
 
             // Push the item into the private items array
             $itemsPrivate.push($_item('__base', 'reserved', $inheritProtectedThis));
-        
+
             // Set the intellisense value in the private context for the "__base" accessor
             Object.defineProperty($thisPrivate, '__base', { 'value': $inheritProtectedThis });
 
@@ -603,10 +613,10 @@
             });
 
             // Push the item into the constructor items array
-            $itemsConstructor.push($_item('__base', 'reserved', intellisense.nullWithCompletionsOf($constructor)));
-        
+            $itemsConstructor.push($_item('__base', 'reserved', intellisense.nullWithCompletionsOf($inheritConstructor)));
+
             // Set the intellisense value in the constructor context for the "__base" accessor
-            Object.defineProperty($thisConstructor, '__base', { 'value': intellisense.nullWithCompletionsOf($constructor) });
+            Object.defineProperty($thisConstructor, '__base', { 'value': intellisense.nullWithCompletionsOf($inheritConstructor) });
 
             for (var $i = 0, $j = $inheritProtected.length; $i < $j; $i++)
             {
@@ -644,7 +654,7 @@
         // Return the class
         return $class;
     };
-    
+
     $$.toString = jTypes.toString;
 
     // ########## DATA ##########
@@ -766,7 +776,7 @@
 
         return jTypes.type.apply(jTypes, arguments);
     };
-    
+
     $$.isArray    = function()
     {
         /// <signature>
@@ -1013,9 +1023,9 @@
     $$.isObject           = function()
     {
         /// <signature>
-        ///   <summary>Indicates whether or not an object is an object.</summary>
-        ///   <param name="object" type="Object">An object to test if it is an object.</param>
-        ///   <returns type="Boolean">true if object is neither null nor undefined; otherwise, false.</returns>
+        ///   <summary>Indicates whether or not a reference is an object.</summary>
+        ///   <param name="reference" type="Object">A reference to test if it is an object.</param>
+        ///   <returns type="Boolean">true if reference is neither null nor undefined; otherwise, false.</returns>
         /// </signature>
 
         return jTypes.isObject.apply(jTypes, arguments);
@@ -1152,7 +1162,7 @@
     };
 
     // ########## CASTS ##########
-    
+
     $$.asArray  = function()
     {
         /// <signature>
@@ -1160,7 +1170,7 @@
         ///   <param name="object" type="Object">An object to convert to an array.</param>
         ///   <returns type="Array">An array copy of object if it is an array-like object; otherwise object converted to an array.</returns>
         /// </signature>
-        
+
         return jTypes.asArray.apply(jTypes, arguments);
     };
     $$.asBool   = function()
@@ -1269,7 +1279,7 @@
     };
 
     // ########## SETTINGS ##########
-    
+
     Object.defineProperty($$, 'debug',
     {
         'enumerable': true,
@@ -1310,7 +1320,7 @@
         // Get the statement completion target and its type
         var $target = e.target;
         var $type   = jTypes.type($target);
-        
+
         // ---------- DEBUG ----------
         //intellisense.logMessage('[' + jTypes.type($target) + ']');
         //intellisense.logMessage(e.targetName);
@@ -1355,7 +1365,7 @@
     });
 
     // ########## GLOBALS ##########
-    
+
     if (typeof define === 'function' && define.amd)
     {
         define(function()
@@ -1371,7 +1381,7 @@
     {
         if (window.$$ === undefined || window.$$ === window.jTypes)
             window.$$ = $$;
-        
+
         window.jTypes = $$;
     }
     else

@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.7b369';
+    var $_version = '2.1.7b373';
 
     // ########## LANGUAGE ##########
 
@@ -316,9 +316,10 @@
     var $_definition_member_method_virtual     = 8;
     var $_definition_member_method_type        = 9;
     var $_definition_member_property_accessors = 10;
+    var $_definition_member_const              = 11;
 
     // Create the definition member flags length
-    var $_definition_member_flagCount = 11;
+    var $_definition_member_flagCount = 12;
 
     // ---------- INJECTIONS ----------
 
@@ -541,8 +542,65 @@
             // If the member is a property
             if ($type === 'property')
             {
-                // If the value is an automatically implemented property
-                if ($auto)
+                // If the value is not an automatically implemented property
+                if (!$auto)
+                {
+                    // Create the has get and set accessors flags
+                    var $hasGet = false;
+                    var $hasSet = false;
+
+                    // Create the has override flag
+                    var $hasOverride = $__indexOf__.call($keywords, 'override') >= 0;
+
+                    for (var $propertyKey in $value)
+                    {
+                        // Get the member name and value
+                        var $memberName  = $__trim__.call($propertyKey || '').split(' ').pop() || '';
+                        var $memberValue = $value[$propertyKey];
+
+                        // Create the member definition descriptor
+                        var $memberDescriptor = { 'enumerable': true, 'value': $memberValue };
+
+                        // If the member name is not "get"
+                        if ($memberName !== 'get')
+                        {
+                            // If the member name is not "set", continue
+                            if ($memberName !== 'set')
+                                continue;
+
+                            // Set the has set flag
+                            $hasSet = true;
+
+                            // Set the definition in the cache definitions object
+                            $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, $memberDescriptor);
+
+                            // If the set accessor has the override flag, no get accessor has been provided yet, and an inherited get accessor was found, create the default get accessor
+                            if ($hasOverride && !$hasGet && $cacheDefinitions['~get_' + $name])
+                                $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, { 'configurable': true, 'enumerable': true, 'value': function()
+                                {
+                                    // Return the base property
+                                    return this.__base[$name];
+                                } });
+                        }
+                        else
+                        {
+                            // Set the has get flag
+                            $hasGet = true;
+
+                            // Set the definition in the cache definitions object
+                            $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, $memberDescriptor);
+
+                            // If the get accessor has the override flag, no set accessor has been provided yet, and an inherited set accessor was found, create the default set accessor
+                            if ($hasOverride && !$hasSet && $cacheDefinitions['~set_' + $name])
+                                $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, { 'configurable': true, 'enumerable': true, 'value': function($v)
+                                {
+                                    // Set the base property
+                                    this.__base[$name] = $v;
+                                } });
+                        }
+                    }
+                }
+                else
                 {
                     // Set the definitions in the cache definitions object
                     $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $value[2] });
@@ -556,63 +614,6 @@
                         // Set the private property data
                         this['#' + $name] = $v;
                     } });
-
-                    return;
-                }
-
-                // Create the has get and set accessors flags
-                var $hasGet = false;
-                var $hasSet = false;
-
-                // Create the has override flag
-                var $hasOverride = $__indexOf__.call($keywords, 'override') >= 0;
-
-                for (var $propertyKey in $value)
-                {
-                    // Get the member name and value
-                    var $memberName  = $__trim__.call($propertyKey || '').split(' ').pop() || '';
-                    var $memberValue = $value[$propertyKey];
-
-                    // Create the member definition descriptor
-                    var $memberDescriptor = { 'enumerable': true, 'value': $memberValue };
-
-                    // If the member name is not "get"
-                    if ($memberName !== 'get')
-                    {
-                        // If the member name is not "set", continue
-                        if ($memberName !== 'set')
-                            continue;
-
-                        // Set the has set flag
-                        $hasSet = true;
-
-                        // Set the definition in the cache definitions object
-                        $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, $memberDescriptor);
-
-                        // If the set accessor has the override flag, no get accessor has been provided yet, and an inherited get accessor was found, create the default get accessor
-                        if ($hasOverride && !$hasGet && $cacheDefinitions['~get_' + $name])
-                            $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, { 'configurable': true, 'enumerable': true, 'value': function()
-                            {
-                                // Return the base property
-                                return this.__base[$name];
-                            } });
-                    }
-                    else
-                    {
-                        // Set the has get flag
-                        $hasGet = true;
-
-                        // Set the definition in the cache definitions object
-                        $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, $memberDescriptor);
-
-                        // If the get accessor has the override flag, no set accessor has been provided yet, and an inherited set accessor was found, create the default set accessor
-                        if ($hasOverride && !$hasSet && $cacheDefinitions['~set_' + $name])
-                            $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, { 'configurable': true, 'enumerable': true, 'value': function($v)
-                            {
-                                // Set the base property
-                                this.__base[$name] = $v;
-                            } });
-                    }
                 }
             }
             // Set the definition in the cache definitions object
@@ -631,6 +632,8 @@
             throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
         var $abstract = false;
+        var $const    = false;
+        var $new      = false;
         var $override = false;
         var $readonly = false;
         var $sealed   = false;
@@ -648,10 +651,16 @@
             // Get the current keyword
             var $keyword = $keywords[$i];
 
-            // If the keyword is abstract, set the abstract flag
+            // If the keyword is abstract and the member is not a field, set the abstract flag
             if ($keyword === 'abstract' && $type !== 'field')
                 $abstract = true;
-            // If the keyword is override, set the override flag
+            // If the keyword is const, set the const flag
+            else if ($keyword === 'const')
+                $const = true;
+            // If the keyword is new, set the new flag
+            else if ($keyword === 'new')
+                $new = true;
+            // If the keyword is override and the member is not a field, set the override flag
             else if ($keyword === 'override' && $type !== 'field')
                 $override = true;
             // If the keyword is private, set the private flag
@@ -666,16 +675,16 @@
             // If the keyword is public, set the public flag
             else if ($keyword === 'public')
                 $public = true;
-            // If the keyword is readonly, set the readonly flag
+            // If the keyword is readonly and the member is a field or automatically implemented property, set the readonly flag
             else if ($keyword === 'readonly' && ($type === 'field' || $auto && $type === 'property'))
                 $readonly = true;
-            // If the keyword is sealed, set the sealed flag
+            // If the keyword is sealed and the member is not a field, set the sealed flag
             else if ($keyword === 'sealed' && $type !== 'field')
                 $sealed = true;
             // If the keyword is static, set the static flag
             else if ($keyword === 'static')
                 $typeStatic = true;
-            // If the keyword is virtual, set the virtual flag
+            // If the keyword is virtual and the member is not a field, set the virtual flag
             else if ($keyword === 'virtual' && $type !== 'field')
                 $virtual = true;
             // If a keyword was defined, throw an exception
@@ -733,9 +742,17 @@
         }
         else
         {
+            // If the member has the constant flag, throw an exception
+            if ($const)
+                throw 'const';
+
             // If the member was already defined in the non-static definitions objects, throw an exception
             if ($__hasOwnProperty__.call($privateDefinitions, $name) || $__hasOwnProperty__.call($protectedDefinitions, $name) || $__hasOwnProperty__.call($prototypeDefinitions, $name) || $__hasOwnProperty__.call($publicDefinitions, $name))
                 throw $_exceptionFormat($_lang_$$_member_name_2, $name);
+
+            // If the member does not have the new keyword and was already defined in the protected or public definitions objects, throw an exception
+            if (!$new && ($protectedDefinitions[$name] || $publicDefinitions[$name]))
+                throw 'new';
 
             // If the member is neither protected nor public, set the private flag
             if (!$protected && !$public)
@@ -1129,6 +1146,7 @@
                 $member[$_definition_member_name]  = $name;
                 $member[$_definition_member_type]  = $type;
                 $member[$_definition_member_value] = $value;
+                $member[$_definition_member_const] = $const;
 
                 // If the member has the prototype flag, set the member in the prototype definitions object
                 if ($typePrototype)
@@ -2884,7 +2902,7 @@
                     continue;
 
                 // Set the prototype member descriptor
-                $__defineProperty__.call($__object__, $classPrototype, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value] });
+                $__defineProperty__.call($__object__, $classPrototype, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value], 'writable': !$definition[$_definition_member_const] });
             }
 
             for (var $definitionsStaticMember in $definitionsStatic)
@@ -2897,7 +2915,7 @@
                     continue;
 
                 // Set the static member descriptor
-                $__defineProperty__.call($__object__, $class, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value] });
+                $__defineProperty__.call($__object__, $class, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value], 'writable': !$definition[$_definition_member_const] });
             }
 
             // Create the constructor definition array
@@ -3023,9 +3041,9 @@
         $__freeze__.call($__object__, $classProtected);
         $__freeze__.call($__object__, $classPublic);
 
-        // If the prototype is not expando, freeze the prototype
+        // If the prototype is not expando, prevent extensions on the prototype
         if (!$import && !$expandoPrototype)
-            $__freeze__.call($__object__, $classPrototype);
+            $__preventExtensions__.call($__object__, $classPrototype);
 
         // Create the class data
         var $data = {};
@@ -3068,9 +3086,9 @@
         if (!$__hasOwnProperty__.call($definitionsStatic, 'toString'))
             $class.toString = $_class_toString;
 
-        // If the class does not have the import flag and is not expando, freeze the class
+        // If the class does not have the import flag and is not expando, prevent extensions on the class
         if (!$import && !$expandoClass)
-            $__freeze__.call($__object__, $class);
+            $__preventExtensions__.call($__object__, $class);
 
         // If the class has the import flag or is optimized
         if ($import || $optimized)
@@ -3572,19 +3590,40 @@
     });
 
     // ---------- FLOAT ----------
-    $_defineMethod('asFloat', function($object)
+    $_defineMethod('asFloat', function($object, $finite)
     {
+        // FORMAT $finite
+        $finite = $$.asBool($finite);
+
         // Get the object type
         var $type = $$.type($object);
 
-        // If the object is a string and matches a float, return the object cast as a float
-        if ($type === 'string' && $__match__.call($__trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
-            return parseFloat($object);
+        // If the object is a string
+        if ($type === 'string')
+        {
+            // If the object does not match a float, return NaN
+            if (!$__match__.call($__trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
+                return $finite ? 0 : NaN;
+
+            // Cast the string as a float
+            $object = parseFloat($object);
+        }
+        // If the object is not a number, return NaN
+        else if ($type !== 'number')
+            return $finite ? 0 : NaN;
 
         // If the object is not a number, return NaN
-        if ($type !== 'number')
-            return NaN;
+        if (isNaN($object))
+            return $finite ? 0 : NaN;
 
+        // If the number is greater than the maximum float, return infinity
+        if ($object > Number.MAX_VALUE)
+            return $finite ? Number.MAX_VALUE : Infinity;
+
+        // If the number is less than the minimum float, return negative infinity
+        if ($object < Number.MIN_VALUE)
+            return $finite ? Number.MIN_VALUE : -Infinity;
+        
         // Return the number
         return $object;
     });
@@ -3592,8 +3631,10 @@
     // ---------- INTEGER ----------
     $_defineMethod('asInt', function($object, $finite)
     {
-        // Cast the object as a float
+        // FORMAT $object
+        // FORMAT $finite
         $object = $$.asFloat($object);
+        $finite = $$.asBool($finite);
 
         // If the object is not a number, return NaN
         if (isNaN($object))
@@ -3716,8 +3757,25 @@
     // ---------- FLAT ----------
     $_defineMethod('flat', function()
     {
-        // Return a new flat object
-        return $__create__.call($__object__, null);
+        // Create a flat object
+        var $flat = $__create__.call($__object__, null);
+
+        for (var $i = 0, $j = arguments.length; $i < $j; $i++)
+        {
+            // Get the current argument
+            var $argument = arguments[$i];
+
+            // If the current argument is a primitive value, continue
+            if ($$.isPrimitive($argument))
+                continue;
+
+            // Copy each key-value pair in the current argument into the flat object
+            for (var $key in $argument)
+                $flat[$key] = $argument[$key];
+        }
+
+        // Return the flat object
+        return $flat;
     });
 
     // ---------- FORMAT ----------
