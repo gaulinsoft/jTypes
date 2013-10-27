@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.7b333';
+    var $_version = '2.1.7b369';
 
     // ########## LANGUAGE ##########
 
@@ -1373,7 +1373,11 @@
 
                         // Get the override method and inherited descriptor
                         var $override = $_constructRuntimeOverride($method, $key, $definition, $overrides);
-                        var $inherit  = $override ? { 'enumerable': true, 'value': $override } : $descriptor;
+                        var $inherit  = $override ? { 'enumerable': true } : $descriptor;
+
+                        // If an override method was found, set the override accessor method in the inherited descriptor
+                        if ($override)
+                            $inherit[$accessor] = $override;
 
                         // If lazy loading is not enabled
                         if (!$_lazy)
