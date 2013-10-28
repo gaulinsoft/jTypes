@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.7b373';
+    var $_version = '2.1.7';
 
     // ########## LANGUAGE ##########
 
@@ -60,6 +60,7 @@
     var $_lang_$$_member_keyword_polymorphism      = '"{0}" cannot have the abstract, virtual, or override modifiers because it is {1}.';
     var $_lang_$$_member_keyword_readonly          = '"{0}" cannot have the readonly modifier because it is {1}.';
     var $_lang_$$_member_keyword_requires_1        = '"{0}" cannot have the {1} modifier without the {2} modifier.';
+    var $_lang_$$_member_keyword_requires_or       = '"{0}" cannot have the {1} modifier without the {2} or {3} modifiers.';
     var $_lang_$$_member_name_2                    = '"{0}" cannot have more than one definition.';
     var $_lang_$$_member_name_invalid              = '"{1}" is not a valid {0} name.';
     var $_lang_$$_member_name_null                 = '"" is not a valid {0} name.';
@@ -67,6 +68,8 @@
     var $_lang_$$_member_name_package_separated    = '"{0}" cannot be a packaged member definition because it is defined in a {1} definition object.';
     var $_lang_$$_member_name_prototype_2          = '"{0}" cannot have more than one definition or hide an inherited non-prototype member.';
     var $_lang_$$_member_name_static_2             = '"{0}" cannot have more than one static definition.';
+    var $_lang_$$_member_new_hide                  = '"{0}" cannot hide an inherited member without the new modifier.';
+    var $_lang_$$_member_new_null                  = '"{0}" must hide an inherited member to have the new modifier.';
     var $_lang_$$_member_override_null             = '"{0}" has no suitable {1} to override.';
     var $_lang_$$_member_property_accessors        = '"{0}" must have both accessors to have an access modifier on the {1} accessor.';
     var $_lang_$$_member_property_accessors_access = '"{0}" must have a more restrictive access modifier on the {1} accessor.';
@@ -225,6 +228,9 @@
 
     // Create the internal constants
     var $_const_construct_arguments = 'c,k,f,m,a,d,d2,p,l';
+    var $_const_float_epsilon       = 2.220460492503130808472633361816E-16;
+    var $_const_float_max           = Number.MAX_VALUE;
+    var $_const_float_min           = -$_const_float_max;
     var $_const_int_max             = 9007199254740992;
     var $_const_int_min             = -$_const_int_max;
     var $_const_precompile_prefix   = '~jT_';
@@ -399,6 +405,9 @@
         return '[object Instance]';
     };
 
+    // Define the "constructor" reference on the base prototype of all class prototypes
+    $__defineProperty__.call($__object__, $_prototype, 'constructor', { 'value': $_class });
+
     // Define the "toString()" methods on the base class of all classes and the base prototype of all class prototypes
     $__defineProperty__.call($__object__, $_class, 'toString', { 'value': $_class_toString });
     $__defineProperty__.call($__object__, $_prototype, 'toString', { 'value': $_prototype_toString });
@@ -499,6 +508,15 @@
         // If the base definition is abstract, throw an exception
         else if ($baseDefinition && $baseDefinition[$_definition_member_method_abstract])
             throw $_exceptionFormat($_lang_$$_member_abstract_override, $key.charAt(0) === '~' ? $key.substr($key.indexOf('_') + 1) : $key, $type);
+    };
+    var $_definitionsCompilerExists         = function($definitions, $name, $recursive)
+    {
+        // If a recursive search is being performed, return true if the definition is found in the definitions object
+        if ($recursive)
+            return !!($definitions[$name] || $definitions['~get_' + $name] || $definitions['~set_' + $name]);
+
+        // Return true if the definition is found in the current definitions object
+        return $__hasOwnProperty__.call($definitions, $name) || $__hasOwnProperty__.call($definitions, '~get_' + $name) || $__hasOwnProperty__.call($definitions, '~set_' + $name);
     };
     var $_definitionsCompiler               = function($cacheDefinitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal, $isImport, $isOptimized, $isStruct)
     {
@@ -714,7 +732,7 @@
                 $type = 'prototype';
 
                 // If the member was already defined in the non-static definitions objects, throw an exception
-                if ($privateDefinitions[$name] || $protectedDefinitions[$name] || $__hasOwnProperty__.call($prototypeDefinitions, $name) || $publicDefinitions[$name])
+                if ($_definitionsCompilerExists($privateDefinitions, $name, true) || $_definitionsCompilerExists($protectedDefinitions, $name, true) || $__hasOwnProperty__.call($prototypeDefinitions, $name) || $_definitionsCompilerExists($publicDefinitions, $name, true))
                     throw $_exceptionFormat($_lang_$$_member_name_prototype_2, $name);
             }
             // If the member has the static flag
@@ -744,15 +762,29 @@
         {
             // If the member has the constant flag, throw an exception
             if ($const)
-                throw 'const';
+                throw $_exceptionFormat($_lang_$$_member_keyword_requires_or, $name, 'const', 'prototype', 'static');
 
             // If the member was already defined in the non-static definitions objects, throw an exception
-            if ($__hasOwnProperty__.call($privateDefinitions, $name) || $__hasOwnProperty__.call($protectedDefinitions, $name) || $__hasOwnProperty__.call($prototypeDefinitions, $name) || $__hasOwnProperty__.call($publicDefinitions, $name))
+            if ($_definitionsCompilerExists($privateDefinitions, $name) || $_definitionsCompilerExists($protectedDefinitions, $name) || $__hasOwnProperty__.call($prototypeDefinitions, $name) || $_definitionsCompilerExists($publicDefinitions, $name))
                 throw $_exceptionFormat($_lang_$$_member_name_2, $name);
 
-            // If the member does not have the new keyword and was already defined in the protected or public definitions objects, throw an exception
-            if (!$new && ($protectedDefinitions[$name] || $publicDefinitions[$name]))
-                throw 'new';
+            // If the member is not an override
+            if (!$override)
+            {
+                // If the member was already defined in the protected or public definitions objects
+                if ($_definitionsCompilerExists($protectedDefinitions, $name, true) || $_definitionsCompilerExists($publicDefinitions, $name, true))
+                {
+                    // If the member does not have the new keyword, throw an exception
+                    if (!$new)
+                        throw $_exceptionFormat($_lang_$$_member_new_hide, $name);
+                }
+                // If the member has the new keyword, throw an exception
+                else if ($new)
+                    throw $_exceptionFormat($_lang_$$_member_new_null, $name);
+            }
+            // If the member has the new modifier, throw an exception
+            else if ($new)
+                throw $_exceptionFormat($_lang_$$_member_keyword_conflict_2, $name, 'new', 'override');
 
             // If the member is neither protected nor public, set the private flag
             if (!$protected && !$public)
@@ -3080,11 +3112,11 @@
 
         // If a static "constructor" definition was not provided, set the class constructor reference
         if (!$__hasOwnProperty__.call($definitionsStatic, 'constructor'))
-            $class.constructor = $$;
+            $__defineProperty__.call($__object__, $class, 'constructor', { 'value': $$, 'writable': true });
 
         // If a static "toString()" definition was not provided, set the class toString() method
         if (!$__hasOwnProperty__.call($definitionsStatic, 'toString'))
-            $class.toString = $_class_toString;
+            $__defineProperty__.call($__object__, $class, 'toString', { 'value': $_class_toString, 'writable': true });
 
         // If the class does not have the import flag and is not expando, prevent extensions on the class
         if (!$import && !$expandoClass)
@@ -3140,6 +3172,11 @@
     // ---------- CLASS + PROTOTYPE ----------
     $_defineField('__class', $_class, false);
     $_defineField('__proto', $_prototype, false);
+
+    // ---------- EPSILON/MAX/MIN ----------
+    $_defineField('epsilon', $_const_float_epsilon, false);
+    $_defineField('max', $_const_float_max, false);
+    $_defineField('min', $_const_float_min, false);
 
     // ---------- INTEGER MAX/MIN ----------
     $_defineField('intMax', $_const_int_max, false);
@@ -3616,14 +3653,14 @@
         if (isNaN($object))
             return $finite ? 0 : NaN;
 
-        // If the number is greater than the maximum float, return infinity
-        if ($object > Number.MAX_VALUE)
-            return $finite ? Number.MAX_VALUE : Infinity;
+        // If the number is greater than the maximum value, return infinity
+        if ($object > $_const_float_max)
+            return $finite ? $_const_float_max : Infinity;
 
-        // If the number is less than the minimum float, return negative infinity
-        if ($object < Number.MIN_VALUE)
-            return $finite ? Number.MIN_VALUE : -Infinity;
-        
+        // If the number is less than the minimum value, return negative infinity
+        if ($object < $_const_float_min)
+            return $finite ? $_const_float_min : -Infinity;
+
         // Return the number
         return $object;
     });

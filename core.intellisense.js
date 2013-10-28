@@ -664,6 +664,10 @@
     $$.__class = jTypes.__class;
     $$.__proto = jTypes.__proto;
 
+    $$.epsilon = jTypes.epsilon;
+    $$.max     = jTypes.max;
+    $$.min     = jTypes.min;
+
     $$.intMax = jTypes.intMax;
     $$.intMin = jTypes.intMin;
 
@@ -673,9 +677,15 @@
         '__class': function(){},
         /// <field type="Object">Provides access to the base prototype of all jTypes instances.</field>
         '__proto': {},
-        /// <field type="Boolean">A number containing the maximum integer.</field>
+        /// <field type="Number">The smallest representable interval between two distinguishable numbers in JavaScript.</field>
+        'epsilon': 0,
+        /// <field type="Number">The maximum representable floating-point number in JavaScript.</field>
+        'max': 0,
+        /// <field type="Number">The minimum representable floating-point number in JavaScript.</field>
+        'min': 0,
+        /// <field type="Number">The maximum representable integer in JavaScript.</field>
         'intMax': 0,
-        /// <field type="Boolean">A number containing the minimum integer.</field>
+        /// <field type="Number">The minimum representable integer in JavaScript.</field>
         'intMin': 0,
         /// <field type="String">A string containing the jTypes version number.</field>
         'version': ''
@@ -1188,6 +1198,7 @@
         /// <signature>
         ///   <summary>Converts an object to a floating-point number.</summary>
         ///   <param name="object" type="Object">An object to convert to a floating-point number.</param>
+        ///   <param name="finite" type="Boolean">A flag indicating whether or not to force a finite cast.</param>
         ///   <returns type="Number">object if it is a number; otherwise its number equivalent.</returns>
         /// </signature>
 
@@ -1260,6 +1271,8 @@
     {
         /// <signature>
         ///   <summary>Creates a flat object.</summary>
+        ///   <param name="arg0" type="Object" optional="true">An object to merge into the flat object.</param>
+        ///   <param name="argN" type="Object" parameterArray="true" optional="true">An object to merge into the flat object.</param>
         ///   <returns type="Object">An object with a null prototype.</returns>
         /// </signature>
 
