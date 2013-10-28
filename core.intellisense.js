@@ -124,7 +124,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class.</returns>
+        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -133,7 +133,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class.</returns>
+        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -143,7 +143,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class.</returns>
+        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -152,7 +152,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class.</returns>
+        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -162,7 +162,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class.</returns>
+        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -171,7 +171,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class.</returns>
+        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -181,7 +181,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class.</returns>
+        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -192,7 +192,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class.</returns>
+        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
         /// </signature>
 
         // Compile the class

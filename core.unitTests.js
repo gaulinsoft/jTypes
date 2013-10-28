@@ -28,7 +28,7 @@
     {
         var $keywords  = ['', 'abstract', 'sealed'];
         var $accessors = ['public', 'protected', 'private'];
-        var $modifiers = ['', 'abstract', 'virtual', 'override', 'sealed override', 'abstract override'];
+        var $modifiers = ['', 'abstract', 'virtual', 'override', 'sealed override', 'abstract override', 'new', 'new abstract', 'new virtual'];
         var $values    = ['', $$.empty(), { 'get': $$.empty(), 'set': $$.empty() }];
 
         var $shouldFail = function($h, $i, $j, $k)
@@ -101,7 +101,7 @@
             if (($j === 1 || $j === 2) && ($y === 3 || $y === 4 || $w === 1 && $y === 5) && $i === $x && $k === $z)
                 return false;
 
-            if ($j !== 1 && !$shouldFail($w, $x, $y, $z))
+            if ($j !== 1 && ($y === ($i !== 2 ? 6 : 0) || $y === ($i !== 2 ? 7 : 1) && $w === 1 && $x !== 2 && $z !== 0 || $y === ($i !== 2 ? 8 : 2) && $w !== 2 && $x !== 2 && $z !== 0))
                 return false;
 
             return true;
