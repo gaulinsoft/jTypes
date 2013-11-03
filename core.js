@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                                jTypes 2.1.7
+//                                jTypes 2.2.0
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2013 Gaulinsoft Corporation
@@ -26,7 +26,7 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.1.7';
+    var $_version = '2.2.0a404';
 
     // ########## LANGUAGE ##########
 
@@ -90,50 +90,123 @@
     // ########## NATIVE CODE ##########
 
     // ---------- OBJECT ----------
-    var $__object__                   = Object;
-    var $__objectProto__              = $__object__.prototype;
-    var $__create__                   = $__object__.create;
-    var $__defineProperties__         = $__object__.defineProperties;
-    var $__defineProperty__           = $__object__.defineProperty;
-    var $__freeze__                   = $__object__.freeze;
-    var $__getOwnPropertyDescriptor__ = $__object__.getOwnPropertyDescriptor;
-    var $__getOwnPropertyNames__      = $__object__.getOwnPropertyNames;
-    var $__getPrototypeOf__           = $__object__.getPrototypeOf;
-    var $__isExtensible__             = $__object__.isExtensible;
-    var $__isFrozen__                 = $__object__.isFrozen;
-    var $__isSealed__                 = $__object__.isSealed;
-    var $__keys__                     = $__object__.keys;
-    var $__preventExtensions__        = $__object__.preventExtensions;
-    var $__propertyIsEnumerable__     = $__object__.propertyIsEnumerable;
-    var $__seal__                     = $__object__.seal;
-    var $__hasOwnProperty__           = $__objectProto__.hasOwnProperty;
-    var $__isPrototypeOf__            = $__objectProto__.isPrototypeOf;
-    var $__toString__                 = $__objectProto__.toString;
-    var $__valueOf__                  = $__objectProto__.valueOf;
+    var $__object                   = Object;
+    var $__objectProto__            = $__object.prototype;
+    var $__create                   = $__object.create;
+    var $__defineProperties         = $__object.defineProperties;
+    var $__defineProperty           = $__object.defineProperty;
+    var $__freeze                   = $__object.freeze;
+    var $__getOwnPropertyDescriptor = $__object.getOwnPropertyDescriptor;
+    var $__getOwnPropertyNames      = $__object.getOwnPropertyNames;
+    var $__getPrototypeOf           = $__object.getPrototypeOf;
+    var $__isExtensible             = $__object.isExtensible;
+    var $__isFrozen                 = $__object.isFrozen;
+    var $__isSealed                 = $__object.isSealed;
+    var $__keys                     = $__object.keys;
+    var $__preventExtensions        = $__object.preventExtensions;
+    var $__propertyIsEnumerable     = $__object.propertyIsEnumerable;
+    var $__seal                     = $__object.seal;
+    var $__setPrototypeOf           = $__object.setPrototypeOf || null;
+    var $__hasOwnProperty__         = $__objectProto__.hasOwnProperty;
+    var $__isPrototypeOf__          = $__objectProto__.isPrototypeOf;
+    var $__toString__               = $__objectProto__.toString;
+    var $__valueOf__                = $__objectProto__.valueOf;
 
     // ---------- ARRAY ----------
-    var $__array__       = Array;
-    var $__arrayProto__  = $__array__.prototype;
-    var $__isArray__     = $__array__.isArray;
-    var $__every__       = $__arrayProto__.every;
-    var $__filter__      = $__arrayProto__.filter;
-    var $__forEach__     = $__arrayProto__.forEach;
-    var $__indexOf__     = $__arrayProto__.indexOf;
-    var $__lastIndexOf__ = $__arrayProto__.lastIndexOf;
-    var $__map__         = $__arrayProto__.map;
-    var $__reduce__      = $__arrayProto__.reduce;
-    var $__reduceRight__ = $__arrayProto__.reduceRight;
-    var $__some__        = $__arrayProto__.some;
+    var $__array               = Array;
+    var $__arrayProto__        = $__array.prototype;
+    var $__array_isArray       = $__array.isArray;
+    var $__array_every__       = $__arrayProto__.every;
+    var $__array_filter__      = $__arrayProto__.filter;
+    var $__array_forEach__     = $__arrayProto__.forEach;
+    var $__array_indexOf__     = $__arrayProto__.indexOf;
+    var $__array_lastIndexOf__ = $__arrayProto__.lastIndexOf;
+    var $__array_map__         = $__arrayProto__.map;
+    var $__array_reduce__      = $__arrayProto__.reduce;
+    var $__array_reduceRight__ = $__arrayProto__.reduceRight;
+    var $__array_some__        = $__arrayProto__.some;
+    var $__array_toString__    = $__arrayProto__.toString;
+
+    // ---------- BOOLEAN ----------
+    var $__boolean            = Boolean;
+    var $__booleanProto__     = $__boolean.prototype;
+    var $__boolean_toString__ = $__booleanProto__.toString;
+    var $__boolean_valueOf__  = $__booleanProto__.valueOf;
+
+    // ---------- DATE ----------
+    var $__date            = Date;
+    var $__dateProto__     = $__date.prototype;
+    var $__date_toString__ = $__dateProto__.toString;
+    var $__date_valueOf__  = $__dateProto__.valueOf;
+
+    // ---------- ERROR ----------
+    var $__error            = Error;
+    var $__errorProto__     = $__error.prototype;
+    var $__error_toString__ = $__errorProto__.toString;
+    var $__error_valueOf__  = $__errorProto__.valueOf;
+
+    // ---------- FUNCTION ----------
+    var $__function            = Function;
+    var $__functionProto__     = $__function.prototype;
+    var $__function_apply__    = $__functionProto__.apply;
+    var $__function_call__     = $__functionProto__.call;
+    var $__function_toString__ = $__functionProto__.toString;
+    var $__function_valueOf__  = $__functionProto__.valueOf;
+
+    // ---------- NUMBER ----------
+    var $__number            = Number;
+    var $__numberProto__     = $__number.prototype;
+    var $__number_toString__ = $__numberProto__.toString;
+    var $__number_valueOf__  = $__numberProto__.valueOf;
+    
+    // Get the number constants as number primitives
+    var $__number_maxValue__         = $__number_valueOf__.call($__number.MAX_VALUE);
+    var $__number_minValue__         = $__number_valueOf__.call($__number.MIN_VALUE);
+    var $__number_negativeInfinity__ = $__number_valueOf__.call($__number.NEGATIVE_INFINITY);
+    var $__number_positiveInfinity__ = $__number_valueOf__.call($__number.POSITIVE_INFINITY);
+
+    // Get the global NaN constant as a number primitive
+    var $__NaN__ = $__number_valueOf__.call(NaN);
+
+    // Get the number-related global functions
+    var $__isFinite   = isFinite;
+    var $__isNaN      = isNaN;
+    var $__parseFloat = parseFloat;
+    var $__parseInt   = parseInt;
+
+    // ---------- REGEXP ----------
+    var $__regexp            =  RegExp;
+    var $__regexpProto__     = $__regexp.prototype;
+    var $__regexp_toString__ = $__regexpProto__.toString;
+    var $__regexp_valueOf__  = $__regexpProto__.valueOf;
 
     // ---------- STRING ----------
-    var $__string__      = String;
-    var $__stringProto__ = $__string__.prototype;
-    var $__match__       = $__stringProto__.match;
-    var $__replace__     = $__stringProto__.replace;
-    var $__trim__        = $__stringProto__.trim;
+    var $__string            = String;
+    var $__stringProto__     = $__string.prototype;
+    var $__string_match__    = $__stringProto__.match;
+    var $__string_replace__  = $__stringProto__.replace;
+    var $__string_toString__ = $__stringProto__.toString;
+    var $__string_trim__     = $__stringProto__.trim;
+    var $__string_valueOf__  = $__stringProto__.valueOf;
+
+    // ---------- WINDOW ----------
+    var $__window            = null;
+    var $__windowProto__     = null;
+    var $__window_toString__ = null;
+    var $__window_valueOf__  = null;
+
+    // If a window constructor is defined
+    if (typeof Window !== 'undefined' && typeof Window.prototype !== 'undefined')
+    {
+        // Create the window references
+        $__window            = Window;
+        $__windowProto__     = $__window.prototype;
+        $__window_toString__ = $__windowProto__.toString;
+        $__window_valueOf__  = $__windowProto__.valueOf;
+    }
 
     // If any of the major native code methods from recent JavaScript versions are not found, throw an exception
-    if (!$__create__ || !$__defineProperty__ || !$__freeze__ || !$__getPrototypeOf__ || !$__preventExtensions__ || !$__seal__ || !$__isArray__ || !$__forEach__ || !$__indexOf__ || !$__trim__)
+    if (!$__create || !$__defineProperty || !$__freeze || !$__getPrototypeOf || !$__preventExtensions || !$__seal || !$__array_isArray || !$__array_forEach__ || !$__array_indexOf__ || !$__string_trim__)
         throw $_lang_exception_prefix + $_lang_compatibility;
 
     // ########## NAMESPACE ##########
@@ -163,7 +236,7 @@
             $name = '$$';
 
         // Create the types array
-        var $types = new $__array__($arguments.length);
+        var $types = new $__array($arguments.length);
 
         // Set the argument types in the types array
         for (var $i = 0, $j = $types.length; $i < $j; $i++)
@@ -184,7 +257,7 @@
     var $_defineField    = function($name, $field, $writable)
     {
         // Define an enumerable field on the global namespace object
-        return $__defineProperty__.call($__object__, $$, $name,
+        return $__defineProperty($$, $name,
         {
             'configurable': false,
             'enumerable':   true,
@@ -195,7 +268,7 @@
     var $_defineMethod   = function($name, $method)
     {
         // Define a non-enumerable method on the global namespace object
-        return $__defineProperty__.call($__object__, $$, $name,
+        return $__defineProperty($$, $name,
         {
             'configurable': false,
             'enumerable':   false,
@@ -206,7 +279,7 @@
     var $_defineProperty = function($name, $getMethod, $setMethod)
     {
         // Define an enumerable property on the global namespace object
-        return $__defineProperty__.call($__object__, $$, $name,
+        return $__defineProperty($$, $name,
         {
             'configurable': false,
             'enumerable':   true,
@@ -229,7 +302,7 @@
     // Create the internal constants
     var $_const_construct_arguments = 'c,k,f,m,a,d,d2,p,l';
     var $_const_float_epsilon       = 2.220460492503130808472633361816E-16;
-    var $_const_float_max           = Number.MAX_VALUE;
+    var $_const_float_max           = $__number_maxValue__;
     var $_const_float_min           = -$_const_float_max;
     var $_const_int_max             = 9007199254740992;
     var $_const_int_min             = -$_const_int_max;
@@ -264,7 +337,7 @@
                 $key += $_characters.charAt(Math.floor($j * Math.random()));
         }
         // Continue if the key was already found in the keys array
-        while ($__indexOf__.call($_keys, $key) >= 0);
+        while ($__array_indexOf__.call($_keys, $key) >= 0);
 
         // Push the key into the keys array
         $_keys.push($key);
@@ -406,23 +479,23 @@
     };
 
     // Define the "constructor" reference on the base prototype of all class prototypes
-    $__defineProperty__.call($__object__, $_prototype, 'constructor', { 'value': $_class });
+    $__defineProperty($_prototype, 'constructor', { 'value': $_class });
 
     // Define the "toString()" methods on the base class of all classes and the base prototype of all class prototypes
-    $__defineProperty__.call($__object__, $_class, 'toString', { 'value': $_class_toString });
-    $__defineProperty__.call($__object__, $_prototype, 'toString', { 'value': $_prototype_toString });
+    $__defineProperty($_class, 'toString', { 'value': $_class_toString });
+    $__defineProperty($_prototype, 'toString', { 'value': $_prototype_toString });
 
     // Set the base class of all classes prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
     $_class.prototype = $_prototype;
 
     // Set the base class of all classes prototype without the "writable" flag
-    $__defineProperty__.call($__object__, $_class, 'prototype', { 'value': $_prototype, 'writable': false });
+    $__defineProperty($_class, 'prototype', { 'value': $_prototype, 'writable': false });
 
     // ########## FLAGS ##########
 
     // Create the internal flags
     var $_clone    = false;// DON'T CHANGE
-    var $_debug    = true;// DEFAULT
+    var $_debug    = false;// DEFAULT
     var $_lazy     = true;// DEFAULT
     var $_subclass = false;// DON'T CHANGE
 
@@ -432,7 +505,7 @@
     var $_definitionsCompilerAccessorMethod = function($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $accessor, $type, $abstract, $override, $sealed, $virtual, $hasTwoAccessors)
     {
         // Create the property method definition array
-        var $method = new $__array__($_definition_member_flagCount);
+        var $method = new $__array($_definition_member_flagCount);
 
         // Get the accessor name and private access modifier flag
         var $accessorName    = $accessor[$_accessor_name];
@@ -455,17 +528,17 @@
         {
             // If the accessor is private, set the method definition in the private definitions object
             if ($accessorPrivate)
-                $__defineProperty__.call($__object__, $privateDefinitions, $accessorName, $descriptor);
+                $__defineProperty($privateDefinitions, $accessorName, $descriptor);
             // If the accessor is protected, set the method definition in the protected definitions object
             else if ($accessor[$_accessor_protected])
-                $__defineProperty__.call($__object__, $protectedDefinitions, $accessorName, $descriptor);
+                $__defineProperty($protectedDefinitions, $accessorName, $descriptor);
             // If the accessor is public, set the method definition in the public definitions object
             else if ($accessor[$_accessor_public])
-                $__defineProperty__.call($__object__, $publicDefinitions, $accessorName, $descriptor);
+                $__defineProperty($publicDefinitions, $accessorName, $descriptor);
         }
         // Set the method definition in the definitions object
         else
-            $__defineProperty__.call($__object__, $definitions, $accessorName, $descriptor);
+            $__defineProperty($definitions, $accessorName, $descriptor);
     };
     var $_definitionsCompilerBaseAbstract   = function($definitions, $baseDefinitions, $baseKey)
     {
@@ -521,7 +594,7 @@
     var $_definitionsCompiler               = function($cacheDefinitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal, $isImport, $isOptimized, $isStruct)
     {
         // Break the key string into a keywords array and get the member name
-        var $keywords = $__trim__.call($key || '').split(' ');
+        var $keywords = $__string_trim__.call($key || '').split(' ');
         var $name     = $keywords.pop() || '';
 
         // If the member is a package
@@ -544,14 +617,14 @@
         }
 
         // Get the automatically implemented property flag and create the type
-        var $auto = $__isArray__.call($__array__, $value) && $value.length !== 0;
+        var $auto = $__array_isArray($value) && $value.length !== 0;
         var $type = 'field';
 
         // If the value is a function, set the type as a method
         if (typeof $value === 'function')
             $type = 'method';
         // If the value is a simple object or a non-empty array, set the type as a property
-        else if ($auto || $value !== null && typeof $value === 'object' && $__getPrototypeOf__.call($__object__, $value) === $__objectProto__)
+        else if ($auto || $value !== null && typeof $value === 'object' && $__getPrototypeOf($value) === $__objectProto__)
             $type = 'property';
 
         // If the class has the import flag
@@ -568,12 +641,12 @@
                     var $hasSet = false;
 
                     // Create the has override flag
-                    var $hasOverride = $__indexOf__.call($keywords, 'override') >= 0;
+                    var $hasOverride = $__array_indexOf__.call($keywords, 'override') >= 0;
 
                     for (var $propertyKey in $value)
                     {
                         // Get the member name and value
-                        var $memberName  = $__trim__.call($propertyKey || '').split(' ').pop() || '';
+                        var $memberName  = $__string_trim__.call($propertyKey || '').split(' ').pop() || '';
                         var $memberValue = $value[$propertyKey];
 
                         // Create the member definition descriptor
@@ -590,11 +663,11 @@
                             $hasSet = true;
 
                             // Set the definition in the cache definitions object
-                            $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, $memberDescriptor);
+                            $__defineProperty($cacheDefinitions, '~set_' + $name, $memberDescriptor);
 
                             // If the set accessor has the override flag, no get accessor has been provided yet, and an inherited get accessor was found, create the default get accessor
                             if ($hasOverride && !$hasGet && $cacheDefinitions['~get_' + $name])
-                                $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, { 'configurable': true, 'enumerable': true, 'value': function()
+                                $__defineProperty($cacheDefinitions, '~get_' + $name, { 'configurable': true, 'enumerable': true, 'value': function()
                                 {
                                     // Return the base property
                                     return this.__base[$name];
@@ -606,11 +679,11 @@
                             $hasGet = true;
 
                             // Set the definition in the cache definitions object
-                            $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, $memberDescriptor);
+                            $__defineProperty($cacheDefinitions, '~get_' + $name, $memberDescriptor);
 
                             // If the get accessor has the override flag, no set accessor has been provided yet, and an inherited set accessor was found, create the default set accessor
                             if ($hasOverride && !$hasSet && $cacheDefinitions['~set_' + $name])
-                                $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, { 'configurable': true, 'enumerable': true, 'value': function($v)
+                                $__defineProperty($cacheDefinitions, '~set_' + $name, { 'configurable': true, 'enumerable': true, 'value': function($v)
                                 {
                                     // Set the base property
                                     this.__base[$name] = $v;
@@ -621,13 +694,13 @@
                 else
                 {
                     // Set the definitions in the cache definitions object
-                    $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $value[2] });
-                    $__defineProperty__.call($__object__, $cacheDefinitions, '~get_' + $name, { 'enumerable': true, 'value': function()
+                    $__defineProperty($cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $value[2] });
+                    $__defineProperty($cacheDefinitions, '~get_' + $name, { 'enumerable': true, 'value': function()
                     {
                         // Return the private property data
                         return this['#' + $name];
                     } });
-                    $__defineProperty__.call($__object__, $cacheDefinitions, '~set_' + $name, { 'enumerable': true, 'value': function($v)
+                    $__defineProperty($cacheDefinitions, '~set_' + $name, { 'enumerable': true, 'value': function($v)
                     {
                         // Set the private property data
                         this['#' + $name] = $v;
@@ -636,17 +709,17 @@
             }
             // Set the definition in the cache definitions object
             else
-                $__defineProperty__.call($__object__, $cacheDefinitions, $name, { 'enumerable': true, 'value': $value });
+                $__defineProperty($cacheDefinitions, $name, { 'enumerable': true, 'value': $value });
 
             return;
         }
 
         // If the name is empty or whitespace, throw an exception
-        if (!$__trim__.call($name))
+        if (!$__string_trim__.call($name))
             throw $_exceptionFormat($_lang_$$_member_name_null, $type);
 
         // If the name is not a valid member name, throw an exception
-        if (!$__match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
+        if (!$__string_match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
             throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
         var $abstract = false;
@@ -867,7 +940,7 @@
                 }
 
                 // Create the field definition array
-                var $field = new $__array__($_definition_member_flagCount);
+                var $field = new $__array($_definition_member_flagCount);
 
                 // Set the field definition data
                 $field[$_definition_member_field_readonly] = $readonly;
@@ -876,11 +949,11 @@
                 $field[$_definition_member_value]          = $value;
 
                 // Set the field in the definitions object
-                $__defineProperty__.call($__object__, $definitions, $name, { 'enumerable': true, 'value': $field });
+                $__defineProperty($definitions, $name, { 'enumerable': true, 'value': $field });
 
                 // If the class is optimized, set the definition in the cache definitions object
                 if ($isOptimized)
-                    $__defineProperty__.call($__object__, $cacheDefinitions, $name, { 'enumerable': true, 'value': $value });
+                    $__defineProperty($cacheDefinitions, $name, { 'enumerable': true, 'value': $value });
 
                 break;
 
@@ -891,7 +964,7 @@
                     $_definitionsCompilerBaseMethod($name, $type, null, $baseProtected, $basePublic, $override, $protected, $public);
 
                 // Create the method definition array
-                var $method = new $__array__($_definition_member_flagCount);
+                var $method = new $__array($_definition_member_flagCount);
 
                 // Set the field definition data
                 $method[$_definition_member_method_abstract] = $abstract;
@@ -902,19 +975,19 @@
                 $method[$_definition_member_value]           = $value;
 
                 // Set the method in the definitions object
-                $__defineProperty__.call($__object__, $definitions, $name, { 'enumerable': true, 'value': $method });
+                $__defineProperty($definitions, $name, { 'enumerable': true, 'value': $method });
 
                 // If the class is optimized, set the definition in the cache definitions object
                 if ($isOptimized)
-                    $__defineProperty__.call($__object__, $cacheDefinitions, $name, { 'enumerable': true, 'value': $value });
+                    $__defineProperty($cacheDefinitions, $name, { 'enumerable': true, 'value': $value });
 
                 break;
 
             case 'property':
 
                 // Create the get and set method data arrays
-                var $get = new $__array__($_accessor_flagCount);
-                var $set = new $__array__($_accessor_flagCount);
+                var $get = new $__array($_accessor_flagCount);
+                var $set = new $__array($_accessor_flagCount);
 
                 // Create the get and set accessors flags
                 var $hasGet = false;
@@ -943,7 +1016,7 @@
 
                     // Get the default value and create the private property data definition array
                     var $default = $data[2];
-                    var $field   = new $__array__($_definition_member_flagCount);
+                    var $field   = new $__array($_definition_member_flagCount);
 
                     // If the default value is neither undefined nor null
                     if ($default !== undefined && $default !== null)
@@ -963,22 +1036,22 @@
                     $field[$_definition_member_value]          = $default;
 
                     // Set the private field definition in the definitions object
-                    $__defineProperty__.call($__object__, $privateDefinitions, '#' + $name, { 'enumerable': true, 'value': $field });
+                    $__defineProperty($privateDefinitions, '#' + $name, { 'enumerable': true, 'value': $field });
 
                     // If the class is optimized, set the private field in the cache definitions object
                     if ($isOptimized)
-                        $__defineProperty__.call($__object__, $cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $default });
+                        $__defineProperty($cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $default });
                 }
 
                 for (var $propertyKey in $value)
                 {
                     // Break the property key string into a keywords array and get the member name and value
-                    var $propertyKeywords = $__trim__.call($propertyKey || '').split(' ');
+                    var $propertyKeywords = $__string_trim__.call($propertyKey || '').split(' ');
                     var $memberName       = $propertyKeywords.pop() || '';
                     var $memberValue      = $value[$propertyKey];
 
                     // If the member name is empty or whitespace, throw an exception
-                    if (!$__trim__.call($memberName))
+                    if (!$__string_trim__.call($memberName))
                         throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
                     var $member = null;
@@ -1148,7 +1221,7 @@
 
                     // If the class is optimized, set the definition in the cache definitions object
                     if ($isOptimized)
-                        $__defineProperty__.call($__object__, $cacheDefinitions, $get[$_accessor_name], { 'enumerable': true, 'value': $get[$_accessor_value] });
+                        $__defineProperty($cacheDefinitions, $get[$_accessor_name], { 'enumerable': true, 'value': $get[$_accessor_value] });
                 }
 
                 // If a set method was provided
@@ -1163,7 +1236,7 @@
 
                     // If the class is optimized, set the definition in the cache definitions object
                     if ($isOptimized)
-                        $__defineProperty__.call($__object__, $cacheDefinitions, $set[$_accessor_name], { 'enumerable': true, 'value': $set[$_accessor_value] });
+                        $__defineProperty($cacheDefinitions, $set[$_accessor_name], { 'enumerable': true, 'value': $set[$_accessor_value] });
                 }
 
                 break;
@@ -1172,7 +1245,7 @@
             case 'static':
 
                 // Create the member definition array
-                var $member = new $__array__($_definition_member_flagCount);
+                var $member = new $__array($_definition_member_flagCount);
 
                 // Set the member definition data
                 $member[$_definition_member_name]  = $name;
@@ -1193,7 +1266,7 @@
     var $_definitionsCompilerInjections     = function($definitions, $cacheDefinitions, $injections)
     {
         // If no injections array was provided, return
-        if (!$__isArray__.call($__array__, $injections) || !$definitions && !$cacheDefinitions)
+        if (!$__array_isArray($injections) || !$definitions && !$cacheDefinitions)
             return;
 
         for (var $i = 0, $j = $injections.length; $i < $j; $i++)
@@ -1202,7 +1275,7 @@
             var $injection = $injections[$i];
 
             // If no injection array was found, continue
-            if (!$__isArray__.call($__array__, $injection))
+            if (!$__array_isArray($injection))
                 continue;
 
             // Get the injection name
@@ -1214,11 +1287,11 @@
 
             // If the class has a definitions object, set the injected definition array into the definitions object
             if ($definitions)
-                $__defineProperty__.call($__object__, $definitions, $injectionName, { 'enumerable': true, 'value': $injection });
+                $__defineProperty($definitions, $injectionName, { 'enumerable': true, 'value': $injection });
 
             // If the class has a definitions cache, set the definition into the cache definitions object
             if ($cacheDefinitions)
-                $__defineProperty__.call($__object__, $cacheDefinitions, $injectionName, { 'enumerable': true, 'value': $injection[$_definition_member_value] });
+                $__defineProperty($cacheDefinitions, $injectionName, { 'enumerable': true, 'value': $injection[$_definition_member_value] });
         }
     };
     var $_definitionsCompilerLock           = function($reference)
@@ -1264,10 +1337,10 @@
     {
         // Create the constructor reference and instance
         var $constructor = undefined;
-        var $this        = $__create__.call($__object__, $private);
+        var $this        = $__create($private);
 
         // Mask the base instance reference with the base constructor get accessor
-        $__defineProperty__.call($__object__, $this, '__base',
+        $__defineProperty($this, '__base',
         {
             'get': function()
             {
@@ -1285,10 +1358,10 @@
         });
 
         // Create a data reference to the private instance
-        $__defineProperty__.call($__object__, $this, '__data', { 'value': $private });
+        $__defineProperty($this, '__data', { 'value': $private });
 
         // Freeze the constructor instance object
-        $__freeze__.call($__object__, $this);
+        $__freeze($this);
 
         // Return the constructor instance
         return $this;
@@ -1317,13 +1390,13 @@
                 if ($isProtected || $isPublic)
                 {
                     // Set the base field descriptor
-                    $__defineProperty__.call($__object__, $base, $name, $descriptor);
+                    $__defineProperty($base, $name, $descriptor);
 
                     // If lazy loading is not enabled
                     if (!$_lazy)
                     {
                         // Set the private field descriptor
-                        $__defineProperty__.call($__object__, $private, $name, $descriptor);
+                        $__defineProperty($private, $name, $descriptor);
 
                         // Set the field descriptor in the inherits object
                         $inherits[$name] = $descriptor;
@@ -1333,15 +1406,15 @@
                     }
                     // Set the protected field descriptor
                     else
-                        $__defineProperty__.call($__object__, $protected, $name, $descriptor);
+                        $__defineProperty($protected, $name, $descriptor);
 
                     // If the field is public, set the public field descriptor
                     if ($isPublic)
-                        $__defineProperty__.call($__object__, $public, $name, $descriptor);
+                        $__defineProperty($public, $name, $descriptor);
                 }
                 // Set the private field descriptor
                 else
-                    $__defineProperty__.call($__object__, $private, $name, $descriptor);
+                    $__defineProperty($private, $name, $descriptor);
 
                 break;
 
@@ -1362,7 +1435,7 @@
                 if ($isProtected || $isPublic)
                 {
                     // Set the base method descriptor
-                    $__defineProperty__.call($__object__, $base, $name, $descriptor);
+                    $__defineProperty($base, $name, $descriptor);
 
                     // Get the override and inherited descriptors
                     var $override = $_constructRuntimeOverride($descriptor, $key, $definition, $overrides);
@@ -1372,7 +1445,7 @@
                     if (!$_lazy)
                     {
                         // Set the private method descriptor
-                        $__defineProperty__.call($__object__, $private, $name, $inherit);
+                        $__defineProperty($private, $name, $inherit);
 
                         // Set the method descriptor in the inherits object
                         $inherits[$name] = $inherit;
@@ -1382,15 +1455,15 @@
                     }
                     // Set the protected method descriptor
                     else
-                        $__defineProperty__.call($__object__, $protected, $name, $inherit);
+                        $__defineProperty($protected, $name, $inherit);
 
                     // If the method is public, set the public method descriptor
                     if ($isPublic)
-                        $__defineProperty__.call($__object__, $public, $name, $inherit);
+                        $__defineProperty($public, $name, $inherit);
                 }
                 // Set the private method descriptor
                 else
-                    $__defineProperty__.call($__object__, $private, $name, $descriptor);
+                    $__defineProperty($private, $name, $descriptor);
 
                 break;
 
@@ -1419,7 +1492,7 @@
                     if ($isProtected || $isPublic)
                     {
                         // Set the base property descriptor (merge if a base descriptor was found)
-                        $__defineProperty__.call($__object__, $base, $name, $mergeBase ? $_constructRuntimeMerge($descriptor, $base[$name], $accessor) : $descriptor);
+                        $__defineProperty($base, $name, $mergeBase ? $_constructRuntimeMerge($descriptor, $base[$name], $accessor) : $descriptor);
 
                         // Get the override method and inherited descriptor
                         var $override = $_constructRuntimeOverride($method, $key, $definition, $overrides);
@@ -1433,7 +1506,7 @@
                         if (!$_lazy)
                         {
                             // Set the private property descriptor (merge if a private descriptor was found)
-                            $__defineProperty__.call($__object__, $private, $name, $mergePrivate ? $_constructRuntimeMerge($inherit, $private[$name], $accessor) : $inherit);
+                            $__defineProperty($private, $name, $mergePrivate ? $_constructRuntimeMerge($inherit, $private[$name], $accessor) : $inherit);
 
                             // Set the property descriptor in the inherits object (merge if an inherits descriptor was found)
                             $inherits[$name] = $merge && $__hasOwnProperty__.call($inherits, $name) ? $_constructRuntimeMerge($inherit, $inherits[$name], $accessor) : $inherit;
@@ -1444,20 +1517,20 @@
                         else
                         {
                             // Set the protected property descriptor (merge if a base descriptor was found)
-                            $__defineProperty__.call($__object__, $protected, $name, $mergeBase ? $_constructRuntimeMerge($inherit, $protected[$name], $accessor) : $inherit);
+                            $__defineProperty($protected, $name, $mergeBase ? $_constructRuntimeMerge($inherit, $protected[$name], $accessor) : $inherit);
 
                             // If a private merge was found, set the private property descriptor
                             if ($mergePrivate)
-                                $__defineProperty__.call($__object__, $private, $name, $_constructRuntimeMerge($inherit, $private[$name], $accessor));
+                                $__defineProperty($private, $name, $_constructRuntimeMerge($inherit, $private[$name], $accessor));
                         }
 
                         // If the property is public, set the public property descriptor (merge if a public descriptor was found)
                         if ($isPublic)
-                            $__defineProperty__.call($__object__, $public, $name, $complex && $__hasOwnProperty__.call($public, $name) ? $_constructRuntimeMerge($inherit, $public[$name], $accessor) : $inherit);
+                            $__defineProperty($public, $name, $complex && $__hasOwnProperty__.call($public, $name) ? $_constructRuntimeMerge($inherit, $public[$name], $accessor) : $inherit);
                     }
                     // Set the private property descriptor (merge if a private descriptor was found)
                     else
-                        $__defineProperty__.call($__object__, $private, $name, $mergePrivate ? $_constructRuntimeMerge($descriptor, $private[$name], $accessor) : $descriptor);
+                        $__defineProperty($private, $name, $mergePrivate ? $_constructRuntimeMerge($descriptor, $private[$name], $accessor) : $descriptor);
                 }
                 else
                 {
@@ -1468,7 +1541,7 @@
                     if ($isProtected || $isPublic)
                     {
                         // Set the base property descriptor
-                        $__defineProperty__.call($__object__, $base, $name, $descriptorWrapper);
+                        $__defineProperty($base, $name, $descriptorWrapper);
 
                         // Get the override and inherited methods
                         var $override = $_constructRuntimeOverride($method, $key, $definition, $overrides);
@@ -1481,7 +1554,7 @@
                         if (!$_lazy)
                         {
                             // Set the private property descriptor
-                            $__defineProperty__.call($__object__, $private, $name, $descriptorInherit);
+                            $__defineProperty($private, $name, $descriptorInherit);
 
                             // Set the inherited accessor method in the inherits object
                             $inherits[$name] = $inherit;
@@ -1491,15 +1564,15 @@
                         }
                         // Set the protected property descriptor
                         else
-                            $__defineProperty__.call($__object__, $protected, $name, $descriptorInherit);
+                            $__defineProperty($protected, $name, $descriptorInherit);
 
                         // If the property is public, set the public property descriptor
                         if ($isPublic)
-                            $__defineProperty__.call($__object__, $public, $name, $descriptorInherit);
+                            $__defineProperty($public, $name, $descriptorInherit);
                     }
                     // Set the private property descriptor
                     else
-                        $__defineProperty__.call($__object__, $private, $name, $descriptorWrapper);
+                        $__defineProperty($private, $name, $descriptorWrapper);
                 }
 
                 break;
@@ -1750,7 +1823,7 @@
             var $inherit = $inherits[$inheritKey];
 
             // Set the instance member descriptor
-            $__defineProperty__.call($__object__, $instance, $inheritKey, $inherit);
+            $__defineProperty($instance, $inheritKey, $inherit);
 
             // If a derived inherits object was provided, set the member descriptor in it
             if ($derivedInherits)
@@ -1923,8 +1996,8 @@
         var $vars       = [];
 
         // Create the protected and public overrides containers
-        var $protectedOverrides = $__create__.call($__object__, null);
-        var $publicOverrides    = $__create__.call($__object__, null);
+        var $protectedOverrides = $__create(null);
+        var $publicOverrides    = $__create(null);
 
         for (var $i = 0, $j = $chain.length; $i < $j; $i++)
         {
@@ -1949,12 +2022,12 @@
             var $public    = $class[$_definition_public].call($_lock);
 
             // Get the private, protected, and public keys
-            var $privateKeys   = $__keys__.call($__object__, $private);
-            var $protectedKeys = $__keys__.call($__object__, $protected);
-            var $publicKeys    = $__keys__.call($__object__, $public);
+            var $privateKeys   = $__keys($private);
+            var $protectedKeys = $__keys($protected);
+            var $publicKeys    = $__keys($public);
 
             // Create the merges lookup
-            var $merges = $__create__.call($__object__, null);
+            var $merges = $__create(null);
 
             // Dump the private definitions into the variables and statements arrays
             for (var $k = 0, $l = $privateKeys.length; $k < $l; $k++)
@@ -2000,50 +2073,50 @@
 
         // If a private self reference is required, define the self reference on the private instance
         if ($definePrivate)
-            $__defineProperty__.call($__object__, $private, '__self', { 'value': $instance });
+            $__defineProperty($private, '__self', { 'value': $instance });
 
         // If a base self reference is required, define the self reference on the base instance
         //if ($defineBase)
-        //    $__defineProperty__.call($__object__, $base, '__self', { 'value': $instance });
+        //    $__defineProperty($base, '__self', { 'value': $instance });
 
         // If a public self reference is required, define the self reference on the public instance
         if ($definePublic)
-            $__defineProperty__.call($__object__, $public, '__self', { 'value': $instance });
+            $__defineProperty($public, '__self', { 'value': $instance });
 
         // Define the public instance accessor on the private and base instances
-        $__defineProperty__.call($__object__, $private, '__this', { 'value': $public });
-        //$__defineProperty__.call($__object__, $base, '__this', { 'value': $public });
+        $__defineProperty($private, '__this', { 'value': $public });
+        //$__defineProperty($base, '__this', { 'value': $public });
 
         // Define the chain type accessor on the private and base instances
-        $__defineProperty__.call($__object__, $private, '__type', { 'value': $class });
-        //$__defineProperty__.call($__object__, $base, '__type', { 'value': $class });
+        $__defineProperty($private, '__type', { 'value': $class });
+        //$__defineProperty($base, '__type', { 'value': $class });
 
         // If the class is not internal, a public chain type accessor is required, or the chain is switching to internal, define the chain type accessor on the public instance
         if (!$isInternal || $definePublic || $switch)
-            $__defineProperty__.call($__object__, $public, '__type', { 'value': $isInternal ? null : $class });
+            $__defineProperty($public, '__type', { 'value': $isInternal ? null : $class });
 
         // If a private type method is required, define the type method on the private instance
         if ($definePrivate)
-            $__defineProperty__.call($__object__, $private, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+            $__defineProperty($private, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
 
         // If a base type method is required or the chain is switching to internal, define the type method on the base instance
         if ($defineBase || $switch)
-            $__defineProperty__.call($__object__, $base, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+            $__defineProperty($base, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
 
         // If a public type method is required, define the type method on the public instance
         if ($definePublic)
-            $__defineProperty__.call($__object__, $public, 'type', { 'value': $typeExternal });
+            $__defineProperty($public, 'type', { 'value': $typeExternal });
 
         // If a protected instance was provided
         if ($protected)
         {
             // If this is the last stack, define the self reference on the protected instance
             if ($last)
-                $__defineProperty__.call($__object__, $protected, '__self', { 'value': $instance });
+                $__defineProperty($protected, '__self', { 'value': $instance });
 
             // If this is the last stack or the chain is switching to internal, define the type method on the protected instance
             if ($last || $switch)
-                $__defineProperty__.call($__object__, $protected, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
+                $__defineProperty($protected, 'type', { 'value': $isInternal ? $typeInternal : $typeExternal });
         }
     };
     var $_constructRuntimeStruct      = function($class, $type, $externalType, $cache, $injections, $base, $private, $protected, $public, $isExpandoPublic, $isInternal)
@@ -2052,12 +2125,12 @@
         var $clone = $_constructRuntimeClone($type, $class, $cache, $injections);
 
         // Define the clone method on the private and base instances
-        $__defineProperty__.call($__object__, $private, 'clone', { 'value': $clone });
-        $__defineProperty__.call($__object__, $base, 'clone', { 'value': $clone });
+        $__defineProperty($private, 'clone', { 'value': $clone });
+        $__defineProperty($base, 'clone', { 'value': $clone });
 
         // If the chain is not internal or has an expando public instance, define the clone method on the public instance
         if (!$isInternal || !$protected || $isExpandoPublic)
-            $__defineProperty__.call($__object__, $public, 'clone', { 'value': $isInternal ? $_constructRuntimeClone($type, $externalType, $cache, $injections) : $clone });
+            $__defineProperty($public, 'clone', { 'value': $isInternal ? $_constructRuntimeClone($type, $externalType, $cache, $injections) : $clone });
     };
 
     // Create the import runtime helper functions
@@ -2075,7 +2148,7 @@
     var $_importRuntimeDescriptor  = function($instance, $descriptor)
     {
         // Set the descriptor on the instance using the embedded member name
-        $__defineProperty__.call($__object__, $instance, $descriptor['name'], $descriptor);
+        $__defineProperty($instance, $descriptor['name'], $descriptor);
     };
     var $_importRuntimeDescriptor2 = function($formerInstance, $latterInstance, $descriptor)
     {
@@ -2083,8 +2156,8 @@
         var $name = $descriptor['name'];
 
         // Set the descriptor on the former and latter instances
-        $__defineProperty__.call($__object__, $formerInstance, $name, $descriptor);
-        $__defineProperty__.call($__object__, $latterInstance, $name, $descriptor);
+        $__defineProperty($formerInstance, $name, $descriptor);
+        $__defineProperty($latterInstance, $name, $descriptor);
     };
     var $_importRuntimeField       = function($cache, $name, $injections, $private, $public, $type, $readonly)
     {
@@ -2101,18 +2174,18 @@
     var $_importRuntimeLock        = function($base, $private, $protected, $public)
     {
         // Freeze the base instance
-        $__freeze__.call($__object__, $base);
+        $__freeze($base);
 
         // If a private instance was provided, freeze the private instance
         if ($private)
-            $__freeze__.call($__object__, $private);
+            $__freeze($private);
 
         // Freeze the protected instance
-        $__freeze__.call($__object__, $protected);
+        $__freeze($protected);
 
         // If a public instance was provided, freeze the public instance
         if ($public)
-            $__freeze__.call($__object__, $public);
+            $__freeze($public);
     };
     var $_importRuntimeMethod      = function($cache, $name, $private, $public, $type)
     {
@@ -2140,7 +2213,7 @@
         $set = $set && $set['set'] || undefined;
 
         // Set the property get/set accessors descriptor on the instance
-        $__defineProperty__.call($__object__, $instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
+        $__defineProperty($instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
     };
 
     // ########## NAMESPACE ##########
@@ -2157,7 +2230,7 @@
         var $typeof      = typeof $constructor;
 
         // If the constructor is not a simple object
-        if ($constructor === null || $typeof !== 'object' || $__getPrototypeOf__.call($__object__, $constructor) !== $__objectProto__)
+        if ($constructor === null || $typeof !== 'object' || $__getPrototypeOf($constructor) !== $__objectProto__)
         {
             // Get the prototype
             $prototype = arguments[$argument++];
@@ -2212,7 +2285,7 @@
             }
 
             // If the prototype is not a simple object, throw an exception
-            if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf__.call($__object__, $prototype) !== $__objectProto__)
+            if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf($prototype) !== $__objectProto__)
                 throw $_exceptionArguments(null, arguments);
         }
         else
@@ -2267,7 +2340,7 @@
             if ($modifiers.length <= $_const_precompile_prefix.length || $modifiers.substr(0, $_const_precompile_prefix.length) !== $_const_precompile_prefix)
             {
                 // Create the keywords array
-                var $keywords = $__trim__.call($modifiers).split(' ');
+                var $keywords = $__string_trim__.call($modifiers).split(' ');
 
                 for (var $i = 0, $j = $keywords.length; $i < $j; $i++)
                 {
@@ -2360,7 +2433,7 @@
         if ($import)
         {
             // Generate the imported construct function factory
-            $construct = (new Function('"use strict";var $=function(' + $_const_construct_arguments + ')' + $modifiers.substr($_const_precompile_prefix.length) + 'return $;')).call($$);
+            $construct = (new $__function('"use strict";var $=function(' + $_const_construct_arguments + ')' + $modifiers.substr($_const_precompile_prefix.length) + 'return $;')).call($$);
 
             // Copy the imported construct data into the class
             $abstract = !!$construct['a'];
@@ -2372,14 +2445,14 @@
 
         // Create the cache, private, protected, and public references along with the inherited prototype reference
         var $classCache     = null;
-        var $classPrivate   = $__create__.call($__object__, null);
+        var $classPrivate   = $__create(null);
         var $classProtected = null;
         var $classPrototype = null;
         var $classPublic    = null;
 
         // Create the prototype and static definitions objects
-        var $definitionsPrototype = $__create__.call($__object__, null);
-        var $definitionsStatic    = $__create__.call($__object__, null);
+        var $definitionsPrototype = $__create(null);
+        var $definitionsStatic    = $__create(null);
 
         // Create the base protected and public references
         var $baseProtected = null;
@@ -2408,9 +2481,9 @@
                     throw $_exceptionFormat($_lang_$$_derive_export);
 
                 // Create the chained cache, protected, and public definitions objects
-                $classCache     = $__create__.call($__object__, $baseClass[$_definition_cache]);
-                $classProtected = $__create__.call($__object__, null);
-                $classPublic    = $__create__.call($__object__, null);
+                $classCache     = $__create($baseClass[$_definition_cache]);
+                $classProtected = $__create(null);
+                $classPublic    = $__create(null);
             }
             else
             {
@@ -2419,9 +2492,9 @@
                     throw $_exceptionFormat($_lang_$$_derive_import);
 
                 // Create the chained cache, chained protected, and chained public definitions objects
-                $classCache     = $__create__.call($__object__, $optimized ? $baseClass[$_definition_cache] : null);
-                $classProtected = $__create__.call($__object__, $baseProtected);
-                $classPublic    = $__create__.call($__object__, $basePublic);
+                $classCache     = $__create($optimized ? $baseClass[$_definition_cache] : null);
+                $classProtected = $__create($baseProtected);
+                $classPublic    = $__create($basePublic);
             }
 
             // If the class is not internal and the base class is internal, throw an exception
@@ -2472,10 +2545,10 @@
         else
         {
             // Create the cache, protected, and public definitions objects along with the inherited prototype
-            $classCache     = $__create__.call($__object__, null);
-            $classProtected = $__create__.call($__object__, null);
+            $classCache     = $__create(null);
+            $classProtected = $__create(null);
             $classPrototype = new $_class();
-            $classPublic    = $__create__.call($__object__, null);
+            $classPublic    = $__create(null);
         }
 
         // If the argument count does not match the number of arguments
@@ -2487,17 +2560,17 @@
             var $prototypePublic    = arguments[$argument++];
 
             // If the next argument is not an array
-            if (!$__isArray__.call($__array__, $prototypeProtected))
+            if (!$__array_isArray($prototypeProtected))
             {
                 // If the neither the protected nor public prototypes are simple objects, throw an exception
-                if ($prototypeProtected === null || typeof $prototypeProtected !== 'object' || $__getPrototypeOf__.call($__object__, $prototypeProtected) !== $__objectProto__ || $prototypePublic === null || typeof $prototypePublic !== 'object' || $__getPrototypeOf__.call($__object__, $prototypePublic) !== $__objectProto__)
+                if ($prototypeProtected === null || typeof $prototypeProtected !== 'object' || $__getPrototypeOf($prototypeProtected) !== $__objectProto__ || $prototypePublic === null || typeof $prototypePublic !== 'object' || $__getPrototypeOf($prototypePublic) !== $__objectProto__)
                     throw $_exceptionArguments(null, arguments);
 
                 // Set the extra prototype definition object
                 $prototype = arguments[$argument];
 
                 // If the extra prototype is not a simple object, set it to null
-                if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf__.call($__object__, $prototype) !== $__objectProto__)
+                if ($prototype === null || typeof $prototype !== 'object' || $__getPrototypeOf($prototype) !== $__objectProto__)
                     $prototype = null;
                 // Increment the argument count
                 else
@@ -2574,7 +2647,7 @@
 
             // Create the instance reference and matrix
             var $instance = this;
-            var $matrix   = new $__array__($levels);
+            var $matrix   = new $__array($levels);
 
             // Check if the new operator was used
             var $isInit = false;
@@ -2638,8 +2711,8 @@
             };
 
             // Set the "as()" and "is()" methods on the instance
-            $__defineProperty__.call($__object__, $instance, 'as', { 'value': $as });
-            $__defineProperty__.call($__object__, $instance, 'is', { 'value': $is });
+            $__defineProperty($instance, 'as', { 'value': $as });
+            $__defineProperty($instance, 'is', { 'value': $is });
 
             // Create the class instances
             var $base      = $instance;
@@ -2655,8 +2728,8 @@
             };
 
             // Create the public and protected override caches
-            var $protectedOverrides = !$import && !$optimized ? $__create__.call($__object__, null) : null;
-            var $publicOverrides    = !$import && !$optimized ? $__create__.call($__object__, null) : null;
+            var $protectedOverrides = !$import && !$optimized ? $__create(null) : null;
+            var $publicOverrides    = !$import && !$optimized ? $__create(null) : null;
 
             // Get the injection objects array
             var $injections  = $unsafe ? arguments[$_clone ? 1 : 0] : null;
@@ -2669,24 +2742,24 @@
             if (!$_lazy && !$import && !$optimized)
             {
                 // Create the contexts and inherits arrays
-                var $contexts = new $__array__($levels);
-                var $inherits = new $__array__($levels);
+                var $contexts = new $__array($levels);
+                var $inherits = new $__array($levels);
 
                 for (var $i = 0; $i < $levels; $i++)
                 {
                     // Create the base, private, and public instances
-                    $base      = $__create__.call($__object__, $instance);
-                    $private   = $__create__.call($__object__, $instance);
-                    $public    = $__create__.call($__object__, $instance);
+                    $base      = $__create($instance);
+                    $private   = $__create($instance);
+                    $public    = $__create($instance);
 
                     // Create the constructor context and matrix instance stack
-                    var $context = $__create__.call($__object__, $private);
+                    var $context = $__create($private);
                     var $stack   = [$private, $base, $public];
 
                     // Create the inherits objects
-                    var $baseInherits      = $__create__.call($__object__, null);
-                    var $protectedInherits = $__create__.call($__object__, null);
-                    var $publicInherits    = $__create__.call($__object__, null);
+                    var $baseInherits      = $__create(null);
+                    var $protectedInherits = $__create(null);
+                    var $publicInherits    = $__create(null);
 
                     // Build the matrix instance stack
                     ($i === 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
@@ -2735,17 +2808,17 @@
                         var $privateBase = $matrix[$i + 1][1];
 
                         // Define the base instance reference on the private instance
-                        $__defineProperty__.call($__object__, $private, '__base', { 'value': $privateBase });
+                        $__defineProperty($private, '__base', { 'value': $privateBase });
 
                         // Get the constructor context
                         var $context = $contexts[$i];
 
                         // Mask the base instance reference with the base constructor
-                        $__defineProperty__.call($__object__, $context, '__base', { 'value': $privateBase.constructor });
-                        $__defineProperty__.call($__object__, $context, '__data', { 'value': $private });
+                        $__defineProperty($context, '__base', { 'value': $privateBase.constructor });
+                        $__defineProperty($context, '__data', { 'value': $private });
 
                         // Freeze the constructor context
-                        $__freeze__.call($__object__, $context);
+                        $__freeze($context);
 
                         // Get the inherits objects
                         var $baseInherits      = $derivedBaseInherits;
@@ -2778,15 +2851,15 @@
                     }
 
                     // Freeze the base instance object
-                    $__freeze__.call($__object__, $base);
+                    $__freeze($base);
 
                     // If the class is not expando-private, freeze the private instance object
                     if (!$chainExpandoPrivate)
-                        $__freeze__.call($__object__, $private);
+                        $__freeze($private);
 
                     // If the class is not expando-public, freeze the public instance object
                     if (!$chainExpandoPublic)
-                        $__freeze__.call($__object__, $public);
+                        $__freeze($public);
 
                     // Remove the last matrix stack flag
                     $matrixLast = false;
@@ -2800,16 +2873,16 @@
                 for (var $i = $levels - 1; $i >= 0; $i--)
                 {
                     // Create the base, protected, and public instances
-                    $base      = $__create__.call($__object__, $base);
-                    $protected = $__create__.call($__object__, $protected);
-                    $public    = $__create__.call($__object__, $public);
+                    $base      = $__create($base);
+                    $protected = $__create($protected);
+                    $public    = $__create($public);
 
                     // Create the private instance
-                    $private = $__create__.call($__object__, $protected);
+                    $private = $__create($protected);
 
                     // If this is not the last matrix stack, define the base instance reference on the private instance
                     if (!$matrixLast)
-                        $__defineProperty__.call($__object__, $private, '__base', { 'value': $matrix[$i + 1][3] });
+                        $__defineProperty($private, '__base', { 'value': $matrix[$i + 1][3] });
 
                     // Get the chain data
                     var $chainInternal = $i < $external;
@@ -2899,7 +2972,7 @@
 
         // If the class has the import flag or is optimized, set the constructor in the cache definitions object
         if ($import || $optimized)
-            $__defineProperty__.call($__object__, $classCache, 'constructor', { 'enumerable': true, 'value': $constructor });
+            $__defineProperty($classCache, 'constructor', { 'enumerable': true, 'value': $constructor });
 
         // Create the precompile string and helper function references
         var $eval       = null;
@@ -2912,8 +2985,8 @@
             if ($baseClass && $baseClass[$_definition_abstract])
             {
                 // Get the array of keys for the base protected and public definitions objects
-                var $baseProtectedKeys = $__keys__.call($__object__, $baseProtected);
-                var $basePublicKeys    = $__keys__.call($__object__, $basePublic);
+                var $baseProtectedKeys = $__keys($baseProtected);
+                var $basePublicKeys    = $__keys($basePublic);
 
                 // Compile the protected definitions for each property defined in the base protected definitions
                 for (var $i = 0, $j = $baseProtectedKeys.length; $i < $j; $i++)
@@ -2934,7 +3007,7 @@
                     continue;
 
                 // Set the prototype member descriptor
-                $__defineProperty__.call($__object__, $classPrototype, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value], 'writable': !$definition[$_definition_member_const] });
+                $__defineProperty($classPrototype, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value], 'writable': !$definition[$_definition_member_const] });
             }
 
             for (var $definitionsStaticMember in $definitionsStatic)
@@ -2947,11 +3020,11 @@
                     continue;
 
                 // Set the static member descriptor
-                $__defineProperty__.call($__object__, $class, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value], 'writable': !$definition[$_definition_member_const] });
+                $__defineProperty($class, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value], 'writable': !$definition[$_definition_member_const] });
             }
 
             // Create the constructor definition array
-            var $constructorDefinition = new $__array__($_definition_member_flagCount);
+            var $constructorDefinition = new $__array($_definition_member_flagCount);
 
             // Set the constructor definition data
             $constructorDefinition[$_definition_member_method_abstract] = false;
@@ -2962,12 +3035,12 @@
             $constructorDefinition[$_definition_member_value]           = $constructor;
 
             // Set the constructor in the protected definitions object
-            $__defineProperty__.call($__object__, $classProtected, 'constructor', { 'enumerable': true, 'value': $constructorDefinition });
+            $__defineProperty($classProtected, 'constructor', { 'enumerable': true, 'value': $constructorDefinition });
 
             // Get the arrays of private, protected, and public member keys
-            var $classPrivateKeys   = $__keys__.call($__object__, $classPrivate);
-            var $classProtectedKeys = $__keys__.call($__object__, $classProtected);
-            var $classPublicKeys    = $__keys__.call($__object__, $classPublic);
+            var $classPrivateKeys   = $__keys($classPrivate);
+            var $classProtectedKeys = $__keys($classProtected);
+            var $classPublicKeys    = $__keys($classPublic);
 
             // Create the construct and precompile helper functions
             $construct  = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections, $cache)
@@ -3014,16 +3087,16 @@
                 if ($_lazy)
                 {
                     // Freeze the base and protected instance objects
-                    $__freeze__.call($__object__, $base);
-                    $__freeze__.call($__object__, $protected);
+                    $__freeze($base);
+                    $__freeze($protected);
 
                     // If the class is not expando-private, freeze the private instance object
                     if (!$expandoPrivate)
-                        $__freeze__.call($__object__, $private);
+                        $__freeze($private);
 
                     // If the class is not expando-public, freeze the public instance object
                     if (!$expandoPublic)
-                        $__freeze__.call($__object__, $public);
+                        $__freeze($public);
                 }
             };
             $precompile = function()
@@ -3060,7 +3133,7 @@
         else
         {
             // Get the array of cached member keys
-            var $classCacheKeys = $__keys__.call($__object__, $classCache);
+            var $classCacheKeys = $__keys($classCache);
 
             // If the imported class data doesn't validate, throw an exception
             if ($levels !== $construct['l'] || $classCacheKeys.length !== $construct['k0'] + $construct['k1'] + $construct['k2'])
@@ -3068,14 +3141,14 @@
         }
 
         // Freeze the class definitions objects
-        $__freeze__.call($__object__, $classCache);
-        $__freeze__.call($__object__, $classPrivate);
-        $__freeze__.call($__object__, $classProtected);
-        $__freeze__.call($__object__, $classPublic);
+        $__freeze($classCache);
+        $__freeze($classPrivate);
+        $__freeze($classProtected);
+        $__freeze($classPublic);
 
         // If the prototype is not expando, prevent extensions on the prototype
         if (!$import && !$expandoPrototype)
-            $__preventExtensions__.call($__object__, $classPrototype);
+            $__preventExtensions($classPrototype);
 
         // Create the class data
         var $data = {};
@@ -3102,25 +3175,25 @@
         $data[$_definition_unsafe]            = { 'value': $unsafe };
 
         // Set the class data
-        $__defineProperties__.call($__object__, $class, $data);
+        $__defineProperties($class, $data);
 
         // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
         $class.prototype = $classPrototype;
 
         // Set the class prototype without the "writable" flag
-        $__defineProperty__.call($__object__, $class, 'prototype', { 'value': $classPrototype, 'writable': false });
+        $__defineProperty($class, 'prototype', { 'value': $classPrototype, 'writable': false });
 
         // If a static "constructor" definition was not provided, set the class constructor reference
         if (!$__hasOwnProperty__.call($definitionsStatic, 'constructor'))
-            $__defineProperty__.call($__object__, $class, 'constructor', { 'value': $$, 'writable': true });
+            $__defineProperty($class, 'constructor', { 'value': $$, 'writable': true });
 
         // If a static "toString()" definition was not provided, set the class toString() method
         if (!$__hasOwnProperty__.call($definitionsStatic, 'toString'))
-            $__defineProperty__.call($__object__, $class, 'toString', { 'value': $_class_toString, 'writable': true });
+            $__defineProperty($class, 'toString', { 'value': $_class_toString, 'writable': true });
 
         // If the class does not have the import flag and is not expando, prevent extensions on the class
         if (!$import && !$expandoClass)
-            $__preventExtensions__.call($__object__, $class);
+            $__preventExtensions($class);
 
         // If the class has the import flag or is optimized
         if ($import || $optimized)
@@ -3130,7 +3203,7 @@
             {
                 // Generate the precompiled string and the optimized construct function factory
                 $eval      = $_constructRuntimePrecompile($chain);
-                $construct = new Function($_const_construct_arguments, '"use strict";' + $eval);
+                $construct = new $__function($_const_construct_arguments, '"use strict";' + $eval);
             }
 
             // Generate the optimized construct function
@@ -3185,13 +3258,13 @@
     // ########## PACKAGES ##########
 
     // Define the package methods for class members
-    $__forEach__.call('private protected public prototype static'.split(' '), function($modifier)
+    $__array_forEach__.call('private protected public prototype static'.split(' '), function($modifier)
     {
         // Create the package method
         var $method = function($modifiers, $value)
         {
             // Create the member package
-            var $package = new $__array__($_package_flagCount);
+            var $package = new $__array($_package_flagCount);
 
             switch (arguments.length)
             {
@@ -3238,7 +3311,7 @@
             $$.prototype = $method;
 
             // Set the prototype method without the "writable" flag
-            $__defineProperty__.call($__object__, $$, 'prototype', { 'value': $method, 'writable': false });
+            $__defineProperty($$, 'prototype', { 'value': $method, 'writable': false });
         }
         // Define the package method for the access modifier
         else
@@ -3247,14 +3320,16 @@
 
     // ########## TYPES ##########
 
+    var $$_type = null;
+
     // Define the "type()" method and the "is()" methods for internal JavaScript types
     (function()
     {
         // Create the types lookup
-        var $types = $__create__.call($__object__, null);
+        var $types = $__create(null);
 
         // Iterate the internal JavaScript types
-        $__forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' '), function($type)
+        $__array_forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' '), function($type)
         {
             // Get the type keyword
             var $keyword = $type.toLowerCase();
@@ -3271,7 +3346,7 @@
         });
 
         // Iterate the known aliases of the internal JavaScript window type
-        $__forEach__.call('global Window DOMWindow'.split(' '), function($alias)
+        $__array_forEach__.call('global Window DOMWindow'.split(' '), function($alias)
         {
             // Insert the window alias into the types lookup
             $types['[object ' + $alias + ']'] = 'window';
@@ -3293,7 +3368,7 @@
                 return $object[$_definition_keyHint] === $object ? 'class': 'function';
 
             // If the object is the window object, return the "window" type string
-            if ($object === $_window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf__.call($__object__, $object) === null)
+            if ($object === $_window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf($object) === null)
                 return 'window';
 
             // If the object is a class instance, return the "instance" type string
@@ -3349,6 +3424,8 @@
         return $type === 'class' || $type === 'function';
     });
 
+    var $$_isClass = null;
+
     // ---------- CLASS ----------
     $_defineMethod('isClass', function($object)
     {
@@ -3364,15 +3441,17 @@
             return false;
 
         // Return true if the prototype of the object is not the object prototype
-        return $__getPrototypeOf__.call($__object__, $object) !== $__objectProto__;
+        return $__getPrototypeOf($object) !== $__objectProto__;
     });
 
     // ---------- FINITE ----------
     $_defineMethod('isFinite', function($number)
     {
         // Return true if the object is a number and is finite
-        return $$.isNumber($number) && !!isFinite($number);
+        return $$.isNumber($number) && !!$__isFinite($number);
     });
+
+    var $$_isFiniteInt = null;
 
     // ---------- FINITE INTEGER ----------
     $_defineMethod('isFiniteInt', function($number)
@@ -3389,7 +3468,7 @@
             return false;
 
         // Return true if the prototype of the object is null
-        return $__getPrototypeOf__.call($__object__, $object) === null;
+        return $__getPrototypeOf($object) === null;
     });
 
     // ---------- IMPORTED CLASS ----------
@@ -3410,7 +3489,7 @@
     $_defineMethod('isInfinity', function($number)
     {
         // Return true if the object is a number, is not NaN, and is not finite
-        return $$.isNumber($number) && !isNaN($number) && !isFinite($number);
+        return $$.isNumber($number) && !$__isNaN($number) && !$__isFinite($number);
     });
 
     // ---------- INSTANCE ----------
@@ -3428,14 +3507,14 @@
     $_defineMethod('isNaN', function($number)
     {
         // Return true if the object is a number and is NaN
-        return $$.isNumber($number) && !!isNaN($number);
+        return $$.isNumber($number) && !!$__isNaN($number);
     });
 
     // ---------- NEGATIVE INFINITY ----------
     $_defineMethod('isNegativeInfinity', function($number)
     {
         // Return true if the object is a number, is not NaN, is not finite, and is less than zero
-        return $$.isNumber($number) && !isNaN($number) && !isFinite($number) && $number < 0;
+        return $$.isNumber($number) && !$__isNaN($number) && !$__isFinite($number) && $number < 0;
     });
 
     // ---------- NULL ----------
@@ -3460,7 +3539,7 @@
             return false;
 
         // Return true if the object inherits from the object prototype
-        return !!($object instanceof $__object__);
+        return !!($object instanceof $__object);
     });
 
     // ---------- OPTIMIZED CLASS ----------
@@ -3474,8 +3553,10 @@
     $_defineMethod('isPositiveInfinity', function($number)
     {
         // Return true if the object is a number, is not NaN, is not finite, and is greater than zero
-        return $$.isNumber($number) && !isNaN($number) && !isFinite($number) && $number > 0;
+        return $$.isNumber($number) && !$__isNaN($number) && !$__isFinite($number) && $number > 0;
     });
+
+    var $$_isPrimitive = null;
 
     // ---------- PRIMITIVE ----------
     $_defineMethod('isPrimitive', function($object)
@@ -3534,7 +3615,7 @@
             return false;
 
         // Return true if the prototype of the object is the object prototype
-        return $__getPrototypeOf__.call($__object__, $object) === $__objectProto__;
+        return $__getPrototypeOf($object) === $__objectProto__;
     });
 
     // ---------- STRUCT ----------
@@ -3588,102 +3669,131 @@
     });
 
     // ########## CASTS ##########
-
-    // ---------- ARRAY ----------
-    $_defineMethod('asArray', function($object)
+    
+    // Create the casting methods
+    var $$_asArray  = function($object)
     {
-        // If the object is a null reference or undefined, return an empty array
-        if ($object === null || $object === undefined)
-            return [];
-
         // If the object is already an array, return the array
-        if ($__isArray__.call($__array__, $object))
+        if ($__array_isArray($object))
             return $object;
 
-        // Get the type of the object
-        var $type = typeof $object;
-
-        // If the object is a primitive type, return an empty array
-        if ($type === 'boolean' || $type === 'number' || $type === 'string')
+        // If the object is a primitive value, return an empty array
+        if ($$_isPrimitive($object))
             return [];
 
-        // Get the object collection length and create the array
-        var $length = Math.max(0, $$.asInt($object.length, true));
-        var $array  = new $__array__($length);
+        // Get the object collection length
+        var $length = $object.length;
 
-        // Set the object values in the array
+        // If the object collection length is not an integer or is less than zero, set it to zero
+        if (!$$_isFiniteInt($length) || $length < 0)
+            $length = 0;
+
+        // Create the array
+        var $array = new $__array($length);
+        
+        // Copy the value of each index in the object into the array
         for (var $i = 0; $i < $length; $i++)
             $array[$i] = $object[$i];
 
         // Return the array
         return $array;
-    });
-
-    // ---------- BOOL ----------
-    $_defineMethod('asBool', function($object)
+    };
+    var $$_asBool   = function($object)
     {
-        // Return the object cast as a boolean
-        return !!$object;
-    });
+        // Get the internal type of the object
+        var $typeOf = typeof $object;
 
-    // ---------- FLOAT ----------
-    $_defineMethod('asFloat', function($object, $finite)
-    {
-        // FORMAT $finite
-        $finite = $$.asBool($finite);
+        // If the object is a boolean primitive, return the object
+        if ($typeOf === 'boolean')
+            return $object;
 
         // Get the object type
-        var $type = $$.type($object);
+        var $type = $$_type($object);
 
-        // If the object is a string
-        if ($type === 'string')
+        // If the object is a number
+        if ($type === 'number')
         {
-            // If the object does not match a float, return NaN
-            if (!$__match__.call($__trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
-                return $finite ? 0 : NaN;
-
-            // Cast the string as a float
-            $object = parseFloat($object);
+            // If the number is not a primitive, convert it to a number primitive
+            if ($typeOf !== 'number')
+                $object = $__number_valueOf__.call($object);
         }
-        // If the object is not a number, return NaN
-        else if ($type !== 'number')
-            return $finite ? 0 : NaN;
+        // If the object is a string
+        else if ($type === 'string')
+        {
+            // If the string is not a primitive, convert it to a string primitive
+            if ($typeOf !== 'string')
+                $object = $__string_valueOf__.call($object);
+        }
+        
+        // Return the object as a boolean primitive
+        return !!$object;
+    };
+    var $$_asFloat  = function($object, $finite)
+    {
+        // FORMAT $finite
+        $finite = $finite !== undefined ? $$_asBool($finite) : false;
 
-        // If the object is not a number, return NaN
-        if (isNaN($object))
-            return $finite ? 0 : NaN;
+        // If the object is not a number primitive
+        if (typeof $object !== 'number')
+        {
+            // Get the object type
+            var $type = $$_type($object);
 
-        // If the number is greater than the maximum value, return infinity
+            // If the object is a string
+            if ($type === 'string')
+            {
+                // If the object does not match a floating-point string, return NaN (unless forced to be finite)
+                if (!$__string_match__.call($__string_trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
+                    return $finite ? 0 : $__NaN__;
+
+                // Convert the string to a floating-point number
+                $object = $__parseFloat($object);
+            }
+            // If the object is a number object, convert it to a number primitive
+            else if ($type === 'number')
+                $object = $__number_valueOf__.call($object);
+            // Return NaN (unless forced to be finite)
+            else
+                return $finite ? 0 : $__NaN__;
+        }
+
+         // If the finite flag is not set, return the object
+        if (!$finite)
+            return $object;
+
+        // If the object is not a number, return zero
+        if ($__isNaN($object))
+            return 0;
+
+        // If the number is greater than the maximum value, return the maximum value
         if ($object > $_const_float_max)
-            return $finite ? $_const_float_max : Infinity;
+            return $_const_float_max;
 
-        // If the number is less than the minimum value, return negative infinity
+        // If the number is less than the minimum value, return the minimum value
         if ($object < $_const_float_min)
-            return $finite ? $_const_float_min : -Infinity;
+            return $_const_float_min;
 
-        // Return the number
+        // Return the object
         return $object;
-    });
-
-    // ---------- INTEGER ----------
-    $_defineMethod('asInt', function($object, $finite)
+    };
+    var $$_asInt    = function($object, $finite)
     {
         // FORMAT $object
         // FORMAT $finite
-        $object = $$.asFloat($object);
-        $finite = $$.asBool($finite);
+        $object = $$_asFloat($object);
+        $finite = $finite !== undefined ? $$_asBool($finite) : false;
 
-        // If the object is not a number, return NaN
-        if (isNaN($object))
-            return $finite ? 0 : NaN;
+        // If the object is not a number, return NaN (unless forced to be finite)
+        if ($__isNaN($object))
+            return $finite ? 0 : $__NaN__;
 
-        // If the number is greater than the maximum integer, return infinity
+        // If the number is greater than the maximum integer, return positive infinity (unless forced to be finite)
         if ($object > $_const_int_max)
-            return $finite ? $_const_int_max : Infinity;
+            return $finite ? $_const_int_max : $__number_positiveInfinity__;
 
-        // If the number is less than the minimum integer, return negative infinity
+        // If the number is less than the minimum integer, return negative infinity (unless forced to be finite)
         if ($object < $_const_int_min)
-            return $finite ? $_const_int_min : -Infinity;
+            return $finite ? $_const_int_min : $__number_negativeInfinity__;
 
         // If the number is less than zero, return the number as an integer (rounded towards zero)
         if ($object < 0)
@@ -3691,10 +3801,8 @@
 
         // Return the number as an integer (rounded towards zero)
         return Math.floor($object);
-    });
-
-    // ---------- OBJECT ----------
-    $_defineMethod('asObject', function($object)
+    };
+    var $$_asObject = function($object)
     {
         // If the object is a null reference or undefined, return an empty object
         if ($object === null || $object === undefined)
@@ -3702,25 +3810,39 @@
 
         // Return the object
         return $object;
-    });
-
-    // ---------- STRING ----------
-    $_defineMethod('asString', function($object)
+    };
+    var $$_asString = function($object)
     {
-        // Get the object type
-        var $type = $$.type($object);
-
-        // If the object is a string, return the object
-        if ($type === 'string')
+        // If the object is a string primitive, return the object
+        if (typeof $object === 'string')
             return $object;
 
-        // If the object is a boolean or a number, return the object cast as a string
-        if ($type === 'boolean' || $type === 'number')
-            return $object + '';
+        // Get the object type
+        var $type = $$_type($object);
 
-        // Return an empty string
+        // If the object is a boolean, return it as a string primitive
+        if ($type === 'boolean')
+            return $__boolean_toString__.call($object);
+
+        // If the object is a number, return it as a string primitive
+        if ($type === 'number')
+            return $__number_toString__.call($object);
+
+        // If the object is a string object, return the primitive value of the string object
+        if ($type === 'string')
+            return $__string_valueOf__.call($object);
+        
+        // Return an empty string primitive
         return '';
-    });
+    };
+    
+    // Define the casting methods
+    $_defineMethod('asArray', $$_asArray);
+    $_defineMethod('asBool', $$_asBool);
+    $_defineMethod('asFloat', $$_asFloat);
+    $_defineMethod('asInt', $$_asInt);
+    $_defineMethod('asObject', $$_asObject);
+    $_defineMethod('asString', $$_asString);
 
     // ########## HELPERS ##########
 
@@ -3728,10 +3850,10 @@
     $_defineMethod('base', function($class)
     {
         // CHECK $class
-        if (!$$.isClass($class))
+        if (!$$_isClass($class))
         {
             // If the debug flag is set, throw an exception
-            if ($$.debug)
+            if ($_debug)
                 throw $_exceptionArguments('base', arguments);
 
             return null;
@@ -3739,6 +3861,32 @@
 
         // Return the base class
         return $class[$_definition_baseClass] || null;
+    });
+
+    // ---------- BOX ----------
+    $_defineMethod('box', function($object)
+    {
+        // If the object is a null reference or undefined, return an empty object
+        if ($object === null || $object === undefined)
+            return {};
+
+        // Get the internal type of the object
+        var $typeOf = typeof $object;
+
+        // If the object is a boolean primitive, return the boolean object
+        if ($typeOf === 'boolean')
+            return new $__boolean($object);
+
+        // If the object is a number primitive, return the number object
+        if ($typeOf === 'number')
+            return new $__number($object);
+
+        // If the object is a string primitive, return the string object
+        if ($typeOf === 'string')
+            return new $__string($object);
+        
+        // Return the object
+        return $object;
     });
 
     // ---------- EMPTY ----------
@@ -3755,13 +3903,13 @@
     $_defineMethod('export', function($class)
     {
         // CHECK $class
-        if (!$$.isClass($class))
+        if (!$$_isClass($class))
         {
             // If the debug flag is set, throw an exception
-            if ($$.debug)
+            if ($_debug)
                 throw $_exceptionArguments('export', arguments);
 
-            // Return an empty string
+            // Return an empty string primitive
             return '';
         }
 
@@ -3769,10 +3917,10 @@
         if ($class[$_definition_import])
         {
             // If the debug flag is set, throw an exception
-            if ($$.debug)
+            if ($_debug)
                 throw $_exceptionFormat($_lang_export_import);
 
-            // Return an empty string
+            // Return an empty string primitive
             return '';
         }
 
@@ -3780,14 +3928,14 @@
         if ($class[$_definition_struct])
         {
             // If the debug flag is set, throw an exception
-            if ($$.debug)
+            if ($_debug)
                 throw $_exceptionFormat($_lang_export_struct);
 
-            // Return an empty string
+            // Return an empty string primitive
             return '';
         }
 
-        // Return the precompiled string
+        // Return the precompiled string primitive
         return $class[$_definition_precompile].call($_lock) || '';
     });
 
@@ -3795,18 +3943,25 @@
     $_defineMethod('flat', function()
     {
         // Create a flat object
-        var $flat = $__create__.call($__object__, null);
+        var $flat = $__create(null);
 
         for (var $i = 0, $j = arguments.length; $i < $j; $i++)
         {
             // Get the current argument
             var $argument = arguments[$i];
 
-            // If the current argument is a primitive value, continue
-            if ($$.isPrimitive($argument))
-                continue;
+            // If the current argument is a primitive value
+            if ($$_isPrimitive($argument))
+            {
+                // If the debug flag is set, throw an exception
+                if ($_debug)
+                    throw $_exceptionArguments('flat', arguments);
 
-            // Copy each key-value pair in the current argument into the flat object
+                // Skip the current argument
+                continue;
+            }
+
+            // Copy each enumerable key-value pair in the current argument object into the flat object
             for (var $key in $argument)
                 $flat[$key] = $argument[$key];
         }
@@ -3822,30 +3977,63 @@
         if (!$$.isString($string))
         {
             // If the debug flag is set, throw an exception
-            if ($$.debug)
+            if ($_debug)
                 throw $_exceptionArguments('format', arguments);
 
-            // Return an empty string
+            // Return an empty string primitive
             return '';
         }
 
         // Get the arguments
         var $arguments = arguments;
 
-        // Return the formatted string
-        return $__replace__.call($string, /([\{]+)([0-9]+)\}/g, function($0, $1, $2)
+        // Return the formatted string primitive
+        return $$_asString($__string_replace__.call($string, /([\{]+)([0-9]{1,16})\}/g, function($0, $1, $2)
         {
-            // Get the argument index and create the prepend string
-            var $index   = $$.asInt($2, true) + 1;
-            var $prepend = $$.asString($1);
+            // Get the number of opening-braces and the argument index
+            var $braces = $1.length;
+            var $index  = $__number($2) + 1;
 
             // If an even number of opening-braces were provided or the argument index exceeded the number of arguments, return the unescaped match as the replacement
-            if ($prepend.length % 2 === 0 || $index >= $arguments.length)
-                return $prepend.substr($prepend.length / 2) + $2 + '}';
+            if ($braces % 2 === 0 || $index >= $arguments.length)
+                return $1.substr($braces / 2) + $2 + '}';
 
             // Return the argument as the replacement
-            return $prepend.substr($prepend.length / 2 + 1) + $$.asString($arguments[$index]);
-        });
+            return $1.substr(Math.floor($braces / 2) + 1) + $$_asString($arguments[$index]);
+        }));
+    });
+
+    // ---------- UNBOX ----------
+    $_defineMethod('unbox', function($object)
+    {
+        // If the object is a null reference or undefined, return it
+        if ($object === null || $object === undefined)
+            return $object;
+
+        // Get the internal type of the object
+        var $typeOf = typeof $object;
+
+        // If the internal type is a primitive type, return the object
+        if ($typeOf === 'boolean' || $typeOf === 'number' || $typeOf === 'string')
+            return $object;
+
+        // Get the object type
+        var $type = $$_type($object);
+
+        // If the object is a boolean object, return the boolean primitive
+        if ($type === 'boolean')
+            return $__boolean_valueOf__.call($object);
+
+        // If the object is a number object, return the number primitive
+        if ($type === 'number')
+            return $__number_valueOf__.call($object);
+
+        // If the object is a string object, return the string primitive
+        if ($type === 'string')
+            return $__string_valueOf__.call($object);
+        
+        // Return the object
+        return $object;
     });
 
     // ########## SETTINGS ##########
@@ -3858,7 +4046,7 @@
     }, function($v)
     {
         // Set the debug flag
-        $_debug = $$.asBool($v);
+        $_debug = $$_asBool($v);
     });
 
     // ---------- LAZY ----------
@@ -3869,7 +4057,7 @@
     }, function($v)
     {
         // Set the lazy flag
-        $_lazy = $$.asBool($v);
+        $_lazy = $$_asBool($v);
     });
 
     // ########## GLOBALS ##########
