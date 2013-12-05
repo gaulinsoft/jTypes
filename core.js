@@ -26,14 +26,21 @@
     // ########## BUILD ##########
 
     // Create the build version
-    var $_version = '2.2.0a432';
+    var $_version = '2.2.0a444';
+
+    // ########## FLAGS ##########
+
+    // Create the internal flags
+    var $_debug = false;
+    var $_lazy  = true;
 
     // ########## LANGUAGE ##########
 
     // Create the compatibility exception message, arguments exception format string, and the exception prefix constants
-    var $_lang_compatibility       = 'A browser that supports JavaScript 1.8.5 (MSIE 9+) is required.';
-    var $_lang_exception_arguments = '"{0}({1})" has some invalid arguments.';
-    var $_lang_exception_prefix    = 'jTypes Error: ';
+    var $_lang_compatibility           = 'A browser that supports JavaScript 1.8.5 (MSIE 9+) is required.';
+    var $_lang_exception_arguments     = '"{0}({1})" has some invalid arguments.';
+    var $_lang_exception_prefix        = 'jTypes Error: ';
+    var $_lang_exception_prefix_global = 'jTypes Error [{0}]: ';
 
     // Create the language constants
     var $_lang_$$_abstract_conflict_1              = 'Abstract classes cannot have the {0} modifier.';
@@ -43,8 +50,10 @@
     var $_lang_$$_derive_export                    = 'Class must inherit from an imported class to have a precompiled string.';
     var $_lang_$$_derive_import                    = 'Class must have a precompiled string to inherit from an imported class.';
     var $_lang_$$_derive_internal                  = 'Class must have the internal modifier to inherit from an internal class.';
+    var $_lang_$$_derive_locked                    = 'Class must inherit from an unlocked class to have the unlocked modifier.';
     var $_lang_$$_derive_sealed                    = 'Classes cannot inherit from a sealed class.';
     var $_lang_$$_derive_struct                    = 'Classes cannot inherit from structs.';
+    var $_lang_$$_derive_unlocked                  = 'Class must have the unlocked modifier to inherit from an unlocked class.';
     var $_lang_$$_derive_unoptimized               = 'Class must inherit from an optimized class to have the optimized modifier.';
     var $_lang_$$_derive_unsafe                    = 'Classes cannot inherit from a .NET class.';
     var $_lang_$$_field_readonly                   = '"{0}" cannot be set because it is a read-only {1}.';
@@ -53,12 +62,13 @@
     var $_lang_$$_keyword                          = '"{0}" is not a valid class modifier.';
     var $_lang_$$_member_abstract                  = '"{0}" cannot have the abstract modifier in a non-abstract class.';
     var $_lang_$$_member_abstract_override         = '"{0}" must implement the inherited abstract {1} with the override modifier.';
+    var $_lang_$$_member_constraint                = '"{0}" cannot have a type constraint because it is a {1} member.';
     var $_lang_$$_member_keyword                   = '"{1}" has an invalid {0} modifier "{2}".';
     var $_lang_$$_member_keyword_access_2          = '"{0}" cannot have more than one access modifier.';
     var $_lang_$$_member_keyword_conflict_2        = '"{0}" cannot have the {1} and {2} modifiers.';
-    var $_lang_$$_member_keyword_escapsulation     = '"{0}" cannot have the public, protected, or private modifiers because it is {1}.';
-    var $_lang_$$_member_keyword_polymorphism      = '"{0}" cannot have the abstract, virtual, or override modifiers because it is {1}.';
-    var $_lang_$$_member_keyword_readonly          = '"{0}" cannot have the readonly modifier because it is {1}.';
+    var $_lang_$$_member_keyword_escapsulation     = '"{0}" cannot have the public, protected, or private modifiers because it is a {1} member.';
+    var $_lang_$$_member_keyword_polymorphism      = '"{0}" cannot have the abstract, virtual, or override modifiers because it is a {1} member.';
+    var $_lang_$$_member_keyword_readonly          = '"{0}" cannot have the readonly modifier because it is a {1} member.';
     var $_lang_$$_member_keyword_requires_1        = '"{0}" cannot have the {1} modifier without the {2} modifier.';
     var $_lang_$$_member_keyword_requires_or       = '"{0}" cannot have the {1} modifier without the {2} or {3} modifiers.';
     var $_lang_$$_member_name_2                    = '"{0}" cannot have more than one definition.';
@@ -71,6 +81,7 @@
     var $_lang_$$_member_new_hide                  = '"{0}" cannot hide an inherited member without the new modifier.';
     var $_lang_$$_member_new_null                  = '"{0}" must hide an inherited member to have the new modifier.';
     var $_lang_$$_member_override_null             = '"{0}" has no suitable {1} to override.';
+    var $_lang_$$_member_override_type             = '"{0}" must have the {1} type constraint to override.';
     var $_lang_$$_member_property_accessors        = '"{0}" must have both accessors to have an access modifier on the {1} accessor.';
     var $_lang_$$_member_property_accessors_access = '"{0}" must have a more restrictive access modifier on the {1} accessor.';
     var $_lang_$$_member_property_accessors_array  = '"{0}" cannot have more than one default value for the automatically implemented property.';
@@ -113,19 +124,10 @@
     var $__valueOf__                = $__objectProto__.valueOf;
 
     // ---------- ARRAY ----------
-    var $__array               = Array;
-    var $__arrayProto__        = $__array.prototype;
-    var $__array_isArray       = $__array.isArray;
-    var $__array_every__       = $__arrayProto__.every;
-    var $__array_filter__      = $__arrayProto__.filter;
-    var $__array_forEach__     = $__arrayProto__.forEach;
-    var $__array_indexOf__     = $__arrayProto__.indexOf;
-    var $__array_lastIndexOf__ = $__arrayProto__.lastIndexOf;
-    var $__array_map__         = $__arrayProto__.map;
-    var $__array_reduce__      = $__arrayProto__.reduce;
-    var $__array_reduceRight__ = $__arrayProto__.reduceRight;
-    var $__array_some__        = $__arrayProto__.some;
-    var $__array_toString__    = $__arrayProto__.toString;
+    var $__array            = Array;
+    var $__arrayProto__     = $__array.prototype;
+    var $__array_isArray    = $__array.isArray;
+    var $__array_toString__ = $__arrayProto__.toString;
 
     // ---------- BOOLEAN ----------
     var $__boolean            = Boolean;
@@ -136,6 +138,9 @@
     // ---------- DATE ----------
     var $__date            = Date;
     var $__dateProto__     = $__date.prototype;
+    var $__date_now__      = $__date.now;
+    var $__date_parse__    = $__date.parse;
+    var $__date_utc__      = $__date.UTC;
     var $__date_toString__ = $__dateProto__.toString;
     var $__date_valueOf__  = $__dateProto__.valueOf;
 
@@ -143,7 +148,6 @@
     var $__error            = Error;
     var $__errorProto__     = $__error.prototype;
     var $__error_toString__ = $__errorProto__.toString;
-    var $__error_valueOf__  = $__errorProto__.valueOf;
 
     // ---------- FUNCTION ----------
     var $__function            = Function;
@@ -151,14 +155,13 @@
     var $__function_apply__    = $__functionProto__.apply;
     var $__function_call__     = $__functionProto__.call;
     var $__function_toString__ = $__functionProto__.toString;
-    var $__function_valueOf__  = $__functionProto__.valueOf;
 
     // ---------- NUMBER ----------
     var $__number            = Number;
     var $__numberProto__     = $__number.prototype;
     var $__number_toString__ = $__numberProto__.toString;
     var $__number_valueOf__  = $__numberProto__.valueOf;
-    
+
     // Get the number constants as number primitives
     var $__number_maxValue__         = $__number_valueOf__.call($__number.MAX_VALUE);
     var $__number_minValue__         = $__number_valueOf__.call($__number.MIN_VALUE);
@@ -169,44 +172,41 @@
     var $__NaN__ = $__number_valueOf__.call(NaN);
 
     // Get the number-related global functions
+    var $__ceil       = Math.ceil;
+    var $__floor      = Math.floor;
     var $__isFinite   = isFinite;
     var $__isNaN      = isNaN;
     var $__parseFloat = parseFloat;
     var $__parseInt   = parseInt;
+    var $__random     = Math.random;
 
     // ---------- REGEXP ----------
     var $__regexp            =  RegExp;
     var $__regexpProto__     = $__regexp.prototype;
     var $__regexp_toString__ = $__regexpProto__.toString;
-    var $__regexp_valueOf__  = $__regexpProto__.valueOf;
 
     // ---------- STRING ----------
     var $__string            = String;
     var $__stringProto__     = $__string.prototype;
-    var $__string_match__    = $__stringProto__.match;
-    var $__string_replace__  = $__stringProto__.replace;
     var $__string_toString__ = $__stringProto__.toString;
-    var $__string_trim__     = $__stringProto__.trim;
     var $__string_valueOf__  = $__stringProto__.valueOf;
 
     // ---------- WINDOW ----------
     var $__window            = null;
     var $__windowProto__     = null;
     var $__window_toString__ = null;
-    var $__window_valueOf__  = null;
 
     // If a window constructor is defined
-    if (typeof Window != 'undefined' && typeof Window.prototype != 'undefined')
+    if (typeof Window != 'undefined' && Window !== null && typeof Window.prototype != 'undefined' && Window.prototype !== null)
     {
         // Create the window references
         $__window            = Window;
         $__windowProto__     = $__window.prototype;
         $__window_toString__ = $__windowProto__.toString;
-        $__window_valueOf__  = $__windowProto__.valueOf;
     }
 
     // If any of the major native code methods from recent JavaScript versions are not found, throw an exception
-    if (!$__create || !$__defineProperty || !$__freeze || !$__getPrototypeOf || !$__preventExtensions || !$__seal || !$__array_isArray || !$__array_forEach__ || !$__array_indexOf__ || !$__string_trim__)
+    if (!$__create || !$__defineProperty || !$__freeze || !$__getPrototypeOf || !$__preventExtensions || !$__seal || !$__array_isArray || !$__arrayProto__.forEach || !$__arrayProto__.indexOf || !$__stringProto__.trim)
         throw $_lang_exception_prefix + $_lang_compatibility;
 
     // ########## NAMESPACE ##########
@@ -220,12 +220,12 @@
     var $_window = window ? window : this;
 
     // If the window reference is either null or undefined, create a reference
-    if ($_window === null || $_window === undefined)
+    if ($_window == null)
         $_window = {};
 
     // ########## EXCEPTIONS ##########
 
-    // Create the exception helpers
+    // Create the exception helper functions
     var $_exceptionArguments = function($name, $arguments)
     {
         // If a name was provided, prepend "$$." to the name for reference
@@ -253,7 +253,7 @@
 
     // ########## DEFINES ##########
 
-    // Create the define helpers
+    // Create the define helper functions
     var $_defineField    = function($name, $field, $writable)
     {
         // Define an enumerable field on the global namespace object
@@ -267,31 +267,42 @@
     };
     var $_defineMethod   = function($name, $method)
     {
-        // Define a non-enumerable method on the global namespace object
-        return $__defineProperty($$, $name,
-        {
-            'configurable': false,
-            'enumerable':   false,
-            'value':        $method,
-            'writable':     false
-        });
+        // If the name does not contain a space, define a non-enumerable method on the global namespace object
+        if ($name.indexOf(' ') < 0)
+            return $__defineProperty($$, $name,
+            {
+                'configurable': false,
+                'enumerable':   false,
+                'value':        $method,
+                'writable':     false
+            });
+
+        // Create the method names array
+        var $names = $name.split(' ');
+
+        // Define each method in the method names array
+        for (var $i = 0, $j = $names.length; $i < $j; $i++)
+            $_defineMethod($names[$i], $method);
     };
     var $_defineProperty = function($name, $getMethod, $setMethod)
     {
-        // Define an enumerable property on the global namespace object
-        return $__defineProperty($$, $name,
-        {
-            'configurable': false,
-            'enumerable':   true,
-            'get':          $getMethod || undefined,
-            'set':          $setMethod || undefined
-        });
+        // If the name does not contain a space, define an enumerable property on the global namespace object
+        if ($name.indexOf(' ') < 0)
+            return $__defineProperty($$, $name,
+            {
+                'configurable': false,
+                'enumerable':   true,
+                'get':          $getMethod || undefined,
+                'set':          $setMethod || undefined
+            });
+
+        // Create the property names array
+        var $names = $name.split(' ');
+
+        // Define each property in the property names array
+        for (var $i = 0, $j = $names.length; $i < $j; $i++)
+            $_defineProperty($names[$i], $getMethod, $setMethod);
     };
-
-    // ########## LOCKS ##########
-
-    // Create the internal lock reference
-    var $_lock = {};
 
     // ##########################
     // ########## CORE ##########
@@ -301,12 +312,34 @@
 
     // Create the internal constants
     var $_const_construct_arguments = 'c,k,f,m,a,d,d2,p,l';
+    var $_const_date_max            = 8640000000000000;
+    var $_const_date_min            = -$_const_date_max;
     var $_const_float_epsilon       = 2.220460492503130808472633361816E-16;
     var $_const_float_max           = $__number_maxValue__;
     var $_const_float_min           = -$_const_float_max;
     var $_const_int_max             = 9007199254740992;
     var $_const_int_min             = -$_const_int_max;
-    var $_const_precompile_prefix   = '~jT_';
+    var $_const_prefix_precompile   = '~jT_';
+    var $_const_prefix_symbol       = '$jT_';
+
+    // ---------- LOCKS ----------
+
+    // Create the internal lock reference
+    var $_lock = {};
+
+    // ########## VARIABLES ##########
+
+    // Create the internal variables
+    var $_clone    = false;
+    var $_subclass = false;
+
+    // ---------- LOCKS ----------
+
+    // Create the internal lock symbol references
+    var $_lock_class       = null;
+    var $_lock_instance_as = null;
+    var $_lock_instance_is = null;
+    var $_lock_package     = null;
 
     // ########## KEYS ##########
 
@@ -317,8 +350,8 @@
     // Append the lowercase characters to the characters string
     $_characters += $_characters.toLowerCase();
 
-    // Create the key generator helper
-    var $_keyGenerator = function($length, $noTilde)
+    // Create the key helper functions
+    var $_keyGenerator       = function($length)
     {
         // If no length was provided, use a default length of three
         if (!$length)
@@ -334,71 +367,96 @@
 
             // Append random characters to the key
             for (var $i = 0, $j = $_characters.length; $i < $length; $i++)
-                $key += $_characters.charAt(Math.floor($j * Math.random()));
+                $key += $_characters.charAt($__floor($j * $__random()));
         }
         // Continue if the key was already found in the keys array
-        while ($__array_indexOf__.call($_keys, $key) >= 0);
+        while ($_keys.indexOf($key) >= 0);
 
         // Push the key into the keys array
         $_keys.push($key);
 
-        // If the no tilde flag is set, return the key
-        if ($noTilde)
-            return $key;
-
-        // Return the key with a tilde
-        return '~' + $key;
+        // Return the key
+        return $key;
+    };
+    var $_keyGeneratorSymbol = function($length)
+    {
+        // Return the key with the prepended symbol prefix
+        return $_const_prefix_symbol + $_keyGenerator($length);
     };
 
-    // ---------- DEFINITION ----------
+    // ---------- SYMBOLS ----------
 
-    // Create the definition obfuscated key hash flag, key hint, and length setting
-    var $_definition_keyHash   = true;
-    var $_definition_keyHint   = $_keyGenerator(3);
-    var $_definition_keyLength = 3;
+    // Create the symbol obfuscated key hash flag and length settings
+    var $_symbol_keyHash   = true;
+    var $_symbol_keyLength = 3;
 
-    // Create the definition obfuscated keys
-    var $_definition_abstract          = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~abstract';
-    var $_definition_baseClass         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~baseClass';
-    var $_definition_cache             = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~cache';
-    var $_definition_construct         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~construct';
-    var $_definition_expando_class     = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoClass';
-    var $_definition_expando_private   = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoPrivate';
-    var $_definition_expando_prototype = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoPrototype';
-    var $_definition_expando_public    = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~expandoPublic';
-    var $_definition_final             = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~final';
-    var $_definition_import            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~import';
-    var $_definition_internal          = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~internal';
-    var $_definition_optimized         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~optimized';
-    var $_definition_private           = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~private';
-    var $_definition_precompile        = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~precompile';
-    var $_definition_protected         = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~protected';
-    var $_definition_public            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~public';
-    var $_definition_struct            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~struct';
-    var $_definition_unsafe            = $_definition_keyHash ? $_keyGenerator($_definition_keyLength) : '~unsafe';
+    // Create the symbol obfuscated keys
+    var $_symbol_abstract          = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~abstract';
+    var $_symbol_baseClass         = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~baseClass';
+    var $_symbol_cache             = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~cache';
+    var $_symbol_construct         = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~construct';
+    var $_symbol_expando_class     = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~expandoClass';
+    var $_symbol_expando_private   = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~expandoPrivate';
+    var $_symbol_expando_prototype = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~expandoPrototype';
+    var $_symbol_expando_public    = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~expandoPublic';
+    var $_symbol_final             = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~final';
+    var $_symbol_import            = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~import';
+    var $_symbol_internal          = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~internal';
+    var $_symbol_lock              = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~lock';
+    var $_symbol_optimized         = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~optimized';
+    var $_symbol_private           = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~private';
+    var $_symbol_precompile        = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~precompile';
+    var $_symbol_protected         = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~protected';
+    var $_symbol_public            = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~public';
+    var $_symbol_struct            = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~struct';
+    var $_symbol_unlocked          = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~unlocked';
+    var $_symbol_unsafe            = $_symbol_keyHash ? $_keyGeneratorSymbol($_symbol_keyLength) : '~unsafe';
 
-    // #################################################
-    // ########## BEGIN jTypes.NET INJECTIONS ##########
-    // #################################################
+    // ---------- ACCESSORS ----------
 
-    // ---------- DEFINITION (MEMBER) ----------
+    // Create the accessor flags
+    var $_accessor_name      = 0;
+    var $_accessor_value     = 1;
+    var $_accessor_modifiers = 2;
+    var $_accessor_private   = 3;
+    var $_accessor_protected = 4;
+    var $_accessor_public    = 5;
 
-    // Create the definition member flags
-    var $_definition_member_name               = 0;
-    var $_definition_member_value              = 1;
-    var $_definition_member_type               = 2;
-    var $_definition_member_field_readonly     = 3;
-    var $_definition_member_field_type         = 4;
-    var $_definition_member_field_injection    = 5;
-    var $_definition_member_method_abstract    = 6;
-    var $_definition_member_method_final       = 7;
-    var $_definition_member_method_virtual     = 8;
-    var $_definition_member_method_type        = 9;
-    var $_definition_member_property_accessors = 10;
-    var $_definition_member_const              = 11;
+    // Create the accessor flags length
+    var $_accessor_flagCount = 6;
 
-    // Create the definition member flags length
-    var $_definition_member_flagCount = 12;
+    // ---------- PRECOMPILES ----------
+
+    // Create the precompile obfuscated variable names
+    var $_precompile_cache      = $_keyGenerator(1);
+    var $_precompile_injections = $_keyGenerator(1);
+    var $_precompile_matrix     = $_keyGenerator(1);
+    var $_precompile_null       = $_keyGenerator(1);
+    var $_precompile_readonly   = $_keyGenerator(1);
+    var $_precompile_reference  = $_keyGenerator(1);
+
+    // -------------------------------------------------
+    // ---------- BEGIN jTypes.NET INJECTIONS ----------
+    // -------------------------------------------------
+
+    // ---------- DEFINITIONS ----------
+
+    // Create the definition flags
+    var $_definition_name               = 0;
+    var $_definition_value              = 1;
+    var $_definition_type               = 2;
+    var $_definition_field_readonly     = 3;
+    var $_definition_field_type         = 4;
+    var $_definition_field_injection    = 5;
+    var $_definition_method_abstract    = 6;
+    var $_definition_method_final       = 7;
+    var $_definition_method_virtual     = 8;
+    var $_definition_method_type        = 9;
+    var $_definition_property_accessors = 10;
+    var $_definition_const              = 11;
+
+    // Create the definition flags length
+    var $_definition_flagCount = 12;
 
     // ---------- INJECTIONS ----------
 
@@ -414,50 +472,24 @@
 
     // ---------- PACKAGES ----------
 
-    // Create the member package key hint
-    var $_package_keyHint = $_keyGenerator(3);
-
-    // Create the member package flags
+    // Create the package flags
     var $_package_value     = 0;
     var $_package_modifiers = 1;
     var $_package_type      = 2;
 
-    // Create the member package flags length
+    // Create the package flags length
     var $_package_flagCount = 3;
 
     // ---------- .NET ----------
 
-    // Create the unsafe token
+    // Create the unsafe token (for jTypes.NET client classes)
     var $_unsafe = '';
 
-    // ###############################################
-    // ########## END jTypes.NET INJECTIONS ##########
-    // ###############################################
+    // -----------------------------------------------
+    // ---------- END jTypes.NET INJECTIONS ----------
+    // -----------------------------------------------
 
-    // ---------- ACCESSOR ----------
-
-    // Create the accessor member flags
-    var $_accessor_name      = 0;
-    var $_accessor_value     = 1;
-    var $_accessor_modifiers = 2;
-    var $_accessor_private   = 3;
-    var $_accessor_protected = 4;
-    var $_accessor_public    = 5;
-
-    // Create the accessor member flags length
-    var $_accessor_flagCount = 6;
-
-    // ---------- PRECOMPILE ----------
-
-    // Create the precompile obfuscated keys
-    var $_precompile_cache      = $_keyGenerator(1, true);
-    var $_precompile_injections = $_keyGenerator(1, true);
-    var $_precompile_matrix     = $_keyGenerator(1, true);
-    var $_precompile_null       = $_keyGenerator(1, true);
-    var $_precompile_readonly   = $_keyGenerator(1, true);
-    var $_precompile_reference  = $_keyGenerator(1, true);
-
-    // ########## CLASSES ##########
+    // ########## BUILT-INS ##########
 
     // Create the base class of all classes and the base prototype of all class prototypes
     var $_class     = function()
@@ -482,7 +514,7 @@
     $__defineProperty($_prototype, 'constructor', { 'value': $_class });
 
     // Define the "toString()" methods on the base class of all classes and the base prototype of all class prototypes
-    $__defineProperty($_class, 'toString', { 'value': $_class_toString });
+    $__defineProperty($_class,     'toString', { 'value': $_class_toString });
     $__defineProperty($_prototype, 'toString', { 'value': $_prototype_toString });
 
     // Set the base class of all classes prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
@@ -491,34 +523,33 @@
     // Set the base class of all classes prototype without the "writable" flag
     $__defineProperty($_class, 'prototype', { 'value': $_prototype, 'writable': false });
 
-    // ########## FLAGS ##########
+    // ############################################################
+    // ############################################################
+    // ############################################################
 
-    // Create the internal flags
-    var $_clone    = false;// DON'T CHANGE
-    var $_debug    = false;// DEFAULT
-    var $_lazy     = true;// DEFAULT
-    var $_subclass = false;// DON'T CHANGE
+    // ########## FUNCTIONS ##########
 
-    // ########## COMPILER ##########
+    // ---------- COMPILER ----------
 
     // Create the definitions compiler helper functions
-    var $_definitionsCompilerAccessorMethod = function($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $accessor, $type, $abstract, $override, $sealed, $virtual, $hasTwoAccessors)
+    var $_definitionsCompilerAccessorMethod = function($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $accessor, $type, $constraint, $abstract, $override, $sealed, $virtual, $hasTwoAccessors)
     {
         // Create the property method definition array
-        var $method = new $__array($_definition_member_flagCount);
+        var $method = new $__array($_definition_flagCount);
 
         // Get the accessor name and private access modifier flag
         var $accessorName    = $accessor[$_accessor_name];
         var $accessorPrivate = $accessor[$_accessor_private];
 
         // Set the method definition data
-        $method[$_definition_member_method_abstract]    = !$accessorPrivate && $abstract;
-        $method[$_definition_member_method_final]       = !$accessorPrivate && $sealed;
-        $method[$_definition_member_method_virtual]     = !$accessorPrivate && ($virtual || $abstract || $override);
-        $method[$_definition_member_name]               = $accessorName.substr(5);
-        $method[$_definition_member_property_accessors] = $hasTwoAccessors;
-        $method[$_definition_member_type]               = $type;
-        $method[$_definition_member_value]              = $accessor[$_accessor_value];
+        $method[$_definition_method_abstract]    = !$accessorPrivate && $abstract;
+        $method[$_definition_method_final]       = !$accessorPrivate && $sealed;
+        $method[$_definition_method_type]        = $constraint;
+        $method[$_definition_method_virtual]     = !$accessorPrivate && ($virtual || $abstract || $override);
+        $method[$_definition_name]               = $accessorName.substr(5);
+        $method[$_definition_property_accessors] = $hasTwoAccessors;
+        $method[$_definition_type]               = $type;
+        $method[$_definition_value]              = $accessor[$_accessor_value];
 
         // Create the definition descriptor
         var $descriptor = { 'enumerable': true, 'value': $method };
@@ -546,17 +577,17 @@
         var $baseDefinition = $baseDefinitions[$baseKey];
 
         // If the base definition is not abstract, return
-        if (!$baseDefinition[$_definition_member_method_abstract])
+        if (!$baseDefinition[$_definition_method_abstract])
             return;
 
         // Get the definition from the definitions object
         var $definition = $__hasOwnProperty__.call($definitions, $baseKey) && $definitions[$baseKey] || null;
 
         // If no definition was found or it does not match the type of the base definition, throw an exception
-        if (!$definition || $definition[$_definition_member_type] != $baseDefinition[$_definition_member_type])
-            throw $_exceptionFormat($_lang_$$_abstract_override, $baseDefinition[$_definition_member_name], $baseDefinition[$_definition_member_type]);
+        if (!$definition || $definition[$_definition_type] != $baseDefinition[$_definition_type])
+            throw $_exceptionFormat($_lang_$$_abstract_override, $baseDefinition[$_definition_name], $baseDefinition[$_definition_type]);
     };
-    var $_definitionsCompilerBaseMethod     = function($key, $type, $typeName, $baseProtected, $basePublic, $override, $protected, $public)
+    var $_definitionsCompilerBaseMethod     = function($key, $type, $typeName, $baseProtected, $basePublic, $constraint, $override, $protected, $public)
     {
         // If no type name was provided, use the type as the type name
         if (!$typeName)
@@ -575,11 +606,22 @@
         if ($override)
         {
             // If no base definition was found, it is not a virtual base method, or it is a final base method, throw an exception
-            if (!$baseDefinition || $baseDefinition[$_definition_member_type] != $type || !$baseDefinition[$_definition_member_method_virtual] || $baseDefinition[$_definition_member_method_final])
+            if (!$baseDefinition || $baseDefinition[$_definition_type] != $type || !$baseDefinition[$_definition_method_virtual] || $baseDefinition[$_definition_method_final])
                 throw $_exceptionFormat($_lang_$$_member_override_null, $key.charAt(0) == '~' ? $key.substr($key.indexOf('_') + 1) : $key, $typeName);
+
+            // If the base definition does not match the constraint type
+            if ($baseDefinition[$_definition_method_type] !== $constraint)
+            {
+                // If the constraint is a function, throw an exception
+                if (typeof $constraint == 'function')
+                    throw $_exceptionFormat($_lang_$$_member_override_null, $key.charAt(0) == '~' ? $key.substr($key.indexOf('_') + 1) : $key, $typeName);
+
+                // Throw an exception
+                throw $_exceptionFormat($_lang_$$_member_override_type, $key.charAt(0) == '~' ? $key.substr($key.indexOf('_') + 1) : $key, $constraint);
+            }
         }
         // If the base definition is abstract, throw an exception
-        else if ($baseDefinition && $baseDefinition[$_definition_member_method_abstract])
+        else if ($baseDefinition && $baseDefinition[$_definition_method_abstract])
             throw $_exceptionFormat($_lang_$$_member_abstract_override, $key.charAt(0) == '~' ? $key.substr($key.indexOf('_') + 1) : $key, $type);
     };
     var $_definitionsCompilerExists         = function($definitions, $name, $recursive)
@@ -594,11 +636,12 @@
     var $_definitionsCompiler               = function($cacheDefinitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $prototypeDefinitions, $staticDefinitions, $key, $value, $baseProtected, $basePublic, $isAbstract, $isFinal, $isImport, $isOptimized, $isStruct)
     {
         // Break the key string into a keywords array and get the member name
-        var $keywords = $__string_trim__.call($key || '').split(' ');
-        var $name     = $keywords.pop() || '';
+        var $constraint = null;
+        var $keywords   = $key.trim().split(' ');
+        var $name       = $keywords.pop() || '';
 
         // If the member is a package
-        if (typeof $value == 'function' && $value[$_package_keyHint] === $value)
+        if (typeof $value == 'function' && $_lockSymbolsPackage($value))
         {
             // If this is a separated definition object (no static definitions object), throw an exception
             if ($staticDefinitions === null)
@@ -608,12 +651,10 @@
             if ($keywords.length && $keywords[0] != 'static')
                 throw $_exceptionFormat($_lang_$$_member_name_package, $name);
 
-            // Unlock the package
-            $value = $value.call($_lock);
-
             // Extract the package data
-            $keywords = ($value[$_package_modifiers] || '').split(' ');
-            $value    = $value[$_package_value];
+            $constraint = $value[$_package_type];
+            $keywords   = $value[$_package_modifiers].split(' ');
+            $value      = $value[$_package_value];
         }
 
         // Get the automatically implemented property flag and create the type
@@ -624,7 +665,7 @@
         if (typeof $value == 'function')
             $type = 'method';
         // If the value is a simple object or a non-empty array, set the type as a property
-        else if ($auto || $value !== null && typeof $value == 'object' && $__getPrototypeOf($value) === $__objectProto__)
+        else if ($auto || $value != null && typeof $value == 'object' && $__getPrototypeOf($value) === $__objectProto__)
             $type = 'property';
 
         // If the class has the import flag
@@ -641,12 +682,12 @@
                     var $hasSet = false;
 
                     // Create the has override flag
-                    var $hasOverride = $__array_indexOf__.call($keywords, 'override') >= 0;
+                    var $hasOverride = $keywords.indexOf('override') >= 0;
 
                     for (var $propertyKey in $value)
                     {
                         // Get the member name and value
-                        var $memberName  = $__string_trim__.call($propertyKey || '').split(' ').pop() || '';
+                        var $memberName  = $propertyKey.trim().split(' ').pop() || '';
                         var $memberValue = $value[$propertyKey];
 
                         // Create the member definition descriptor
@@ -694,7 +735,7 @@
                 else
                 {
                     // Set the definitions in the cache definitions object
-                    $__defineProperty($cacheDefinitions, '#' + $name, { 'enumerable': true, 'value': $value[2] });
+                    $__defineProperty($cacheDefinitions, '#'     + $name, { 'enumerable': true, 'value': $value[2] });
                     $__defineProperty($cacheDefinitions, '~get_' + $name, { 'enumerable': true, 'value': function()
                     {
                         // Return the private property data
@@ -715,11 +756,11 @@
         }
 
         // If the name is empty or whitespace, throw an exception
-        if (!$__string_trim__.call($name))
+        if (!$name.trim())
             throw $_exceptionFormat($_lang_$$_member_name_null, $type);
 
         // If the name is not a valid member name, throw an exception
-        if (!$__string_match__.call($name, /^(_|\$|[a-z])[_\$a-z0-9]*$/i))
+        if (!$name.match(/^(_|\$|[a-z])[_\$a-z0-9]*$/i))
             throw $_exceptionFormat($_lang_$$_member_name_invalid, $type, $name);
 
         var $abstract = false;
@@ -778,13 +819,20 @@
             // If the keyword is virtual and the member is not a field, set the virtual flag
             else if ($keyword == 'virtual' && $type != 'field')
                 $virtual = true;
-            // If a keyword was defined, throw an exception
+            // If a keyword was defined
             else if ($keyword)
-                throw $_exceptionFormat($_lang_$$_member_keyword, $type, $name, $keyword);
+            {
+                // If the keyword is not a constraint, throw an exception
+                if ($i != $j - 1 || [].indexOf($keyword) < 0)
+                    throw $_exceptionFormat($_lang_$$_member_keyword, $type, $name, $keyword);
+
+                // Set the constraint
+                $constraint = $keyword;
+            }
         }
 
         // If the member name is invalid, throw an exception
-        if ($name == 'as' || $isStruct && $name == 'clone' || $name == 'constructor' || $name == 'is' || $name == 'type' || $name == '__base' || $name == '__self' || $name == '__this' || $name == '__type')
+        if ($name == 'as' || $isStruct && $name == 'clone' || $name == 'constructor' || $name == 'is' || $name == 'type' || $name == '__base' || $name == '__data' || $name == '__self' || $name == '__this' || $name == '__type')
             throw $_exceptionFormat($_lang_$$_member_name_invalid, 'member', $name);
 
         // If the member has more than one access modifier, throw an exception
@@ -830,6 +878,10 @@
             // If the member has the read-only flag, throw an exception
             if ($readonly)
                 throw $_exceptionFormat($_lang_$$_member_keyword_readonly, $name, $type);
+
+            // If the member has a constraint, throw an exception
+            if ($constraint)
+                throw $_exceptionFormat($_lang_$$_member_constraint, $name, $type);
         }
         else
         {
@@ -928,8 +980,8 @@
         {
             case 'field':
 
-                // If the value is neither undefined nor null
-                if ($value !== undefined && $value !== null)
+                // If the value is neither null nor undefined
+                if ($value != null)
                 {
                     // Get the type of the value
                     var $valueType = typeof $value;
@@ -940,13 +992,14 @@
                 }
 
                 // Create the field definition array
-                var $field = new $__array($_definition_member_flagCount);
+                var $field = new $__array($_definition_flagCount);
 
                 // Set the field definition data
-                $field[$_definition_member_field_readonly] = $readonly;
-                $field[$_definition_member_name]           = $name;
-                $field[$_definition_member_type]           = $type;
-                $field[$_definition_member_value]          = $value;
+                $field[$_definition_field_readonly] = $readonly;
+                $field[$_definition_field_type]     = $constraint;
+                $field[$_definition_name]           = $name;
+                $field[$_definition_type]           = $type;
+                $field[$_definition_value]          = $value;
 
                 // Set the field in the definitions object
                 $__defineProperty($definitions, $name, { 'enumerable': true, 'value': $field });
@@ -961,18 +1014,19 @@
 
                 // If there is a base class, perform further compiling on the method
                 if ($baseProtected || $basePublic)
-                    $_definitionsCompilerBaseMethod($name, $type, null, $baseProtected, $basePublic, $override, $protected, $public);
+                    $_definitionsCompilerBaseMethod($name, $type, null, $baseProtected, $basePublic, $constraint, $override, $protected, $public);
 
                 // Create the method definition array
-                var $method = new $__array($_definition_member_flagCount);
+                var $method = new $__array($_definition_flagCount);
 
                 // Set the field definition data
-                $method[$_definition_member_method_abstract] = $abstract;
-                $method[$_definition_member_method_final]    = $sealed;
-                $method[$_definition_member_method_virtual]  = $virtual || $abstract || $override;
-                $method[$_definition_member_name]            = $name;
-                $method[$_definition_member_type]            = $type;
-                $method[$_definition_member_value]           = $value;
+                $method[$_definition_method_abstract] = $abstract;
+                $method[$_definition_method_final]    = $sealed;
+                $method[$_definition_method_type]     = $constraint;
+                $method[$_definition_method_virtual]  = $virtual || $abstract || $override;
+                $method[$_definition_name]            = $name;
+                $method[$_definition_type]            = $type;
+                $method[$_definition_value]           = $value;
 
                 // Set the method in the definitions object
                 $__defineProperty($definitions, $name, { 'enumerable': true, 'value': $method });
@@ -1016,10 +1070,10 @@
 
                     // Get the default value and create the private property data definition array
                     var $default = $data[2];
-                    var $field   = new $__array($_definition_member_flagCount);
+                    var $field   = new $__array($_definition_flagCount);
 
-                    // If the default value is neither undefined nor null
-                    if ($default !== undefined && $default !== null)
+                    // If the default value is neither null nor undefined
+                    if ($default != null)
                     {
                         // Get the type of the default value
                         var $defaultType = typeof $default;
@@ -1030,10 +1084,10 @@
                     }
 
                     // Set the private field definition data
-                    $field[$_definition_member_field_readonly] = $readonly;
-                    $field[$_definition_member_name]           = '#' + $name;
-                    $field[$_definition_member_type]           = 'field';
-                    $field[$_definition_member_value]          = $default;
+                    $field[$_definition_field_readonly] = $readonly;
+                    $field[$_definition_name]           = '#' + $name;
+                    $field[$_definition_type]           = 'field';
+                    $field[$_definition_value]          = $default;
 
                     // Set the private field definition in the definitions object
                     $__defineProperty($privateDefinitions, '#' + $name, { 'enumerable': true, 'value': $field });
@@ -1046,12 +1100,12 @@
                 for (var $propertyKey in $value)
                 {
                     // Break the property key string into a keywords array and get the member name and value
-                    var $propertyKeywords = $__string_trim__.call($propertyKey || '').split(' ');
+                    var $propertyKeywords = $propertyKey.trim().split(' ');
                     var $memberName       = $propertyKeywords.pop() || '';
                     var $memberValue      = $value[$propertyKey];
 
                     // If the member name is empty or whitespace, throw an exception
-                    if (!$__string_trim__.call($memberName))
+                    if (!$memberName.trim())
                         throw $_exceptionFormat($_lang_$$_member_property_name_null, $name);
 
                     var $member = null;
@@ -1214,10 +1268,10 @@
                 {
                     // If there is a base class, perform further compiling on the get method
                     if ($baseProtected || $basePublic)
-                        $_definitionsCompilerBaseMethod($get[$_accessor_name], $type, 'get accessor', $baseProtected, $basePublic, $override, $hasGetModifier ? $get[$_accessor_protected] : $protected, $hasGetModifier ? $get[$_accessor_public] : $public);
+                        $_definitionsCompilerBaseMethod($get[$_accessor_name], $type, 'get accessor', $baseProtected, $basePublic, $constraint, $override, $hasGetModifier ? $get[$_accessor_protected] : $protected, $hasGetModifier ? $get[$_accessor_public] : $public);
 
                     // Compile the get accessor method
-                    $_definitionsCompilerAccessorMethod($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $get, $type, $abstract, $override, $sealed, $virtual, $hasGet && $hasSet);
+                    $_definitionsCompilerAccessorMethod($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $get, $type, $constraint, $abstract, $override, $sealed, $virtual, $hasGet && $hasSet);
 
                     // If the class is optimized, set the definition in the cache definitions object
                     if ($isOptimized)
@@ -1229,10 +1283,10 @@
                 {
                     // If there is a base class, perform further compiling on the set method
                     if ($baseProtected || $basePublic)
-                        $_definitionsCompilerBaseMethod($set[$_accessor_name], $type, 'set accessor', $baseProtected, $basePublic, $override, $hasSetModifier ? $set[$_accessor_protected] : $protected, $hasSetModifier ? $set[$_accessor_public] : $public);
+                        $_definitionsCompilerBaseMethod($set[$_accessor_name], $type, 'set accessor', $baseProtected, $basePublic, $constraint, $override, $hasSetModifier ? $set[$_accessor_protected] : $protected, $hasSetModifier ? $set[$_accessor_public] : $public);
 
                     // Compile the set accessor method
-                    $_definitionsCompilerAccessorMethod($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $set, $type, $abstract, $override, $sealed, $virtual, $hasGet && $hasSet);
+                    $_definitionsCompilerAccessorMethod($definitions, $privateDefinitions, $protectedDefinitions, $publicDefinitions, $set, $type, $constraint, $abstract, $override, $sealed, $virtual, $hasGet && $hasSet);
 
                     // If the class is optimized, set the definition in the cache definitions object
                     if ($isOptimized)
@@ -1245,13 +1299,13 @@
             case 'static':
 
                 // Create the member definition array
-                var $member = new $__array($_definition_member_flagCount);
+                var $member = new $__array($_definition_flagCount);
 
                 // Set the member definition data
-                $member[$_definition_member_name]  = $name;
-                $member[$_definition_member_type]  = $type;
-                $member[$_definition_member_value] = $value;
-                $member[$_definition_member_const] = $const;
+                $member[$_definition_name]  = $name;
+                $member[$_definition_type]  = $type;
+                $member[$_definition_value] = $value;
+                $member[$_definition_const] = $const;
 
                 // If the member has the prototype flag, set the member in the prototype definitions object
                 if ($typePrototype)
@@ -1279,7 +1333,7 @@
                 continue;
 
             // Get the injection name
-            var $injectionName = $injection[$_definition_member_name];
+            var $injectionName = $injection[$_definition_name];
 
             // If the injection does not have a name, continue
             if (!$injectionName)
@@ -1291,21 +1345,21 @@
 
             // If the class has a definitions cache, set the definition into the cache definitions object
             if ($cacheDefinitions)
-                $__defineProperty($cacheDefinitions, $injectionName, { 'enumerable': true, 'value': $injection[$_definition_member_value] });
+                $__defineProperty($cacheDefinitions, $injectionName, { 'enumerable': true, 'value': $injection[$_definition_value] });
         }
     };
     var $_definitionsCompilerLock           = function($reference)
     {
         // Return the lock wrapper function
-        return function()
+        return function($lock)
         {
             // If this function was internally unlocked, return the reference
-            if (this === $_lock)
+            if ($lock === $_lock)
                 return $reference;
         };
     };
 
-    // ########## RUNTIME ##########
+    // ---------- RUNTIME ----------
 
     // Create the construct runtime helper functions
     var $_constructRuntimeClone       = function($type, $class, $cache, $injections)
@@ -1373,18 +1427,18 @@
 
         // Create the descriptor reference and get the name
         var $descriptor = null;
-        var $name       = $definition[$_definition_member_name];
+        var $name       = $definition[$_definition_name];
 
-        switch ($definition[$_definition_member_type])
+        switch ($definition[$_definition_type])
         {
             case 'field':
 
                 // If an injections array was provided and the field is an injected field, construct the injected field descriptor
-                if ($injections && $definition[$_definition_member_field_injection])
-                    $descriptor = $_constructRuntimeInjection({}, $name, $definition[$_definition_member_value], $injections, $definition[$_definition_member_field_type], $definition[$_definition_member_field_readonly] ? $readonly : null);
+                if ($injections && $definition[$_definition_field_injection])
+                    $descriptor = $_constructRuntimeInjection({}, $name, $definition[$_definition_value], $injections, $definition[$_definition_field_type], $definition[$_definition_field_readonly] ? $readonly : null);
                 // Construct the field descriptor
                 else
-                    $descriptor = $_constructRuntimeField({}, false, $name, $cache ? $cache[$name] : $definition[$_definition_member_value], $private, $public, $definition[$_definition_member_field_readonly] ? $readonly : null);
+                    $descriptor = $_constructRuntimeField({}, false, $name, $cache ? $cache[$name] : $definition[$_definition_value], $private, $public, '', $definition[$_definition_field_readonly] ? $readonly : null);
 
                 // If the field is protected or public
                 if ($isProtected || $isPublic)
@@ -1423,13 +1477,14 @@
                 // Create the constructor flag and method context
                 var $constructor = $isProtected && $name == 'constructor';
                 var $this        = $private;
+                var $unhidden    = false;
 
                 // If the method is the constructor, set the instance as the constructor instance
                 if ($constructor)
                     $this = $_lazy ? $_constructRuntimeConstructor($private) : $context;
 
                 // Construct the method and method descriptor
-                $descriptor = { 'enumerable': !$constructor, 'value': $_constructRuntimeMethod($definition[$_definition_member_value], $this, $private, $public) };
+                $descriptor = { 'enumerable': !$constructor && $unhidden, 'value': $_constructRuntimeMethod($definition[$_definition_value], $this, $private, $public) };
 
                 // If the method is protected or public
                 if ($isProtected || $isPublic)
@@ -1471,10 +1526,11 @@
 
                 // Get the property accessor and construct the accessor method
                 var $accessor = $key.substr(1, 3);
-                var $method   = $_constructRuntimeMethod($definition[$_definition_member_value], $private, $private, $public);
+                var $method   = $_constructRuntimeMethod($definition[$_definition_value], $private, $private, $public);
 
                 // Check if the property is complex and if a merge operation is being performed
-                var $complex      = $definition[$_definition_member_property_accessors];
+                var $complex      = $definition[$_definition_property_accessors];
+                var $hidden       = false;
                 var $mergeBase    = $complex && $__hasOwnProperty__.call($base, $name);
                 var $mergePrivate = $complex && $__hasOwnProperty__.call($private, $name);
                 var $merge        = $mergeBase || $mergePrivate;
@@ -1483,7 +1539,7 @@
                 if (!$complex || $merge)
                 {
                     // Construct the property descriptor
-                    $descriptor = { 'enumerable': true };
+                    $descriptor = { 'enumerable': !$hidden };
 
                     // Set the accessor method in the property descriptor
                     $descriptor[$accessor] = $method;
@@ -1496,7 +1552,7 @@
 
                         // Get the override method and inherited descriptor
                         var $override = $_constructRuntimeOverride($method, $key, $definition, $overrides);
-                        var $inherit  = $override ? { 'enumerable': true } : $descriptor;
+                        var $inherit  = $override ? { 'enumerable': !$hidden } : $descriptor;
 
                         // If an override method was found, set the override accessor method in the inherited descriptor
                         if ($override)
@@ -1582,8 +1638,8 @@
     {
         // Get the member definition from the definitions object along with the name and type
         var $definition = $definitions[$key];
-        var $name       = $definition[$_definition_member_name];
-        var $type       = $definition[$_definition_member_type];
+        var $name       = $definition[$_definition_name];
+        var $type       = $definition[$_definition_type];
 
         // Create the helper arguments array and handle along with the member reference
         var $arguments = [];
@@ -1595,9 +1651,9 @@
             case 'field':
 
                 // Get the field definition data
-                var $fieldType = $definition[$_definition_member_field_type];
-                var $injection = $definition[$_definition_member_field_injection];
-                var $readonly  = $definition[$_definition_member_field_readonly];
+                var $fieldType = $definition[$_definition_field_type];
+                var $injection = $definition[$_definition_field_injection];
+                var $readonly  = $definition[$_definition_field_readonly];
 
                 // Set the helper handle
                 $handle = 'f';
@@ -1619,7 +1675,7 @@
             case 'method':
 
                 // Get the method definition data
-                var $returnType = $definition[$_definition_member_method_type];
+                var $methodType = $definition[$_definition_method_type];
 
                 // Set the helper handle
                 $handle = 'm';
@@ -1631,7 +1687,7 @@
                     '"' + $name + '"',                                        // NAME
                     $_precompile_matrix + $level + '$0',                      // PRIVATE
                     $_precompile_matrix + $level + '$2',                      // PUBLIC
-                    $returnType ? '"' + $returnType + '"' : $_precompile_null // TYPE
+                    $methodType ? '"' + $methodType + '"' : $_precompile_null // TYPE
                 ]);
 
                 break;
@@ -1639,8 +1695,8 @@
             case 'property':
 
                 // Get the property definition data
-                var $accessor   = $key.substr(1, 1);
-                var $returnType = $definition[$_definition_member_method_type];
+                var $accessor     = $key.substr(1, 1);
+                var $propertyType = $definition[$_definition_method_type];
 
                 // Set the helper handle
                 $handle = 'a';
@@ -1648,12 +1704,12 @@
                 // Create the helper arguments
                 $arguments = (
                 [
-                    $_precompile_cache + $level,                               // CACHE[NAME] => FUNCTION
-                    '"' + $name + '"',                                         // NAME
-                    $_precompile_matrix + $level + '$0',                       // PRIVATE
-                    $_precompile_matrix + $level + '$2',                       // PUBLIC
-                    $returnType ? '"' + $returnType + '"' : $_precompile_null, // TYPE
-                    '"' + $accessor + '"'                                      // ACCESSOR
+                    $_precompile_cache + $level,                                   // CACHE[NAME] => FUNCTION
+                    '"' + $name + '"',                                             // NAME
+                    $_precompile_matrix + $level + '$0',                           // PRIVATE
+                    $_precompile_matrix + $level + '$2',                           // PUBLIC
+                    $propertyType ? '"' + $propertyType + '"' : $_precompile_null, // TYPE
+                    '"' + $accessor + '"'                                          // ACCESSOR
                 ]);
 
                 break;
@@ -1666,7 +1722,7 @@
         if ($type == 'property')
         {
             // Get the complex flag and merge stack
-            var $complex = $definition[$_definition_member_property_accessors];
+            var $complex = $definition[$_definition_property_accessors];
             var $merge   = $merges[$name];
 
             // If the property is not complex or is being merged
@@ -1749,16 +1805,16 @@
 
             // If the member is public, push the protected and public member references into the statements array
             if ($publicOverrides)
-                $statements.push('d2(' + $_precompile_matrix + $level + '$1,' + $_precompile_matrix + $level + '$2,' + ($override !== null ? $override : $reference) + ')');
+                $statements.push('d2(' + $_precompile_matrix + $level + '$1,' + $_precompile_matrix + $level + '$2,' + ($override != null ? $override : $reference) + ')');
             // Push the protected member reference into the statements array
             else
-                $statements.push('d(' + $_precompile_matrix + $level + '$1,' + ($override !== null ? $override : $reference) + ')');
+                $statements.push('d(' + $_precompile_matrix + $level + '$1,' + ($override != null ? $override : $reference) + ')');
         }
         // Push the private member reference into the statements array
         else
             $statements.push('d(' + $_precompile_matrix + $level + '$0,' + $reference + ')');
     };
-    var $_constructRuntimeField       = function($descriptor, $configurable, $name, $value, $private, $public, $readonly)
+    var $_constructRuntimeField       = function($descriptor, $configurable, $name, $value, $private, $public, $type, $readonly)
     {
         // Set the descriptor data
         $descriptor['configurable'] = $configurable;
@@ -1769,10 +1825,13 @@
             return $value;
         };
 
-        // If read-only checking is enabled
-        if ($readonly)
+        // If type checking is enabled
+        if ($type)
         {
-            // Set the descriptor set accessor with read-only checking
+            //
+        }
+        // If read-only checking is enabled, set the descriptor set accessor with read-only checking
+        else if ($readonly)
             $descriptor['set'] = function($v)
             {
                 // If the field is read-only
@@ -1793,10 +1852,8 @@
                 else
                     $value = $v;
             };
-        }
+        // Set the descriptor set accessor without read-only checking
         else
-        {
-            // Set the descriptor set accessor without read-only checking
             $descriptor['set'] = function($v)
             {
                 // If the provided value is set to a private instance, set the value to the public instance
@@ -1806,7 +1863,6 @@
                 else
                     $value = $v;
             };
-        }
 
         // Return the field descriptor
         return $descriptor;
@@ -1855,7 +1911,7 @@
                         throw $_exceptionFormat($_lang_$$_field_readonly, $name, 'injection');
 
                     // If the value does not match the type, throw an exception
-                    if ($v !== undefined && $v !== null && $$_type($v) != $type)
+                    if ($v != null && $$_type($v) != $type)
                         throw $_exceptionFormat($_lang_$$_field_type, $name, $type);
 
                     // Set the injected value
@@ -1868,7 +1924,7 @@
                 $descriptor['set'] = function($v)
                 {
                     // If the value does not match the type, throw an exception
-                    if ($v !== undefined && $v !== null && $$_type($v) != $type)
+                    if ($v != null && $$_type($v) != $type)
                         throw $_exceptionFormat($_lang_$$_field_type, $name, $type);
 
                     // Set the injected value
@@ -1944,7 +2000,7 @@
         // Return the descriptor
         return $descriptor;
     };
-    var $_constructRuntimeMethod      = function($function, $this, $private, $public)
+    var $_constructRuntimeMethod      = function($function, $this, $private, /*$type,*/ $public)
     {
         // Return the method wrapper
         return function()
@@ -1963,10 +2019,10 @@
     var $_constructRuntimeOverride    = function($data, $key, $definition, $overrides)
     {
         // If the method is virtual
-        if ($definition[$_definition_member_method_virtual])
+        if ($definition[$_definition_method_virtual])
         {
             // If the method is not final
-            if (!$definition[$_definition_member_method_final])
+            if (!$definition[$_definition_method_final])
             {
                 // Get the override data from the overrides object
                 var $override = $overrides[$key] || null;
@@ -2017,9 +2073,9 @@
             $vars.push($_precompile_matrix + $i + '$3=' + $_precompile_matrix + $i + '[3]');
 
             // Get the private, protected, and public definitions objects 
-            var $private   = $class[$_definition_private].call($_lock);
-            var $protected = $class[$_definition_protected].call($_lock);
-            var $public    = $class[$_definition_public].call($_lock);
+            var $private   = $class[$_symbol_private]($_lock);
+            var $protected = $class[$_symbol_protected]($_lock);
+            var $public    = $class[$_symbol_public]($_lock);
 
             // Get the private, protected, and public keys
             var $privateKeys   = $__keys($private);
@@ -2048,7 +2104,7 @@
                 $_constructRuntimeDump($vars, $statements, $public, $merges, $publicKeys[$k], $k + $index, $i, null, $publicOverrides);
 
             // Push the lock statement into the statements array (without locking expandos)
-            $statements.push('l(' + $_precompile_matrix + $i + '$3,' + ($class[$_definition_expando_private] ? $_precompile_null : $_precompile_matrix + $i + '$0') + ',' + $_precompile_matrix + $i + '$1,' + ($class[$_definition_expando_public] ? $_precompile_null : $_precompile_matrix + $i + '$2') + ')');
+            $statements.push('l(' + $_precompile_matrix + $i + '$3,' + ($class[$_symbol_expando_private] ? $_precompile_null : $_precompile_matrix + $i + '$0') + ',' + $_precompile_matrix + $i + '$1,' + ($class[$_symbol_expando_public] ? $_precompile_null : $_precompile_matrix + $i + '$2') + ')');
         }
 
         // Create the precompile string
@@ -2169,7 +2225,7 @@
             return $_constructRuntimeInjection($descriptor, $name, $cache[$name], $injections, $type, $readonly);
 
         // Return the constructed field descriptor
-        return $_constructRuntimeField($descriptor, false, $name, $cache[$name], $private, $public, $readonly);
+        return $_constructRuntimeField($descriptor, false, $name, $cache[$name], $private, $public, '', $readonly);
     };
     var $_importRuntimeLock        = function($base, $private, $protected, $public)
     {
@@ -2190,7 +2246,7 @@
     var $_importRuntimeMethod      = function($cache, $name, $private, $public, $type)
     {
         // Create the method descriptor with the embedded property name and the method context
-        var $descriptor = { 'enumerable': true, 'name': $name };
+        var $descriptor = { 'enumerable': false, 'name': $name };
         var $this       = $private;
 
         // If the method is the constructor, create the constructor context
@@ -2216,6 +2272,59 @@
         $__defineProperty($instance, $name, { 'enumerable': true, 'get': $get, 'set': $set });
     };
 
+    // ---------- SYMBOLS ----------
+
+    // Create the lock symbols helper functions
+    var $_lockSymbolsClass    = function($class)
+    {
+        var $lock = $class[$_symbol_lock];
+
+        if (typeof $lock != 'function')
+            return false;
+
+        $_lock_class = null;
+
+        $lock();
+
+        if (!$_lock_class)
+            return false;
+
+        return $_lock_class === $class;
+    };
+    var $_lockSymbolsInstance = function($instance)
+    {
+        var $lock = $instance[$_symbol_lock];
+
+        if (typeof $lock != 'function')
+            return false;
+
+        $_lock_instance_as = null;
+        $_lock_instance_is = null;
+
+        $lock();
+
+        if (!$_lock_instance_as || !$_lock_instance_is)
+            return false;
+
+        return $_lock_instance_as === $instance.as && $_lock_instance_is === $instance.is;
+    };
+    var $_lockSymbolsPackage  = function($package)
+    {
+        var $lock = $package[$_symbol_lock];
+
+        if (typeof $lock != 'function')
+            return false;
+
+        $_lock_package = null;
+
+        $lock();
+
+        if (!$_lock_package)
+            return false;
+
+        return $_lock_package === $package;
+    };
+
     // ########## NAMESPACE ##########
 
     // Create the compiler
@@ -2230,7 +2339,7 @@
         var $typeof      = typeof $constructor;
 
         // If the constructor is not a simple object
-        if ($constructor === null || $typeof != 'object' || $__getPrototypeOf($constructor) !== $__objectProto__)
+        if ($constructor == null || $typeof != 'object' || $__getPrototypeOf($constructor) !== $__objectProto__)
         {
             // Get the prototype
             $prototype = arguments[$argument++];
@@ -2246,7 +2355,7 @@
                 $modifiers = $constructor;
 
                 // If the prototype is a class
-                if (typeof $prototype == 'function' && $prototype[$_definition_keyHint] === $prototype)
+                if (typeof $prototype == 'function' && $_lockSymbolsClass($prototype))
                 {
                     // Use the second argument as the base class
                     $baseClass   = $prototype;
@@ -2257,7 +2366,7 @@
                     $constructor = $prototype;
 
                 // If the constructor is not a function or is a class
-                if (typeof $constructor != 'function' || $constructor[$_definition_keyHint] === $constructor)
+                if (typeof $constructor != 'function' || $_lockSymbolsClass($constructor))
                 {
                     // Use the third argument as the prototype
                     $prototype   = $constructor;
@@ -2268,13 +2377,13 @@
                     $prototype = arguments[$argument++];
             }
             // If the constructor is a class
-            else if ($constructor[$_definition_keyHint] === $constructor)
+            else if ($_lockSymbolsClass($constructor))
             {
                 // Use the first argument as the base class
                 $baseClass = $constructor;
 
                 // If the prototype is a function and not a class
-                if (typeof $prototype == 'function' && $prototype[$_definition_keyHint] !== $prototype)
+                if (typeof $prototype == 'function' && !$_lockSymbolsClass($prototype))
                 {
                     // Use the second argument as the constructor
                     $constructor = $prototype;
@@ -2285,7 +2394,7 @@
             }
 
             // If the prototype is not a simple object, throw an exception
-            if ($prototype === null || typeof $prototype != 'object' || $__getPrototypeOf($prototype) !== $__objectProto__)
+            if ($prototype == null || typeof $prototype != 'object' || $__getPrototypeOf($prototype) !== $__objectProto__)
                 throw $_exceptionArguments(null, arguments);
         }
         else
@@ -2325,6 +2434,7 @@
         var $internal  = false;
         var $optimized = false;
         var $struct    = false;
+        var $unlocked  = false;
         var $unsafe    = false;
 
         // Create the expando flags
@@ -2337,10 +2447,10 @@
         if ($modifiers)
         {
             // If the modifiers string is not an import string
-            if ($modifiers.length <= $_const_precompile_prefix.length || $modifiers.substr(0, $_const_precompile_prefix.length) != $_const_precompile_prefix)
+            if ($modifiers.length <= $_const_prefix_precompile.length || $modifiers.substr(0, $_const_prefix_precompile.length) != $_const_prefix_precompile)
             {
                 // Create the keywords array
-                var $keywords = $__string_trim__.call($modifiers).split(' ');
+                var $keywords = $modifiers.trim().split(' ');
 
                 for (var $i = 0, $j = $keywords.length; $i < $j; $i++)
                 {
@@ -2386,6 +2496,16 @@
                     // If the keyword is struct, set the struct flag
                     else if ($keyword == 'struct')
                         $struct = true;
+                    // If the keyword is unlocked
+                    else if ($keyword == 'unlocked')
+                    {
+                        // Set the class instance expando flags
+                        $expandoPrivate = true;
+                        $expandoPublic  = true;
+
+                        // Set the unlocked flag
+                        $unlocked = true;
+                    }
                     // If the keyword is the unsafe token, set the unsafe flag
                     else if ($_unsafe && $keyword == $_unsafe)
                         $unsafe = true;
@@ -2433,7 +2553,7 @@
         if ($import)
         {
             // Generate the imported construct function factory
-            $construct = (new $__function('"use strict";var $=function(' + $_const_construct_arguments + ')' + $modifiers.substr($_const_precompile_prefix.length) + 'return $;')).call($$);
+            $construct = (new $__function('"use strict";var $=function(' + $_const_construct_arguments + ')' + $modifiers.substr($_const_prefix_precompile.length) + 'return $;')).call($$);
 
             // Copy the imported construct data into the class
             $abstract = !!$construct['a'];
@@ -2462,51 +2582,51 @@
         if ($baseClass)
         {
             // Get the base protected and public definitions objects
-            $baseProtected = $baseClass[$_definition_protected].call($_lock);
-            $basePublic    = $baseClass[$_definition_public].call($_lock);
+            $baseProtected = $baseClass[$_symbol_protected]($_lock);
+            $basePublic    = $baseClass[$_symbol_public]($_lock);
 
             // If the base class is final, throw an exception
-            if ($baseClass[$_definition_final])
+            if ($baseClass[$_symbol_final])
                 throw $_exceptionFormat($_lang_$$_derive_sealed);
 
             // If the class is not unsafe and the base class is unsafe, throw an exception
-            if (!$unsafe && $baseClass[$_definition_unsafe])
+            if (!$unsafe && $baseClass[$_symbol_unsafe])
                 throw $_exceptionFormat($_lang_$$_derive_unsafe);
 
             // If the class has the import flag
             if ($import)
             {
                 // If the base class doesn't have the import flag, throw an exception
-                if (!$baseClass[$_definition_import])
+                if (!$baseClass[$_symbol_import])
                     throw $_exceptionFormat($_lang_$$_derive_export);
 
                 // Create the chained cache, protected, and public definitions objects
-                $classCache     = $__create($baseClass[$_definition_cache]);
+                $classCache     = $__create($baseClass[$_symbol_cache]);
                 $classProtected = $__create(null);
                 $classPublic    = $__create(null);
             }
             else
             {
                 // If the base class has the import flag, throw an exception
-                if ($baseClass[$_definition_import])
+                if ($baseClass[$_symbol_import])
                     throw $_exceptionFormat($_lang_$$_derive_import);
 
                 // Create the chained cache, chained protected, and chained public definitions objects
-                $classCache     = $__create($optimized ? $baseClass[$_definition_cache] : null);
+                $classCache     = $__create($optimized ? $baseClass[$_symbol_cache] : null);
                 $classProtected = $__create($baseProtected);
                 $classPublic    = $__create($basePublic);
             }
 
             // If the class is not internal and the base class is internal, throw an exception
-            if (!$internal && $baseClass[$_definition_internal])
+            if (!$internal && $baseClass[$_symbol_internal])
                 throw $_exceptionFormat($_lang_$$_derive_internal);
 
             // If the class is optimized and the base class is not optimized, throw an exception
-            if ($optimized && !$baseClass[$_definition_optimized])
+            if ($optimized && !$baseClass[$_symbol_optimized])
                 throw $_exceptionFormat($_lang_$$_derive_unoptimized);
 
             // If the base class has the struct modifier
-            if ($baseClass[$_definition_struct])
+            if ($baseClass[$_symbol_struct])
             {
                 // If the class does not have the struct modifier, throw an exception
                 if (!$struct)
@@ -2515,6 +2635,17 @@
             // If the class has the struct modifier, throw an exception
             else if ($struct)
                 throw $_exceptionFormat($_lang_$$_derive_class);
+
+            // If the base class is unlocked
+            if ($baseClass[$_symbol_unlocked])
+            {
+                // If the class is not unlocked, throw an exception
+                if (!$unlocked)
+                    throw $_exceptionFormat($_lang_$$_derive_unlocked);
+            }
+            // If the class is unlocked, throw an exception
+            else if ($unlocked)
+                throw $_exceptionFormat($_lang_$$_derive_locked);
 
             // Set the subclass flag
             $_subclass = true;
@@ -2528,19 +2659,20 @@
             // Create the current class tracker
             var $current = $baseClass;
 
-            // If a current class was found
-            while (typeof $current == 'function' && $current[$_definition_keyHint] === $current)
+            do
             {
                 // Add the current class to the chain array
                 $chain.push($current);
 
                 // If the class is internal and the current class is internal, increment the external index
-                if ($internal && $current[$_definition_internal])
+                if ($internal && $current[$_symbol_internal])
                     $external++;
 
                 // Get the next class in the chain
-                $current = $current[$_definition_baseClass];
+                $current = $current[$_symbol_baseClass];
             }
+            // If a current class was found
+            while ($current);
         }
         else
         {
@@ -2563,14 +2695,14 @@
             if (!$__array_isArray($prototypeProtected))
             {
                 // If the neither the protected nor public prototypes are simple objects, throw an exception
-                if ($prototypeProtected === null || typeof $prototypeProtected != 'object' || $__getPrototypeOf($prototypeProtected) !== $__objectProto__ || $prototypePublic === null || typeof $prototypePublic != 'object' || $__getPrototypeOf($prototypePublic) !== $__objectProto__)
+                if ($prototypeProtected == null || typeof $prototypeProtected != 'object' || $__getPrototypeOf($prototypeProtected) !== $__objectProto__ || $prototypePublic == null || typeof $prototypePublic != 'object' || $__getPrototypeOf($prototypePublic) !== $__objectProto__)
                     throw $_exceptionArguments(null, arguments);
 
                 // Set the extra prototype definition object
                 $prototype = arguments[$argument];
 
                 // If the extra prototype is not a simple object, set it to null
-                if ($prototype === null || typeof $prototype != 'object' || $__getPrototypeOf($prototype) !== $__objectProto__)
+                if ($prototype == null || typeof $prototype != 'object' || $__getPrototypeOf($prototype) !== $__objectProto__)
                     $prototype = null;
                 // Increment the argument count
                 else
@@ -2677,21 +2809,16 @@
                 if ($as === $type)
                     return $matrix[$external][2];
 
-                // If the type is not a class or the instance is not an instance of type, return
-                if (typeof $as != 'function' || $as[$_definition_keyHint] !== $as || !($instance instanceof $as))
+                // If the type is not a function, return
+                if (typeof $as != 'function')
                     return null;
 
-                // Create the level tracker
-                var $level = 1;
+                // Get the level from the chain array
+                var $level = $chain.indexOf($as);
 
-                do
-                {
-                    // If the type was found in the chain array, break
-                    if ($chain[$level] === $as)
-                        break;
-                }
-                // Continue if the level is still valid
-                while (++$level < $levels);
+                // If the level is not valid, return
+                if ($level < 0 || $level >= $levels)
+                    return null;
 
                 // Return the public instance
                 return $matrix[$level][2];
@@ -2702,12 +2829,12 @@
                 if ($is === $class || $is === $type)
                     return true;
 
-                // If no type was provided, return false
+                // If the type is not a function, return false
                 if (typeof $is != 'function')
                     return false;
 
-                // Return true if the instance is an instance of the type
-                return !!($instance instanceof $is);
+                // Return true if the type is in the chain array
+                return $chain.indexOf($is) >= 0;
             };
 
             // Set the "as()" and "is()" methods on the instance
@@ -2762,7 +2889,7 @@
                     var $publicInherits    = $__create(null);
 
                     // Build the matrix instance stack
-                    ($i == 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
+                    ($i == 0 ? $construct : $chain[$i][$_symbol_construct])($_lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $getterReadonly, $context, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
 
                     // Set the instance stack in the instance matrix and constructor context in the contexts array
                     $matrix[$i]   = $stack;
@@ -2791,8 +2918,8 @@
                     var $chainType     = $chain[$i];
 
                     // Get the chain expando flags
-                    var $chainExpandoPrivate = $chainType[$_definition_expando_private];
-                    var $chainExpandoPublic  = $chainType[$_definition_expando_public];
+                    var $chainExpandoPrivate = $chainType[$_symbol_expando_private];
+                    var $chainExpandoPublic  = $chainType[$_symbol_expando_public];
 
                     // Build the stack
                     $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $base, $private, null, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
@@ -2890,8 +3017,8 @@
                     var $chainType     = $chain[$i];
 
                     // Get the chain expando flags
-                    var $chainExpandoPrivate = $chainType[$_definition_expando_private];
-                    var $chainExpandoPublic  = $chainType[$_definition_expando_public];
+                    var $chainExpandoPrivate = $chainType[$_symbol_expando_private];
+                    var $chainExpandoPublic  = $chainType[$_symbol_expando_public];
 
                     // Build the stack
                     $_constructRuntimeStack($chainType, $matrixLast, $chainSwitch, $instance, $base, $private, $protected, $public, $typeExternal, $typeInternal, $chainExpandoPrivate, $chainExpandoPublic, $chainInternal);
@@ -2912,11 +3039,11 @@
                 {
                     // Build the matrix
                     for (var $i = 0; $i < $levels; $i++)
-                        ($i == 0 ? $construct : $chain[$i][$_definition_construct]).call($_lock, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly, null, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
+                        ($i == 0 ? $construct : $chain[$i][$_symbol_construct])($_lock, $matrix[$i], null, null, null, $protectedOverrides, $publicOverrides, $getterReadonly, null, $unsafe ? $injections[$i] : null, $matrixCache ? $matrixCache[$i] : null);
                 }
                 // Build the precompiled matrix
                 else
-                    $construct.call($_lock, $matrix, $getterReadonly, $unsafe ? $injections : null);
+                    $construct($_lock, $matrix, $getterReadonly, $unsafe ? $injections : null);
             }
 
             // Create a reference for the return value of the constructor and get the constructor wrapper
@@ -2982,7 +3109,7 @@
         if (!$import)
         {
             // If a base class was provided and it is abstract
-            if ($baseClass && $baseClass[$_definition_abstract])
+            if ($baseClass && $baseClass[$_symbol_abstract])
             {
                 // Get the array of keys for the base protected and public definitions objects
                 var $baseProtectedKeys = $__keys($baseProtected);
@@ -3003,11 +3130,11 @@
                 var $definition = $definitionsPrototype[$definitionsPrototypeMember];
 
                 // If the definition is not a prototype definition, continue
-                if ($definition[$_definition_member_type] != 'prototype')
+                if ($definition[$_definition_type] != 'prototype')
                     continue;
 
                 // Set the prototype member descriptor
-                $__defineProperty($classPrototype, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value], 'writable': !$definition[$_definition_member_const] });
+                $__defineProperty($classPrototype, $definition[$_definition_name], { 'enumerable': true, 'value': $definition[$_definition_value], 'writable': !$definition[$_definition_const] });
             }
 
             for (var $definitionsStaticMember in $definitionsStatic)
@@ -3016,23 +3143,23 @@
                 var $definition = $definitionsStatic[$definitionsStaticMember];
 
                 // If the definition is not a static definition, continue
-                if ($definition[$_definition_member_type] != 'static')
+                if ($definition[$_definition_type] != 'static')
                     continue;
 
                 // Set the static member descriptor
-                $__defineProperty($class, $definition[$_definition_member_name], { 'enumerable': true, 'value': $definition[$_definition_member_value], 'writable': !$definition[$_definition_member_const] });
+                $__defineProperty($class, $definition[$_definition_name], { 'enumerable': true, 'value': $definition[$_definition_value], 'writable': !$definition[$_definition_const] });
             }
 
             // Create the constructor definition array
-            var $constructorDefinition = new $__array($_definition_member_flagCount);
+            var $constructorDefinition = new $__array($_definition_flagCount);
 
             // Set the constructor definition data
-            $constructorDefinition[$_definition_member_method_abstract] = false;
-            $constructorDefinition[$_definition_member_method_final]    = false;
-            $constructorDefinition[$_definition_member_method_virtual]  = false;
-            $constructorDefinition[$_definition_member_name]            = 'constructor';
-            $constructorDefinition[$_definition_member_type]            = 'method';
-            $constructorDefinition[$_definition_member_value]           = $constructor;
+            $constructorDefinition[$_definition_method_abstract] = false;
+            $constructorDefinition[$_definition_method_final]    = false;
+            $constructorDefinition[$_definition_method_virtual]  = false;
+            $constructorDefinition[$_definition_name]            = 'constructor';
+            $constructorDefinition[$_definition_type]            = 'method';
+            $constructorDefinition[$_definition_value]           = $constructor;
 
             // Set the constructor in the protected definitions object
             $__defineProperty($classProtected, 'constructor', { 'enumerable': true, 'value': $constructorDefinition });
@@ -3043,10 +3170,10 @@
             var $classPublicKeys    = $__keys($classPublic);
 
             // Create the construct and precompile helper functions
-            $construct  = function($stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections, $cache)
+            $construct  = function($lock, $stack, $baseInherits, $protectedInherits, $publicInherits, $protectedOverrides, $publicOverrides, $readonly, $context, $injections, $cache)
             {
                 // If this function was not internally unlocked, return
-                if (this !== $_lock)
+                if ($lock !== $_lock)
                     return;
 
                 // Create the stack instance references
@@ -3099,10 +3226,10 @@
                         $__freeze($public);
                 }
             };
-            $precompile = function()
+            $precompile = function($lock)
             {
                 // If this function was not internally unlocked, return
-                if (this !== $_lock)
+                if ($lock !== $_lock)
                     return;
 
                 // If the precompiled string is not found, generate it
@@ -3122,12 +3249,12 @@
                 $evalExport += '$.l=' + $levels + ';';
                 $evalExport += '$.s=' + ($struct ? '!0' : '!1') + ';';
 
-                // If the class is unsafe, append the unsafe (razor) class data to the precompiled export string
+                // If the class is unsafe, append the unsafe razor snippet injection to the precompiled export string
                 if ($unsafe)
                     $evalExport += '$.u="@unsafe";';
 
                 // Return the precompiled export string with the prepended precompile prefix (say that three times fast)
-                return $_const_precompile_prefix + $evalExport;
+                return $_const_prefix_precompile + $evalExport;
             };
         }
         else
@@ -3154,25 +3281,30 @@
         var $data = {};
 
         // Set the class cache data
-        $data[$_definition_abstract]          = { 'value': $abstract };
-        $data[$_definition_baseClass]         = { 'value': $baseClass };
-        $data[$_definition_cache]             = { 'value': $classCache };
-        $data[$_definition_construct]         = { 'value': !$import && !$final ? $construct : null};
-        $data[$_definition_expando_class]     = { 'value': $expandoClass };
-        $data[$_definition_expando_private]   = { 'value': $expandoPrivate };
-        $data[$_definition_expando_prototype] = { 'value': $expandoPrototype };
-        $data[$_definition_expando_public]    = { 'value': $expandoPublic };
-        $data[$_definition_final]             = { 'value': $final };
-        $data[$_definition_import]            = { 'value': $import };
-        $data[$_definition_internal]          = { 'value': $internal };
-        $data[$_definition_keyHint]           = { 'value': $class };
-        $data[$_definition_optimized]         = { 'value': $optimized };
-        $data[$_definition_private]           = { 'value': $_definitionsCompilerLock($classPrivate) };
-        $data[$_definition_precompile]        = { 'value': $precompile };
-        $data[$_definition_protected]         = { 'value': $_definitionsCompilerLock($classProtected) };
-        $data[$_definition_public]            = { 'value': $_definitionsCompilerLock($classPublic) };
-        $data[$_definition_struct]            = { 'value': $struct };
-        $data[$_definition_unsafe]            = { 'value': $unsafe };
+        $data[$_symbol_abstract]          = { 'value': $abstract };
+        $data[$_symbol_baseClass]         = { 'value': $baseClass };
+        $data[$_symbol_cache]             = { 'value': $classCache };
+        $data[$_symbol_construct]         = { 'value': !$import && !$final ? $construct : null};
+        $data[$_symbol_expando_class]     = { 'value': $expandoClass };
+        $data[$_symbol_expando_private]   = { 'value': $expandoPrivate };
+        $data[$_symbol_expando_prototype] = { 'value': $expandoPrototype };
+        $data[$_symbol_expando_public]    = { 'value': $expandoPublic };
+        $data[$_symbol_final]             = { 'value': $final };
+        $data[$_symbol_import]            = { 'value': $import };
+        $data[$_symbol_internal]          = { 'value': $internal };
+        $data[$_symbol_lock]              = { 'value': function()
+        {
+            // Set the lock class
+            $_lock_class = $class;
+        } };
+        $data[$_symbol_optimized]         = { 'value': $optimized };
+        $data[$_symbol_private]           = { 'value': $_definitionsCompilerLock($classPrivate) };
+        $data[$_symbol_precompile]        = { 'value': $precompile };
+        $data[$_symbol_protected]         = { 'value': $_definitionsCompilerLock($classProtected) };
+        $data[$_symbol_public]            = { 'value': $_definitionsCompilerLock($classPublic) };
+        $data[$_symbol_struct]            = { 'value': $struct };
+        $data[$_symbol_unlocked]          = { 'value': $unlocked };
+        $data[$_symbol_unsafe]            = { 'value': $unsafe };
 
         // Set the class data
         $__defineProperties($class, $data);
@@ -3211,7 +3343,7 @@
             (
                 $$,                         // this
                 $chain,                     // c
-                $_definition_cache,         // k
+                $_symbol_cache,             // k
                 $_importRuntimeField,       // f
                 $_importRuntimeMethod,      // m
                 $_importRuntimeAccessor,    // a
@@ -3224,41 +3356,16 @@
 
         // If the export flag is set, return the precompiled export string
         if ($export)
-            return $precompile.call($_lock) || '';
+            return $precompile($_lock) || '';
 
         // Return the class
         return $class;
     };
 
-    // Define the compiler "toString()" method
-    $_defineMethod('toString', function()
-    {
-        // Return the global namespace type string
-        return '[object jTypes]';
-    });
-
-    // ########## DATA ##########
-
-    // ---------- VERSION ----------
-    $_defineField('version', $_version, false);
-
-    // ---------- CLASS + PROTOTYPE ----------
-    $_defineField('__class', $_class, false);
-    $_defineField('__proto', $_prototype, false);
-
-    // ---------- EPSILON/MAX/MIN ----------
-    $_defineField('epsilon', $_const_float_epsilon, false);
-    $_defineField('max', $_const_float_max, false);
-    $_defineField('min', $_const_float_min, false);
-
-    // ---------- INTEGER MAX/MIN ----------
-    $_defineField('intMax', $_const_int_max, false);
-    $_defineField('intMin', $_const_int_min, false);
-
     // ########## PACKAGES ##########
 
     // Define the package methods for class members
-    $__array_forEach__.call('private protected public prototype static'.split(' '), function($modifier)
+    'private protected public prototype static'.split(' ').forEach(function($modifier)
     {
         // Create the package method
         var $method = function($modifiers, $value)
@@ -3297,8 +3404,11 @@
             // Lock the member package
             $package = $_definitionsCompilerLock($package);
 
-            // Set the member package key hint
-            $package[$_package_keyHint] = $package;
+            // Set the package lock
+            $package[$_symbol_lock] = function()
+            {
+                $_lock_package = $package;
+            };
 
             // Return the member package
             return $package;
@@ -3318,558 +3428,89 @@
             $_defineMethod($modifier, $method);
     });
 
+    // ############################################################
+    // ############################################################
+    // ############################################################
+
+    // ########## EXPORTS ##########
+
+    // Define the "toString()" method
+    $_defineMethod('toString', function()
+    {
+        // Return the global namespace type string
+        return '[object jTypes]';
+    });
+
+    // Define the version constant
+    $_defineField('version', $_version, false);
+
+    // Define the global class and prototype constants
+    $_defineField('__class', $_class,     false);
+    $_defineField('__proto', $_prototype, false);
+
+    // Define the date constants
+    $_defineField('dateMax', $__preventExtensions(new $__date($_const_date_max)), false);
+    $_defineField('dateMin', $__preventExtensions(new $__date($_const_date_min)), false);
+
+    // Define the numeric constants
+    $_defineField('epsilon', $_const_float_epsilon, false);
+    $_defineField('intMax',  $_const_int_max,       false);
+    $_defineField('intMin',  $_const_int_min,       false);
+    $_defineField('max',     $_const_float_max,     false);
+    $_defineField('min',     $_const_float_min,     false);
+
     // ########## TYPES ##########
 
-    var $$_type = null;
+    // Create the internal types lookup
+    var $_types = $__create(null);
 
-    // Define the "type()" method and the "is()" methods for internal JavaScript types
-    (function()
+    // Create the checking methods
+    var $$_isClass     = function($object)
     {
-        // Create the types lookup
-        var $types = $__create(null);
-
-        // Iterate the internal JavaScript types
-        $__array_forEach__.call('Array Boolean Date Error Function Number RegExp String'.split(' '), function($type)
-        {
-            // Get the type keyword
-            var $keyword = $type.toLowerCase();
-
-            // Insert the keyword into the types lookup
-            $types['[object ' + $type + ']'] = $keyword;
-
-            // Define the "is()" method for the type
-            $_defineMethod('is' + $type, function($object)
-            {
-                // Return true if the object matches the type
-                return $$_type($object) == $keyword;
-            });
-        });
-
-        // Iterate the known aliases of the internal JavaScript window type
-        $__array_forEach__.call('global Window DOMWindow'.split(' '), function($alias)
-        {
-            // Insert the window alias into the types lookup
-            $types['[object ' + $alias + ']'] = 'window';
-        });
-
-        // Define the type method
-        $_defineMethod('type', $$_type = function($object)
-        {
-            // If the object is undefined, return the "undefined" type string
-            if ($object === undefined)
-                return 'undefined';
-
-            // If the object is null, return the "null" type string
-            if ($object === null)
-                return 'null';
-
-            // If the object is a function, return either the "class" or "function" type string
-            if (typeof $object == 'function')
-                return $object[$_definition_keyHint] === $object ? 'class': 'function';
-
-            // If the object is the window object, return the "window" type string
-            if ($object === $_window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf($object) === null)
-                return 'window';
-
-            // If the object is a class instance, return the "instance" type string
-            if ($object instanceof $_class)
-                return 'instance';
-
-            // Return the type string from the types lookup using the native "toString()" function
-            return $types[$__toString__.call($object)] || 'object';
-        });
-    })();
-
-    // ########## CHECKS ##########
-
-    // ---------- ABSTRACT CLASS ----------
-    $_defineMethod('isAbstractClass', function($object)
-    {
-        // Return true if the object is a class and it is abstract
-        return $$_isClass($object) && !!$object[$_definition_abstract];
-    });
-
-    // ---------- ARGUMENTS OBJECT ----------
-    $_defineMethod('isArgumentsObject', function($object)
-    {
-        // Return true if the object is an arguments object
-        return $__toString__.call($object) == '[object Arguments]';
-    });
-
-    // ---------- ARRAY-LIKE OBJECT ----------
-    $_defineMethod('isArrayLikeObject', function($object)
-    {
-        // If the object is undefined or null, return false
-        if ($object === undefined || $object === null)
-            return false;
-
-        // Get the object length
-        var $length = $object.length;
-
-        // Return true if the length is a finite integer greater than or equal to zero
-        return $$_isFiniteInt($length) && $length >= 0;
-    });
-
-    // ---------- CALLABLE-TYPE ----------
-    $_defineMethod('isCallableType', function($object)
-    {
-        // If the object is a null reference or undefined, return false
-        if ($object === null || $object === undefined)
-            return false;
-
-        // Get the type of the object
-        var $type = $$_type($object);
-
-        // Return true if the object a class or a function
-        return $type == 'class' || $type == 'function';
-    });
-
-    var $$_isClass = null;
-
-    // ---------- CLASS ----------
-    $_defineMethod('isClass', $$_isClass = function($object)
-    {
-        // Return true if the object is a function and has a class key hint
-        return typeof $object == 'function' && $object[$_definition_keyHint] === $object;
-    });
-
-    // ---------- COMPLEX OBJECT ----------
-    $_defineMethod('isComplexObject', function($object)
-    {
-        // If the object is not an object, return false
-        if (!$object || $$_type($object) != 'object')
-            return false;
-
-        // Return true if the prototype of the object is not the object prototype
-        return $__getPrototypeOf($object) !== $__objectProto__;
-    });
-
-    var $$_isFinite = null;
-
-    // ---------- FINITE ----------
-    $_defineMethod('isFinite', $$_isFinite = function($number)
+        // Return true if the object is a function and is a class
+        return typeof $object == 'function' && $_lockSymbolsClass($object);
+    };
+    var $$_isFinite    = function($number)
     {
         // Return true if the object is a number and is finite
-        return $$_type($number) == 'number' && !!$__isFinite($number);
-    });
-
-    var $$_isFiniteInt = null;
-
-    // ---------- FINITE INTEGER ----------
-    $_defineMethod('isFiniteInt', $$_isFiniteInt = function($number)
-    {
-        // Return true if the object is a number, finite, and within the maximum and minimum representable integers
-        return $$_isFinite($number) && $number <= $_const_int_max && $number >= $_const_int_min && $number == Math.floor($number);
-    });
-
-    // ---------- FLAT OBJECT ----------
-    $_defineMethod('isFlatObject', function($object)
-    {
-        // If the object is not an object, return false
-        if (!$object || $$_type($object) != 'object')
-            return false;
-
-        // Return true if the prototype of the object is null
-        return $__getPrototypeOf($object) === null;
-    });
-
-    // ---------- IMPORTED CLASS ----------
-    $_defineMethod('isImportedClass', function($object)
-    {
-        // Return true if the object is a class and it has the import flag
-        return $$_isClass($object) && !!$object[$_definition_import];
-    });
-
-    // ---------- INTERNAL CLASS ----------
-    $_defineMethod('isInternalClass', function($object)
-    {
-        // Return true if the object is a class and it has the internal flag
-        return $$_isClass($object) && !!$object[$_definition_internal];
-    });
-
-    // ---------- INFINITY ----------
-    $_defineMethod('isInfinity', function($number)
-    {
-        // Return true if the object is a number, is not NaN, and is not finite
-        return $$_type($number) == 'number' && !$__isNaN($number) && !$__isFinite($number);
-    });
-
-    // ---------- INSTANCE ----------
-    $_defineMethod('isInstance', function($object)
-    {
-        // If the object is undefined or null, return false
-        if ($object === undefined || $object === null)
-            return false;
-
-        // Return true if the object is an instance of a class
-        return !!($object instanceof $_class);
-    });
-
-    // ---------- NOT-A-NUMBER ----------
-    $_defineMethod('isNaN', function($number)
-    {
-        // Return true if the object is a number and is NaN
-        return $$_type($number) == 'number' && !!$__isNaN($number);
-    });
-
-    // ---------- NEGATIVE INFINITY ----------
-    $_defineMethod('isNegativeInfinity', function($number)
-    {
-        // Return true if the object is a number, is not NaN, is not finite, and is less than zero
-        return $$_type($number) == 'number' && !$__isNaN($number) && !$__isFinite($number) && $number < 0;
-    });
-
-    // ---------- NULL ----------
-    $_defineMethod('isNull', function($argument)
-    {
-        // Return true if the argument is null
-        return $argument === null;
-    });
-
-    // ---------- OBJECT ----------
-    $_defineMethod('isObject', function($object)
-    {
-        // Return true if the object is neither undefined nor null
-        return $object !== undefined && $object !== null;
-    });
-
-    // ---------- OBJECT INSTANCE ----------
-    $_defineMethod('isObjectInstance', function($object)
-    {
-        // If the object is a null reference or undefined, return false
-        if ($object === null || $object === undefined)
-            return false;
-
-        // Return true if the object inherits from the object prototype
-        return !!($object instanceof $__object);
-    });
-
-    // ---------- OPTIMIZED CLASS ----------
-    $_defineMethod('isOptimizedClass', function($object)
-    {
-        // Return true if the object is a class and it is optimized
-        return $$_isClass($object) && !!$object[$_definition_optimized];
-    });
-
-    // ---------- POSITIVE INFINITY ----------
-    $_defineMethod('isPositiveInfinity', function($number)
-    {
-        // Return true if the object is a number, is not NaN, is not finite, and is greater than zero
-        return $$_type($number) == 'number' && !$__isNaN($number) && !$__isFinite($number) && $number > 0;
-    });
-
-    var $$_isPrimitive = null;
-
-    // ---------- PRIMITIVE ----------
-    $_defineMethod('isPrimitive', $$_isPrimitive = function($object)
-    {
-        // If the object is a null reference or undefined, return true
-        if ($object === null || $object === undefined)
-            return true;
-
-        // Get the primitive type of the object
-        var $typeof = typeof $object;
-
-        // Return true if the object is a boolean, number, or string primitive
-        return $typeof == 'boolean' || $typeof == 'number' || $typeof == 'string';
-    });
-
-    // ---------- PRIMITIVE-TYPE ----------
-    $_defineMethod('isPrimitiveType', function($object)
-    {
-        // If the object is a null reference or undefined, return true
-        if ($object === null || $object === undefined)
-            return true;
-
-        // Get the type of the object
-        var $type = $$_type($object);
-
-        // Return true if the object is a value type
-        return $type == 'string' || $type == 'number' || $type == 'boolean';
-    });
-
-    // ---------- REFERENCE-TYPE ----------
-    $_defineMethod('isReferenceType', function($object)
-    {
-        // If the object is a null reference or undefined, return false
-        if ($object === null || $object === undefined)
-            return false;
-
-        // Get the type of the object
-        var $type = $$_type($object);
-
-        // Return true if the object is not a value type
-        return $type != 'boolean' && $type != 'number' && $type != 'string';
-    });
-
-    // ---------- SEALED CLASS ----------
-    $_defineMethod('isSealedClass', function($object)
-    {
-        // Return true if the object is a class and it is final
-        return $$_isClass($object) && !!$object[$_definition_final];
-    });
-
-    // ---------- SIMPLE OBJECT ----------
-    $_defineMethod('isSimpleObject', function($object)
-    {
-        // If the object is not an object, return false
-        if (!$object || $$_type($object) != 'object')
-            return false;
-
-        // Return true if the prototype of the object is the object prototype
-        return $__getPrototypeOf($object) === $__objectProto__;
-    });
-
-    // ---------- STRUCT ----------
-    $_defineMethod('isStruct', function($object)
-    {
-        // Return true if the object is a class and it has the struct modifier
-        return $$_isClass($object) && !!$object[$_definition_struct];
-    });
-
-    // ---------- UNDEFINED ----------
-    $_defineMethod('isUndefined', function($argument)
-    {
-        // Return true if the argument is undefined
-        return $argument === undefined;
-    });
-
-    // ---------- VALUE-TYPE ----------
-    $_defineMethod('isValueType', function($object)
-    {
-        // If the object is a null reference or undefined, return false
-        if ($object === null || $object === undefined)
-            return false;
-
-        // Get the type of the object
-        var $type = $$_type($object);
-
-        // Return true if the object is a boolean, number, or string
-        return $type == 'boolean' || $type == 'number' || $type == 'string';
-    });
-
-    // ---------- WINDOW ----------
-    $_defineMethod('isWindow', function($object)
-    {
-        // If the object is the window reference, return true
-        if ($object === $_window)
-            return true;
-
-        // If the object is a null reference or undefined, return false
-        if ($object === null || $object === undefined)
-            return false;
-
-        // Return true if the object is a window reference
-        return $$_type($object) == 'window';
-    });
-
-    // ---------- WINDOW-LIKE OBJECT ----------
-    $_defineMethod('isWindowLikeObject', function($object)
-    {
-        // Return true if the object is neither undefined nor null and has a window property that is a self reference
-        return $object !== undefined && $object !== null && $object.window === $object;
-    });
-
-    // ########## CASTS ##########
-    
-    // Create the casting methods
-    var $$_asArray  = function($object)
-    {
-        // If the object is already an array, return the array
-        if ($__array_isArray($object))
-            return $object;
-
-        // If the object is a primitive value, return an empty array
-        if ($$_isPrimitive($object))
-            return [];
-
-        // Get the object collection length
-        var $length = $object.length;
-
-        // If the object collection length is not an integer or is less than zero, set it to zero
-        if (!$$_isFiniteInt($length) || $length < 0)
-            $length = 0;
-
-        // Create the array
-        var $array = new $__array($length);
-        
-        // Copy the value of each index in the object into the array
-        for (var $i = 0; $i < $length; $i++)
-            $array[$i] = $object[$i];
-
-        // Return the array
-        return $array;
+        return $number != null && (typeof $number == 'number' || $_types[$__toString__.call($number)] == 'number') && !!$__isFinite($number);
     };
-    var $$_asBool   = function($object)
+    var $$_isInstance  = function($object)
     {
+        // Return true if the object is neither null nor undefined and is a class instance
+        return $object != null && $_lockSymbolsInstance($object);
+    };
+    var $$_isInteger   = function($number)
+    {
+        // Return true if the object is a number, finite, and truncated (and within the maximum and minimum representable integers)
+        return $$_isFinite($number) && $number <= $_const_int_max && $number >= $_const_int_min && $number == $__floor($number);
+    };
+    var $$_isPrimitive = function($object)
+    {
+        // If the object is a null reference or undefined, return true
+        if ($object == null)
+            return true;
+
         // Get the internal type of the object
         var $typeOf = typeof $object;
 
-        // If the object is a boolean primitive, return the object
-        if ($typeOf == 'boolean')
-            return $object;
-
-        // Get the object type
-        var $type = $$_type($object);
-
-        // If the object is a number
-        if ($type == 'number')
-        {
-            // If the number is not a primitive, convert it to a number primitive
-            if ($typeOf != 'number')
-                $object = $__number_valueOf__.call($object);
-        }
-        // If the object is a string
-        else if ($type == 'string')
-        {
-            // If the string is not a primitive, convert it to a string primitive
-            if ($typeOf != 'string')
-                $object = $__string_valueOf__.call($object);
-        }
-        
-        // Return the object as a boolean primitive
-        return !!$object;
+        // Return true if the object is a boolean, number, or string primitive
+        return $typeOf == 'boolean' || $typeOf == 'number' || $typeOf == 'string';
     };
-    var $$_asFloat  = function($object, $finite)
-    {
-        // FORMAT $finite
-        $finite = $finite !== undefined ? $$_asBool($finite) : false;
 
-        // If the object is not a number primitive
-        if (typeof $object != 'number')
-        {
-            // Get the object type
-            var $type = $$_type($object);
+    // Define the checking methods
+    $_defineMethod('isClass',     $$_isClass);
+    $_defineMethod('isFinite',    $$_isFinite);
+    $_defineMethod('isInstance',  $$_isInstance);
+    $_defineMethod('isInteger',   $$_isInteger);
+    $_defineMethod('isFiniteInt', $$_isInteger);// DEPRECATED
+    $_defineMethod('isPrimitive', $$_isPrimitive);
 
-            // If the object is a string
-            if ($type == 'string')
-            {
-                // If the object does not match a floating-point string, return NaN (unless forced to be finite)
-                if (!$__string_match__.call($__string_trim__.call($object), /^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
-                    return $finite ? 0 : $__NaN__;
-
-                // Convert the string to a floating-point number
-                $object = $__parseFloat($object);
-            }
-            // If the object is a number object, convert it to a number primitive
-            else if ($type == 'number')
-                $object = $__number_valueOf__.call($object);
-            // Return NaN (unless forced to be finite)
-            else
-                return $finite ? 0 : $__NaN__;
-        }
-
-         // If the finite flag is not set, return the object
-        if (!$finite)
-            return $object;
-
-        // If the object is not a number, return zero
-        if ($__isNaN($object))
-            return 0;
-
-        // If the number is greater than the maximum value, return the maximum value
-        if ($object > $_const_float_max)
-            return $_const_float_max;
-
-        // If the number is less than the minimum value, return the minimum value
-        if ($object < $_const_float_min)
-            return $_const_float_min;
-
-        // Return the object
-        return $object;
-    };
-    var $$_asInt    = function($object, $finite)
-    {
-        // FORMAT $object
-        // FORMAT $finite
-        $object = $$_asFloat($object);
-        $finite = $finite !== undefined ? $$_asBool($finite) : false;
-
-        // If the object is not a number, return NaN (unless forced to be finite)
-        if ($__isNaN($object))
-            return $finite ? 0 : $__NaN__;
-
-        // If the number is greater than the maximum integer, return positive infinity (unless forced to be finite)
-        if ($object > $_const_int_max)
-            return $finite ? $_const_int_max : $__number_positiveInfinity__;
-
-        // If the number is less than the minimum integer, return negative infinity (unless forced to be finite)
-        if ($object < $_const_int_min)
-            return $finite ? $_const_int_min : $__number_negativeInfinity__;
-
-        // If the number is less than zero, return the number as an integer (rounded towards zero)
-        if ($object < 0)
-            return Math.ceil($object);
-
-        // Return the number as an integer (rounded towards zero)
-        return Math.floor($object);
-    };
-    var $$_asObject = function($object)
+    // Create the boxing and lookup methods
+    var $$_box   = function($object)
     {
         // If the object is a null reference or undefined, return an empty object
-        if ($object === null || $object === undefined)
-            return {};
-
-        // Return the object
-        return $object;
-    };
-    var $$_asString = function($object)
-    {
-        // If the object is a string primitive, return the object
-        if (typeof $object == 'string')
-            return $object;
-
-        // Get the object type
-        var $type = $$_type($object);
-
-        // If the object is a boolean, return it as a string primitive
-        if ($type == 'boolean')
-            return $__boolean_toString__.call($object);
-
-        // If the object is a number, return it as a string primitive
-        if ($type == 'number')
-            return $__number_toString__.call($object);
-
-        // If the object is a string object, return the primitive value of the string object
-        if ($type == 'string')
-            return $__string_valueOf__.call($object);
-        
-        // Return an empty string primitive
-        return '';
-    };
-    
-    // Define the casting methods
-    $_defineMethod('asArray',  $$_asArray);
-    $_defineMethod('asBool',   $$_asBool);
-    $_defineMethod('asFloat',  $$_asFloat);
-    $_defineMethod('asInt',    $$_asInt);
-    $_defineMethod('asObject', $$_asObject);
-    $_defineMethod('asString', $$_asString);
-
-    // ########## HELPERS ##########
-
-    // ---------- BASE ----------
-    $_defineMethod('base', function($class)
-    {
-        // CHECK $class
-        if (!$$_isClass($class))
-        {
-            // If the debug flag is set, throw an exception
-            if ($_debug)
-                throw $_exceptionArguments('base', arguments);
-
-            return null;
-        }
-
-        // Return the base class
-        return $class[$_definition_baseClass] || null;
-    });
-
-    // ---------- BOX ----------
-    $_defineMethod('box', function($object)
-    {
-        // If the object is a null reference or undefined, return an empty object
-        if ($object === null || $object === undefined)
+        if ($object == null)
             return {};
 
         // Get the internal type of the object
@@ -3886,22 +3527,714 @@
         // If the object is a string primitive, return the string object
         if ($typeOf == 'string')
             return new $__string($object);
-        
+
         // Return the object
         return $object;
-    });
-
-    // ---------- EMPTY ----------
-    $_defineMethod('empty', function()
+    };
+    var $$_type  = function($object)
     {
-        // Return an empty function
-        return function()
+        // If the object is a null reference or undefined, return either the "null" or "undefined" type string
+        if ($object == null)
+            return $object === null ? 'null' : 'undefined';
+
+        // Get the internal type of the object
+        var $typeOf = typeof $object;
+
+        // If the object is a either a boolean, number, or string primitive, return the internal type string
+        if ($typeOf == 'boolean' || $typeOf == 'number' || $typeOf == 'string')
+            return $typeOf;
+
+        // If the object is a function, return either the "class" or "function" type string
+        if ($typeOf == 'function')
+            return $object[$_symbol_lock] && $_lockSymbolsClass($object) ? 'class' : $typeOf;
+
+        // If the object is a class instance, return the "instance" type string
+        if ($object[$_symbol_lock] && $_lockSymbolsInstance($object))
+            return 'instance';
+
+        // If the object is a window object, return the "window" type string
+        if ($object === $_window || $object.window === $object && !$__hasOwnProperty__.call($object, 'window') && $__getPrototypeOf($object) === null)
+            return 'window';
+
+        // Return the type string from the internal types lookup
+        return $_types[$__toString__.call($object)] || 'object';
+    };
+    var $$_unbox = function($object)
+    {
+        // If the object is a primitive, return the object
+        if ($$_isPrimitive($object))
+            return $object;
+
+        // Get the object type
+        var $type = $_types[$__toString__.call($object)] || 'object';
+
+        // If the object is a boolean, return the primitive value of the boolean
+        if ($type == 'boolean')
+            return $__boolean_valueOf__.call($object);
+
+        // If the object is a number, return the primitive value of the number
+        if ($type == 'number')
+            return $__number_valueOf__.call($object);
+
+        // If the object is a string, return the primitive value of the string
+        if ($type == 'string')
+            return $__string_valueOf__.call($object);
+
+        // Return the object
+        return $object;
+    };
+
+    // Define the boxing and lookup methods
+    $_defineMethod('box',   $$_box);
+    $_defineMethod('type',  $$_type);
+    $_defineMethod('unbox', $$_unbox);
+
+    // Iterate the internal JavaScript types
+    'Array Boolean Date Error Function Number RegExp String'.split(' ').forEach(function($type)
+    {
+        // Create the type keyword
+        var $keyword = $type.toLowerCase();
+
+        // Set the keyword in the internal types lookup
+        $_types['[object ' + $type + ']'] = $keyword;
+
+        // Define the checking method for the internal JavaScript type
+        $_defineMethod('is' + $type, function($object)
         {
-            //
-        };
+            // Return true if the object type string matches the keyword
+            return $$_type($object) == $keyword;
+        });
     });
 
-    // ---------- EXPORT ----------
+    // Iterate the known aliases of the internal JavaScript window type
+    'global Window DOMWindow'.split(' ').forEach(function($alias)
+    {
+        // Set the window alias in the internal types lookup
+        $_types['[object ' + $alias + ']'] = 'window';
+    });
+
+    // ########## CASTS ##########
+
+    // Create the casting methods
+    var $$_asArray  = function($object, $unobstructed)
+    {
+        // If the object is an array
+        if ($__array_isArray($object))
+        {
+            // FORMAT $unobstructed
+            $unobstructed = $unobstructed !== undefined ? $$_asBool($unobstructed) : false;
+
+            // If the unobstructed flag is not set, return the object
+            if (!$unobstructed)
+                return $object;
+
+            // If the array has the array prototype
+            if ($__getPrototypeOf($object) === $__arrayProto__)
+            {
+                // Create the obstructed flag and get the properties defined on the array
+                var $obstructed = false;
+                var $properties = $__getOwnPropertyNames($object);
+
+                for (var $i = 0, $j = $properties.length; $i < $j; $i++)
+                {
+                    // Get the current property
+                    var $property = $properties[$i];
+
+                    // If the property is the length property, skip it
+                    if ($property == 'length')
+                        continue;
+
+                    // Get the unicode value of the first character of the property
+                    var $unicode = $property.charCodeAt(0);
+
+                    // If the property starts with a numeric character, skip it
+                    if ($unicode >= 48 && $unicode <= 57)
+                        continue;
+
+                    // Get the inherited value
+                    var $value = $__arrayProto__[$property];
+
+                    // If a value is inherited and the current property obstructs the array prototype property
+                    if ($value !== undefined && $object[$property] !== $value)
+                    {
+                        // Set the obstructed flag
+                        $obstructed = true;
+
+                        break;
+                    }
+                }
+
+                // If the array is not obstructed, return the object
+                if (!$obstructed)
+                    return $object;
+            }
+        }
+        // If the object is a primitive value, return an empty array
+        else if ($$_isPrimitive($object))
+            return [];
+
+        // Get the object collection length
+        var $length = $object.length;
+
+        // If the length is not an integer or is less than or equal to zero, return an empty array
+        if (!$$_isInteger($length) || $length <= 0)
+            return [];
+
+        // Create the array
+        var $array = new $__array($length);
+
+        // Copy the value of each indexed property in the object into the array
+        for (var $i = 0; $i < $length; $i++)
+            $array[$i] = $object[$i];
+
+        // Return the array
+        return $array;
+    };
+    var $$_asBool   = function($object)
+    {
+        // Get the internal type of the object
+        var $typeOf = typeof $object;
+
+        // If the object is a boolean primitive, return the object
+        if ($typeOf == 'boolean')
+            return $object;
+
+        // Get the object type
+        var $type = $object == null ?
+                    $object + '' :
+                    $typeOf == 'function' || $typeOf == 'number' || $typeOf == 'string' ?
+                    $typeOf :
+                    $_types[$__toString__.call($object)] || 'object';
+
+        // If the object is a boolean, return the primitive value of the boolean
+        if ($type == 'boolean')
+            return $__boolean_valueOf__.call($object);
+
+        // If the object is a number
+        if ($type == 'number')
+        {
+            // If the number is not a primitive, get the primitive value of the number
+            if ($typeOf != 'number')
+                $object = $__number_valueOf__.call($object);
+        }
+        // If the object is a string
+        else if ($type == 'string')
+        {
+            // If the string is not a primitive, get the primitive value of the string
+            if ($typeOf != 'string')
+                $object = $__string_valueOf__.call($object);
+        }
+
+        // Return the object as a boolean primitive
+        return !!$object;
+    };
+    var $$_asDate   = function($object, $unobstructed)
+    {
+        // Get the object type
+        var $type = $object == null ?
+                    $object + '' :
+                    $_types[$__toString__.call($object)] || 'object';
+
+        // If the object is a boolean
+        if ($type == 'boolean')
+        {
+            // If the boolean is not a primitive, get the primitive value of the boolean
+            if (typeof $object != 'boolean')
+                $object = $__boolean_valueOf__.call($object);
+
+            // Return the date object
+            return new $__date($object ? 1 : 0);
+        }
+
+        // FORMAT $unobstructed
+        $unobstructed = $unobstructed !== undefined ? $$_asBool($unobstructed) : false;
+
+        // If the unobstructed flag is set and the object is a date
+        if ($unobstructed && $type == 'date')
+        {
+            // If the date has the date prototype
+            if ($__getPrototypeOf($object) === $__dateProto__)
+            {
+                // Get the properties defined on the date
+                var $properties = $__getOwnPropertyNames($object);
+
+                for (var $i = 0, $j = $properties.length; $i < $j; $i++)
+                {
+                    // Get the current property and the inherited value
+                    var $property = $properties[$i];
+                    var $value    = $__dateProto__[$property];
+
+                    // If a value is inherited and the current property obstructs the date prototype property
+                    if ($value !== undefined && $object[$property] !== $value)
+                    {
+                        // Get the primitive value of the date
+                        $object = $__date_valueOf__.call($object);
+                        $type   = 'number';
+
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                // Get the primitive value of the date
+                $object = $__date_valueOf__.call($object);
+                $type   = 'number';
+            }
+        }
+
+        // If the object is a number
+        if ($type == 'number')
+        {
+            // If the number is not a primitive, get the primitive value of the number
+            if (typeof $object != 'number')
+                $object = $__number_valueOf__.call($object);
+
+            // If the number is not an integer, return an invalid date object
+            if (!$$_isInteger($object))
+                return new $__date($__NaN__);
+
+            // If the number is greater than the maximum representable timestamp, return the maximum representable date object
+            if ($object > $_const_date_max)
+                return new $__date($_const_date_max);
+
+            // If the number is less than the minimum representable timestamp, return the minimum representable date object
+            if ($object < $_const_date_min)
+                return new $__date($_const_date_min);
+
+            // Return the date object
+            return new $__date($object);
+        }
+
+        // If the object is a string
+        if ($type == 'string')
+        {
+            // If the string is not a primitive, get the primitive value of the string
+            if (typeof $object != 'string')
+                $object = $__string_valueOf__.call($object);
+
+            // Return the date object
+            return new $__date($object);
+        }
+
+        // If the object is not a date, return an invalid date object
+        if ($type != 'date')
+            return new $__date($__NaN__);
+
+        // Return the object
+        return $object;
+    };
+    var $$_asFloat  = function($object, $finite, $hex)
+    {
+        // FORMAT $finite
+        $finite = $finite !== undefined ? $$_asBool($finite) : false;
+
+        // Get the internal type of the object
+        var $typeOf = typeof $object;
+
+        // If the object is not a number primitive
+        if ($typeOf != 'number')
+        {
+            // Get the object type
+            var $type = $object == null ?
+                        $object + '' :
+                        $typeOf == 'boolean' || $typeOf == 'function' || $typeOf == 'string' ?
+                        $typeOf :
+                        $_types[$__toString__.call($object)] || 'object';
+
+            // If the object is a string
+            if ($type == 'string')
+            {
+                // If the string is not a primitive, get the primitive value of the string
+                if ($typeOf != 'string')
+                    $object = $__string_valueOf__.call($object);
+
+                // Trim the string
+                $object = $object.trim();
+
+                // If the string does not match a floating-point numeric string
+                if (!$object.match(/^[-+]?[0-9]*\.?[0-9]+(e[-+]?[0-9]+)?$/i))
+                {
+                    // FORMAT $hex
+                    $hex = $hex !== undefined ? $$_asBool($hex) : false;
+
+                    // If the string does not match a hexadecimal numeric string, return NaN (unless forced to be finite)
+                    if (!$hex || !$object.match(/^[-+]?0x[0-9a-f]+$/i))
+                        return $finite ? 0 : $__NaN__;
+
+                    // Convert the string to a floating-point number
+                    $object = $__parseInt($object, 16);
+                }
+                // Convert the string to a floating-point number
+                else
+                    $object = $__parseFloat($object);
+            }
+            // If the object is a boolean
+            else if ($type == 'boolean')
+            {
+                // If the boolean is not a primitive, get the primitive value of the boolean
+                if ($typeOf != 'boolean')
+                    $object = $__boolean_valueOf__.call($object);
+
+                // Convert the boolean to a number
+                $object = $object ? 1 : 0;
+            }
+            // If the object is a number, get the primitive value of the number
+            else if ($type == 'number')
+                $object = $__number_valueOf__.call($object);
+            // Return NaN (unless forced to be finite)
+            else
+                return $finite ? 0 : $__NaN__;
+        }
+
+         // If the finite flag is not set, return the object
+        if (!$finite)
+            return $object;
+
+        // If the object is not a number, return zero
+        if ($__isNaN($object))
+            return 0;
+
+        // If the object is greater than the maximum value, return the maximum value
+        if ($object > $_const_float_max)
+            return $_const_float_max;
+
+        // If the object is less than the minimum value, return the minimum value
+        if ($object < $_const_float_min)
+            return $_const_float_min;
+
+        // Return the object
+        return $object;
+    };
+    var $$_asInt    = function($object, $finite, $hex)
+    {
+        // FORMAT $finite
+        // FORMAT $hex
+        // FORMAT $object
+        $finite = $finite !== undefined ? $$_asBool($finite) : false;
+        $hex    = $hex    !== undefined ? $$_asBool($hex)    : true;
+        $object = $$_asFloat($object, false, $hex);
+
+        // If the object is not a number, return NaN (unless forced to be finite)
+        if ($__isNaN($object))
+            return $finite ? 0 : $__NaN__;
+
+        // If the object is greater than the maximum integer, return positive infinity (unless forced to be finite)
+        if ($object > $_const_int_max)
+            return $finite ? $_const_int_max : $__number_positiveInfinity__;
+
+        // If the object is less than the minimum integer, return negative infinity (unless forced to be finite)
+        if ($object < $_const_int_min)
+            return $finite ? $_const_int_min : $__number_negativeInfinity__;
+
+        // If the object is less than zero, return the object as an integer (rounded towards zero)
+        if ($object < 0)
+            return $__ceil($object);
+
+        // Return the object as an integer (rounded towards zero)
+        return $__floor($object);
+    };
+    var $$_asObject = function($object)
+    {
+        // If the object is a null reference or undefined, return an empty object
+        if ($object == null)
+            return {};
+
+        // Return the object
+        return $object;
+    };
+    var $$_asString = function($object, $lookup)
+    {
+        // Get the internal type of the object
+        var $typeOf = typeof $object;
+
+        // If the object is a string primitive, return the object
+        if ($typeOf == 'string')
+            return $object;
+
+        // Get the object type
+        var $type = $object == null ?
+                    $object + '' :
+                    $typeOf == 'boolean' || $typeOf == 'function' || $typeOf == 'number' ?
+                    $typeOf :
+                    $_types[$__toString__.call($object)] || 'object';
+
+        // If the object is a string, return the primitive value of the string
+        if ($type == 'string')
+            return $__string_valueOf__.call($object);
+
+        // If the object is a boolean, return it as a string primitive
+        if ($type == 'boolean')
+            return $__boolean_toString__.call($object);
+
+        // If the object is a number, return it as a string primitive
+        if ($type == 'number')
+            return $__number_toString__.call($object);
+
+        // FORMAT $lookup
+        $lookup = $lookup !== undefined ? $$_asBool($lookup) : false;
+
+        // If the lookup flag is set and the object is neither a null reference nor undefined
+        if ($lookup && $object != null)
+        {
+            // If the object reference does not have a "toString()" function, return an empty string primitive
+            if (typeof $object.toString != 'function')
+                return '';
+
+            // Call the "toString()" function
+            var $return = $object.toString();
+
+            // If the function returned a string primitive, return the return value of the function
+            if (typeof $return == 'string')
+                return $return;
+
+            // If the function returned a string, return the primitive value of the string
+            if ($return != null && $_types[$__toString__.call($return)] == 'string')
+                return $__string_valueOf__.call($return);
+        }
+
+        // Return an empty string primitive
+        return '';
+    };
+
+    // Define the casting methods
+    $_defineMethod('asArray',   $$_asArray);
+    $_defineMethod('asBoolean', $$_asBool);
+    $_defineMethod('asDate',    $$_asDate);
+    $_defineMethod('asInteger', $$_asInt);
+    $_defineMethod('asNumber',  $$_asFloat);
+    $_defineMethod('asObject',  $$_asObject);
+    $_defineMethod('asString',  $$_asString);
+
+    // Define the C# casting aliases
+    $_defineMethod('asBool',  $$_asBool);
+    $_defineMethod('asFloat', $$_asFloat);
+    $_defineMethod('asInt',   $$_asInt);
+
+    // ########## CHECKS ##########
+
+    // ---------- CLASS ----------
+    $_defineMethod('isAbstractClass',  function($class)
+    {
+        // Return true if the object is a class and it is abstract
+        return $$_isClass($class) && !!$class[$_symbol_abstract];
+    });
+    $_defineMethod('isImportedClass',  function($class)
+    {
+        // Return true if the object is a class and it has the import flag
+        return $$_isClass($class) && !!$class[$_symbol_import];
+    });
+    $_defineMethod('isInternalClass',  function($class)
+    {
+        // Return true if the object is a class and it has the internal flag
+        return $$_isClass($class) && !!$class[$_symbol_internal];
+    });
+    $_defineMethod('isOptimizedClass', function($class)
+    {
+        // Return true if the object is a class and it is optimized
+        return $$_isClass($class) && !!$class[$_symbol_optimized];
+    });
+    $_defineMethod('isSealedClass',    function($class)
+    {
+        // Return true if the object is a class and it is final
+        return $$_isClass($class) && !!$class[$_symbol_final];
+    });
+    $_defineMethod('isStruct',         function($class)
+    {
+        // Return true if the object is a class and it has the struct modifier
+        return $$_isClass($class) && !!$class[$_symbol_struct];
+    });
+    $_defineMethod('isUnlockedClass',  function($class)
+    {
+        // Return true if the object is a class and it is unlocked
+        return $$_isClass($class) && !!$class[$_symbol_unlocked];
+    });
+
+    // ---------- NUMBER ----------
+    $_defineMethod('isInfinity',         function($number)
+    {
+        // Unbox the object
+        $number = $$_unbox($number);
+
+        // Return true if the object is a number, is not NaN, and is not finite
+        return typeof $number == 'number' && !$__isNaN($number) && !$__isFinite($number);
+    });
+    $_defineMethod('isNaN',              function($number)
+    {
+        // Unbox the object
+        $number = $$_unbox($number);
+
+        // Return true if the object is a number and is NaN
+        return typeof $number == 'number' && !!$__isNaN($number);
+    });
+    $_defineMethod('isNegativeInfinity', function($number)
+    {
+        // Unbox the object
+        $number = $$_unbox($number);
+
+        // Return true if the object is a number, is not NaN, is not finite, and is less than zero
+        return typeof $number == 'number' && !$__isNaN($number) && !$__isFinite($number) && $number < 0;
+    });
+    $_defineMethod('isPositiveInfinity', function($number)
+    {
+        // Unbox the object
+        $number = $$_unbox($number);
+
+        // Return true if the object is a number, is not NaN, is not finite, and is greater than zero
+        return typeof $number == 'number' && !$__isNaN($number) && !$__isFinite($number) && $number > 0;
+    });
+
+    // ---------- OBJECT ----------
+    $_defineMethod('isArgumentsObject', function($object)
+    {
+        // Return true if the object is an arguments object
+        return $__toString__.call($object) == '[object Arguments]';
+    });
+    $_defineMethod('isComplexObject',   function($object)
+    {
+        // If the object is not an object, return false
+        if (!$object || $$_type($object) != 'object')
+            return false;
+
+        // Return true if the prototype of the object is not the object prototype
+        return $__getPrototypeOf($object) !== $__objectProto__;
+    });
+    $_defineMethod('isFlatObject',      function($object)
+    {
+        // If the object is not an object, return false
+        if (!$object || $$_type($object) != 'object')
+            return false;
+
+        // Return true if the prototype of the object is null
+        return $__getPrototypeOf($object) === null;
+    });
+    $_defineMethod('isSimpleObject',    function($object)
+    {
+        // If the object is not an object, return false
+        if (!$object || $$_type($object) != 'object')
+            return false;
+
+        // Return true if the prototype of the object is the object prototype
+        return $__getPrototypeOf($object) === $__objectProto__;
+    });
+
+    // ---------- *-LIKE OBJECT ----------
+    $_defineMethod('isArrayLikeObject',  function($object)
+    {
+        // If the object is null or undefined, return false
+        if ($object == null)
+            return false;
+
+        // Get the object length
+        var $length = $object.length;
+
+        // Return true if the length is an integer and is greater than or equal to zero
+        return $$_isInteger($length) && $length >= 0;
+    });
+    $_defineMethod('isWindowLikeObject', function($object)
+    {
+        // Return true if the object is neither undefined nor null and has a window property that is a self reference
+        return $object != null && $object.window === $object;
+    });
+
+    // ---------- PROTOTYPE ----------
+    $_defineMethod('isObjectInstance', function($object)
+    {
+        // If the object is a null reference or undefined, return false
+        if ($object == null)
+            return false;
+
+        // Return true if the object inherits from the object prototype
+        return !!$__isPrototypeOf__.call($__objectProto__, $object);
+    });
+
+    // ---------- TYPE ----------
+    $_defineMethod('isObject',    function($object)
+    {
+        // Return true if the object is neither undefined nor null
+        return $object != null;
+    });
+    $_defineMethod('isNull',      function($argument)
+    {
+        // Return true if the argument is null
+        return $argument === null;
+    });
+    $_defineMethod('isUndefined', function($argument)
+    {
+        // Return true if the argument is undefined
+        return $argument === undefined;
+    });
+    $_defineMethod('isWindow',    function($object)
+    {
+        // If the object is the window reference, return true
+        if ($object === $_window)
+            return true;
+
+        // Return true if the object is a window reference
+        return $$_type($object) == 'window';
+    });
+
+    // ---------- PSEUDO-TYPE ----------
+    $_defineMethod('isCallableType',  function($object)
+    {
+        // Return true if the object is a function
+        return typeof $object == 'function';
+    });
+    $_defineMethod('isPrimitiveType', function($object)
+    {
+        // If the object is a null reference or undefined, return true
+        if ($object == null)
+            return true;
+
+        // Get the type of the object
+        var $type = $$_type($object);
+
+        // Return true if the object is a value type
+        return $type == 'boolean' || $type == 'number' || $type == 'string';
+    });
+    $_defineMethod('isReferenceType', function($object)
+    {
+        // If the object is a null reference or undefined, return false
+        if ($object == null)
+            return false;
+
+        // Get the type of the object
+        var $type = $$_type($object);
+
+        // Return true if the object is not a value type
+        return $type != 'boolean' && $type != 'number' && $type != 'string';
+    });
+    $_defineMethod('isValueType',     function($object)
+    {
+        // If the object is a null reference or undefined, return false
+        if ($object == null)
+            return false;
+
+        // Get the type of the object
+        var $type = $$_type($object);
+
+        // Return true if the object is a boolean, number, or string
+        return $type == 'boolean' || $type == 'number' || $type == 'string';
+    });
+
+    // ########## HELPERS ##########
+
+    // ---------- CLASS ----------
+    $_defineMethod('base',   function($class)
+    {
+        // CHECK $class
+        if (!$$_isClass($class))
+        {
+            // If the debug flag is set, throw an exception
+            if ($_debug)
+                throw $_exceptionArguments('base', arguments);
+
+            return null;
+        }
+
+        // Return the base class
+        return $class[$_symbol_baseClass] || null;
+    });
     $_defineMethod('export', function($class)
     {
         // CHECK $class
@@ -3916,7 +4249,7 @@
         }
 
         // If the class has the import flag
-        if ($class[$_definition_import])
+        if ($class[$_symbol_import])
         {
             // If the debug flag is set, throw an exception
             if ($_debug)
@@ -3927,7 +4260,7 @@
         }
 
         // If the class has the struct flag
-        if ($class[$_definition_struct])
+        if ($class[$_symbol_struct])
         {
             // If the debug flag is set, throw an exception
             if ($_debug)
@@ -3937,11 +4270,21 @@
             return '';
         }
 
-        // Return the precompiled string primitive
-        return $class[$_definition_precompile].call($_lock) || '';
+        // Return the precompiled string
+        return $class[$_symbol_precompile]($_lock) || '';
     });
 
-    // ---------- FLAT ----------
+    // ---------- FUNCTION ----------
+    $_defineMethod('empty', function()
+    {
+        // Return an empty function
+        return function()
+        {
+            //
+        };
+    });
+
+    // ---------- OBJECT ----------
     $_defineMethod('flat', function()
     {
         // Create a flat object
@@ -3972,70 +4315,56 @@
         return $flat;
     });
 
-    // ---------- FORMAT ----------
+    // ---------- STRING ----------
     $_defineMethod('format', function($string)
     {
         // CHECK $string
-        if ($$_type($string) != 'string')
+        if (typeof $string != 'string')
         {
-            // If the debug flag is set, throw an exception
-            if ($_debug)
-                throw $_exceptionArguments('format', arguments);
+            // Unbox the object
+            $string = $$_unbox($string);
 
-            // Return an empty string primitive
-            return '';
+            // If the object is not a string
+            if (typeof $string != 'string')
+            {
+                // If the debug flag is set, throw an exception
+                if ($_debug)
+                    throw $_exceptionArguments('format', arguments);
+
+                // Return an empty string primitive
+                return '';
+            }
         }
 
-        // Get the arguments
-        var $arguments = arguments;
+        // Create the arguments length and array
+        var $length    = arguments.length - 1;
+        var $arguments = new $__array($length);
 
-        // Return the formatted string primitive
-        return $$_asString($__string_replace__.call($string, /([\{]+)([0-9]{1,16})\}/g, function($0, $1, $2)
+        // Copy each function argument converted as a string into the arguments array
+        for (var $i = 0; $i < $length; $i++)
+            $arguments[$i] = $$_asString(arguments[$i + 1]);
+
+        // Return the formatted string
+        return $string.replace(/([\{]+)([0-9]+)\}/g, function($0, $1, $2)
         {
             // Get the number of opening-braces and the argument index
             var $braces = $1.length;
-            var $index  = $__number($2) + 1;
+            var $index  = $__parseInt($2, 10);
 
-            // If an even number of opening-braces were provided or the argument index exceeded the number of arguments, return the unescaped match as the replacement
-            if ($braces % 2 == 0 || $index >= $arguments.length)
-                return $1.substr($braces / 2) + $2 + '}';
+            // If more than one opening-brace was provided
+            if ($braces > 1)
+            {
+                // If an even number of opening-braces was provided or the argument index exceeded the number of arguments, return the match (with the escaped opening-braces)
+                if ($braces % 2 == 0 || $index >= $length)
+                    return $1.substr($braces / 2) + $2 + '}';
 
-            // Return the argument as the replacement
-            return $1.substr(Math.floor($braces / 2) + 1) + $$_asString($arguments[$index]);
-        }));
-    });
+                // Return the argument string (with the escaped opening-braces)
+                return $1.substr($__floor($braces / 2) + 1) + $arguments[$index];
+            }
 
-    // ---------- UNBOX ----------
-    $_defineMethod('unbox', function($object)
-    {
-        // If the object is a null reference or undefined, return it
-        if ($object === null || $object === undefined)
-            return $object;
-
-        // Get the internal type of the object
-        var $typeOf = typeof $object;
-
-        // If the internal type is a primitive type, return the object
-        if ($typeOf == 'boolean' || $typeOf == 'number' || $typeOf == 'string')
-            return $object;
-
-        // Get the object type
-        var $type = $$_type($object);
-
-        // If the object is a boolean object, return the boolean primitive
-        if ($type == 'boolean')
-            return $__boolean_valueOf__.call($object);
-
-        // If the object is a number object, return the number primitive
-        if ($type == 'number')
-            return $__number_valueOf__.call($object);
-
-        // If the object is a string object, return the string primitive
-        if ($type == 'string')
-            return $__string_valueOf__.call($object);
-        
-        // Return the object
-        return $object;
+            // Return the argument string
+            return $arguments[$index];
+        });
     });
 
     // ########## SETTINGS ##########
