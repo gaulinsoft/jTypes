@@ -2,7 +2,7 @@
 //                                jTypes 2.2.0
 //  ------------------------------------------------------------------------
 //
-//                   Copyright 2013 Gaulinsoft Corporation
+//                   Copyright 2014 Gaulinsoft Corporation
 //
 //       Licensed under the Apache License, Version 2.0 (the "License");
 //      you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@
                                 {
                                     console.error('########## FAILED ##########');
                                     console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
-                                    console.error(e);
+                                    console.error(e.message);
                                 }
                             }
                         }
@@ -164,7 +164,7 @@
                                                     {
                                                         console.error('########## FAILED ##########');
                                                         console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k, $w, $x, $y, $z) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ', ' + $w + ', ' + $x + ', ' + $y + ', ' + $z + ')');
-                                                        console.error(e);
+                                                        console.error(e.message);
                                                     }
                                                 }
                                             }
@@ -184,7 +184,7 @@
                                 {
                                     console.error('########## FAILED ##########');
                                     console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($h, $i, $j, $k) = (' + $h + ', ' + $i + ', ' + $j + ', ' + $k + ')');
-                                    console.error(e);
+                                    console.error(e.message);
                                 }
                             }
                         }
@@ -236,6 +236,10 @@
                 {
                     for (var $k = 0; $k < $setters.length; $k++)
                     {
+                        // Empty object should not be treated as a property anymore
+                        if ($j === 0 && $k === 0)
+                            continue;
+
                         var $accessor = $accessors[$i];
                         var $getter   = $getters[$j];
                         var $setter   = $setters[$k];
@@ -268,7 +272,7 @@
                             {
                                 console.error('########## FAILED ##########');
                                 console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
-                                console.error(e);
+                                console.error(e.message);
                             }
                         }
                     }
@@ -278,9 +282,13 @@
 
         var $virtuals = ['abstract', 'virtual'];
 
-        var $shouldFailVirtual = function($i, $j, $k)
+        var $shouldFailVirtual = function($i, $j, $k, $m)
         {
             if ($shouldFail($i, $j, $k))
+                return true;
+
+            // Private accessor cannot be abstract
+            if ($m === 0 && ($j === 4 || $k === 4))
                 return true;
 
             if ($i !== 2)
@@ -300,6 +308,10 @@
                     {
                         for (var $m = 0; $m < $virtuals.length; $m++)
                         {
+                            // Empty object should not be treated as a property anymore
+                            if ($j === 0 && $k === 0)
+                                continue;
+
                             var $accessor = $accessors[$i];
                             var $getter   = $getters[$j];
                             var $setter   = $setters[$k];
@@ -321,7 +333,7 @@
                             {
                                 $$('abstract', $definition);
 
-                                if ($shouldFailVirtual($i, $j, $k))
+                                if ($shouldFailVirtual($i, $j, $k, $m))
                                 {
                                     console.error('########## FAILED ##########');
                                     console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($i, $j, $k, $m) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $m + ')');
@@ -329,11 +341,11 @@
                             }
                             catch(e)
                             {
-                                if (!$shouldFailVirtual($i, $j, $k))
+                                if (!$shouldFailVirtual($i, $j, $k, $m))
                                 {
                                     console.error('########## FAILED ##########');
                                     console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k, $m) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $m + ')');
-                                    console.error(e);
+                                    console.error(e.message);
                                 }
                             }
                         }
@@ -344,7 +356,7 @@
 
         var $shouldFailOverride = function($i, $j, $k, $x, $y, $z)
         {
-            if ($shouldFailVirtual($i, $j, $k))
+            if ($shouldFailVirtual($i, $j, $k, 1))
                 return true;
 
             if ($i === 0 && $j === 1 && $k === 0 ||
@@ -384,16 +396,16 @@
                     return false;
             }
 
-            // protected set OVERRIDES public get + protected set
-            if ($i === 0 && $j === 1 && $k === 3 && $x === 1 && $y === 0 && $z === 1)
+            // Protected set accessor can override public get + protected set accessors
+            if ($i === 0 && $j === 1 && $k === 3 && $x === 0 && $y === 0 && $z === 3)
             {
                 console.warn('Allowing failure which DIDN\'T throw but was actually NOT SUPPOSED to throw...');
 
                 return false;
             }
 
-            // protected get OVERRIDES protected get + public set
-            if ($i === 0 && $j === 3 && $k === 1 && $x === 1 && $y === 1 && $z === 0)
+            // Protected get accessor can override protected get + public set accessors
+            if ($i === 0 && $j === 3 && $k === 1 && $x === 0 && $y === 3 && $z === 0)
             {
                 console.warn('Allowing failure which DIDN\'T throw but was actually NOT SUPPOSED to throw...');
 
@@ -412,6 +424,10 @@
                 {
                     for (var $k = 0; $k < $setters.length; $k++)
                     {
+                        // Empty object should not be treated as a property anymore
+                        if ($j === 0 && $k === 0)
+                            continue;
+
                         var $accessor = $accessors[$i];
                         var $getter   = $getters[$j];
                         var $setter   = $setters[$k];
@@ -438,6 +454,10 @@
                                 {
                                     for (var $z = 0; $z < $setters.length; $z++)
                                     {
+                                        // Empty object should not be treated as a property anymore
+                                        if ($y === 0 && $z === 0)
+                                            continue;
+
                                         var $accessorOverride = $accessors[$x];
                                         var $getterOverride   = $getters[$y];
                                         var $setterOverride   = $setters[$z];
@@ -470,14 +490,14 @@
                                             {
                                                 console.error('########## FAILED ##########');
                                                 console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k, $x, $y, $z) = (' + $i + ', ' + $j + ', ' + $k + ', ' + $x + ', ' + $y + ', ' + $z + ')');
-                                                console.error(e);
+                                                console.error(e.message);
                                             }
                                         }
                                     }
                                 }
                             }
 
-                            if ($shouldFailVirtual($i, $j, $k))
+                            if ($shouldFailVirtual($i, $j, $k, 1))
                             {
                                 console.error('########## FAILED ##########');
                                 console.error('Failed test ' + _ + ' which was SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
@@ -485,11 +505,11 @@
                         }
                         catch(e)
                         {
-                            if (!$shouldFailVirtual($i, $j, $k))
+                            if (!$shouldFailVirtual($i, $j, $k, 1))
                             {
                                 console.error('########## FAILED ##########');
                                 console.error('Failed test ' + _ + ' which was NOT SUPPOSED to throw with ($i, $j, $k) = (' + $i + ', ' + $j + ', ' + $k + ')');
-                                console.error(e);
+                                console.error(e.message);
                             }
                         }
                     }
