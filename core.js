@@ -46,7 +46,7 @@ if (typeof jT_Shorthand != 'string')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0a507';
+        $_version = '2.2.0a516';
 
     // ########## FLAGS ##########
 
@@ -66,42 +66,42 @@ if (typeof jT_Shorthand != 'string')
         $_lang_exception_suffix_class = ' [jTypes::{0}]';
     
     // Create the language constants
-    var $_lang_$$_abstract_auto               = '"{0}" cannot have the abstract modifier because it is an automatically implemented property.',
+    var $_lang_$$_abstract_accessor           = '"{0}" cannot be accessed because it is an abstract property.',
+        $_lang_$$_abstract_auto               = '"{0}" cannot have the abstract modifier because it is an automatically implemented property.',
+        $_lang_$$_abstract_call               = '"{0}" cannot be called because it is an abstract method.',
         $_lang_$$_abstract_class              = '"{0}" cannot have the abstract modifier in a non-abstract class.',
         $_lang_$$_access_duplicate            = '"{0}" cannot have more than one access modifier.',
         $_lang_$$_access_invalid              = '"{0}" cannot have the private, protected, or public modifiers because it is a {1} definition.',
-        $_lang_$$_auto_invalid                = '"{0}" must have both accessors because it is an automatically implemented property.',
+        $_lang_$$_auto_invalid                = '"{0}" must implement both accessors because it is an automatically implemented property.',
         $_lang_$$_auto_invalid_default        = '"{0}" cannot have more than one default value for the automatically implemented property.',
-        $_lang_$$_class_abstract_conflict     = 'Abstract classes cannot have the {0} modifier.',
-        $_lang_$$_class_abstract_instance     = 'Abstract classes cannot be instantiated.',
-        $_lang_$$_class_constraint            = '"{0}" has an invalid type constraint "{1}".',
-        $_lang_$$_class_constraint_nameless   = '"{1}" is not a valid type constraint.',
-        $_lang_$$_class_constraint_type       = '"{0}" must have a value of the type {1}.',
-        $_lang_$$_class_global_conflict       = 'Class cannot hide the existing global "{0}".',
-        $_lang_$$_class_global_invalid        = 'Global classes must have a name.',
-        $_lang_$$_class_keyword_duplicate     = 'Class cannot have a duplicate {1} modifier.',
+        $_lang_$$_class_abstract_instance     = 'abstract classes cannot be instantiated.',
+        $_lang_$$_class_conflict              = '{0} cannot have the {1} modifier.',
+        $_lang_$$_class_conflict_abstract     = 'abstract {0} cannot have the {1} modifier.',
+        $_lang_$$_class_conflict_and          = '{0} cannot have the {1} and {2} modifiers.',
+        $_lang_$$_class_expando               = '{0} cannot have expando instances.',
+        $_lang_$$_class_export                = '{0} cannot be exported.',
+        $_lang_$$_class_global_conflict       = '{0} cannot hide the existing global "{1}".',
+        $_lang_$$_class_global_invalid        = 'global {0} must have a name.',
+        $_lang_$$_class_inherit               = '{0} cannot inherit from {1}.',
+        $_lang_$$_class_inherit_import        = '{0} must have a precompiled string to inherit from an imported {0}.',
+        $_lang_$$_class_inherit_internal      = '{0} must have the internal modifier to inherit from an internal {0}.',
+        $_lang_$$_class_inherit_invalid       = '{0} cannot have inheritance.',
+        $_lang_$$_class_inherit_locked        = '{0} must inherit from an unlocked {0} to have the unlocked modifier.',
+        $_lang_$$_class_inherit_nonimport     = '{0} must inherit from an imported {0} to have a precompiled string.',
+        $_lang_$$_class_inherit_sealed        = '{0} cannot inherit from a sealed {1}.',
+        $_lang_$$_class_inherit_unlocked      = '{0} must have the unlocked modifier to inherit from an unlocked {0}.',
+        $_lang_$$_class_inherit_unoptimized   = '{0} must inherit from an optimized {0} to have the optimized modifier.',
+        $_lang_$$_class_inherit_unsafe        = '{0} cannot inherit from a .NET class.',
+        $_lang_$$_class_keyword_duplicate     = 'class cannot have a duplicate {0} modifier.',
         $_lang_$$_class_keyword_invalid       = '"{0}" is not a valid class modifier.',
-        $_lang_$$_class_struct_expando        = 'Structs cannot have expando instances.',
-        $_lang_$$_class_struct_export         = 'Structs cannot be exported.',
-        $_lang_$$_class_this_new              = 'Classes cannot be compiled using the new operator.',
+        $_lang_$$_class_this_new              = 'classes cannot be compiled using the new operator.',
         $_lang_$$_conflict_and                = '"{0}" cannot have the {1} and {2} modifiers.',
         $_lang_$$_const_constraint            = '"{0}" cannot have a type constraint with the const modifier.',
-        $_lang_$$_derive_class                = 'Structs cannot inherit from classes.',
-        $_lang_$$_derive_export               = 'Class must inherit from an imported class to have a precompiled string.',
-        $_lang_$$_derive_import               = 'Class must have a precompiled string to inherit from an imported class.',
-        $_lang_$$_derive_internal             = 'Class must have the internal modifier to inherit from an internal class.',
-        $_lang_$$_derive_locked               = 'Class must inherit from an unlocked class to have the unlocked modifier.',
-        $_lang_$$_derive_sealed               = 'Classes cannot inherit from a sealed class.',
-        $_lang_$$_derive_struct               = 'Classes cannot inherit from structs.',
-        $_lang_$$_derive_unlocked             = 'Class must have the unlocked modifier to inherit from an unlocked class.',
-        $_lang_$$_derive_unoptimized          = 'Class must inherit from an optimized class to have the optimized modifier.',
-        $_lang_$$_derive_unsafe               = 'Classes cannot inherit from a .NET class.',
         $_lang_$$_keyword_duplicate           = '"{0}" cannot have a duplicate {1} modifier.',
         $_lang_$$_keyword_invalid             = '"{0}" has an invalid modifier "{1}".',
         $_lang_$$_name_duplicate              = '"{0}" cannot have more than one {1}definition.',
         $_lang_$$_name_invalid                = '"{0}" is not a valid name.',
         $_lang_$$_name_reserved               = '"{0}" is a reserved name.',
-        $_lang_$$_name_symbol                 = '"{0}" cannot have the "{1}" prefix.',
         $_lang_$$_new_invalid                 = '"{0}" must hide an inherited {1}definition to have the new modifier.',
         $_lang_$$_new_required                = '"{0}" cannot hide an inherited {1}definition without the new modifier.',
         $_lang_$$_override_constraint         = '"{0}" must have the "{1}" type constraint to override.',
@@ -110,7 +110,8 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_package_constraint          = '"{0}" has an invalid type constraint "{1}".',
         $_lang_$$_package_modifiers           = '"{0}" cannot have modifiers because it is a packaged definition.',
         $_lang_$$_package_separated           = '"{0}" cannot be a packaged definition because it is defined in a {1} definitions object.',
-        $_lang_$$_property_access_conflict    = '"{0}" must have both accessors to have an access modifier on the {1} accessor.',
+        $_lang_$$_primitive_constraint        = '"{0}" must have a primitive type constraint in a primitive {1}.',
+        $_lang_$$_property_access_accessor    = '"{0}" must have both accessors to have an access modifier on the {1} accessor.',
         $_lang_$$_property_access_duplicate   = '"{0}" cannot have access modifiers on both property accessors.',
         $_lang_$$_property_access_invalid     = '"{0}" has an invalid access modifier "{2}" on the {1} accessor.',
         $_lang_$$_property_access_restrictive = '"{0}" must have a more restrictive access modifier on the {1} accessor.',
@@ -120,17 +121,17 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_property_override_invalid   = '"{0}" has no suitable {1} accessor to override.',
         $_lang_$$_property_private_abstract   = '"{0}" cannot have a private {1} accessor because it is abstract.',
         $_lang_$$_property_private_override   = '"{0}" cannot override a private {1} accessor.',
+        $_lang_$$_property_readonly_invalid   = '"{0}" must have both accessors to have the readonly modifier.',
+        $_lang_$$_property_value_abstract     = '"{0}" must have a either a null or undefined reference or a function for the {1} accessor.',
         $_lang_$$_property_value_function     = '"{0}" must have a function for the {1} accessor.',
-        $_lang_$$_readonly_data               = '"{0}" cannot be set because it is a read-only {1}.',
         $_lang_$$_readonly_invalid            = '"{0}" cannot have the readonly modifier because it is a {1} definition.',
         $_lang_$$_readonly_invalid_type       = '"{0}" must be a field or property to have the readonly modifier.',
+        $_lang_$$_readonly_set                = '"{0}" must implement a set accessor to have the readonly modifier.',
         $_lang_$$_requires                    = '"{0}" cannot have the {1} modifier without the {2} modifier.',
         $_lang_$$_requires_or                 = '"{0}" cannot have the {1} modifier without the {2} or {3} modifiers.',
-        $_lang_$$_sealed_class                = '"{0}" cannot have the virtual modifier in a sealed class.',
-        $_lang_$$_struct_constraint           = '"{0}" must be a method or non-automatically implemented property to have the "{1}" type constraint.',
-        $_lang_$$_struct_constraint_class     = '"{0}" must have a struct type constraint.',
         $_lang_$$_virtual_invalid             = '"{0}" cannot have the abstract, virtual, or override modifiers because it is a {1} definition.',
-        $_lang_$$_virtual_invalid_type        = '"{0}" must be a method or property to have the abstract, virtual, or override modifiers.';
+        $_lang_$$_virtual_invalid_type        = '"{0}" must be a method or property to have the abstract, virtual, or override modifiers.',
+        $_lang_$$_virtual_sealed              = '"{0}" cannot have the virtual modifier in a sealed {1}.';
 
     // ########## NATIVE CODE ##########
 
@@ -241,6 +242,15 @@ if (typeof jT_Shorthand != 'string')
     if (!$__create || !$__defineProperty || !$__freeze || !$__getPrototypeOf || !$__preventExtensions || !$__seal || !$__array_isArray || !$__arrayProto__.forEach || !$__arrayProto__.indexOf || !$__stringProto__.trim)
         throw $_lang_compatibility + $_lang_exception_suffix;
 
+    // If the global function lock flag was set
+    if ($_funcLock)
+    {
+        $__preventExtensions($__hasOwnProperty__);
+        $__preventExtensions($__isPrototypeOf__);
+        $__preventExtensions($__toString__);
+        $__preventExtensions($__valueOf__);
+    }
+
     // If the global prototype lock flag was set
     if ($_protoLock)
     {
@@ -275,11 +285,11 @@ if (typeof jT_Shorthand != 'string')
     // ########## CONSTANTS ##########
 
     // Create the internal constants
-    var $_const_compile_arguments = 'c,k,f,m,a,d,d2,p,l',
-        $_const_date_max          = 8640000000000000,
+    var $_const_date_max          = 8640000000000000,
         $_const_date_min          = -$_const_date_max,
         $_const_escape_replace    = '\\$&',
         $_const_escape_search     = /[-\/\\^$*+?.()|[\]{}]/g,
+        $_const_factory_arguments = 'c,k,f,m,a,d,d2,p,l',
         $_const_float_epsilon     = 2.220460492503130808472633361816E-16,
         $_const_float_max         = $__number_maxValue__,
         $_const_float_min         = -$_const_float_max,
@@ -288,7 +298,30 @@ if (typeof jT_Shorthand != 'string')
         $_const_int_min           = -$_const_int_max,
         $_const_int32_max         = 2147483647,
         $_const_int32_min         = -$_const_int32_max - 1,
-        $_const_prefix_compile    = '~jT_',
+        $_const_keyword_abstract  = 'abstract',
+        $_const_keyword_class     = 'class',
+        $_const_keyword_classes   = $_const_keyword_class + 'es',
+        $_const_keyword_const     = 'const',
+        $_const_keyword_get       = 'get',
+        $_const_keyword_hidden    = 'hidden',
+        $_const_keyword_model     = 'model',
+        $_const_keyword_models    = $_const_keyword_model + 's',
+        $_const_keyword_new       = 'new',
+        $_const_keyword_optimized = 'optimized',
+        $_const_keyword_override  = 'override',
+        $_const_keyword_private   = 'private',
+        $_const_keyword_protected = 'protected',
+        $_const_keyword_prototype = 'prototype',
+        $_const_keyword_public    = 'public',
+        $_const_keyword_sealed    = 'sealed',
+        $_const_keyword_set       = 'set',
+        $_const_keyword_static    = 'static',
+        $_const_keyword_struct    = 'struct',
+        $_const_keyword_structs   = $_const_keyword_struct + 's',
+        $_const_keyword_unlocked  = 'unlocked',
+        $_const_keyword_virtual   = 'virtual',
+        $_const_keyword_visible   = 'visible',
+        $_const_prefix_factory    = '~jT_',
         $_const_prefix_symbol     = '$jT_',
         $_const_regexp_class      = /^[A-Z][_a-zA-Z0-9]*$/,
         $_const_regexp_constraint = /^(~?)([a-z]+(?:\-[a-z]+)?)(\??)$/,
@@ -297,27 +330,8 @@ if (typeof jT_Shorthand != 'string')
         $_const_regexp_number     = /^[-+]?[0-9]*\.?[0-9]+(?:e[-+]?[0-9]+)?$/i,
         $_const_regexp_regexp     = /^\/([^\r\n]+)\/([gim]{0,3})$/,
         $_const_types_dynamic     = 'array bool boolean date float int integer number regexp string'.split(' '),
-        $_const_types_static      = 'error function object primitive type window'.split(' '),
-        $_const_types_struct      = 'bool boolean float int integer number primitive string'.split(' ');
-
-    // ---------- DESCRIPTORS ----------
-
-    // Create the descriptor bits
-    var $_descriptor_base          = 1 << 0,
-        $_descriptor_configurable  = 1 << 1,
-        $_descriptor_enumerable    = 1 << 2,
-        $_descriptor_get           = 1 << 3,
-        $_descriptor_private       = 1 << 4,
-        $_descriptor_protected     = 1 << 5,
-        $_descriptor_protected_get = 1 << 6,
-        $_descriptor_protected_set = 1 << 7,
-        $_descriptor_public        = 1 << 8,
-        $_descriptor_public_get    = 1 << 9,
-        $_descriptor_public_set    = 1 << 10,
-        $_descriptor_set           = 1 << 11,
-        $_descriptor_this          = 1 << 12,
-        $_descriptor_value         = 1 << 13,
-        $_descriptor_writable      = 1 << 14;
+        $_const_types_primitive   = 'bool boolean float int integer number primitive string'.split(' '),
+        $_const_types_static      = 'error function object primitive type window'.split(' ');
 
     // ---------- MODIFIERS ----------
 
@@ -339,12 +353,6 @@ if (typeof jT_Shorthand != 'string')
         $_modifiers_static    = 1 << 14,// @
         $_modifiers_virtual   = 1 << 15,// @
         $_modifiers_visible   = 1 << 16,// @
-
-        // Create the modifier bit groups
-        $_modifiers__access    = $_modifiers_private   | $_modifiers_protected | $_modifiers_public,
-        $_modifiers__enum      = $_modifiers_hidden    | $_modifiers_visible,
-        $_modifiers__spill     = $_modifiers_abstract  | $_modifiers_override  | $_modifiers_virtual,
-        $_modifiers__uncompile = $_modifiers_prototype | $_modifiers_static,
         
         // Create the property modifier bits
         $_modifiers_property_auto          = 1 << 17,// @
@@ -354,12 +362,7 @@ if (typeof jT_Shorthand != 'string')
         $_modifiers_property_set           = 1 << 21,// @
         $_modifiers_property_set_private   = 1 << 22,// @
         $_modifiers_property_set_protected = 1 << 23;// @
-
-    // #########################
-    var $_modifiers_property__getAccessors = $_modifiers_property_get | $_modifiers_property_get_private | $_modifiers_property_get_protected;
-    var $_modifiers_property__setAccessors = $_modifiers_property_set | $_modifiers_property_set_private | $_modifiers_property_set_protected;
-    var $_modifiers_property__accessors    = $_modifiers_property__getAccessors | $_modifiers_property__setAccessors;
-
+    
     // Create the modifiers map
     var $_modifiers = $__create(null);
     
@@ -384,22 +387,24 @@ if (typeof jT_Shorthand != 'string')
     // ---------- CLASS MODIFIERS ----------
 
     // Create the class modifier bits
-    var $_modifiers_class_abstract  = 1 << 0,// @
-        $_modifiers_class_export    = 1 << 1,// @
-        $_modifiers_class_global    = 1 << 2,// @
-        $_modifiers_class_import    = 1 << 3,// @
-        $_modifiers_class_internal  = 1 << 4,// @
-        $_modifiers_class_optimized = 1 << 5,// @
-        $_modifiers_class_sealed    = 1 << 6,// @
-        $_modifiers_class_struct    = 1 << 7,// @
-        $_modifiers_class_unlocked  = 1 << 8,// @
-        $_modifiers_class_unsafe    = 1 << 9,// @
+    var $_modifiers_class_abstract  = 1 << 0, // @
+        $_modifiers_class_export    = 1 << 1, // @
+        $_modifiers_class_global    = 1 << 2, // @
+        $_modifiers_class_import    = 1 << 3, // @
+        $_modifiers_class_internal  = 1 << 4, // @
+        $_modifiers_class_model     = 1 << 5, // @
+        $_modifiers_class_optimized = 1 << 6, // @
+        $_modifiers_class_primitive = 1 << 7, // @
+        $_modifiers_class_sealed    = 1 << 8, // @
+        $_modifiers_class_struct    = 1 << 9, // @
+        $_modifiers_class_unlocked  = 1 << 10,// @
+        $_modifiers_class_unsafe    = 1 << 11,// @
         
         // Create the expando class modifier bits
-        $_modifiers_class_expando_private   = 1 << 10,// @
-        $_modifiers_class_expando_prototype = 1 << 11,// @
-        $_modifiers_class_expando_public    = 1 << 12,// @
-        $_modifiers_class_expando_static    = 1 << 13;// @
+        $_modifiers_class_expando_private   = 1 << 12,// @
+        $_modifiers_class_expando_prototype = 1 << 13,// @
+        $_modifiers_class_expando_public    = 1 << 14,// @
+        $_modifiers_class_expando_static    = 1 << 15;// @
 
     // Create the class modifiers map
     var $_modifiers_class = $__create(null);
@@ -409,7 +414,9 @@ if (typeof jT_Shorthand != 'string')
     $_modifiers_class['export']    = $_modifiers_class_export;
     $_modifiers_class['global']    = $_modifiers_class_global;
     $_modifiers_class['internal']  = $_modifiers_class_internal;
+    $_modifiers_class['model']     = $_modifiers_class_model;
     $_modifiers_class['optimized'] = $_modifiers_class_optimized;
+    $_modifiers_class['primitive'] = $_modifiers_class_primitive;
     $_modifiers_class['sealed']    = $_modifiers_class_sealed;
     $_modifiers_class['struct']    = $_modifiers_class_struct;
     $_modifiers_class['unlocked']  = $_modifiers_class_unlocked;
@@ -427,16 +434,6 @@ if (typeof jT_Shorthand != 'string')
     // Set the expando multi-flag modifier in the class modifiers map
     $_modifiers_class['expando'] = $_modifiers_class_expando_private | $_modifiers_class_expando_prototype | $_modifiers_class_expando_public | $_modifiers_class_expando_static;
 
-    // ---------- PROPERTIES ----------
-
-    // Create the property bits
-    var $_property_get           = 1 << 25, // @
-        $_property_get_private   = 1 << 26, // @
-        $_property_get_protected = 1 << 27, // @
-        $_property_set           = 1 << 28, // @
-        $_property_set_private   = 1 << 29, // @
-        $_property_set_protected = 1 << 30; // @
-
     // ---------- .NET ----------
 
     // Create the unsafe token (for jTypes.NET client classes)
@@ -445,19 +442,17 @@ if (typeof jT_Shorthand != 'string')
     // ########## VARIABLES ##########
 
     // Create the internal variables
-    var $_clone       = false;
-    var $_constraints = $__create(null);
-    var $_globals     = $__create(null);
-    var $_name        = '';
+    var $_clone       = false,
+        $_constraints = $__create(null),
+        $_globals     = $__create(null),
+        $_name        = '';
 
     // ---------- LOCKS ----------
 
     // Create the internal lock references
-    var $_lock_class       = null;
-    var $_lock_instance    = null;
-    var $_lock_instance_as = null;
-    var $_lock_instance_is = null;
-    var $_lock_package     = null;
+    var $_lock_class    = null,
+        $_lock_instance = null,
+        $_lock_package  = null;
 
     // ########## DEFINES ##########
 
@@ -473,6 +468,17 @@ if (typeof jT_Shorthand != 'string')
             'set':          $set || undefined
         });
     };
+    var $_data      = function($object, $key, $value, $writable, $enumerable, $configurable)
+    {
+        // Define the "data" property
+        $__defineProperty($object, $key,
+        {
+            'configurable': !!$configurable,
+            'enumerable':   !!$enumerable,
+            'value':        $value,
+            'writable':     !!$writable
+        });
+    };
     var $_lock      = function($object)
     {
         // Return the function lock
@@ -483,27 +489,16 @@ if (typeof jT_Shorthand != 'string')
                 return $object;
         };
     };
-    var $_value     = function($object, $key, $value, $writable, $enumerable, $configurable)
-    {
-        // Define the "value" property
-        $__defineProperty($object, $key,
-        {
-            'configurable': !!$configurable,
-            'enumerable':   !!$enumerable,
-            'value':        $value,
-            'writable':     !!$writable
-        });
-    };
 
     // Create the define helper functions
     var $_defineField    = function($name, $field, $writable)
     {
         // Define an enumerable field on the global namespace object
-        $_value($$, $name, $field, $writable, true);
+        $_data($$, $name, $field, $writable, true);
     };
     var $_defineMethod   = function($name, $method)
     {
-        // If the global function lock flag is set
+        // If the global function lock flag is set, prevent extensions on the method
         if ($_funcLock)
             $__preventExtensions($method);
 
@@ -515,11 +510,11 @@ if (typeof jT_Shorthand != 'string')
 
             // Define each method in the method names array
             for (var $i = 0, $j = $names.length; $i < $j; $i++)
-                $_value($$, $names[$i], $method);
+                $_data($$, $names[$i], $method);
         }
         // Define a non-enumerable method on the global namespace object
         else
-            $_value($$, $name, $method); 
+            $_data($$, $name, $method); 
     };
     var $_defineProperty = function($name, $getMethod, $setMethod)
     {
@@ -544,6 +539,11 @@ if (typeof jT_Shorthand != 'string')
         // Get the class name
         var $name = $_name;
 
+        // Format the error message
+        $message = typeof $message == 'string' ?
+                   $message[0].toUpperCase() + $message.substr(1) :
+                   '';
+
         // If a class name is not set, throw the prefixed formatted exception string
         if (!$name)
             throw new $__error($message + $_lang_exception_suffix);
@@ -556,8 +556,10 @@ if (typeof jT_Shorthand != 'string')
     };
     var $_exceptionArguments = function($name, $arguments)
     {
-        // Set the throwing function name
-        $name = $name ? '$$.' + $name : '$$';
+        // Format the throwing function name
+        $name = $name ?
+                '$$.' + $name :
+                '$$';
 
         // Create the types array
         var $types = new $__array($arguments.length);
@@ -571,31 +573,21 @@ if (typeof jT_Shorthand != 'string')
     };
     var $_exceptionFormat    = function()
     {
-        // Get the class name
-        var $name = $_name;
-
-        // If a class name is not set, throw the prefixed formatted exception string with the given arguments
-        if (!$name)
-            throw new $__error($$.format.apply($$, arguments) + $_lang_exception_suffix);
-
-        // Reset the class name
-        $_name = '';
-        
-        // Throw the class-prefixed formatted exception string with the given arguments
-        throw new $__error($$.format.apply($$, arguments) + $$.format($_lang_exception_suffix_class, $name));
+        // Throw the formatted exception string
+        $_exception($$.format.apply($$, arguments));
     };
 
     // ########## KEYS ##########
 
     // Create the characters string and keys array
-    var $_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    var $_keys       = $_const_compile_arguments.split(',');
+    var $_characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        $_keys       = $_const_factory_arguments.split(',');
 
     // Append the lowercase characters to the characters string
     $_characters += $_characters.toLowerCase();
 
     // Create the key helper functions
-    var $_keyGenerator       = function($length)
+    var $_generator       = function($length)
     {
         // If no length was provided, use a default length of three
         if (!$length)
@@ -622,68 +614,95 @@ if (typeof jT_Shorthand != 'string')
         // Return the key
         return $key;
     };
-    var $_keyGeneratorSymbol = function($length)
+    var $_generatorSymbol = function($length)
     {
-        // Return the key with the prepended symbol prefix
-        return $_const_prefix_symbol + $_keyGenerator($length);
+        // Return the generated key with the prepended symbol prefix
+        return $_const_prefix_symbol + $_generator($length);
     };
 
-    // ---------- DEFINITIONS ----------
 
-    // Create the definition indices
-    var $_definition_modifiers  = 0;// @
-    var $_definition_name       = 1;// @
-    var $_definition_type       = 2;// @
-    var $_definition_value      = 3;// @
-    var $_definition_constraint = 4;// @
 
-    // Create the definition length
-    var $_definition__length = 5;
 
-    // ---------- PACKAGES ----------
 
-    // Create the package indices
-    var $_package_value      = 0;
-    var $_package_modifiers  = 1;
-    var $_package_constraint = 2;
 
-    // Create the package length
-    var $_package__length = 3;
+
+
+
 
     // ---------- PRECOMPILES ----------
 
     // Create the precompile obfuscated variable names
-    var $_precompile_cache      = $_keyGenerator(1);
-    var $_precompile_injections = $_keyGenerator(1);
-    var $_precompile_matrix     = $_keyGenerator(1);
-    var $_precompile_null       = $_keyGenerator(1);
-    var $_precompile_readonly   = $_keyGenerator(1);
-    var $_precompile_reference  = $_keyGenerator(1);
-
-    // ---------- STACKS ----------
-
-    // Create the stack indices
-    var $_stack_class       = 0;
-    var $_stack_constructor = 1;
-    var $_stack_dump        = 2;
-    var $_stack_private     = 3;
-    var $_stack_protected   = 4;
-    var $_stack_public      = 5;
-    var $_stack_prototype   = 6;
-    var $_stack_static      = 7;
-
-    // Create the stack length
-    var $_stack__length = 8;
+    var $_precompile_cache      = $_generator(1);
+    var $_precompile_injections = $_generator(1);
+    var $_precompile_matrix     = $_generator(1);
+    var $_precompile_null       = $_generator(1);
+    var $_precompile_readonly   = $_generator(1);
+    var $_precompile_reference  = $_generator(1);
 
     // ---------- SYMBOLS ----------
 
     // Create the obfuscated symbol keys
-    var $_symbol_cache     = $_minify ? $_keyGeneratorSymbol() : '~cache';
-    var $_symbol_external  = $_minify ? $_keyGeneratorSymbol() : '~external';
-    var $_symbol_lock      = $_minify ? $_keyGeneratorSymbol() : '~lock';
-    var $_symbol_modifiers = $_minify ? $_keyGeneratorSymbol() : '~modifiers';
-    var $_symbol_name      = $_minify ? $_keyGeneratorSymbol() : '~name';
-    //var $_symbol_precompile   = $_minify ? $_keyGeneratorSymbol() : '~precompile';
+    var $_symbol_cache     = $_minify ? $_generatorSymbol() : '~cache';
+    var $_symbol_external  = $_minify ? $_generatorSymbol() : '~external';
+    var $_symbol_lock      = $_minify ? $_generatorSymbol() : '~lock';
+    var $_symbol_modifiers = $_minify ? $_generatorSymbol() : '~modifiers';
+    var $_symbol_name      = $_minify ? $_generatorSymbol() : '~name';
+    //var $_symbol_precompile   = $_minify ? $_generatorSymbol() : '~precompile';
+
+
+
+
+
+
+
+
+
+
+    // ---------- CACHE ----------
+
+    // Create the cache indices
+    var $_cache_class       = 0,
+        $_cache_constructor = 1,
+        $_cache_dump        = 2,
+        $_cache_private     = 3,
+        $_cache_protected   = 4,
+        $_cache_public      = 5,
+        $_cache_prototype   = 6,
+        $_cache_static      = 7,
+        
+        // Create the length
+        $_cache__length = 8;
+
+    // ---------- DEFINITIONS ----------
+
+    // Create the definition indices
+    var $_definition_modifiers  = 0,// @
+        $_definition_name       = 1,// @
+        $_definition_type       = 2,// @
+        $_definition_value      = 3,// @
+        $_definition_constraint = 4,// @
+        
+        // Create the length
+        $_definition__length = 5;
+
+    // ---------- INJECTIONS ----------
+
+    // Create the injections offsets
+    var $_inject_private   = 0,// @
+        $_inject_protected = 1,// @
+        $_inject_prototype = 2,// @
+        $_inject_public    = 3,// @
+        $_inject_static    = 4;// @
+
+    // ---------- PACKAGES ----------
+
+    // Create the package indices
+    var $_package_value      = 0,
+        $_package_modifiers  = 1,
+        $_package_constraint = 2,
+        
+        // Create the length
+        $_package__length = 3;
 
     // ########## BUILT-INS ##########
 
@@ -707,21 +726,21 @@ if (typeof jT_Shorthand != 'string')
     };
 
     // Define the "constructor" reference on the base prototype of all class prototypes
-    $_value($_prototype, 'constructor', $_class);
+    $_data($_prototype, 'constructor', $_class);
 
     // Define the "toString()" methods on the base class of all classes and the base prototype of all class prototypes
-    $_value($_class,     'toString', $_class_toString);
-    $_value($_prototype, 'toString', $_prototype_toString);
+    $_data($_class,     'toString', $_class_toString);
+    $_data($_prototype, 'toString', $_prototype_toString);
 
     // Set the base class of all classes prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
     $_class.prototype = $_prototype;
 
     // Set the base class of all classes prototype without the "writable" flag
-    $_value($_class, 'prototype', $_prototype, true);
+    $_data($_class, 'prototype', $_prototype, true);
 
     // ---------- SYMBOLS ----------
 
-    // Create the lock symbols helper functions
+    // Create the symbols helper functions
     var $_lockSymbolsClass    = function($class)
     {
         // Define the lock function on the class
@@ -731,25 +750,14 @@ if (typeof jT_Shorthand != 'string')
             $_lock_class = $class;
         } });
     };
-    var $_lockSymbolsInstance = function($base, $private, $public, $as, $is)
+    var $_lockSymbolsInstance = function($base, $private, $public)
     {
         // Create the descriptor
-        var $descriptor = (
+        var $descriptor = { 'value': function()
         {
-            'value': $as && $is ?
-                     (function()
-                     {
-                         // Set the internal lock references to the private instance and casting/checking methods
-                         $_lock_instance    = $private;
-                         $_lock_instance_as = $as;
-                         $_lock_instance_is = $is;
-                     }) :
-                     (function()
-                     {
-                         // Set the internal lock reference to the private instance
-                         $_lock_instance = $private;
-                     })
-        });
+            // Set the internal lock reference to the private instance
+            $_lock_instance = $private;
+        } };
 
         // Define the lock function on the private and public instances
         $__defineProperty($private, $_symbol_lock, $descriptor);
@@ -801,10 +809,8 @@ if (typeof jT_Shorthand != 'string')
         if (typeof $lock != 'function')
             return false;
 
-        // Reset the instance lock references
-        $_lock_instance    = null;
-        $_lock_instance_as = null;
-        $_lock_instance_is = null;
+        // Reset the instance lock reference
+        $_lock_instance = null;
 
         // Call the lock function
         $lock();
@@ -813,16 +819,8 @@ if (typeof jT_Shorthand != 'string')
         if (!$_lock_instance)
             return false;
 
-        // If the instance is neither the private, public, or base instances, return false
-        if ($instance !== $_lock_instance && $instance !== $_lock_instance.__this && $instance !== $_lock_instance.__base)
-            return false;
-
-        // If the instance lock references for the casting and checking methods were not set, return true if the self reference object is the prototype of the instance (because lazy loading was disabled when the instance was instantiated)
-        if (!$_lock_instance_as && !$_lock_instance_is)
-            return $__getPrototypeOf($instance) === $_lock_instance.__self;
-
-        // Return true if the instance casting and checking methods match the lock instance references
-        return $instance.as === $_lock_instance_as && $instance.is === $_lock_instance_is;
+        // Return true if the instance matches either the private, public, or base instances
+        return $instance === $_lock_instance || $instance === $_lock_instance.__this || $instance === $_lock_instance.__base;
     };
     var $_unlockSymbolsPackage  = function($package)
     {
@@ -872,7 +870,7 @@ if (typeof jT_Shorthand != 'string')
             // If the constructor is not a function
             if (typeof $constructor != 'function')
             {
-                // If the constructor is not a string primitive, throw an exception
+                // If the constructor is not a string, throw an exception
                 if (typeof $constructor != 'string')
                     $_exceptionArguments(null, arguments);
 
@@ -929,15 +927,15 @@ if (typeof jT_Shorthand != 'string')
             $constructor = null;
         }
 
-        // Create the compile reference and class name
-        var $compile = null,
+        // Create the factory reference and class name
+        var $factory = null,
             $name    = '';
 
         // If a modifiers string was provided
         if ($modifiers)
         {
             // If the modifiers string is not an import string
-            if ($modifiers.length <= $_const_prefix_compile.length || $modifiers.substr(0, $_const_prefix_compile.length) != $_const_prefix_compile)
+            if ($modifiers.length <= $_const_prefix_factory.length || $modifiers.substr(0, $_const_prefix_factory.length) != $_const_prefix_factory)
             {
                 // Create the keywords array
                 var $keywords = $modifiers.trim().split(' ');
@@ -947,7 +945,7 @@ if (typeof jT_Shorthand != 'string')
 
                 for (var $i = 0, $j = $keywords.length; $i < $j; $i++)
                 {
-                    // Get the current keyword and the corresponding modifier for the keyword
+                    // Get the current keyword and the corresponding class modifier for the keyword
                     var $keyword  = $keywords[$i],
                         $modifier = $_modifiers_class[$keyword];
 
@@ -955,7 +953,7 @@ if (typeof jT_Shorthand != 'string')
                     if (!$keyword)
                         continue;
 
-                    // If no modifier was found
+                    // If no class modifier was found
                     if (!$modifier)
                     {
                         // If the keyword is not the unsafe token
@@ -974,31 +972,31 @@ if (typeof jT_Shorthand != 'string')
                     }
                     else
                     {
-                        // If the modifier was already defined in the modifiers, throw an exception
+                        // If the class modifier was already defined in the modifiers, throw an exception
                         if ($modifiers & $modifier)
                             $_exceptionFormat($_lang_$$_class_keyword_duplicate, $keyword);
 
-                        // Set the modifier in the modifiers
+                        // Set the class modifier in the modifiers
                         $modifiers |= $modifier;
                     }
                 }
             }
             else
             {
-                // Generate the compile function factory (and extract the modifiers and class name)
-                $compile   = (new $__function('"use strict";var $=function(' + $_const_compile_arguments + ')' + $modifiers.substr($_const_prefix_compile.length) + 'return $;'))();
-                $modifiers = $compile['m'];
-                $name      = $compile['n'];
+                // Generate the class factory (and extract the modifiers and class name)
+                $factory   = (new $__function('"use strict";var $=function(' + $_const_factory_arguments + ')' + $modifiers.substr($_const_prefix_factory.length) + 'return $;'))();
+                $modifiers = $factory['m'];
+                $name      = $factory['n'];
 
                 // If the extracted modifiers are not a valid 32-bit integer, reset the modifiers
-                if (!$$_isInteger($modifiers) || $modifiers > $_const_int32_max || $modifiers < $_const_int32_min)
+                if (typeof $modifiers != 'number' || !$__isFinite($modifiers) || $modifiers != $__floor($modifiers) || $modifiers > $_const_int32_max || $modifiers < $_const_int32_min)
                     $modifiers = 0;
                 
                 // Set the import modifier
                 $modifiers |= $_modifiers_class_import;
 
                 // If the unsafe token was extracted, set the unsafe modifier
-                if ($_unsafe && $compile['u'] === $_unsafe)
+                if ($_unsafe && $factory['u'] === $_unsafe)
                     $modifiers |= $_modifiers_class_unsafe;
 
                 // If the extracted class name is invalid, reset it
@@ -1014,187 +1012,262 @@ if (typeof jT_Shorthand != 'string')
         else
             $modifiers = 0;
 
-        // Store the iterated modifier flags
+        // Create the iterated modifier flags
         var $abstract  = !!($modifiers & $_modifiers_class_abstract),
             $import    = !!($modifiers & $_modifiers_class_import),
+            $model     = !!($modifiers & $_modifiers_class_model),
             $optimized = !!($modifiers & $_modifiers_class_optimized),
+            $primitive = !!($modifiers & $_modifiers_class_primitive),
             $sealed    = !!($modifiers & $_modifiers_class_sealed),
-            $struct    = !!($modifiers & $_modifiers_class_struct),
-            $unlocked  = !!($modifiers & $_modifiers_class_unlocked);
-        
-        // If the class is abstract
-        if ($abstract)
-        {
-            // If the class is sealed, throw an exception
-            if ($sealed)
-                $_exceptionFormat($_lang_$$_class_abstract_conflict, 'sealed');
+            $struct    = !!($modifiers & $_modifiers_class_struct);
 
-            // If the struct modifier was provided, throw an exception
-            if ($struct)
-                $_exceptionFormat($_lang_$$_class_abstract_conflict, 'struct');
-        }
-        // If the struct modifier was provided
-        else if ($struct)
+        // If the class is either a model or a struct
+        if ($model || $struct)
         {
+            // If the model and struct modifiers were provided, throw an exception
+            if ($model && $struct)
+                $_exceptionFormat($_lang_$$_class_conflict_and, $_const_keyword_classes, $_const_keyword_model, $_const_keyword_struct);
+
+            // If the class is abstract, throw an exception
+            if ($abstract)
+                $_exceptionFormat($_lang_$$_class_conflict_abstract,
+                                  $_const_keyword_classes,
+                                  $model ?
+                                  $_const_keyword_model :
+                                  $_const_keyword_struct);
+
+            // If the struct modifier was provided
+            if ($struct)
+            {
+                // If the struct has the sealed modifier, throw an exception
+                if ($sealed)
+                    $_exceptionFormat($_lang_$$_class_conflict, $_const_keyword_structs, $_const_keyword_sealed);
+
+                // If the struct has the unlocked modifier, throw an exception
+                if ($modifiers & $_modifiers_class_unlocked)
+                    $_exceptionFormat($_lang_$$_class_conflict, $_const_keyword_structs, $_const_keyword_unlocked);
+
+                // If the struct has the optimized modifier, throw an exception
+                if ($optimized)
+                    $_exceptionFormat($_lang_$$_class_conflict, $_const_keyword_structs, $_const_keyword_optimized);
+            }
+
             // If the export modifier was provided, throw an exception
             if ($modifiers & $_modifiers_class_export)
-                $_exception($_lang_$$_class_struct_export);
+                $_exceptionFormat($_lang_$$_class_expando,
+                                  $model ?
+                                  $_const_keyword_models :
+                                  $_const_keyword_classes);
 
-            // If either the expando private or expando public modifier was provided, throw an exception
+            // If either the expando private or expando public modifiers were provided, throw an exception
             if ($modifiers & ($_modifiers_class_expando_private | $_modifiers_class_expando_public))
-                $_exception($_lang_$$_class_struct_expando);
+                $_exceptionFormat($_lang_$$_class_export,
+                                  $model ?
+                                  $_const_keyword_models :
+                                  $_const_keyword_classes);
         }
+        // If the class is abstract and sealed, throw an exception
+        else if ($abstract && $sealed)
+            $_exceptionFormat($_lang_$$_class_conflict_abstract, $_const_keyword_classes, $_const_keyword_sealed);
 
         // If the class is global
         if ($modifiers & $_modifiers_class_global)
         {
             // If a class name was not provided, throw an exception
             if (!$name)
-                $_exception($_lang_$$_class_global_invalid);
+                $_exceptionFormat($_lang_$$_class_global_invalid,
+                                  $model ?
+                                  $_const_keyword_models :
+                                  $struct ?
+                                  $_const_keyword_structs :
+                                  $_const_keyword_classes,
+                                  $name);
 
             // If the class name is already defined in the global namespace, throw an exception
             if ($__hasOwnProperty__.call($$, $name))
-                $_exceptionFormat($_lang_$$_class_global_conflict, $name);
+                $_exceptionFormat($_lang_$$_class_global_conflict,
+                                  $model ?
+                                  $_const_keyword_models :
+                                  $struct ?
+                                  $_const_keyword_structs :
+                                  $_const_keyword_classes,
+                                  $name);
         }
 
-        // Create the cache reference, external index, levels count, and stack
-        var $cache    = null,
-            $external = 0,
-            $levels   = 1,
-            $stack    = new $__array($_stack__length);
+        // Create the cache, internal index, and metadata
+        var $cache      = new $__array($_cache__length),
+            $internal   = -1,
+            $metaclass  = null,
+            $metalength = 1;
         
-        // Set the stack constructor
-        $stack[$_stack_class]       = null;
-        $stack[$_stack_constructor] = $constructor;
+        // Set the cache constructor
+        $cache[$_cache_constructor] = $constructor;
 
-        // If the class has the import modifier or is optimized, create the dump object in the stack
+        // If the class has the import modifier or is optimized, create the dump object in the cache
         if ($import || $optimized)
-            $stack[$_stack_dump] = $__create(null);
+            $cache[$_cache_dump] = $__create(null);
         
         // If a base class was provided
         if ($base)
         {
-            // Get the cache and modifiers of the base class
-            var $baseCache     = $base[$_symbol_cache]($_lock);
-            var $baseModifiers = $base[$_symbol_modifiers];
+            // If the class is a struct, throw an exception
+            if ($struct)
+                $_exceptionFormat($_lang_$$_class_inherit_invalid, $_const_keyword_structs);
+
+            // Get the base metaclass and modifiers
+            var $baseMetaclass = $base[$_symbol_metaclass]($_lock),
+                $baseModifiers = $base[$_symbol_modifiers];
+
+            // If the base class is a model
+            if ($baseModifiers & $_modifiers_class_model)
+            {
+                // If the class is not a model, throw an exception
+                if (!$model)
+                    $_exceptionFormat($_lang_$$_class_inherit, $_const_keyword_classes, $_const_keyword_models);
+            }
+            // If the base class is a struct, throw an exception
+            else if ($baseModifiers & $_modifiers_class_struct)
+                $_exceptionFormat($_lang_$$_class_inherit,
+                                  $model ?
+                                  $_const_keyword_models :
+                                  $_const_keyword_classes,
+                                  $_const_keyword_structs);
+            // If the class is a model, throw an exception
+            else if ($model)
+                $_exceptionFormat($_lang_$$_class_inherit, $_const_keyword_models, $_const_keyword_classes);
 
             // If the base class is sealed, throw an exception
             if ($baseModifiers & $_modifiers_class_sealed)
-                $_exception($_lang_$$_derive_sealed);
+                $_exceptionFormat($_lang_$$_class_inherit_sealed,
+                                  $model ?
+                                  $_const_keyword_models :
+                                  $_const_keyword_classes,
+                                  $model ?
+                                  $_const_keyword_model :
+                                  $_const_keyword_class);
 
-            // If the class is not unsafe and the base class is unsafe, throw an exception
-            if (~$modifiers & $_modifiers_class_unsafe && $baseModifiers & $_modifiers_class_unsafe)
-                $_exception($_lang_$$_derive_unsafe);
+            // If the base class is unsafe and the class is not unsafe, throw an exception
+            if ($baseModifiers & $_modifiers_class_unsafe && !($modifiers & $_modifiers_class_unsafe))
+                $_exceptionFormat($_lang_$$_class_inherit_unsafe,
+                                  $model ?
+                                  $_const_keyword_models :
+                                  $_const_keyword_classes);
 
             // If the base class is internal
             if ($baseModifiers & $_modifiers_class_internal)
             {
                 // If the class is not internal, throw an exception
-                if (~$modifiers & $_modifiers_class_internal)
-                    $_exception($_lang_$$_derive_internal);
+                if (!($modifiers & $_modifiers_class_internal))
+                    $_exceptionFormat($_lang_$$_class_inherit_internal,
+                                      $model ?
+                                      $_const_keyword_model :
+                                      $_const_keyword_class);
 
-                // Set the external index
-                $external = $base[$_symbol_external] + 1;
+                // Set the internal index
+                $internal = $base[$_symbol_internal] + 1;
             }
-
-            // If the base class has the struct modifier
-            if ($baseModifiers & $_modifiers_class_struct)
-            {
-                // If the class does not have the struct modifier, throw an exception
-                if (!$struct)
-                    $_exception($_lang_$$_derive_struct);
-            }
-            // If the class has the struct modifier, throw an exception
-            else if ($struct)
-                $_exception($_lang_$$_derive_class);
+            // If the class is internal, set the internal index
+            else if ($modifiers & $_modifiers_class_internal)
+                $internal = 0;
 
             // If the base class is unlocked
             if ($baseModifiers & $_modifiers_class_unlocked)
             {
                 // If the class is not unlocked, throw an exception
-                if (!$unlocked)
-                    $_exception($_lang_$$_derive_unlocked);
+                if (!($modifiers & $_modifiers_class_unlocked))
+                    $_exceptionFormat($_lang_$$_class_inherit_unlocked,
+                                      $model ?
+                                      $_const_keyword_model :
+                                      $_const_keyword_class);
             }
             // If the class is unlocked, throw an exception
-            else if ($unlocked)
-                $_exception($_lang_$$_derive_locked);
+            else if ($modifiers & $_modifiers_class_unlocked)
+                $_exceptionFormat($_lang_$$_class_inherit_locked,
+                                  $model ?
+                                  $_const_keyword_model :
+                                  $_const_keyword_class);
 
             // If the class is optimized and the base class is not optimized, throw an exception
-            if ($optimized && ~$baseModifiers & $_modifiers_class_optimized)
-                $_exception($_lang_$$_derive_unoptimized);
+            if ($optimized && !($baseModifiers & $_modifiers_class_optimized))
+                $_exceptionFormat($_lang_$$_class_inherit_unoptimized,
+                                  $model ?
+                                  $_const_keyword_model :
+                                  $_const_keyword_class);
 
-            // If the class does not have the import modifier
-            if (!$import)
+            // If the base class has the import modifier
+            if ($baseModifiers & $_modifiers_class_import)
             {
-                // If the base class has the import modifier, throw an exception
-                if ($baseModifiers & $_modifiers_class_import)
-                    $_exception($_lang_$$_derive_import);
-                
-                // Create the stack definitions objects
-                $stack[$_stack_public]    = $__create($baseCache[0][$_stack_public]);
-                $stack[$_stack_protected] = $__create($baseCache[0][$_stack_protected]);
-                $stack[$_stack_private]   = $__create($stack[$_stack_protected]);
+                // If the class does not have the import modifier, throw an exception
+                if (!$import)
+                    $_exceptionFormat($_lang_$$_class_inherit_import,
+                                      $model ?
+                                      $_const_keyword_model :
+                                      $_const_keyword_class);
             }
-            // If the base class doesn't have the import modifier, throw an exception
-            else if (~$baseModifiers & $_modifiers_class_import)
-                $_exception($_lang_$$_derive_export);
+            // If the class does not have the import modifier
+            else if (!$import)
+            {
+                // Create the cache definitions objects
+                $cache[$_cache_public]    = $__create($baseMetaclass[0][$_cache_public]);
+                $cache[$_cache_protected] = $__create($baseMetaclass[0][$_cache_protected]);
+                $cache[$_cache_private]   = $__create($cache[$_cache_protected]);
+            }
+            // Throw an exception
+            else
+                $_exceptionFormat($_lang_$$_class_inherit_nonimport,
+                                  $model ?
+                                  $_const_keyword_model :
+                                  $_const_keyword_class);
 
-            // Create the stack uncompiles
-            $stack[$_stack_prototype] = $__create($baseCache[0][$_stack_prototype]);
-            $stack[$_stack_static]    = $__create(null);
+            // Create the cache uncompiles
+            $cache[$_cache_prototype] = $__create($baseMetaclass[0][$_cache_prototype]);
+            $cache[$_cache_static]    = $__create(null);
 
-            // Set the levels count and create the cache
-            $levels = $baseCache.length + 1;
-            $cache  = new $__array($levels);
+            // Create the metadata
+            $metalength = $baseMetaclass.length + 1;
+            $metaclass  = new $__array($metalength);
 
-            // Set the stack in the cache
-            $cache[0] = $stack;
+            // Set the cache in the metaclass
+            $metaclass[0] = $cache;
 
-            // Append the base cache to the cache
-            for (var $i = 1; $i < $levels; $i++)
-                $cache[$i] = $baseCache[$i - 1];
+            // Append the base metaclass to the metaclass
+            for (var $i = 1; $i < $metalength; $i++)
+                $metaclass[$i] = $baseMetaclass[$i - 1];
         }
         else
         {
-            // If the class is internal, set the external index
+            // If the class is internal, set the internal index
             if ($modifiers & $_modifiers_class_internal)
-                $external = 1;
+                $internal = 0;
 
             // If the class does not have the import modifier
             if (!$import)
             {
-                // Create the stack definitions objects
-                $stack[$_stack_public]    = $__create(null);
-                $stack[$_stack_protected] = $__create(null);
-                $stack[$_stack_private]   = $__create($stack[$_stack_protected]);
+                // Create the cache definitions objects
+                $cache[$_cache_public]    = $__create(null);
+                $cache[$_cache_protected] = !$struct ?
+                                            $__create(null) :
+                                            null;
+                $cache[$_cache_private]   = $__create(!$struct ?
+                                                      $cache[$_cache_protected] :
+                                                      null);
             }
 
-            // Create the stack uncompiles
-            $stack[$_stack_prototype] = $__create(null);
-            $stack[$_stack_static]    = $__create(null);
+            // Create the cache uncompiles
+            $cache[$_cache_prototype] = $__create(null);
+            $cache[$_cache_static]    = $__create(null);
 
-            // Create the cache matrix
-            $cache = [$stack];
+            // Create the metaclass
+            $metaclass = !$struct ? [$cache] : $cache;
         }
-
-        // Create the inherited definitions reference
-        //var $inherits = null;
-
-        // If there is more than 1 level in the cache, get the inherited definitions object
-        //if ($levels > 1)
-        //    $inherits = $cache[1][$_stack_protected];
-
-        // ########################
-        if ($struct && $constructor && $constructor.length != 0)
-            throw 'ARGUMENT COUNT MISMATCH';
 
         // If the argument count does not match the number of arguments
         if (arguments.length != $argument)
         {
             // If the next argument is not an array (or the unsafe modifier was not set)
-            if (~$modifiers & $_modifiers_class_unsafe || !$__array_isArray(arguments[$argument]))
+            if (!($modifiers & $_modifiers_class_unsafe && $__array_isArray(arguments[$argument])))
             {
-                // Get the private, protected, and public prototypes
+                // Set the private prototype and get the protected and public prototypes
                 var $prototypePrivate   = $prototype,
                     $prototypeProtected = arguments[$argument++],
                     $prototypePublic    = arguments[$argument++];
@@ -1203,42 +1276,67 @@ if (typeof jT_Shorthand != 'string')
                 if ($prototypeProtected == null || typeof $prototypeProtected != 'object' || $__getPrototypeOf($prototypeProtected) !== $__objectProto__ || $prototypePublic == null || typeof $prototypePublic != 'object' || $__getPrototypeOf($prototypePublic) !== $__objectProto__)
                     $_exceptionArguments(null, arguments);
 
-                // Set the extra prototype definitions object
+                // Get the prototype
                 $prototype = arguments[$argument];
 
-                // If the extra prototype is a simple object, increment the argument count
+                // If the prototype is a simple object, increment the argument count
                 if ($prototype != null && typeof $prototype == 'object' && $__getPrototypeOf($prototype) === $__objectProto__)
                     $argument++;
+                // Reset the prototype
                 else
                     $prototype = null;
 
-                // If the argument count does not match the number of arguments, throw an exception
-                if (~$modifiers & $_modifiers_class_unsafe && arguments.length != $argument)
+                // If the argument count does not match the number of arguments (and the unsafe modifier was not set), throw an exception
+                if (arguments.length != $argument && !($modifiers & $_modifiers_class_unsafe))
                     $_exceptionArguments(null, arguments);
 
-                // Compile the private class definitions into the stack
+                // Compile the private definitions into the cache
                 for (var $key in $prototypePrivate)
-                    $_definitionsCompiler($stack, $abstract, $import, $optimized, $sealed, $struct, $unlocked, $key, $prototypePrivate[$key], 'private');
+                    $_definitionsCompilerCache($cache, $abstract, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $prototypePrivate[$key], $_const_keyword_private);
 
-                // Compile the protected class definitions into the stack
+                // Compile the protected definitions into the cache
                 for (var $key in $prototypeProtected)
-                    $_definitionsCompiler($stack, $abstract, $import, $optimized, $sealed, $struct, $unlocked, $key, $prototypeProtected[$key], 'protected');
+                    $_definitionsCompilerCache($cache, $abstract, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $prototypeProtected[$key], $_const_keyword_protected);
 
-                // Compile the public class definitions into the stack
+                // Compile the public definitions into the cache
                 for (var $key in $prototypePublic)
-                    $_definitionsCompiler($stack, $abstract, $import, $optimized, $sealed, $struct, $unlocked, $key, $prototypePublic[$key], 'public');
+                    $_definitionsCompilerCache($cache, $abstract, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $prototypePublic[$key], $_const_keyword_public);
             }
         }
 
-        // If a prototype was provided, compile the class definitions into the stack
+        // If a prototype was provided, compile the definitions into the cache
         if ($prototype)
             for (var $key in $prototype)
-                $_definitionsCompiler($stack, $abstract, $import, $optimized, $sealed, $struct, $unlocked, $key, $prototype[$key]);
+                $_definitionsCompilerCache($cache, $abstract, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $prototype[$key]);
+
+        // If any injections arguments were provided (and the unsafe modifier was set)
+        if ($modifiers & $_modifiers_class_unsafe && arguments[$argument])
+        {
+            // Inject the private, protected, and public definitions
+            $_definitionsCompilerInjections(!$import ? $cache[$_cache_private]   : null, $import || $optimized ? $cache[$_cache_dump] : null, arguments[$argument + $_inject_private]);
+            $_definitionsCompilerInjections(!$import ? $cache[$_cache_protected] : null, $import || $optimized ? $cache[$_cache_dump] : null, arguments[$argument + $_inject_protected]);
+            $_definitionsCompilerInjections(!$import ? $cache[$_cache_public]    : null, $import || $optimized ? $cache[$_cache_dump] : null, arguments[$argument + $_inject_public]);
+            
+            // Inject the prototype and static definitions
+            $_definitionsCompilerInjections($cache[$_cache_prototype], null, arguments[$argument + $_inject_prototype]);
+            $_definitionsCompilerInjections($cache[$_cache_static],    null, arguments[$argument + $_inject_static]);
+        }
         
-        // Construct the class prototype
+        // Create the class prototype
         $prototype = $base ?
                      $__create($base.prototype) :
                      new $_class();
+
+        // CACHE READY => METACLASS READY => DIRECTIVES CAN BE COMPILED (OR PROXIES)
+
+        // while the directives are being compiled, also get the merge index using overridden?
+
+        // Create the inherited definitions reference
+        //var $inherits = null;
+
+        // If there is more than 1 level in the cache, get the inherited definitions object
+        //if ($levels > 1)
+        //    $inherits = $cache[1][$_stack_protected];
 
         // Create the cache, external index, level count, and the external type reference
         //var $merge     = 0;
@@ -1274,18 +1372,6 @@ if (typeof jT_Shorthand != 'string')
         else
             $type = $class;
 
-        // If any injections arguments were provided
-        if ($modifiers & $_modifiers_class_unsafe && arguments[$argument])
-        {
-            // Inject the external and internal definitions objects
-            //$_definitionsCompilerInjections(!$import ? $definitionsExternal : null, $import || $optimized ? $classCache : null, arguments[$argument + $_inject_external]);
-            //$_definitionsCompilerInjections(!$import ? $definitionsInternal : null, $import || $optimized ? $classCache : null, arguments[$argument + $_inject_internal]);
-            
-            // Inject the prototype and static definitions objects
-            //$_definitionsCompilerInjections($definitionsPrototype, null, arguments[$argument + $_inject_prototype]);
-            //$_definitionsCompilerInjections($definitionsStatic,    null, arguments[$argument + $_inject_static]);
-        }
-
         // Create the precompile string and helper function references
         //var $eval       = null;
         //var $precompile = null;
@@ -1296,12 +1382,12 @@ if (typeof jT_Shorthand != 'string')
             //
         }
         // If the imported class data doesn't validate, throw an exception
-        else if ($levels !== $compile['l'] || $__keys($stack[$_stack_private]).length !== $compile['k0'] || $__keys($stack[$_stack_protected]).length !== $compile['k1'] || $__keys($stack[$_stack_public]).length !== $compile['k2'])// verify stack and heap?
+        else if ($levels !== $factory['l'] || $__keys($stack[$_stack_private]).length !== $factory['k0'] || $__keys($stack[$_stack_protected]).length !== $factory['k1'] || $__keys($stack[$_stack_public]).length !== $factory['k2'])// verify stack and heap?
             $_exceptionFormat($_lang_$$_import);
 
         // If the class has a name, set the "toString()" method on the prototype
         if ($name)
-            $_value($prototype, 'toString', function()
+            $_data($prototype, 'toString', function()
             {
                 // Return the named object expression string
                 return '[object ' + $name + ']';
@@ -1312,28 +1398,28 @@ if (typeof jT_Shorthand != 'string')
             $__preventExtensions($prototype);
 
         // Set the class data
-        $_value($class, $_symbol_cache,     $_lock($cache));
-        $_value($class, $_symbol_modifiers, $modifiers);
+        $_data($class, $_symbol_cache,     $_lock($cache));
+        $_data($class, $_symbol_modifiers, $modifiers);
 
         if ($modifiers & $_modifiers_class_internal)
-            $_value($class, $_symbol_external, $external);
+            $_data($class, $_symbol_external, $external);
 
         if ($name)
-            $_value($class, $_symbol_name, $name);
+            $_data($class, $_symbol_name, $name);
 
         // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
         $class.prototype = $prototype;
 
         // Set the class prototype without the "writable" flag
-        $_value($class, 'prototype', $prototype);
+        $_data($class, 'prototype', $prototype);
 
         // If a static "constructor" definition was not provided, set the class constructor reference
         if (!$__hasOwnProperty__.call($stack[$_stack_static], 'constructor'))
-            $_value($class, 'constructor', $$);
+            $_data($class, 'constructor', $$);
 
         // If a static "toString()" definition was not provided, set the class toString() method
         if (!$__hasOwnProperty__.call($stack[$_stack_static], 'toString'))
-            $_value($class, 'toString', $_class_toString);
+            $_data($class, 'toString', $_class_toString);
 
         // Lock the class type
         $_lockSymbolsClass($class);
@@ -2189,9 +2275,26 @@ if (typeof jT_Shorthand != 'string')
 
     // ---------- COMPILER ----------
 
+    var $_definitionsCompilerAbstract       = function($name, $accessor)
+    {
+        // Return the abstract accessor exception handler
+        if ($accessor)
+            return function()
+            {
+                // Throw an exception
+                $_exceptionFormat($_lang_$$_abstract_accessor, $name);
+            };
+
+        // Return the abstract exception handler
+        return function()
+        {
+            // Throw an exception
+            $_exceptionFormat($_lang_$$_abstract_call, $name);
+        };
+    };
     var $_definitionsCompilerAccessor       = function($array, $definitions, $modifiers, $name, $key, $value)
     {
-        // Get the accessor and the index of the last space in it
+        // Get the accessor and the index of the last space in the accessor
         var $accessor = $key.trim(),
             $index    = $accessor.lastIndexOf(' '),
             $modifier = '';
@@ -2208,27 +2311,27 @@ if (typeof jT_Shorthand != 'string')
             $accessor = $accessor.substr($index + 1);
         }
         
-        // Create the property, private, and protected modifiers
-        var $property  = 0,
+        // Create the method modifiers along with the private and protected bits
+        var $method    = 0,
             $private   = 0,
             $protected = 0;
 
-        // If the accessor is a get accessor
-        if ($accessor == 'get')
+        // If the accessor is an accessor method
+        if ($accessor == $_const_keyword_get)
         {
-            // Store the get accessor index and modifiers
+            // Store the accessor method index, modifiers, and bits
             $index     = 0;
-            $property  = $_modifiers_property_get;
+            $method    = $_modifiers_property_get;
             $private   = $_modifiers_property_get_private;
             $protected = $_modifiers_property_get_protected;
             
         }
-        // If the accessor is a set accessor
-        else if ($accessor == 'set')
+        // If the accessor is a mutator method
+        else if ($accessor == $_const_keyword_set)
         {
-            // Store the set accessor index and modifiers
+            // Store the mutator method index, modifiers, and bits
             $index     = 1;
-            $property  = $_modifiers_property_set;
+            $method    = $_modifiers_property_set;
             $private   = $_modifiers_property_set_private;
             $protected = $_modifiers_property_set_protected;
         }
@@ -2236,51 +2339,54 @@ if (typeof jT_Shorthand != 'string')
         else
             $_exceptionFormat($_lang_$$_property_name_invalid, $name, $accessor);
 
-        // If a value array was provided
+        // If a value array was provided (and is therefore not an auto property)
         if ($array)
         {
-            // If the value is not a function
-            if (typeof $value != 'function')
+            // If the property is abstract
+            if ($modifiers & $_modifiers_abstract)
             {
-                // If no definitions object was provided, set the value to null
-                if (!$definitions)
-                    $value = null;
-                // If the value is not null or the property is not abstract, throw an exception
-                else if ($value !== null || ~$modifiers & $_modifiers_abstract)
-                    $_exceptionFormat($_lang_$$_property_value_function, $name, $accessor);
-            }
-            else
-            {
-                // ################################
-                if ($value.length != $index)
-                    throw 'ARGUMENT COUNT MISMATCH';
+                // If the value is neither a null reference, undefined reference, nor a function, throw an exception
+                if ($value != null && typeof $value != 'function')
+                    $_exceptionFormat($_lang_$$_property_value_abstract, $name, $accessor);
 
-                // If the global function lock flag is set, define the apply function on the value
-                if ($_funcLock)
-                    $_value($value, 'apply', $__function_apply__);
+                // Create the abstract exception handler
+                $value = $_definitionsCompilerAbstract($name, $accessor);
             }
+            // If the value is not a function
+            else if (typeof $value != 'function')
+            {
+                // If definitions were provided (and is therefore not a class with the import modifier), throw an exception
+                if ($definitions)
+                    $_exceptionFormat($_lang_$$_property_value_function, $name, $accessor);
+
+                // Set the value to null
+                $value = null;
+            }
+            // If the global function lock flag is set, prevent extensions on the function
+            else if ($_funcLock)
+                $__preventExtensions($value);
 
             // Set the value in the value array
             $array[$index] = $value;
         }
 
-        // If no definitions object was provided, return null
+        // If no definitions were provided (and is therefore a class with the import modifier), return
         if (!$definitions)
-            return null;
+            return 0;
         
-        // If the accessor was already defined, throw an exception
-        if ($modifiers & $property)
+        // If the method was already defined, throw an exception
+        if ($modifiers & $method)
             $_exceptionFormat($_lang_$$_property_name_duplicate, $name, $accessor);
 
         // If the modifier string is a valid access modifier
-        if ($modifier == 'private' || $modifier == 'protected' || $modifier == 'public')
+        if ($modifier == $_const_keyword_private || $modifier == $_const_keyword_protected || $modifier == $_const_keyword_public)
         {
-            // If an access modifier is already defined on the other accessor, throw an exception
+            // If an access modifier is already defined, throw an exception
             if ($modifiers & ($_modifiers_property_get_private | $_modifiers_property_get_protected | $_modifiers_property_set_private | $_modifiers_property_set_protected))
                 $_exceptionFormat($_lang_$$_property_access_duplicate, $name);
 
             // If the "private" modifier string was provided
-            if ($modifier == 'private')
+            if ($modifier == $_const_keyword_private)
             {
                 // If the property is private, throw an exception
                 if ($modifiers & $_modifiers_private)
@@ -2294,18 +2400,18 @@ if (typeof jT_Shorthand != 'string')
                 if ($modifiers & $_modifiers_override)
                     $_exceptionFormat($_lang_$$_property_private_override, $name, $accessor);
                 
-                // Set the private modifier in the property modifiers
-                $property |= $private;
+                // Set the private modifier in the method modifiers
+                $method |= $private;
             }
             // If the "protected" modifier string was provided
-            else if ($modifier == 'protected')
+            else if ($modifier == $_const_keyword_protected)
             {
                 // If the property is not public, throw an exception
-                if (~$modifiers & $_modifiers_public)
+                if (!($modifiers & $_modifiers_public))
                     $_exceptionFormat($_lang_$$_property_access_restrictive, $name, $accessor);
 
-                // Set the protected modifier in the property modifiers
-                $property |= $protected;
+                // Set the protected modifier in the method modifiers
+                $method |= $protected;
             }
             // Throw an exception
             else
@@ -2318,130 +2424,21 @@ if (typeof jT_Shorthand != 'string')
         // If the property has the override modifier
         if ($modifiers & $_modifiers_override)
         {
-            // Get the base property modifiers
+            // Get the base property modifiers and method modifiers
             var $baseModifiers = $definitions[$name][$_definition_modifiers],
-                $baseProperty  = $baseModifiers & ($property | $private | $protected);
+                $baseMethod    = $baseModifiers & ($method | $private | $protected);
 
-            // If the base property modifiers do not match the property modifiers, throw an exception
-            if ($baseProperty != $property)
+            // If the method modifiers do not match the base method modifiers, throw an exception
+            if ($method != $baseMethod)
                 $_exceptionFormat($_lang_$$_property_override_invalid, $name, $accessor);
         }
 
-        // Return the property modifiers
-        return $property;
+        // Return the method modifiers
+        return $method;
     };
-    var $_definitionsCompilerConstraint     = function($keyword)
+    var $_definitionsCompilerCache          = function($cache, $abstract, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $value, $prepend)
     {
-        // If the constraint is a valid class name, return true
-        if ($_const_regexp_class.test($keyword))
-            return true;
-
-        // Parse the keyword
-        var $exec = $_const_regexp_constraint.exec($keyword);
-
-        // If the keyword could not be parsed, return false
-        if (!$exec)
-            return false;
-
-        // If the cast and nullable flags were both set, return false
-        if ($exec[1] && $exec[3])
-            return false;
-        
-        // Return true if the type flag is found in the dynamic types array or the cast flag is not set and the type flag is found in the static types array
-        return $_const_types_dynamic.indexOf($exec[2]) >= 0 || !$exec[1] && $_const_types_static.indexOf($exec[2]) >= 0;
-    };
-    var $_definitionsCompilerPrimitive      = function($value)
-    {
-        // If the value is either null or undefined, return the value
-        if ($value == null)
-            return $value;
-        
-        // Get the internal type of the value
-        var $typeof = typeof $value;
-
-        // If the value is a primitive, return the value
-        if ($typeof == 'boolean' || $typeof == 'number' || $typeof == 'string')
-            return $value;
-        
-        return null;
-    };
-    var $_definitionsCompilerProperty       = function($array, $definitions, $modifiers, $object, $name)
-    {
-        // Create the property modifiers
-        var $property = 0;
-
-        // Populate the value array from the property object and set the property modifiers
-        for (var $key in $object)
-            $property |= $_definitionsCompilerAccessor($array, $definitions, $modifiers | $property, $name, $key, $object[$key]) || 0;
-
-        // If no definitions object was provided, return the value array
-        if (!$definitions)
-            return $array;
-
-        // If no set accessor was provided
-        if (~$property & $_modifiers_property_set)
-        {
-            // If no get accessor was provided, throw an exception
-            if (~$property & $_modifiers_property_get)
-                $_exceptionFormat($_lang_$$_property_name_empty, $name);
-
-            // If the get accessor has an access modifier (but it is not a protected override), throw an exception
-            if ($property & $_modifiers_property_get_private || $property & $_modifiers_property_get_protected && ~$modifiers & $_modifiers_override)
-                $_exceptionFormat($_lang_$$_property_access_conflict, $name, 'get');
-        }
-        // If no get accessor was provided and the set accessor has an access modifier (but it is not a protected override), throw an exception
-        else if (~$property & $_modifiers_property_get && ($property & $_modifiers_property_set_private || $property & $_modifiers_property_set_protected && ~$modifiers & $_modifiers_override))
-            $_exceptionFormat($_lang_$$_property_access_conflict, $name, 'set');
-
-        // Return the property modifiers
-        return $property;
-    };
-    var $_definitionsCompilerThrowDuplicate = function($definitions, $name, $type)
-    {
-        // If the definition is already defined in the stack definitions object, throw an exception
-        if ($__hasOwnProperty__.call($definitions, $name))
-            $_exceptionFormat($_lang_$$_name_duplicate, $name, $type ? $type + ' ' : '');
-    };
-    var $_definitionsCompilerThrowRequired  = function($definitions, $modifiers, $name, $type)
-    {
-        // Get the base definition
-        var $baseDefinition = $definitions[$name];
-
-        // If the definition is defined in the stack definitions object
-        if ($baseDefinition)
-        {
-            // If the base definition has the abstract modifier, throw an exception
-            if ($baseDefinition[$_definition_modifiers] & $_modifiers_abstract)
-                $_exceptionFormat($_lang_$$_override_required, $name, $baseDefinition[$_definition_type]);
-
-            // If the new modifier was not provided, throw an exception
-            if (~$modifiers & $_modifiers_new)
-                $_exceptionFormat($_lang_$$_new_required, $name, $type ? $type + ' ' : '');
-        }
-        // If the new modifier was provided, throw an exception
-        else if ($modifiers & $_modifiers_new)
-            $_exceptionFormat($_lang_$$_new_invalid, $name, $type ? $type + ' ' : '');
-    };
-    var $_definitionsCompilerThrowVirtuals  = function($modifiers, $name, $type)
-    {
-        // If the abstract, override, or virtual modifiers were provided
-        if ($modifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual))
-        {
-            // If a type was provided, throw a type-specific exception
-            if ($type)
-                $_exceptionFormat($_lang_$$_virtual_invalid, $name, $type);
-
-            // Throw an exception
-            $_exceptionFormat($_lang_$$_virtual_invalid_type, $name);
-        }
-
-        // If the sealed modifier was provided, throw an exception
-        if ($modifiers & $_modifiers_sealed)
-            $_exceptionFormat($_lang_$$_requires, $name, 'sealed', 'override');
-    };
-    var $_definitionsCompiler               = function($stack, $abstract, $import, $optimized, $sealed, $struct, $unlocked, $key, $value, $prepend)
-    {
-        // Get the name and the index of the last space in it
+        // Get the name and the index of the last space in the name
         var $name      = $key.trim(),
             $index     = $name.lastIndexOf(' '),
             $modifiers = '';
@@ -2461,14 +2458,14 @@ if (typeof jT_Shorthand != 'string')
         else if ($prepend)
             $modifiers = $prepend;
 
-        // Check if the value is a package
+        // Create the constraint and check if the value is a package
         var $constraint = '',
             $package    = $value != null && $value[$_symbol_lock] && $_unlockSymbolsPackage($value);
 
         // If the value is a package
         if ($package)
         {
-            // If this is a separated definitions object, throw an exception
+            // If the definition is from a separated prototype, throw an exception
             if ($prepend)
                 $_exceptionFormat($_lang_$$_package_separated, $name, $prepend);
 
@@ -2484,8 +2481,8 @@ if (typeof jT_Shorthand != 'string')
             $modifiers  = $value[$_package_modifiers];
             $value      = $value[$_package_value];
 
-            // If a string primitive constraint was provided and it is not valid, throw an exception
-            if ($constraint && typeof $constraint == 'string' && !$_definitionsCompilerConstraint($constraint))
+            // If a string constraint was provided and it is not valid, throw an exception
+            if (typeof $constraint == 'string' && !$_definitionsCompilerConstraint($constraint))
                 $_exceptionFormat($_lang_$$_package_constraint, $name, $constraint);
         }
 
@@ -2497,12 +2494,12 @@ if (typeof jT_Shorthand != 'string')
                     'method' :
                     'field';
 
-        // If the global function lock flag is set and the value is a function, define the apply function on the value
+        // If the global function lock flag is set and the value is a function, prevent extensions on the function
         if ($_funcLock && $type == 'method')
-            $_value($value, 'apply', $__function_apply__);
+            $__preventExtensions($value);
         
         // If the class does not have the import modifier (or the prototype or static modifiers were provided)
-        if (!$import || $modifiers.indexOf('prototype') >= 0 || $modifiers.indexOf('static') >= 0)
+        if (!$import || $modifiers.indexOf($_const_keyword_prototype) >= 0 || $modifiers.indexOf($_const_keyword_static) >= 0)
         {
             // Create the definition and break the modifiers string into a keywords array
             var $definition = new $__array($_definition__length),
@@ -2514,22 +2511,20 @@ if (typeof jT_Shorthand != 'string')
 
             // If the name starts with the symbol prefix, throw an exception
             if ($name.substr(0, $_const_prefix_symbol.length) == $_const_prefix_symbol)
-                $_exceptionFormat($_lang_$$_name_symbol, $name, $_const_prefix_symbol);
+                $_exceptionFormat($_lang_$$_name_reserved, $name);
 
             // Reset the modifiers
             $modifiers = 0;
 
             for (var $i = 0, $j = $keywords.length; $i < $j; $i++)
             {
-                // Get the current keyword
-                var $keyword = $keywords[$i];
+                // Get the current keyword and the corresponding modifier for the keyword
+                var $keyword  = $keywords[$i],
+                    $modifier = $_modifiers[$keyword];
 
                 // If no keyword was provided, skip it
                 if (!$keyword)
                     continue;
-
-                // Get corresponding modifier for the keyword
-                var $modifier = $_modifiers[$keyword];
 
                 // If a modifier was found
                 if ($modifier)
@@ -2543,7 +2538,7 @@ if (typeof jT_Shorthand != 'string')
                 }
                 else
                 {
-                    // If the value was a package, the keyword is not the last keyword, or the keyword is not a valid constraint, throw an exception
+                    // If the value is a package, the keyword is not the last keyword, or the keyword is not a valid constraint, throw an exception
                     if ($package || $i != $j - 1 || !$_definitionsCompilerConstraint($keyword))
                         $_exceptionFormat($_lang_$$_keyword_invalid, $name, $keyword);
 
@@ -2554,228 +2549,10 @@ if (typeof jT_Shorthand != 'string')
 
             // Get the access and enum modifiers
             var $access = $modifiers & ($_modifiers_private | $_modifiers_protected | $_modifiers_public),
-                $enum   = $modifiers & ($_modifiers_hidden | $_modifiers_visible);
+                $enum   = $modifiers & ($_modifiers_visible | $_modifiers_hidden);
             
-            // If neither the prototype nor static modifiers were provided
-            if (~$modifiers & $_modifiers_prototype && ~$modifiers & $_modifiers_static)
-            {
-                // If the name is reserved, throw an exception
-                if ($name == 'as' || $struct && $name == 'clone' || $unlocked && $name == 'constructor' || $name == 'is' || $name == 'type' || $name == '__base' || $name == '__data' || $name == '__self' || $name == '__this' || $name == '__type')
-                    $_exceptionFormat($_lang_$$_name_reserved, $name);
-                
-                // Throw if the definition is already defined in the private or protected stack definitions objects
-                $_definitionsCompilerThrowDuplicate($stack[$_stack_private],   $name);
-                $_definitionsCompilerThrowDuplicate($stack[$_stack_protected], $name);
-                
-                // If no access modifiers were provided, set the private modifier in the modifiers
-                if (!$access)
-                    $modifiers |= $access = $_modifiers_private;
-                // If more than one access modifier was provided, throw an exception
-                else if ($access != $_modifiers_private && $access != $_modifiers_protected && $access != $_modifiers_public)
-                    $_exceptionFormat($_lang_$$_access_duplicate, $name);
-
-                // If the const modifier was provided, throw an exception
-                if ($modifiers & $_modifiers_const)
-                    $_exceptionFormat($_lang_$$_requires_or, $name, 'const', 'prototype', 'static');
-                
-                // If the value is null and the abstract modifier was provided, set the "method" type string
-                if ($value === null && $modifiers & $_modifiers_abstract)
-                    $type = 'method';
-                
-                // If no enum modifiers were provided, set the default enum modifier
-                if (!$enum)
-                    $modifiers |= $enum = $type == 'method' ?
-                                          $_modifiers_hidden :
-                                          $_modifiers_visible;
-                // If more than one enum modifier was provided, throw an exception
-                else if ($enum != $_modifiers_hidden && $enum != $_modifiers_visible)
-                    $_exceptionFormat($_lang_$$_conflict_and, $name, 'hidden', 'visible');
-
-                // If the value is not a field
-                if ($type != 'field')
-                {
-                    // If the private modifier was provided along with either the abstract, override, or virtual modifiers, throw an exception
-                    if ($modifiers & $_modifiers_private && $modifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual))
-                        $_exceptionFormat($_lang_$$_virtual_invalid, $name, 'private');
-
-                    // If the abstract modifier was provided
-                    if ($modifiers & $_modifiers_abstract)
-                    {
-                        // If the sealed modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_sealed)
-                            $_exceptionFormat($_lang_$$_conflict_and, $name, 'abstract', 'sealed');
-
-                        // If the virtual modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_virtual)
-                            $_exceptionFormat($_lang_$$_conflict_and, $name, 'abstract', 'virtual');
-
-                        // If the class is not abstract, throw an exception
-                        if (!$abstract)
-                            $_exceptionFormat($_lang_$$_abstract_class, $name);
-
-                        // If the value is an auto property, throw an exception
-                        if ($auto)
-                            $_exceptionFormat($_lang_$$_abstract_auto, $name);
-                    }
-
-                    // If the override modifier was provided
-                    if ($modifiers & $_modifiers_override)
-                    {
-                        // If the new modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_new)
-                            $_exceptionFormat($_lang_$$_conflict_and, $name, 'new', 'override');
-
-                        // If the virtual modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_virtual)
-                            $_exceptionFormat($_lang_$$_conflict_and, $name, 'override', 'virtual');
-
-                        // Get the base definition
-                        var $baseDefinition = $stack[$_stack_protected][$name];
-
-                        // If no definition is defined on the protected stack definitions object, throw an exception
-                        if (!$baseDefinition)
-                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
-
-                        // Get the base constraint, modifiers, and type-specific modifiers
-                        var $baseConstraint = $baseDefinition[$_definition_constraint],
-                            $baseModifiers  = $baseDefinition[$_definition_modifiers],
-                            $baseAccess     = $baseModifiers & ($_modifiers_protected | $_modifiers_public),
-                            $baseEnum       = $baseModifiers & ($_modifiers_hidden | $_modifiers_visible),
-                            $baseVirtuals   = $baseModifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual);
-                        
-                        // If the base definition does not match the type, access modifier, and enum modifier (or does not have any virtual modifiers or is sealed), throw an exception
-                        if ($baseDefinition[$_definition_type] != $type || $baseAccess != $access || $baseEnum != $enum || !$baseVirtuals || $baseModifiers & $_modifiers_sealed)
-                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
-
-                        // BASEMODIFIERS.READONLY != MODIFIERS.READONLY => THROW
-                        if ($baseModifiers & $_modifiers_readonly ^ $modifiers & $_modifiers_readonly)
-                            $_exceptionFormat(/*$_lang_$$_override_readonly, */$name);
-
-                        // If the base constraint does not match
-                        if ($baseConstraint !== $constraint)
-                        {
-                            // If the base constraint is a class, throw an exception
-                            if ($baseConstraint[$_symbol_lock])
-                                $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
-
-                            // Throw an exception
-                            $_exceptionFormat($_lang_$$_override_constraint, $name, $baseConstraint);
-                        }
-                    }
-                    else
-                    {
-                        // If the sealed modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_sealed)
-                            $_exceptionFormat($_lang_$$_requires, $name, 'sealed', 'override');
-                        
-                        // Throw if the new modifier was not properly utilized (or the override modifier was required)
-                        $_definitionsCompilerThrowRequired($stack[$_stack_protected], $modifiers, $name);
-                    }
-
-                    // If the class is sealed and the virtual modifier was provided, throw an exception
-                    if ($sealed && $modifiers & $_modifiers_virtual)
-                        $_exceptionFormat($_lang_$$_sealed_class, $name);
-                    
-                    // If the value is an auto property
-                    if ($auto)
-                    {
-                        // If the array does not have get and set accessor string primitives, throw an exception
-                        if ($value.length < 2 || typeof $value[0] != 'string' || typeof $value[1] != 'string')
-                            $_exceptionFormat($_lang_$$_auto_invalid, $name);
-
-                        // If the array has more than just a default property value, throw an exception
-                        if ($value.length > 3)
-                            $_exceptionFormat($_lang_$$_auto_invalid_default, $name);
-
-                        // Set the auto property modifiers
-                        $modifiers |= $_modifiers_property_auto;
-                        $modifiers |= $_definitionsCompilerAccessor(null, $stack[$_stack_protected], $modifiers, $name, $value[0]);
-                        $modifiers |= $_definitionsCompilerAccessor(null, $stack[$_stack_protected], $modifiers, $name, $value[1]);
-
-                        // Set the default value
-                        $value = $_definitionsCompilerPrimitive($value[2]);
-                    }
-                    // If the value is a property
-                    else if ($type == 'property')
-                    {
-                        // If the readonly modifier was provided and no set accessor was provided, throw an exception
-                        //if ($modifiers & $_modifiers_readonly && ~$modifiers & $_modifiers_property_set)
-                        //    $_exceptionFormat($_lang_$$_property_readonly_invalid, $name);
-
-                        // Create the value array
-                        var $array = [null, null];
-
-                        // Populate the value array and set the property modifiers
-                        $modifiers |= $_definitionsCompilerProperty($array, $stack[$_stack_protected], $modifiers, $value, $name);
-
-                        // Set the value array
-                        $value = $array;
-                    }
-                    // If the readonly modifier was provided, throw an exception
-                    else if ($modifiers & $_modifiers_readonly)
-                        $_exceptionFormat($_lang_$$_readonly_invalid_type, $name);
-
-                    // MERGE IN PROPERTY BITS TO OVERRIDE (but only overridable property bits, so filter out the privates)
-                    if ($type == 'property' && $modifiers & $_modifiers_override)
-                        $modifiers |= $baseDefinition[$_definition_modifiers] & $_modifiers_property__accessors;
-
-                    // CREATE ABSTRACT VALUE (FOR BASE)
-                    if ($modifiers & $_modifiers_abstract)
-                        $value = $type == 'property' ?
-                                 [$value[0] ?
-                                  (function()
-                                  {
-                                      throw 'abstract "' + $name + '" cannot be get';
-                                  }) :
-                                  null,
-                                  $value[1] ?
-                                  (function()
-                                  {
-                                      throw 'abstract "' + $name + '" cannot be set';
-                                  }) :
-                                  null] :
-                                 (function()
-                                 {
-                                     throw 'abstract "' + $name + '" cannot be called';
-                                 });
-                }
-                else
-                {
-                    // Throw if any virtual modifiers were provided or the new modifier was not properly utilized (or the override modifier was required)
-                    $_definitionsCompilerThrowVirtuals($modifiers, $name);
-                    $_definitionsCompilerThrowRequired($stack[$_stack_protected], $modifiers, $name);
-
-                    // Set the value as a primitive
-                    $value = $_definitionsCompilerPrimitive($value);
-                }
-
-                if ($struct && ($auto || $type == 'field'))
-                {
-                    if ($constraint)
-                    {
-                        if (typeof $constraint == 'string')
-                        {
-                            // Parse the constraint
-                            var $exec = $_const_regexp_constraint.exec($constraint);
-
-                            if (!$exec || $_const_types_struct.indexOf($exec[2]) < 0)
-                                $_exceptionFormat($_lang_$$_struct_constraint, $name, $constraint);
-                        }
-                        else if (~$constraint[$_symbol_modifiers] & $_modifiers_class_struct)
-                            $_exceptionFormat($_lang_$$_struct_constraint_class, $name);
-                    }
-                    else
-                        $constraint = 'primitive';
-                }
-
-                // If the access modifier is public, define the definition in the public stack definitions object
-                if ($access == $_modifiers_public)
-                    $_value($stack[$_stack_public], $name, $definition, false, true);
-
-                // Define the definition in either the private or protected stack definitions object
-                $_value($stack[$access == $_modifiers_private ? $_stack_private : $_stack_protected], $name, $definition, false, true);
-            }
-            else
+            // If either the prototype or static modifiers were provided
+            if ($modifiers & ($_modifiers_prototype | $_modifiers_static))
             {
                 // If no enum modifiers were provided, set the default enum modifier
                 if (!$enum)
@@ -2791,23 +2568,23 @@ if (typeof jT_Shorthand != 'string')
 
                     // If the static modifier was provided, throw an exception
                     if ($modifiers & $_modifiers_static)
-                        $_exceptionFormat($_lang_$$_conflict_and, $name, 'prototype', 'static');
+                        $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_prototype, $_const_keyword_static);
 
-                    // Throw if the definition is already defined in the prototype stack definitions object or the new modifier was not properly utilized
-                    $_definitionsCompilerThrowDuplicate($stack[$_stack_prototype], $name, $type);
-                    $_definitionsCompilerThrowRequired($stack[$_stack_prototype], $modifiers, $name, $type);
+                    // Throw if the definition is already defined in the prototype definitions or the new modifier is improperly used
+                    $_definitionsCompilerThrowDuplicate($cache[$_cache_prototype], $name, $type);
+                    $_definitionsCompilerThrowInherit($cache[$_cache_prototype], $modifiers, $name, $type);
                 }
                 else
                 {
                     // Set the "static" type string
                     $type = 'static';
 
-                    // Throw if the definition is already defined in the static stack definitions object
-                    $_definitionsCompilerThrowDuplicate($stack[$_stack_static], $name, $type);
+                    // Throw if the definition is already defined in the static definitions
+                    $_definitionsCompilerThrowDuplicate($cache[$_cache_static], $name, $type);
 
                     // If the new modifier was provided, throw an exception
                     if ($modifiers & $_modifiers_new)
-                        $_exceptionFormat($_lang_$$_conflict_and, $name, 'new', 'static');
+                        $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_new, $_const_keyword_static);
                 }
 
                 // If any access modifiers were provided, throw an exception
@@ -2816,10 +2593,10 @@ if (typeof jT_Shorthand != 'string')
 
                 // If more than one enum modifier was provided, throw an exception
                 if ($enum != $_modifiers_hidden && $enum != $_modifiers_visible)
-                    $_exceptionFormat($_lang_$$_conflict_and, $name, 'hidden', 'visible');
+                    $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_hidden, $_const_keyword_visible);
 
                 // Throw if any virtual modifiers were provided
-                $_definitionsCompilerThrowVirtuals($modifiers, $name, $type);
+                $_definitionsCompilerThrowVirtual($modifiers, $name, $type);
 
                 // If the readonly modifier was provided, throw an exception
                 if ($modifiers & $_modifiers_readonly)
@@ -2829,8 +2606,212 @@ if (typeof jT_Shorthand != 'string')
                 if ($constraint && $modifiers & $_modifiers_const)
                     $_exceptionFormat($_lang_$$_const_constraint, $name);
 
-                // Define the definition in either the prototype or static stack definitions objects
-                $_value($stack[$type == 'prototype' ? $_stack_prototype : $_stack_static], $name, $definition, false, true);
+                // Set the definition in either the prototype or static definitions
+                $_data($cache[$type == 'prototype' ? $_cache_prototype : $_cache_static], $name, $definition, false, true);
+            }
+            else
+            {
+                // If the name is reserved, throw an exception
+                if ($name == 'as' || ($model || $struct) && ($name == 'clone' || $name == 'equals') || $name == 'is' || $name == 'type' || $name == '__base' || $name == '__data' || $name == '__self' || $name == '__this' || $name == '__type')
+                    $_exceptionFormat($_lang_$$_name_reserved, $name);
+                
+                // Throw if the definition is already defined in the private or protected definitions
+                $_definitionsCompilerThrowDuplicate($cache[$_cache_private],   $name);
+                $_definitionsCompilerThrowDuplicate($cache[$_cache_protected], $name);
+                
+                // If no access modifiers were provided, set the private modifier in the modifiers
+                if (!$access)
+                    $modifiers |= $access = $_modifiers_private;
+                // If more than one access modifier was provided, throw an exception
+                else if ($access != $_modifiers_private && $access != $_modifiers_protected && $access != $_modifiers_public)
+                    $_exceptionFormat($_lang_$$_access_duplicate, $name);
+
+                // If the const modifier was provided, throw an exception
+                if ($modifiers & $_modifiers_const)
+                    $_exceptionFormat($_lang_$$_requires_or, $name, $_const_keyword_const, $_const_keyword_prototype, $_const_keyword_static);
+                
+                // If the value is null and the abstract modifier was provided, set the "method" type string
+                if ($value === null && $modifiers & $_modifiers_abstract)
+                    $type = 'method';
+                
+                // If no enum modifiers were provided, set the default enum modifier
+                if (!$enum)
+                    $modifiers |= $enum = $type == 'method' ?
+                                          $_modifiers_hidden :
+                                          $_modifiers_visible;
+                // If more than one enum modifier was provided, throw an exception
+                else if ($enum != $_modifiers_hidden && $enum != $_modifiers_visible)
+                    $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_hidden, $_const_keyword_visible);
+
+                // If the value is not a field
+                if ($type != 'field')
+                {
+                    // If the private modifier was provided along with either the abstract, override, or virtual modifiers, throw an exception
+                    if ($modifiers & $_modifiers_private && $modifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual))
+                        $_exceptionFormat($_lang_$$_virtual_invalid, $name, $_const_keyword_private);
+
+                    // If the abstract modifier was provided
+                    if ($modifiers & $_modifiers_abstract)
+                    {
+                        // If the sealed modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_sealed)
+                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_abstract, $_const_keyword_sealed);
+
+                        // If the virtual modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_virtual)
+                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_abstract, $_const_keyword_virtual);
+
+                        // If the class is not abstract, throw an exception
+                        if (!$abstract)
+                            $_exceptionFormat($_lang_$$_abstract_class, $name);
+
+                        // If the value is an auto property, throw an exception
+                        if ($auto)
+                            $_exceptionFormat($_lang_$$_abstract_auto, $name);
+                    }
+
+                    // If the override modifier was provided
+                    if ($modifiers & $_modifiers_override)
+                    {
+                        // If the new modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_new)
+                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_new, $_const_keyword_override);
+
+                        // If the virtual modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_virtual)
+                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_override, $_const_keyword_virtual);
+
+                        // Get the base definition
+                        var $baseDefinition = $cache[$_cache_protected][$name];
+
+                        // If no base definition was found, throw an exception
+                        if (!$baseDefinition)
+                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
+
+                        // Get the base constraint, modifiers, and type-specific modifiers
+                        var $baseConstraint  = $baseDefinition[$_definition_constraint],
+                            $baseModifiers   = $baseDefinition[$_definition_modifiers],
+                            $baseAccess      = $baseModifiers & ($_modifiers_public | $_modifiers_protected),
+                            $baseEnum        = $baseModifiers & ($_modifiers_hidden | $_modifiers_visible),
+                            $baseOverridable = $baseModifiers & $_modifiers_sealed ?
+                                               0 :
+                                               $baseModifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual);
+                        
+                        // If the base definition is not overridable or does not match the type or access, enum, or readonly modifiers, throw an exception
+                        if (!$baseOverridable || $type != $baseDefinition[$_definition_type] || $access != $baseAccess || $enum != $baseEnum || $modifiers & $_modifiers_readonly ^ $baseModifiers & $_modifiers_readonly)
+                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
+
+                        // If the base constraint does not match
+                        if ($constraint !== $baseConstraint)
+                        {
+                            // If the base constraint is not a class, throw an exception
+                            if (typeof $baseConstraint != 'function')
+                                $_exceptionFormat($_lang_$$_override_constraint, $name, $baseConstraint);
+
+                            // Throw an exception
+                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
+                        }
+                    }
+                    else
+                    {
+                        // If the sealed modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_sealed)
+                            $_exceptionFormat($_lang_$$_requires, $name, $_const_keyword_sealed, $_const_keyword_override);
+                        
+                        // Throw if the new modifier was improperly used (or the override modifier was required)
+                        $_definitionsCompilerThrowInherit($cache[$_cache_protected], $modifiers, $name);
+                    }
+
+                    // If the class is sealed and the virtual modifier was provided, throw an exception
+                    if ($sealed && $modifiers & $_modifiers_virtual)
+                        $_exceptionFormat($_lang_$$_virtual_sealed,
+                                          $name,
+                                          $model ?
+                                          $_const_keyword_model :
+                                          $struct ?
+                                          $_const_keyword_struct :
+                                          $_const_keyword_class);
+                    
+                    // If the value is a property
+                    if ($type == 'property')
+                    {
+                        // If the value is an auto property
+                        if ($auto)
+                        {
+                            // If the array does not have accessor and mutator strings, throw an exception
+                            if ($value.length < 2 || typeof $value[0] != 'string' || typeof $value[1] != 'string')
+                                $_exceptionFormat($_lang_$$_auto_invalid, $name);
+
+                            // If the array has more than a single default property value, throw an exception
+                            if ($value.length > 3)
+                                $_exceptionFormat($_lang_$$_auto_invalid_default, $name);
+
+                            // Set the auto property modifiers (and compile the accessor and mutator methods)
+                            $modifiers |= $_modifiers_property_auto;
+                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $name, $value[0]);
+                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $name, $value[1]);
+
+                            // Set the default value
+                            $value = $_definitionsCompilerPrimitive($value[2]);
+                        }
+                        else
+                        {
+                            // Create the value array
+                            var $array = [null, null];
+
+                            // Populate the value array and set the property modifiers
+                            $modifiers |= $_definitionsCompilerProperty($array, $cache[$_cache_protected], $modifiers, $name, $value);
+
+                            // Set the value array
+                            $value = $array;
+                        }
+                        
+                        // If the override modifier was provided, merge the inherited property modifiers into the modifiers
+                        if ($modifiers & $_modifiers_override)
+                            $modifiers |= $baseDefinition[$_definition_modifiers] & ($_modifiers_property_get | $_modifiers_property_get_protected | $_modifiers_property_set | $_modifiers_property_set_protected);
+                    }
+                    // If the readonly modifier was provided, throw an exception
+                    else if ($modifiers & $_modifiers_readonly)
+                        $_exceptionFormat($_lang_$$_readonly_invalid_type, $name);
+
+                    // If the abstract modifier was provided and the value is a method, create the abstract exception handler
+                    if ($modifiers & $_modifiers_abstract && $type == 'method')
+                        $value = $_definitionsCompilerAbstract($name);
+                }
+                else
+                {
+                    // Throw if any virtual modifiers were provided or the new modifier was improperly used (or the override modifier was required)
+                    $_definitionsCompilerThrowVirtual($modifiers, $name);
+                    $_definitionsCompilerThrowInherit($cache[$_cache_protected], $modifiers, $name);
+
+                    // Set the value as a primitive
+                    $value = $_definitionsCompilerPrimitive($value);
+                }
+
+                // If the class has the primitive modifier and the value is either a field or auto property
+                if ($primitive && ($auto || $type == 'field'))
+                {
+                    // If the constraint is a string and is not a primitive constraint, throw an exception
+                    if (typeof $constriant == 'string' && !$_definitionsCompilerConstraint($constraint, true))
+                        $_exceptionFormat($_lang_$$_primitive_constraint,
+                                          $name,
+                                          $model ?
+                                          $_const_keyword_model :
+                                          $struct ?
+                                          $_const_keyword_struct :
+                                          $_const_keyword_class);
+
+                    // If a constraint was not provided, set the "primitive" constraint
+                    if (!$constraint)
+                        $constraint = 'primitive';
+                }
+
+                // If the access modifier is public, set the definition in the public definitions
+                if ($access == $_modifiers_public)
+                    $_data($cache[$_cache_public], $name, $definition, false, true);
+
+                // Set the definition in either the private or protected definitions
+                $_data($cache[$access == $_modifiers_private ? $_cache_private : $_cache_protected], $name, $definition, false, true);
             }
             
             // Set the definition data
@@ -2842,27 +2823,188 @@ if (typeof jT_Shorthand != 'string')
             
             // If the class is optimized, set the definition value in the dump object
             if ($optimized)
-                $stack[$_stack_dump][$name] = $value;
+                $cache[$_cache_dump][$name] = $value;
         }
         else
         {
           //$modifiers = 0;
             
             // Set the definition value in the dump object
-            $stack[$_stack_dump][$name] = $type == 'field' ?
+            $cache[$_cache_dump][$name] = $type == 'field' ?
                                           $_definitionsCompilerPrimitive($value) :
                                           $type == 'method' ?
                                           $value :
                                           $auto ?
                                           $_definitionsCompilerPrimitive($value[2]) :
-                                          $_definitionsCompilerProperty([null, null], null, 0, $value, $name);
+                                          $_definitionsCompilerProperty([null, null], null, 0, $name, $value);
 
-          //if ($package && $constraint[$_symbol_lock])
-          //    $types[$name] = $constraint;
+          //if ($package && typeof $constraint == 'function')
+          //    $imports[$name] = $constraint;
         }
     };
+    var $_definitionsCompilerConstraint     = function($keyword, $primitive)
+    {
+        // If the keyword is a valid class name, return true
+        if ($_const_regexp_class.test($keyword))
+            return true;
 
-    var $_definitionsCompilerInstructions        = function($directives, $overrides, $level, $definition)
+        // Parse the keyword
+        var $exec = $_const_regexp_constraint.exec($keyword);
+
+        // If the keyword could not be parsed or the cast and nullable flags were both set, return false
+        if (!$exec || $exec[1] && $exec[3])
+            return false;
+
+        // If the primitive flag is set, return true if the type is primitive
+        if ($primitive)
+            return $_const_types_primitive.indexOf($exec[2]) >= 0;
+        
+        // Return true if the type is dynamic or the cast flag is not set and the type is static
+        return $_const_types_dynamic.indexOf($exec[2]) >= 0 || !$exec[1] && $_const_types_static.indexOf($exec[2]) >= 0;
+    };
+    var $_definitionsCompilerInjections     = function($definitions, $dump, $injections)
+    {
+        // If no injections array was provided (or there is neither a definitions or dump object), return
+        if (!$__array_isArray($injections) || !$definitions && !$dump)
+            return;
+
+        for (var $i = 0, $j = $injections.length; $i < $j; $i++)
+        {
+            // Get the current injection and the definition name
+            var $injection = $injections[$i],
+                $name      = $injection[$_definition_name];
+
+            // If a definitions object was provided, set the injection in the definitions
+            if ($definitions)
+                $_data($definitions, $name, $injection, false, true);
+
+            // If a dump object was provided, set the injection value in the dump object
+            if ($dump)
+                $dump[$name] = $injection[$_definition_value];
+        }
+    };
+    var $_definitionsCompilerPrimitive      = function($value)
+    {
+        // If the value is either null or undefined, return the value
+        if ($value == null)
+            return $value;
+        
+        // Get the internal type of the value
+        var $typeof = typeof $value;
+
+        // If the value is a primitive, return the value
+        if ($typeof == 'boolean' || $typeof == 'number' || $typeof == 'string')
+            return $value;
+
+        // Get the value type
+        var $type = $_types[$__toString__.call($value)] || 'object';
+
+        // If the value is a boolean, return the primitive value of the boolean
+        if ($type == 'boolean')
+            return $__boolean_valueOf__.call($value);
+
+        // If the value is a number, return the primitive value of the number
+        if ($type == 'number')
+            return $__number_valueOf__.call($value);
+
+        // If the value is a string, return the primitive value of the string
+        if ($type == 'string')
+            return $__string_valueOf__.call($value);
+        
+        return null;
+    };
+    var $_definitionsCompilerProperty       = function($array, $definitions, $modifiers, $name, $object)
+    {
+        // Create the property modifiers
+        var $property = 0;
+
+        // Populate the value array from the property object and set the property modifiers
+        for (var $key in $object)
+            $property |= $_definitionsCompilerAccessor($array, $definitions, $modifiers | $property, $name, $key, $object[$key]);
+
+        // If no definitions were provided, return the value array
+        if (!$definitions)
+            return $array;
+
+        // If no mutator method was provided
+        if (!($property & $_modifiers_property_set))
+        {
+            // If no accessor method was provided, throw an exception
+            if (!($property & $_modifiers_property_get))
+                $_exceptionFormat($_lang_$$_property_name_empty, $name);
+
+            // If the accessor method has an access modifier (and it is not a protected override), throw an exception
+            if ($property & $_modifiers_property_get_private || $property & $_modifiers_property_get_protected && !($modifiers & $_modifiers_override))
+                $_exceptionFormat($_lang_$$_property_access_accessor, $name, $_const_keyword_get);
+        }
+        // If no accessor method was provided and the mutator method has an access modifier (and it is not a protected override), throw an exception
+        else if (!($property & $_modifiers_property_get) && ($property & $_modifiers_property_set_private || $property & $_modifiers_property_set_protected && !($modifiers & $_modifiers_override)))
+            $_exceptionFormat($_lang_$$_property_access_accessor, $name, $_const_keyword_set);
+
+        // If the readonly modifier was provided without both the accessor and mutator methods, throw an exception
+        if ($modifiers & $_modifiers_readonly && ~$modifiers & ($_modifiers_property_get | $_modifiers_property_set))
+            $_exceptionFormat($_lang_$$_property_readonly_invalid, $name);
+
+        // Return the property modifiers
+        return $property;
+    };
+    var $_definitionsCompilerThrowDuplicate = function($definitions, $name, $type)
+    {
+        // If the definition is already defined in the definitions, throw an exception
+        if ($__hasOwnProperty__.call($definitions, $name))
+            $_exceptionFormat($_lang_$$_name_duplicate,
+                              $name,
+                              $type ?
+                              $type + ' ' :
+                              '');
+    };
+    var $_definitionsCompilerThrowInherit   = function($definitions, $modifiers, $name, $type)
+    {
+        // Get the base definition
+        var $baseDefinition = $definitions[$name];
+
+        // If a base definition is defined in the definitions
+        if ($baseDefinition)
+        {
+            // If the base definition is abstract, throw an exception
+            if ($baseDefinition[$_definition_modifiers] & $_modifiers_abstract)
+                $_exceptionFormat($_lang_$$_override_required, $name, $baseDefinition[$_definition_type]);
+
+            // If the new modifier was not provided, throw an exception
+            if (!($modifiers & $_modifiers_new))
+                $_exceptionFormat($_lang_$$_new_required,
+                                  $name,
+                                  $type ?
+                                  $type + ' ' :
+                                  '');
+        }
+        // If the new modifier was provided, throw an exception
+        else if ($modifiers & $_modifiers_new)
+            $_exceptionFormat($_lang_$$_new_invalid,
+                              $name,
+                              $type ?
+                              $type + ' ' :
+                              '');
+    };
+    var $_definitionsCompilerThrowVirtual   = function($modifiers, $name, $type)
+    {
+        // If the abstract, override, or virtual modifiers were provided
+        if ($modifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual))
+        {
+            // If a type was provided, throw a type-specific exception
+            if ($type)
+                $_exceptionFormat($_lang_$$_virtual_invalid, $name, $type);
+
+            // Throw an exception
+            $_exceptionFormat($_lang_$$_virtual_invalid_type, $name);
+        }
+
+        // If the sealed modifier was provided, throw an exception
+        if ($modifiers & $_modifiers_sealed)
+            $_exceptionFormat($_lang_$$_requires, $name, $_const_keyword_sealed, $_const_keyword_override);
+    };
+
+    var $_definitionsCompilerInstructions   = function($directives, $overrides, $level, $definition)
     {
         // Get the definition modifiers, name, type, and value
         var $modifiers    = $definition[$_definition_modifiers],
@@ -4093,8 +4235,7 @@ if (typeof jT_Shorthand != 'string')
         };
     };
 
-
-    var $_buildRuntimeSymbols    = function($proxies)
+    var $_buildRuntimeSymbols     = function($proxies)
     {
         // new Class()
         var $class = new $__proxy(function()
@@ -4665,10 +4806,10 @@ if (typeof jT_Shorthand != 'string')
     {
         // If the global shorthand is set, define the shorthand
         if (jT_Shorthand)
-            $_value(window, jT_Shorthand, $$, false, true);
+            $_data(window, jT_Shorthand, $$, false, true);
 
         // Define the global namespace
-        $_value(window, 'jTypes', $$, false, true);
+        $_data(window, 'jTypes', $$, false, true);
     }
     // Return the global namespace
     else
