@@ -46,7 +46,7 @@ if (typeof jT_Shorthand != 'string')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0a516';
+        $_version = '2.2.0a518';
 
     // ########## FLAGS ##########
 
@@ -82,7 +82,7 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_class_export                = '{0} cannot be exported.',
         $_lang_$$_class_global_conflict       = '{0} cannot hide the existing global "{1}".',
         $_lang_$$_class_global_invalid        = 'global {0} must have a name.',
-        $_lang_$$_class_inherit               = '{0} cannot inherit from {1}.',
+        $_lang_$$_class_inherit_conflict      = '{0} cannot inherit from {1}.',
         $_lang_$$_class_inherit_import        = '{0} must have a precompiled string to inherit from an imported {0}.',
         $_lang_$$_class_inherit_internal      = '{0} must have the internal modifier to inherit from an internal {0}.',
         $_lang_$$_class_inherit_invalid       = '{0} cannot have inheritance.',
@@ -642,12 +642,12 @@ if (typeof jT_Shorthand != 'string')
     // ---------- SYMBOLS ----------
 
     // Create the obfuscated symbol keys
-    var $_symbol_cache     = $_minify ? $_generatorSymbol() : '~cache';
-    var $_symbol_external  = $_minify ? $_generatorSymbol() : '~external';
+    var $_symbol_internal  = $_minify ? $_generatorSymbol() : '~internal';
     var $_symbol_lock      = $_minify ? $_generatorSymbol() : '~lock';
+    var $_symbol_metaclass = $_minify ? $_generatorSymbol() : '~metaclass';
     var $_symbol_modifiers = $_minify ? $_generatorSymbol() : '~modifiers';
     var $_symbol_name      = $_minify ? $_generatorSymbol() : '~name';
-    //var $_symbol_precompile   = $_minify ? $_generatorSymbol() : '~precompile';
+  //var $_symbol_factory   = $_minify ? $_generatorSymbol() : '~factory';
 
 
 
@@ -1057,14 +1057,14 @@ if (typeof jT_Shorthand != 'string')
                 $_exceptionFormat($_lang_$$_class_expando,
                                   $model ?
                                   $_const_keyword_models :
-                                  $_const_keyword_classes);
+                                  $_const_keyword_structs);
 
             // If either the expando private or expando public modifiers were provided, throw an exception
             if ($modifiers & ($_modifiers_class_expando_private | $_modifiers_class_expando_public))
                 $_exceptionFormat($_lang_$$_class_export,
                                   $model ?
                                   $_const_keyword_models :
-                                  $_const_keyword_classes);
+                                  $_const_keyword_structs);
         }
         // If the class is abstract and sealed, throw an exception
         else if ($abstract && $sealed)
@@ -1087,10 +1087,10 @@ if (typeof jT_Shorthand != 'string')
             if ($__hasOwnProperty__.call($$, $name))
                 $_exceptionFormat($_lang_$$_class_global_conflict,
                                   $model ?
-                                  $_const_keyword_models :
+                                  $_const_keyword_model :
                                   $struct ?
-                                  $_const_keyword_structs :
-                                  $_const_keyword_classes,
+                                  $_const_keyword_struct :
+                                  $_const_keyword_class,
                                   $name);
         }
 
@@ -1123,18 +1123,18 @@ if (typeof jT_Shorthand != 'string')
             {
                 // If the class is not a model, throw an exception
                 if (!$model)
-                    $_exceptionFormat($_lang_$$_class_inherit, $_const_keyword_classes, $_const_keyword_models);
+                    $_exceptionFormat($_lang_$$_class_inherit_conflict, $_const_keyword_classes, $_const_keyword_models);
             }
             // If the base class is a struct, throw an exception
             else if ($baseModifiers & $_modifiers_class_struct)
-                $_exceptionFormat($_lang_$$_class_inherit,
+                $_exceptionFormat($_lang_$$_class_inherit_conflict,
                                   $model ?
                                   $_const_keyword_models :
                                   $_const_keyword_classes,
                                   $_const_keyword_structs);
             // If the class is a model, throw an exception
             else if ($model)
-                $_exceptionFormat($_lang_$$_class_inherit, $_const_keyword_models, $_const_keyword_classes);
+                $_exceptionFormat($_lang_$$_class_inherit_conflict, $_const_keyword_models, $_const_keyword_classes);
 
             // If the base class is sealed, throw an exception
             if ($baseModifiers & $_modifiers_class_sealed)
@@ -1327,82 +1327,98 @@ if (typeof jT_Shorthand != 'string')
                      $__create($base.prototype) :
                      new $_class();
 
+        var $class        = null,
+            $merge        = 0,
+            $metainstance = new $__array($metalength),
+            $overrides    = {};
+
+        for (var $i = 0; $i < $metalength; $i++)
+        {
+            var $directives = $metainstance[$i] = [],
+                $private    = $metaclass[$i][$_cache_private],
+                $protected  = $metaclass[$i][$_cache_protected];
+            
+            var $privateKeys   = $__keys($private),
+                $protectedKeys = $__keys($protected);
+            
+            for (var $j = 0, $k = $privateKeys.length; $j < $k; $j++)
+                //$_definitionsCompilerInstructions($directives, $overrides, $i, $private[$privateKeys[$j]]);
+                console.log($private[$privateKeys[$j]]);
+
+            for (var $j = 0, $k = $protectedKeys.length; $j < $k; $j++)
+                //$_definitionsCompilerInstructions($directives, $overrides, $i, $protected[$protectedKeys[$j]]);
+                console.log($protected[$protectedKeys[$j]]);
+        }
+
         // CACHE READY => METACLASS READY => DIRECTIVES CAN BE COMPILED (OR PROXIES)
 
         // while the directives are being compiled, also get the merge index using overridden?
 
-        // Create the inherited definitions reference
+        //// Create the inherited definitions reference
         //var $inherits = null;
 
-        // If there is more than 1 level in the cache, get the inherited definitions object
+        //// If there is more than 1 level in the cache, get the inherited definitions object
         //if ($levels > 1)
-        //    $inherits = $cache[1][$_stack_protected];
+        //    $inherits = $metaclass[1][$_cache_protected];
 
-        // Create the cache, external index, level count, and the external type reference
-        //var $merge     = 0;
-        var $type      = null;
+        //// Create the cache, external index, level count, and the external type reference
+        //var $type = null;
 
-        // Create the external type method and internal type method reference
-        var $typeExternal = function()
-        {
-            // Return the external type
-            return $type;
-        };
-        var $typeInternal = null;
+        //// Create the external type method and internal type method reference
+        //var $typeExternal = function()
+        //{
+        //    // Return the external type
+        //    return $type;
+        //};
+        //var $typeInternal = null;
 
         // Create the class
-        var $class = function(){};// where to define this? (use external function for 1 less closure)
+        $class = $cache[$_cache_class] = $_buildRuntimeMatrix($metaclass, $metainstance, $abstract, true, $import, $internal, $merge, $model, $optimized, false, $struct, !!($modifiers & $_modifiers_class_unlocked));
 
-        $cache[0][$_stack_class] = $class;
+        //// If the class is internal
+        //if ($modifiers & $_modifiers_class_internal)
+        //{
+        //    // Set the external type
+        //    $type = $external < $levels ? $metaclass[$external][$_cache_class] : $_class;
 
-        // If the class is internal
-        if ($modifiers & $_modifiers_class_internal)
-        {
-            // Set the external type
-            $type = $external < $levels ? $cache[$external][$_stack_class] : $_class;
-
-            // Create the internal type method
-            $typeInternal = function()
-            {
-                // Return the internal type
-                return $class;
-            };
-        }
-        // Set the external type to the class
-        else
-            $type = $class;
+        //    // Create the internal type method
+        //    $typeInternal = function()
+        //    {
+        //        // Return the internal type
+        //        return $class;
+        //    };
+        //}
+        //// Set the external type to the class
+        //else
+        //    $type = $class;
 
         // Create the precompile string and helper function references
         //var $eval       = null;
         //var $precompile = null;
 
-        // If the class does not have the import flag
-        if (!$import)
-        {
-            //
-        }
-        // If the imported class data doesn't validate, throw an exception
-        else if ($levels !== $factory['l'] || $__keys($stack[$_stack_private]).length !== $factory['k0'] || $__keys($stack[$_stack_protected]).length !== $factory['k1'] || $__keys($stack[$_stack_public]).length !== $factory['k2'])// verify stack and heap?
-            $_exceptionFormat($_lang_$$_import);
+        //// If the class does not have the import flag
+        //if (!$import)
+        //{
+        //    //
+        //}
+        //// If the imported class data doesn't validate, throw an exception
+        //else if ($levels !== $factory['l'] || $__keys($cache[$_cache_private]).length !== $factory['k0'] || $__keys($cache[$_cache_protected]).length !== $factory['k1'] || $__keys($cache[$_cache_public]).length !== $factory['k2'])
+        //    $_exceptionFormat($_lang_$$_import);
 
         // If the class has a name, set the "toString()" method on the prototype
         if ($name)
-            $_data($prototype, 'toString', function()
-            {
-                // Return the named object expression string
-                return '[object ' + $name + ']';
-            });
+            $_data($prototype, 'toString', $_definitionsCompilerToString($name));
 
         // If the prototype is not expando, prevent extensions on the prototype
-        if (~$modifiers & $_modifiers_class_expando_prototype)
+        if (!($modifiers & $_modifiers_class_expando_prototype))
             $__preventExtensions($prototype);
 
-        // Set the class data
-        $_data($class, $_symbol_cache,     $_lock($cache));
+        // Set the class metadata
+        $_data($class, $_symbol_metaclass, $_lock($metaclass));
         $_data($class, $_symbol_modifiers, $modifiers);
 
         if ($modifiers & $_modifiers_class_internal)
-            $_data($class, $_symbol_external, $external);
+            $_data($class, $_symbol_internal, $internal);
 
         if ($name)
             $_data($class, $_symbol_name, $name);
@@ -1414,25 +1430,23 @@ if (typeof jT_Shorthand != 'string')
         $_data($class, 'prototype', $prototype);
 
         // If a static "constructor" definition was not provided, set the class constructor reference
-        if (!$__hasOwnProperty__.call($stack[$_stack_static], 'constructor'))
+        if (!$__hasOwnProperty__.call($cache[$_cache_static], 'constructor'))
             $_data($class, 'constructor', $$);
 
         // If a static "toString()" definition was not provided, set the class toString() method
-        if (!$__hasOwnProperty__.call($stack[$_stack_static], 'toString'))
+        if (!$__hasOwnProperty__.call($cache[$_cache_static], 'toString'))
             $_data($class, 'toString', $_class_toString);
 
         // Lock the class type
         $_lockSymbolsClass($class);
 
         // If the class is not expando, prevent extensions on the class
-        if (~$modifiers & $_modifiers_class_expando_static)
+        if (!($modifiers & $_modifiers_class_expando_static))
             $__preventExtensions($class);
 
         // If the class is global, define the global class constant
         if ($modifiers & $_modifiers_class_global)
             $_defineField($name, $class, false);
-        
-        //
 
         // Reset the exception class name
         $_name = '';
@@ -2490,9 +2504,19 @@ if (typeof jT_Shorthand != 'string')
         var $auto = $__array_isArray($value) && $value.length > 1,
             $type = $auto || $value != null && typeof $value == 'object' && $__getPrototypeOf($value) === $__objectProto__ && $__getOwnPropertyNames($value).length > 0 ?
                     'property' :
-                    typeof $value == 'function' ?
-                    'method' :
-                    'field';
+                    typeof $value != 'function' ?
+                    'field' :
+                    $value[$_symbol_lock] && $_unlockSymbolsClass($value) ?
+                    'class' :
+                    'method';
+
+        // If the value is a class
+        if ($type == 'class')
+        {
+            // Treat the class as a field (until nested classes are supported)
+            $type  = 'field';
+            $value = null;
+        }
 
         // If the global function lock flag is set and the value is a function, prevent extensions on the function
         if ($_funcLock && $type == 'method')
@@ -2832,7 +2856,7 @@ if (typeof jT_Shorthand != 'string')
             // Set the definition value in the dump object
             $cache[$_cache_dump][$name] = $type == 'field' ?
                                           $_definitionsCompilerPrimitive($value) :
-                                          $type == 'method' ?
+                                          $type != 'property ' ?
                                           $value :
                                           $auto ?
                                           $_definitionsCompilerPrimitive($value[2]) :
@@ -3003,19 +3027,35 @@ if (typeof jT_Shorthand != 'string')
         if ($modifiers & $_modifiers_sealed)
             $_exceptionFormat($_lang_$$_requires, $name, $_const_keyword_sealed, $_const_keyword_override);
     };
+    var $_definitionsCompilerToString       = function($name)
+    {
+        // Return the named object "toString()" function
+        return function()
+        {
+            // Return the named object expression string
+            return '[object ' + $name + ']';
+        };
+    };
 
     var $_definitionsCompilerInstructions   = function($directives, $overrides, $level, $definition)
     {
-        // Get the definition modifiers, name, type, and value
-        var $modifiers    = $definition[$_definition_modifiers],
+        // Get the definition constraint, modifiers, name, type, and value
+        var $constraint   = $definition[$_definition_constraint],
+            $modifiers    = $definition[$_definition_modifiers],
             $name         = $definition[$_definition_name],
             $type         = $definition[$_definition_type],
             $value        = $definition[$_definition_value];
 
+        if ($constraint)
+        {
+            $constraint = $_buildRuntimeConstraint($constraint, $name);
+            $value      = $constraint($value);
+        }
+
         //
 
-        // Check if the definition is an auto property and creates the instructions
-        var $auto         = $modifiers & $_modifiers_property_auto > 0,
+        // Check if the definition is an auto property and create the instructions
+        var $auto         = !!($modifiers & $_modifiers_property_auto),
             $directive    = $__array($_directive__length),
             $instructions = 0;
 
@@ -3101,7 +3141,7 @@ if (typeof jT_Shorthand != 'string')
             }
         }
         // Get the definition access modifier
-        else switch ($modifiers & $_modifiers__access)
+        else switch ($modifiers & ($_modifiers_private | $_instructions_protected | $_modifiers_public))
         {
             // If the definition is public
             case $_modifiers_public:
