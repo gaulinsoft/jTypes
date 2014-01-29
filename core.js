@@ -46,7 +46,7 @@ if (typeof jT_Shorthand != 'string')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0a518';
+        $_version = '2.2.0a524';
 
     // ########## FLAGS ##########
 
@@ -70,18 +70,19 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_abstract_auto               = '"{0}" cannot have the abstract modifier because it is an automatically implemented property.',
         $_lang_$$_abstract_call               = '"{0}" cannot be called because it is an abstract method.',
         $_lang_$$_abstract_class              = '"{0}" cannot have the abstract modifier in a non-abstract class.',
+        $_lang_$$_access_conflict             = '"{0}" cannot have the {1} modifier in a {2}.',
         $_lang_$$_access_duplicate            = '"{0}" cannot have more than one access modifier.',
         $_lang_$$_access_invalid              = '"{0}" cannot have the private, protected, or public modifiers because it is a {1} definition.',
         $_lang_$$_auto_invalid                = '"{0}" must implement both accessors because it is an automatically implemented property.',
         $_lang_$$_auto_invalid_default        = '"{0}" cannot have more than one default value for the automatically implemented property.',
         $_lang_$$_class_abstract_instance     = 'abstract classes cannot be instantiated.',
+        $_lang_$$_class_abstract_override     = '{0} must implement the inherited abstract {2} "{1}" with the override modifier.',
         $_lang_$$_class_conflict              = '{0} cannot have the {1} modifier.',
         $_lang_$$_class_conflict_abstract     = 'abstract {0} cannot have the {1} modifier.',
         $_lang_$$_class_conflict_and          = '{0} cannot have the {1} and {2} modifiers.',
         $_lang_$$_class_expando               = '{0} cannot have expando instances.',
         $_lang_$$_class_export                = '{0} cannot be exported.',
         $_lang_$$_class_global_conflict       = '{0} cannot hide the existing global "{1}".',
-        $_lang_$$_class_global_invalid        = 'global {0} must have a name.',
         $_lang_$$_class_inherit_conflict      = '{0} cannot inherit from {1}.',
         $_lang_$$_class_inherit_import        = '{0} must have a precompiled string to inherit from an imported {0}.',
         $_lang_$$_class_inherit_internal      = '{0} must have the internal modifier to inherit from an internal {0}.',
@@ -96,6 +97,7 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_class_keyword_invalid       = '"{0}" is not a valid class modifier.',
         $_lang_$$_class_this_new              = 'classes cannot be compiled using the new operator.',
         $_lang_$$_conflict_and                = '"{0}" cannot have the {1} and {2} modifiers.',
+        $_lang_$$_conflict_constraint         = '"{0}" must be a field or automatically implemented property to have the "{1}" type constraint.',
         $_lang_$$_const_constraint            = '"{0}" cannot have a type constraint with the const modifier.',
         $_lang_$$_keyword_duplicate           = '"{0}" cannot have a duplicate {1} modifier.',
         $_lang_$$_keyword_invalid             = '"{0}" has an invalid modifier "{1}".',
@@ -112,6 +114,7 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_package_separated           = '"{0}" cannot be a packaged definition because it is defined in a {1} definitions object.',
         $_lang_$$_primitive_constraint        = '"{0}" must have a primitive type constraint in a primitive {1}.',
         $_lang_$$_property_access_accessor    = '"{0}" must have both accessors to have an access modifier on the {1} accessor.',
+        $_lang_$$_property_access_conflict    = '"{0}" cannot have the {2} modifier on the {1} accessor in a {3}.',
         $_lang_$$_property_access_duplicate   = '"{0}" cannot have access modifiers on both property accessors.',
         $_lang_$$_property_access_invalid     = '"{0}" has an invalid access modifier "{2}" on the {1} accessor.',
         $_lang_$$_property_access_restrictive = '"{0}" must have a more restrictive access modifier on the {1} accessor.',
@@ -285,53 +288,77 @@ if (typeof jT_Shorthand != 'string')
     // ########## CONSTANTS ##########
 
     // Create the internal constants
-    var $_const_date_max          = 8640000000000000,
-        $_const_date_min          = -$_const_date_max,
-        $_const_escape_replace    = '\\$&',
-        $_const_escape_search     = /[-\/\\^$*+?.()|[\]{}]/g,
-        $_const_factory_arguments = 'c,k,f,m,a,d,d2,p,l',
-        $_const_float_epsilon     = 2.220460492503130808472633361816E-16,
-        $_const_float_max         = $__number_maxValue__,
-        $_const_float_min         = -$_const_float_max,
-        $_const_format_search     = /([\{]+)([0-9]+)\}/g,
-        $_const_int_max           = 9007199254740992,
-        $_const_int_min           = -$_const_int_max,
-        $_const_int32_max         = 2147483647,
-        $_const_int32_min         = -$_const_int32_max - 1,
-        $_const_keyword_abstract  = 'abstract',
-        $_const_keyword_class     = 'class',
-        $_const_keyword_classes   = $_const_keyword_class + 'es',
-        $_const_keyword_const     = 'const',
-        $_const_keyword_get       = 'get',
-        $_const_keyword_hidden    = 'hidden',
-        $_const_keyword_model     = 'model',
-        $_const_keyword_models    = $_const_keyword_model + 's',
-        $_const_keyword_new       = 'new',
-        $_const_keyword_optimized = 'optimized',
-        $_const_keyword_override  = 'override',
-        $_const_keyword_private   = 'private',
-        $_const_keyword_protected = 'protected',
-        $_const_keyword_prototype = 'prototype',
-        $_const_keyword_public    = 'public',
-        $_const_keyword_sealed    = 'sealed',
-        $_const_keyword_set       = 'set',
-        $_const_keyword_static    = 'static',
-        $_const_keyword_struct    = 'struct',
-        $_const_keyword_structs   = $_const_keyword_struct + 's',
-        $_const_keyword_unlocked  = 'unlocked',
-        $_const_keyword_virtual   = 'virtual',
-        $_const_keyword_visible   = 'visible',
-        $_const_prefix_factory    = '~jT_',
-        $_const_prefix_symbol     = '$jT_',
-        $_const_regexp_class      = /^[A-Z][_a-zA-Z0-9]*$/,
-        $_const_regexp_constraint = /^(~?)([a-z]+(?:\-[a-z]+)?)(\??)$/,
-        $_const_regexp_hex        = /^[-+]?0x[0-9a-f]+$/i,
-        $_const_regexp_instance   = /^(?:_|\$|[a-z])[_\$a-z0-9]*$/i,
-        $_const_regexp_number     = /^[-+]?[0-9]*\.?[0-9]+(?:e[-+]?[0-9]+)?$/i,
-        $_const_regexp_regexp     = /^\/([^\r\n]+)\/([gim]{0,3})$/,
-        $_const_types_dynamic     = 'array bool boolean date float int integer number regexp string'.split(' '),
-        $_const_types_primitive   = 'bool boolean float int integer number primitive string'.split(' '),
-        $_const_types_static      = 'error function object primitive type window'.split(' ');
+    var $_const_date_max                = 8640000000000000,
+        $_const_date_min                = -$_const_date_max,
+        $_const_escape_replace          = '\\$&',
+        $_const_escape_search           = /[-\/\\^$*+?.()|[\]{}]/g,
+        $_const_factory_arguments       = 'c,k,f,m,a,d,d2,p,l',
+        $_const_float_epsilon           = 2.220460492503130808472633361816E-16,
+        $_const_float_max               = $__number_maxValue__,
+        $_const_float_min               = -$_const_float_max,
+        $_const_format_search           = /([\{]+)([0-9]+)\}/g,
+        $_const_int_max                 = 9007199254740992,
+        $_const_int_min                 = -$_const_int_max,
+        $_const_int32_max               = 2147483647,
+        $_const_int32_min               = -$_const_int32_max - 1,
+        $_const_keyword_abstract        = 'abstract',
+        $_const_keyword_class           = 'class',
+        $_const_keyword_classes         = $_const_keyword_class + 'es',
+        $_const_keyword_const           = 'const',
+        $_const_keyword_get             = 'get',
+        $_const_keyword_hidden          = 'hidden',
+        $_const_keyword_model           = 'model',
+        $_const_keyword_models          = $_const_keyword_model + 's',
+        $_const_keyword_new             = 'new',
+        $_const_keyword_optimized       = 'optimized',
+        $_const_keyword_override        = 'override',
+        $_const_keyword_private         = 'private',
+        $_const_keyword_protected       = 'protected',
+        $_const_keyword_prototype       = 'prototype',
+        $_const_keyword_public          = 'public',
+        $_const_keyword_sealed          = 'sealed',
+        $_const_keyword_set             = 'set',
+        $_const_keyword_static          = 'static',
+        $_const_keyword_struct          = 'struct',
+        $_const_keyword_structs         = $_const_keyword_struct + 's',
+        $_const_keyword_unlocked        = 'unlocked',
+        $_const_keyword_virtual         = 'virtual',
+        $_const_keyword_visible         = 'visible',
+        $_const_prefix_factory          = '~jT_',
+        $_const_prefix_symbol           = '$jT_',
+        $_const_regexp_class            = /^[A-Z][_a-zA-Z0-9]*$/,
+        $_const_regexp_constraint       = /^(~|@)?([a-z]+(?:\-[a-z]+)?)(\?|\!)?$/,
+        $_const_regexp_constraint_class = /^(@)?([A-Z][_a-zA-Z0-9]*)(\?|\!)?$/,
+        $_const_regexp_hex              = /^[-+]?0x[0-9a-f]+$/i,
+        $_const_regexp_instance         = /^(?:_|\$|[a-z])[_\$a-z0-9]*$/i,
+        $_const_regexp_number           = /^[-+]?[0-9]*\.?[0-9]+(?:e[-+]?[0-9]+)?$/i,
+        $_const_regexp_regexp           = /^\/([^\r\n]+)\/([gim]{0,3})$/;
+
+    // ---------- CONSTRAINTS ----------
+
+    // Create the constraint bits
+    var $_constraints          = $__create(null),
+        $_constraints_cast     = 1 << 0,
+        $_constraints_default  = 1 << 1,
+        $_constraints_null     = 1 << 2,
+        $_constraints_suppress = 1 << 3;
+    
+    $_constraints['array']     = $_constraints_cast | $_constraints_default | $_constraints_suppress;
+    $_constraints['bool']      = $_constraints_cast | $_constraints_null    | $_constraints_suppress;
+    $_constraints['boolean']   = $_constraints_cast | $_constraints_null    | $_constraints_suppress;
+    $_constraints['date']      = $_constraints_cast | $_constraints_default | $_constraints_suppress;
+    $_constraints['error']     =                  0 | $_constraints_default | $_constraints_suppress;
+    $_constraints['float']     = $_constraints_cast | $_constraints_null    | $_constraints_suppress;
+    $_constraints['function']  =                  0 | $_constraints_default | $_constraints_suppress;
+    $_constraints['int']       = $_constraints_cast | $_constraints_null    | $_constraints_suppress;
+    $_constraints['integer']   = $_constraints_cast | $_constraints_null    | $_constraints_suppress;
+    $_constraints['number']    = $_constraints_cast | $_constraints_null    | $_constraints_suppress;
+    $_constraints['object']    =                  0 | $_constraints_default | $_constraints_suppress;
+    $_constraints['primitive'] =                  0 |                     0 | $_constraints_suppress;
+    $_constraints['regexp']    = $_constraints_cast | $_constraints_default | $_constraints_suppress;
+    $_constraints['string']    = $_constraints_cast | $_constraints_null    | $_constraints_suppress;
+    $_constraints['type']      =                  0 |                     0 | $_constraints_suppress;
+    $_constraints['window']    =                  0 |                     0 | $_constraints_suppress;
 
     // ---------- MODIFIERS ----------
 
@@ -412,7 +439,6 @@ if (typeof jT_Shorthand != 'string')
     // Set the modifiers in the class modifiers map
     $_modifiers_class['abstract']  = $_modifiers_class_abstract;
     $_modifiers_class['export']    = $_modifiers_class_export;
-    $_modifiers_class['global']    = $_modifiers_class_global;
     $_modifiers_class['internal']  = $_modifiers_class_internal;
     $_modifiers_class['model']     = $_modifiers_class_model;
     $_modifiers_class['optimized'] = $_modifiers_class_optimized;
@@ -442,10 +468,10 @@ if (typeof jT_Shorthand != 'string')
     // ########## VARIABLES ##########
 
     // Create the internal variables
-    var $_clone       = false,
-        $_constraints = $__create(null),
-        $_globals     = $__create(null),
-        $_name        = '';
+    var $_clone    = false,
+        $_globals  = $__create(null),
+        $_handlers = $__create(null),
+        $_name     = '';
 
     // ---------- LOCKS ----------
 
@@ -1004,9 +1030,15 @@ if (typeof jT_Shorthand != 'string')
                     $name = '';
             }
 
-            // If a class name was provided, set the exception class name
+            // If a class name was provided
             if ($name)
+            {
+                // Set the global modifier
+                $modifiers |= $_modifiers_class_global;
+
+                // Set the exception class name
                 $_name = $name;
+            }
         }
         // Reset the modifiers
         else
@@ -1070,29 +1102,15 @@ if (typeof jT_Shorthand != 'string')
         else if ($abstract && $sealed)
             $_exceptionFormat($_lang_$$_class_conflict_abstract, $_const_keyword_classes, $_const_keyword_sealed);
 
-        // If the class is global
-        if ($modifiers & $_modifiers_class_global)
-        {
-            // If a class name was not provided, throw an exception
-            if (!$name)
-                $_exceptionFormat($_lang_$$_class_global_invalid,
-                                  $model ?
-                                  $_const_keyword_models :
-                                  $struct ?
-                                  $_const_keyword_structs :
-                                  $_const_keyword_classes,
-                                  $name);
-
-            // If the class name is already defined in the global namespace, throw an exception
-            if ($__hasOwnProperty__.call($$, $name))
-                $_exceptionFormat($_lang_$$_class_global_conflict,
-                                  $model ?
-                                  $_const_keyword_model :
-                                  $struct ?
-                                  $_const_keyword_struct :
-                                  $_const_keyword_class,
-                                  $name);
-        }
+        // If a class name was provided and it is already defined in the global namespace, throw an exception
+        if ($name && $__hasOwnProperty__.call($$, $name))
+            $_exceptionFormat($_lang_$$_class_global_conflict,
+                              $model ?
+                              $_const_keyword_model :
+                              $struct ?
+                              $_const_keyword_struct :
+                              $_const_keyword_class,
+                              $name);
 
         // Create the cache, internal index, and metadata
         var $cache      = new $__array($_cache__length),
@@ -1106,6 +1124,10 @@ if (typeof jT_Shorthand != 'string')
         // If the class has the import modifier or is optimized, create the dump object in the cache
         if ($import || $optimized)
             $cache[$_cache_dump] = $__create(null);
+
+        // Create the base metaclass and modifiers references
+        var $baseMetaclass = null,
+            $baseModifiers = null;
         
         // If a base class was provided
         if ($base)
@@ -1115,8 +1137,8 @@ if (typeof jT_Shorthand != 'string')
                 $_exceptionFormat($_lang_$$_class_inherit_invalid, $_const_keyword_structs);
 
             // Get the base metaclass and modifiers
-            var $baseMetaclass = $base[$_symbol_metaclass]($_lock),
-                $baseModifiers = $base[$_symbol_modifiers];
+            $baseMetaclass = $base[$_symbol_metaclass]($_lock);
+            $baseModifiers = $base[$_symbol_modifiers];
 
             // If the base class is a model
             if ($baseModifiers & $_modifiers_class_model)
@@ -1321,20 +1343,47 @@ if (typeof jT_Shorthand != 'string')
             $_definitionsCompilerInjections($cache[$_cache_prototype], null, arguments[$argument + $_inject_prototype]);
             $_definitionsCompilerInjections($cache[$_cache_static],    null, arguments[$argument + $_inject_static]);
         }
-        
-        // Create the class prototype
-        $prototype = $base ?
-                     $__create($base.prototype) :
-                     new $_class();
 
-        var $class        = null,
-            $merge        = 0,
+        // If a base class was provided
+        if ($base)
+        {
+            // If the class is not abstract and the base class is abstract (and the import modifier is not set)
+            if (!$import && !$abstract && $baseModifiers & $_modifiers_class_abstract)
+            {
+                // Get the base and derived definitions
+                var $definitionsBase    = $baseMetaclass[0][$_cache_protected],
+                    $definitionsDerived = $cache[$_cache_protected];
+
+                for (var $key in $definitionsBase)
+                {
+                    // Get the base definition and modifiers
+                    var $baseDefinition = $definitionsBase[$key],
+                        $baseModifiers  = $baseDefinition[$_definition_modifiers];
+
+                    // If the base definition does not have the abstract modifier, skip it
+                    if (!($baseModifiers & $_modifiers_abstract))
+                        continue;
+
+                    // If the derived definition is the base definition, throw an exception
+                    if ($definitionsDerived[$key] === $baseDefinition)
+                        $_exceptionFormat($_lang_$$_class_abstract_override, $_const_keyword_class, $baseDefinition[$_definition_name], $baseDefinition[$_definition_type]);
+                }
+            }
+
+            // Create the class prototype
+            $prototype = $__create($base.prototype);
+        }
+        // Create the class prototype
+        else
+            $prototype = new $_class();
+
+        var $merge        = 0,
             $metainstance = new $__array($metalength),
             $overrides    = {};
 
         for (var $i = 0; $i < $metalength; $i++)
         {
-            var $directives = $metainstance[$i] = [],
+            var $directives = [],
                 $private    = $metaclass[$i][$_cache_private],
                 $protected  = $metaclass[$i][$_cache_protected];
             
@@ -1342,17 +1391,15 @@ if (typeof jT_Shorthand != 'string')
                 $protectedKeys = $__keys($protected);
             
             for (var $j = 0, $k = $privateKeys.length; $j < $k; $j++)
-                //$_definitionsCompilerInstructions($directives, $overrides, $i, $private[$privateKeys[$j]]);
-                console.log($private[$privateKeys[$j]]);
+                if ($_definitionsCompilerDirective($directives, $overrides, $i, $private[$privateKeys[$j]]))
+                    $merge = $i + 1;
 
             for (var $j = 0, $k = $protectedKeys.length; $j < $k; $j++)
-                //$_definitionsCompilerInstructions($directives, $overrides, $i, $protected[$protectedKeys[$j]]);
-                console.log($protected[$protectedKeys[$j]]);
+                if ($_definitionsCompilerDirective($directives, $overrides, $i, $protected[$protectedKeys[$j]]))
+                    $merge = $i + 1;
+
+            $metainstance[$i] = $directives;
         }
-
-        // CACHE READY => METACLASS READY => DIRECTIVES CAN BE COMPILED (OR PROXIES)
-
-        // while the directives are being compiled, also get the merge index using overridden?
 
         //// Create the inherited definitions reference
         //var $inherits = null;
@@ -1373,7 +1420,7 @@ if (typeof jT_Shorthand != 'string')
         //var $typeInternal = null;
 
         // Create the class
-        $class = $cache[$_cache_class] = $_buildRuntimeMatrix($metaclass, $metainstance, $abstract, true, $import, $internal, $merge, $model, $optimized, false, $struct, !!($modifiers & $_modifiers_class_unlocked));
+        var $class = $cache[$_cache_class] = $_buildRuntimeMatrix($metaclass, $metainstance, $abstract, $import, $internal, $merge, $model, $optimized, false, $struct, !!($modifiers & $_modifiers_class_unlocked));
 
         //// If the class is internal
         //if ($modifiers & $_modifiers_class_internal)
@@ -1445,11 +1492,13 @@ if (typeof jT_Shorthand != 'string')
             $__preventExtensions($class);
 
         // If the class is global, define the global class constant
-        if ($modifiers & $_modifiers_class_global)
+        if ($name)
             $_defineField($name, $class, false);
 
         // Reset the exception class name
         $_name = '';
+
+        // STATIC + PROTOTYPE UNCOMPILES
 
         // If the export flag is set, return the precompiled export string
         //if ($modifiers & $_modifiers_class_export)
@@ -1521,7 +1570,7 @@ if (typeof jT_Shorthand != 'string')
                     if (typeof $constraint == 'string')
                         $constraint = $constraint.trim();
                     // If the constraint is not a class, throw an exception
-                    else if (typeof $constraint != 'function' || !$_unlockSymbolsClass($constraint))
+                    else// if (typeof $constraint != 'function' || !$_unlockSymbolsClass($constraint))
                         $_exceptionArguments($type, arguments);
 
                     // Set the package data
@@ -2281,10 +2330,6 @@ if (typeof jT_Shorthand != 'string')
     $_defineMethod('asFloat', $$_asNumber);
     $_defineMethod('asInt',   $$_asInteger);
 
-    // ########## CONSTRAINTS ##########
-
-    //
-
     // ########## FUNCTIONS ##########
 
     // ---------- COMPILER ----------
@@ -2306,7 +2351,7 @@ if (typeof jT_Shorthand != 'string')
             $_exceptionFormat($_lang_$$_abstract_call, $name);
         };
     };
-    var $_definitionsCompilerAccessor       = function($array, $definitions, $modifiers, $name, $key, $value)
+    var $_definitionsCompilerAccessor       = function($array, $definitions, $modifiers, $struct, $name, $key, $value)
     {
         // Get the accessor and the index of the last space in the accessor
         var $accessor = $key.trim(),
@@ -2424,6 +2469,10 @@ if (typeof jT_Shorthand != 'string')
                 if (!($modifiers & $_modifiers_public))
                     $_exceptionFormat($_lang_$$_property_access_restrictive, $name, $accessor);
 
+                // If the class is a struct, throw an exception
+                if ($struct)
+                    $_exceptionFormat($_lang_$$_property_access_conflict, $name, $accessor, $_const_keyword_protected, $_const_keyword_struct);
+                
                 // Set the protected modifier in the method modifiers
                 $method |= $protected;
             }
@@ -2495,8 +2544,8 @@ if (typeof jT_Shorthand != 'string')
             $modifiers  = $value[$_package_modifiers];
             $value      = $value[$_package_value];
 
-            // If a string constraint was provided and it is not valid, throw an exception
-            if (typeof $constraint == 'string' && !$_definitionsCompilerConstraint($constraint))
+            // If a constraint was provided and it is not valid, throw an exception
+            if ($constraint && !$_definitionsCompilerConstraint($constraint))
                 $_exceptionFormat($_lang_$$_package_constraint, $name, $constraint);
         }
 
@@ -2650,6 +2699,10 @@ if (typeof jT_Shorthand != 'string')
                 else if ($access != $_modifiers_private && $access != $_modifiers_protected && $access != $_modifiers_public)
                     $_exceptionFormat($_lang_$$_access_duplicate, $name);
 
+                // If the class is a struct and the protected modifier was provided, throw an exception
+                if ($struct && $access == $_modifiers_protected)
+                    $_exceptionFormat($_lang_$$_access_conflict, $name, $_const_keyword_protected, $_const_keyword_struct);
+
                 // If the const modifier was provided, throw an exception
                 if ($modifiers & $_modifiers_const)
                     $_exceptionFormat($_lang_$$_requires_or, $name, $_const_keyword_const, $_const_keyword_prototype, $_const_keyword_static);
@@ -2694,6 +2747,10 @@ if (typeof jT_Shorthand != 'string')
                             $_exceptionFormat($_lang_$$_abstract_auto, $name);
                     }
 
+                    // Create the base definition and modifiers references
+                    var $baseDefinition = null,
+                        $baseModifiers  = null;
+
                     // If the override modifier was provided
                     if ($modifiers & $_modifiers_override)
                     {
@@ -2706,16 +2763,17 @@ if (typeof jT_Shorthand != 'string')
                             $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_override, $_const_keyword_virtual);
 
                         // Get the base definition
-                        var $baseDefinition = $cache[$_cache_protected][$name];
+                        $baseDefinition = $cache[$_cache_protected][$name];
 
                         // If no base definition was found, throw an exception
                         if (!$baseDefinition)
                             $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
 
-                        // Get the base constraint, modifiers, and type-specific modifiers
-                        var $baseConstraint  = $baseDefinition[$_definition_constraint],
-                            $baseModifiers   = $baseDefinition[$_definition_modifiers],
-                            $baseAccess      = $baseModifiers & ($_modifiers_public | $_modifiers_protected),
+                        // Get the base modifiers
+                        $baseModifiers = $baseDefinition[$_definition_modifiers];
+
+                        // Get the base type-specific modifiers
+                        var $baseAccess      = $baseModifiers & ($_modifiers_public | $_modifiers_protected),
                             $baseEnum        = $baseModifiers & ($_modifiers_hidden | $_modifiers_visible),
                             $baseOverridable = $baseModifiers & $_modifiers_sealed ?
                                                0 :
@@ -2725,16 +2783,9 @@ if (typeof jT_Shorthand != 'string')
                         if (!$baseOverridable || $type != $baseDefinition[$_definition_type] || $access != $baseAccess || $enum != $baseEnum || $modifiers & $_modifiers_readonly ^ $baseModifiers & $_modifiers_readonly)
                             $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
 
-                        // If the base constraint does not match
-                        if ($constraint !== $baseConstraint)
-                        {
-                            // If the base constraint is not a class, throw an exception
-                            if (typeof $baseConstraint != 'function')
-                                $_exceptionFormat($_lang_$$_override_constraint, $name, $baseConstraint);
-
-                            // Throw an exception
-                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
-                        }
+                        // If the base constraint does not match, throw an exception
+                        if ($constraint != $baseDefinition[$_definition_constraint])
+                            $_exceptionFormat($_lang_$$_override_constraint, $name, $baseDefinition[$_definition_constraint]);
                     }
                     else
                     {
@@ -2772,8 +2823,8 @@ if (typeof jT_Shorthand != 'string')
 
                             // Set the auto property modifiers (and compile the accessor and mutator methods)
                             $modifiers |= $_modifiers_property_auto;
-                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $name, $value[0]);
-                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $name, $value[1]);
+                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $struct, $name, $value[0]);
+                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $struct, $name, $value[1]);
 
                             // Set the default value
                             $value = $_definitionsCompilerPrimitive($value[2]);
@@ -2784,15 +2835,15 @@ if (typeof jT_Shorthand != 'string')
                             var $array = [null, null];
 
                             // Populate the value array and set the property modifiers
-                            $modifiers |= $_definitionsCompilerProperty($array, $cache[$_cache_protected], $modifiers, $name, $value);
+                            $modifiers |= $_definitionsCompilerProperty($array, $cache[$_cache_protected], $modifiers, $struct, $name, $value);
 
                             // Set the value array
                             $value = $array;
                         }
                         
                         // If the override modifier was provided, merge the inherited property modifiers into the modifiers
-                        if ($modifiers & $_modifiers_override)
-                            $modifiers |= $baseDefinition[$_definition_modifiers] & ($_modifiers_property_get | $_modifiers_property_get_protected | $_modifiers_property_set | $_modifiers_property_set_protected);
+                        if ($baseDefinition)
+                            $modifiers |= $baseModifiers & ($_modifiers_property_get | $_modifiers_property_get_protected | $_modifiers_property_set | $_modifiers_property_set_protected);
                     }
                     // If the readonly modifier was provided, throw an exception
                     else if ($modifiers & $_modifiers_readonly)
@@ -2812,23 +2863,29 @@ if (typeof jT_Shorthand != 'string')
                     $value = $_definitionsCompilerPrimitive($value);
                 }
 
-                // If the class has the primitive modifier and the value is either a field or auto property
-                if ($primitive && ($auto || $type == 'field'))
+                // If the value is either a field or auto property
+                if ($auto || $type == 'field')
                 {
-                    // If the constraint is a string and is not a primitive constraint, throw an exception
-                    if (typeof $constriant == 'string' && !$_definitionsCompilerConstraint($constraint, true))
-                        $_exceptionFormat($_lang_$$_primitive_constraint,
-                                          $name,
-                                          $model ?
-                                          $_const_keyword_model :
-                                          $struct ?
-                                          $_const_keyword_struct :
-                                          $_const_keyword_class);
-
-                    // If a constraint was not provided, set the "primitive" constraint
-                    if (!$constraint)
-                        $constraint = 'primitive';
+                    // If the class has the primitive modifier
+                    if ($primitive)
+                    {
+                        // If a constraint was not provided, set the "primitive" constraint
+                        if (!$constraint)
+                            $constraint = 'primitive';
+                        // If the constraint is not a primitive constraint, throw an exception
+                        else if (!$_definitionsCompilerConstraint($constraint, false, true))
+                            $_exceptionFormat($_lang_$$_primitive_constraint,
+                                              $name,
+                                              $model ?
+                                              $_const_keyword_model :
+                                              $struct ?
+                                              $_const_keyword_struct :
+                                              $_const_keyword_class);
+                    }
                 }
+                // If a constraint was provided and it has both the cast and default modifiers, throw an exception
+                else if ($constraint && $constraint[0] == '~' && $constraint[$constraint.length - 1] == '!')
+                        $_exceptionFormat($_lang_$$_conflict_constraint, $name, $constraint);
 
                 // If the access modifier is public, set the definition in the public definitions
                 if ($access == $_modifiers_public)
@@ -2860,31 +2917,53 @@ if (typeof jT_Shorthand != 'string')
                                           $value :
                                           $auto ?
                                           $_definitionsCompilerPrimitive($value[2]) :
-                                          $_definitionsCompilerProperty([null, null], null, 0, $name, $value);
+                                          $_definitionsCompilerProperty([null, null], null, 0, $struct, $name, $value);
 
           //if ($package && typeof $constraint == 'function')
           //    $imports[$name] = $constraint;
         }
     };
-    var $_definitionsCompilerConstraint     = function($keyword, $primitive)
+    var $_definitionsCompilerConstraint     = function($keyword, $native, $primitive)
     {
-        // If the keyword is a valid class name, return true
-        if ($_const_regexp_class.test($keyword))
+        // If the keyword is a valid class constraint, return true
+        if (!$native && $_const_regexp_constraint_class.test($keyword))
             return true;
 
         // Parse the keyword
         var $exec = $_const_regexp_constraint.exec($keyword);
 
-        // If the keyword could not be parsed or the cast and nullable flags were both set, return false
-        if (!$exec || $exec[1] && $exec[3])
+        // If the keyword could not be parsed, return false
+        if (!$exec || $exec[1] == '~' && $exec[3] == '?')
             return false;
 
-        // If the primitive flag is set, return true if the type is primitive
-        if ($primitive)
-            return $_const_types_primitive.indexOf($exec[2]) >= 0;
-        
-        // Return true if the type is dynamic or the cast flag is not set and the type is static
-        return $_const_types_dynamic.indexOf($exec[2]) >= 0 || !$exec[1] && $_const_types_static.indexOf($exec[2]) >= 0;
+        // Get the constraint bits and create the flags
+        var $constraint = $_constraints[$exec[2]],
+            $flags      = 0;
+
+        // If no constraint bits were found, return false
+        if ($constraint == null)
+            return false;
+
+        // If the primitive flag is set and either the constraint does not support the null flag or it is not the "primitive" string, return false
+        if ($primitive && !($constraint & $_constraints_null || $exec[2] == 'primitive'))
+            return false;
+
+        // If the cast modifier was provided, set the cast flag in the flags
+        if ($exec[1] == '~')
+            $flags |= $_constraints_cast;
+        // If the suppress modifier was provided, set the suppress flag in the flags
+        else if ($exec[1] == '@')
+            $flags |= $_constraints_suppress;
+
+        // If the null modifier was provided, set the null flag in the flags
+        if ($exec[3] == '?')
+            $flags |= $_constraints_null;
+        // If the default modifier was provided, set the default flag in the flags
+        else if ($exec[3] == '!')
+            $flags |= $_constraints_default;
+
+        // Return true if no flags were set that are not found in the constraint bits
+        return !($flags & ~$constraint);
     };
     var $_definitionsCompilerInjections     = function($definitions, $dump, $injections)
     {
@@ -2937,14 +3016,14 @@ if (typeof jT_Shorthand != 'string')
         
         return null;
     };
-    var $_definitionsCompilerProperty       = function($array, $definitions, $modifiers, $name, $object)
+    var $_definitionsCompilerProperty       = function($array, $definitions, $modifiers, $struct, $name, $object)
     {
         // Create the property modifiers
         var $property = 0;
 
         // Populate the value array from the property object and set the property modifiers
         for (var $key in $object)
-            $property |= $_definitionsCompilerAccessor($array, $definitions, $modifiers | $property, $name, $key, $object[$key]);
+            $property |= $_definitionsCompilerAccessor($array, $definitions, $modifiers | $property, $struct, $name, $key, $object[$key]);
 
         // If no definitions were provided, return the value array
         if (!$definitions)
@@ -2966,7 +3045,7 @@ if (typeof jT_Shorthand != 'string')
             $_exceptionFormat($_lang_$$_property_access_accessor, $name, $_const_keyword_set);
 
         // If the readonly modifier was provided without both the accessor and mutator methods, throw an exception
-        if ($modifiers & $_modifiers_readonly && ~$modifiers & ($_modifiers_property_get | $_modifiers_property_set))
+        if ($modifiers & $_modifiers_readonly && ~$property & ($_modifiers_property_get | $_modifiers_property_set))
             $_exceptionFormat($_lang_$$_property_readonly_invalid, $name);
 
         // Return the property modifiers
@@ -3037,27 +3116,53 @@ if (typeof jT_Shorthand != 'string')
         };
     };
 
-    var $_definitionsCompilerInstructions   = function($directives, $overrides, $level, $definition)
+    var $_definitionsCompilerDirective      = function($directives, $overrides, $i, $definition)
     {
         // Get the definition constraint, modifiers, name, type, and value
-        var $constraint   = $definition[$_definition_constraint],
-            $modifiers    = $definition[$_definition_modifiers],
-            $name         = $definition[$_definition_name],
-            $type         = $definition[$_definition_type],
-            $value        = $definition[$_definition_value];
+        var $constraint = $definition[$_definition_constraint],
+            $modifiers  = $definition[$_definition_modifiers],
+            $name       = $definition[$_definition_name],
+            $type       = $definition[$_definition_type],
+            $value      = $definition[$_definition_value];
+
+        // Check if the definition is an auto property and create the directive
+        var $auto         = !!($modifiers & $_modifiers_property_auto),
+            $directive    = $__array($_directive__length);
 
         if ($constraint)
         {
-            $constraint = $_buildRuntimeConstraint($constraint, $name);
-            $value      = $constraint($value);
+            var $constraintHandler = $_buildRuntimeConstraint($constraint, $name, $directive);
+
+            $value = $_definitionsCompilerConstraint($constraint, true, true) ?
+                     $constraintHandler($value) :
+                     null;
         }
 
-        //
+        // Create the instructions
+        var $instructions = $directive[$_directive_instructions] || 0;
 
-        // Check if the definition is an auto property and create the instructions
-        var $auto         = !!($modifiers & $_modifiers_property_auto),
-            $directive    = $__array($_directive__length),
-            $instructions = 0;
+        if ($modifiers & $_modifiers_visible)
+            $instructions |= $_instructions_enumerable;
+
+        if ($type == 'method')
+            $instructions |= $_instructions_value;
+
+        if (($type == 'method' || $type == 'property' && !$auto) && !($modifiers & $_modifiers_abstract))
+            $instructions |= $_instructions_this;
+
+        if ($type == 'property')
+        {
+            if ($auto || $modifiers & $_modifiers_property_get)
+                $instructions |= $_instructions_get;
+
+            if ($auto || $modifiers & $_modifiers_property_set)
+                $instructions |= $_instructions_set;
+
+            if ($auto)
+                $instructions |= $_instructions_data;
+        }
+        else if ($type == 'field')
+            $instructions |= $_instructions_data;
 
         // If the definition has the override modifier
         if ($modifiers & $_modifiers_override)
@@ -3077,7 +3182,7 @@ if (typeof jT_Shorthand != 'string')
                     if ($get && $override[0] == null)
                     {
                         // Set the level in the override array for the get accessor
-                        $override[0] = $level;
+                        $override[0] = $i;//$level;
 
                         // Set the override get accessor instruction
                         $instructions |= $_instructions_override | $_instructions_override_get;
@@ -3087,7 +3192,7 @@ if (typeof jT_Shorthand != 'string')
                     if ($set && $override[1] == null)
                     {
                         // Set the level in the override array for the set accessor
-                        $override[1] = $level;
+                        $override[1] = $i;//$level;
 
                         // Set the override set accessor instruction
                         $instructions |= $_instructions_override | $_instructions_override_set;
@@ -3098,8 +3203,8 @@ if (typeof jT_Shorthand != 'string')
                     // Create the override array in the overrides object
                     $override = $overrides[$name] = (
                     [
-                        $get ? $level : null,
-                        $set ? $level : null
+                        $get ? $i : null,
+                        $set ? $i : null
                     ]);
 
                     // Set the override instruction
@@ -3107,13 +3212,13 @@ if (typeof jT_Shorthand != 'string')
                 }
                 
                 // If the definition is not in the top-level stack
-                if ($level > 0)
+                if ($i > 0)
                 {
                     // If the definition inherits a get or set accessor or the override array already has inherited levels
                     if (!$get && $modifiers & $_property_get || !$set && $modifiers & $_property_set || $override.length > 2)
                     {
                         // Push the level into the override array
-                        $override.push($level);
+                        $override.push($i);
 
                         // Set the base cache instruction
                         $instructions |= $_instructions_base_cache;
@@ -3129,14 +3234,14 @@ if (typeof jT_Shorthand != 'string')
                 if ($overrides[$name] == null)
                 {
                     // Set the override level in the overrides object
-                    $overrides[$name] = $level;
+                    $overrides[$name] = $i;
 
                     // Set the override instruction
                     $instructions |= $_instructions_override;
                 }
 
                 // If the definition is not in the top-level stack, set the base instruction
-                if ($level > 0)
+                if ($i > 0)
                     $instructions |= $_instructions_base;
             }
         }
@@ -3194,7 +3299,7 @@ if (typeof jT_Shorthand != 'string')
                     $inherits = $overridden.slice(2);
 
                 // If the definition is not in the top-level stack, set the base instruction
-                if ($level > 0)
+                if ($i > 0)
                     $instructions |= $inherits ? $_instructions_base_cache : $_instructions_base;
 
                 break;
@@ -3207,26 +3312,6 @@ if (typeof jT_Shorthand != 'string')
 
                 break;
         }
-
-        if ($modifiers & $_modifiers_visible)
-            $instructions |= $_instructions_enumerable;
-
-        if ($auto || $type != 'property')
-            $instructions |= $_instructions_value;
-
-        if (!$auto && $type != 'field' && !$modifiers & $_modifiers_abstract && ($type != 'method' || !$_unlockSymbolsClass($value)))
-            $instructions |= $_instructions_this;
-
-        if ($type == 'property')
-        {
-            if ($auto || $modifiers & $_modifiers_property_get)
-                $instructions |= $_instructions_get;
-
-            if ($auto || $modifiers & $_modifiers_property_set)
-                $instructions |= $_instructions_set;
-        }
-        else if ($type == 'field')
-            $instructions |= $_instructions_get | $_instructions_set;
         
         $directive[$_directive_instructions]  = $instructions;
         $directive[$_directive_name]          = $name;
@@ -3234,7 +3319,7 @@ if (typeof jT_Shorthand != 'string')
 
         $directives.push($directive);
 
-        return $overridden;
+        return $overridden != null;
         
         // IF NO OVERRIDES (L > M), DON'T DEFINE ON THE BASE
 
@@ -3256,11 +3341,23 @@ if (typeof jT_Shorthand != 'string')
 
     // ---------- RUNTIME ----------
 
-    var $_directive_constraint,
+    //var $_directive_constraint,
+    //    $_directive_inherits,
+    //    $_directive_instructions,
+    //    $_directive_name,
+    //    $_directive_value;
+
+    var $_directive_constraint_filter,
+        $_directive_constraint_class,
         $_directive_inherits,
         $_directive_instructions,
         $_directive_name,
         $_directive_value;
+
+    var $_instructions_build,// !!$constraint
+        $_instructions_constraint,// !!$constraint
+        $_instructions_constraint_default,// $constraint[$constraint.length] == '!'
+        $_instructions_constraint_new;// !!$native
 
     var $_instructions_base,
         $_instructions_configurable,
@@ -3287,16 +3384,18 @@ if (typeof jT_Shorthand != 'string')
         $_instructions_value,
         $_instructions_writable;
     
-    var $_buildRuntimeConstraint  = function($constraint, $name)
+    var $_buildRuntimeConstraint  = function($constraint, $name, $directive, $primitive)
     {
         // Create the flags, get the internal type of the constraint, and check if a constraint handler was already created
         var $cast     = false,
+            $default  = false,
             $global   = null,
-            $nullable = false,
+            $null     = false,
+            $suppress = false,
             $type     = '',
             $typeof   = typeof $constraint,
-            $handler  = $typeof == 'string' ?
-                        $_constraints[$constraint] :
+            $handler  = $name != null && $typeof == 'string' ?
+                        $_handlers[$constraint] :
                         null;
 
         // If a constraint handler was already created, return it
@@ -3307,11 +3406,17 @@ if (typeof jT_Shorthand != 'string')
         if ($typeof == 'string')
         {
             // Get the cast and nullable flags along with the type string
-            $cast     = $constraint[0] == '~',
-            $nullable = $constraint[$constraint.length - 1] == '?';
-            $type     = $cast || $nullable ?
-                        $constraint.substr($cast ? 1 : 0, $constraint.length - 1) :
-                        $constraint;
+            $cast     = $constraint[0] == '~';
+            $default  = $constraint[$constraint.length - 1] == '!';
+            $null     = $constraint[$constraint.length - 1] == '?';
+            $suppress = $constraint[0] == '@';
+            $type     = $constraint;
+
+            if ($cast || $suppress)
+                $type = $type.substr(1);
+
+            if ($default || $null)
+                $type = $type.substr(0, $type.length - 1);
 
             // If the type string starts with a capital letter
             if ($type[0] >= 'A' && $type[0] <= 'Z')
@@ -3335,6 +3440,17 @@ if (typeof jT_Shorthand != 'string')
             if (!$global && ($typeof != 'function' || !$_unlockSymbolsClass($constraint)))
                 $_exceptionFormat($name ? $_lang_$$_class_constraint : $_lang_$$_class_constraint_nameless, $name, '(' + $$_type($constraint) + ')');
 
+            var $modifiers = $constraint[$_symbol_modifiers];
+
+            if ($cast)
+                throw '';
+                
+            if ($default && !($modifiers & $_modifiers_class_model))
+                throw '';
+
+            if ($null && !($modifiers & $_modifiers_class_struct))
+                throw '';
+
             // Create the class constraint handler
             $handler = function($value, $name)
             {
@@ -3355,6 +3471,8 @@ if (typeof jT_Shorthand != 'string')
             case 'array':
 
                 // Create the array constraint handler
+                $class   = $__array;
+                $new     = true;
                 $handler = function($value, $name)
                 {
                     // If the value is an array, return it
@@ -3414,6 +3532,8 @@ if (typeof jT_Shorthand != 'string')
             case 'date':
 
                 // Create the date constraint handler
+                $class   = $__date;
+                $new     = true;
                 $handler = function($value, $name)
                 {
                     // If the value is a date object, return it
@@ -3441,6 +3561,8 @@ if (typeof jT_Shorthand != 'string')
             case 'error':
 
                 // Create the error constraint handler
+                $class   = $__error;
+                $new     = true;
                 $handler = function($value, $name)
                 {
                     // If the value is an error object, return it
@@ -3464,6 +3586,8 @@ if (typeof jT_Shorthand != 'string')
             case 'function':
 
                 // Create the function constraint handler
+                $class   = $__function;
+                $new     = true;
                 $handler = function($value, $name)
                 {
                     // If the value is a function and not a class
@@ -3573,6 +3697,8 @@ if (typeof jT_Shorthand != 'string')
             case 'object':
 
                 // Create the object constraint handler
+                $class   = $__object;
+                $new     = true;
                 $handler = function($value, $name)
                 {
                     // If the value is neither null nor undefined, return it
@@ -3616,6 +3742,8 @@ if (typeof jT_Shorthand != 'string')
             case 'regexp':
 
                 // Create the regexp constraint handler
+                $class   = $__regexp;
+                $new     = true;
                 $handler = function($value, $name)
                 {
                     // If the value is a regexp object, return it
@@ -3724,7 +3852,7 @@ if (typeof jT_Shorthand != 'string')
         }
 
         // Set the constraint handler in the constraints cache
-        $_constraints[$constraint] = $handler;
+        $_handlers[$constraint] = $handler;
 
         // Return the constraint handler
         return $handler;
@@ -3805,17 +3933,24 @@ if (typeof jT_Shorthand != 'string')
                 $value = $v;
             };
     };
-    var $_buildRuntimeDirective   = function($instance, $i, $base, $private, $protected, $public, $directive, $overrides, $readonly, $build)
+    var $_buildRuntimeDirective   = function($instance, $i, $base, $private, $protected, $public, $directive, $overrides, $readonly)
     {
-        // Get the directive constraint, instructions, name, and value
-        var $constraint   = $directive[$_directive_constraint],
-            $instructions = $directive[$_directive_instructions],
+        // Get the directive instructions, name, and value
+        var $instructions = $directive[$_directive_instructions],
             $name         = $directive[$_directive_name],
             $value        = $directive[$_directive_value];
 
-        // If the build flag is set and the constraint is a primitive string, parse the constraint and update the directive
-        if ($build && typeof $constraint == 'string')
-            $constraint = $directive[$_directive_constraint] = $_buildRuntimeConstraint($constraint, $name);
+        // If the build instruction is set, build the constraint
+        if ($instructions & $_instructions_build)
+            $instructions = $_buildRuntimeConstraint(null, $name, $directive);
+
+        // Get the directive constraint handler and type
+        var $constraintHandler = $directive[$_directive_constraint_handler];
+
+        if ($instructions & $_instructions_constraint_default)
+            $value = $instructions & $_instructions_constraint_new ?
+                     new $value() :
+                     $value();
 
         // Create the descriptor
         var $descriptor = (
@@ -3833,18 +3968,18 @@ if (typeof jT_Shorthand != 'string')
                 // If there is a get accessor instruction, set the get accessor in the descriptor
                 if ($instructions & $_instructions_get)
                     $descriptor['get'] = $instructions & $_instructions_this ?
-                                            $_buildRuntimeThis($name, $value[0], $private, $public, $constraint, 0) :
-                                            $value[0];
+                                         $_buildRuntimeThis($name, $value[0], $private, $public, $constraintHandler, 0) :
+                                         $value[0];
 
                 // If there is a set accessor instruction, set the set accessor in the descriptor
                 if ($instructions & $_instructions_set)
                     $descriptor['set'] = $instructions & $_instructions_this ?
-                                            $_buildRuntimeThis($name, $value[1], $private, $public, $constraint, 1) :
-                                            $value[1];
+                                         $_buildRuntimeThis($name, $value[1], $private, $public, $constraintHandler, 1) :
+                                         $value[1];
             }
             // Set the data get and set accessors in the descriptor
             else
-                $_buildRuntimeData($descriptor, $name, $value, $constraint, true, $instructions & $_instructions_data_readonly ? $readonly : null);
+                $_buildRuntimeData($descriptor, $name, $value, $constraintHandler, true, $instructions & $_instructions_data_readonly ? $readonly : null);
 
             // If there is not an override instruction
             if (~$instructions & $_instructions_override)
@@ -3975,12 +4110,12 @@ if (typeof jT_Shorthand != 'string')
                 // Set the writable flag and value in the descriptor
                 $descriptor['writable'] = !!($instructions & $_instructions_writable);
                 $descriptor['value']    = $instructions & $_instructions_this ?
-                                            $_buildRuntimeThis($name, $value, $private, $public, $constraint) :
-                                            $value;
+                                          $_buildRuntimeThis($name, $value, $private, $public, $constraintHandler) :
+                                          $value;
             }
             // If there is a data instruction
             else if ($instructions & $_instructions_data)
-                $_buildRuntimeData($descriptor, $name, $value, $constraint, false, $instructions & $_instructions_data_readonly ? $readonly : null);
+                $_buildRuntimeData($descriptor, $name, $value, $constraintHandler, false, $instructions & $_instructions_data_readonly ? $readonly : null);
 
             // If there is a base instruction, set the descriptor on the base instance object
             if ($instructions & $_instructions_base)
@@ -4060,7 +4195,7 @@ if (typeof jT_Shorthand != 'string')
             $__defineProperty($base, '__type', $descriptorType);
         }
     };
-    var $_buildRuntimeMatrix      = function($cache, $directives, $abstract, $build, $import, $internal, $merge, $model, $optimized, $readonlys, $struct, $unlocked)
+    var $_buildRuntimeMatrix      = function($cache, $directives, $abstract, $import, $internal, $merge, $model, $optimized, $readonlys, $struct, $unlocked)
     {
         //if ($root)
         //{
@@ -4142,7 +4277,7 @@ if (typeof jT_Shorthand != 'string')
 
                     // Execute the directives on the instance objects
                     for (var $k = 0, $l = $cacheDirectives.length; $k < $l; $k++)
-                        $_buildRuntimeDirective($instance, $i, $base, $private, $protected, $public, $cacheDirectives[$k], $overrides, $readonly, $build);
+                        $_buildRuntimeDirective($instance, $i, $base, $private, $protected, $public, $cacheDirectives[$k], $overrides, $readonly);
                 }
 
                 // Create the constructor
@@ -4166,17 +4301,13 @@ if (typeof jT_Shorthand != 'string')
 
                     // Execute the directives on the instance objects
                     for (var $k = 0, $l = $cacheDirectives.length; $k < $l; $k++)
-                        $_buildRuntimeDirective($instance, $i, $base, $private, $protected, $public, $cacheDirectives[$k], $overrides, $readonly, $build);
+                        $_buildRuntimeDirective($instance, $i, $base, $private, $protected, $public, $cacheDirectives[$k], $overrides, $readonly);
                 }
 
                 // Reset the private and public instance object references
                 $private = $instance[0][0];
                 $public  = $instance[0][2];
             }
-
-            // If the build flag is set, unset it
-            if ($build)
-                $build = false;
 
             // If a constructor was provided and the new operator was used or the class is neither a model nor a struct, apply the constructor and store its return value
             if ($constructor && ($new || !$model && !$struct))
@@ -4605,7 +4736,7 @@ if (typeof jT_Shorthand != 'string')
         if ($type)
         {
             // Create the constraint handler
-            var $constraint = $_buildRuntimeConstraint($type);
+            var $constraint = $_buildRuntimeConstraint(null, $type);
 
             // If either a get or set accessor was provided
             if ($get || $set)
