@@ -1,17 +1,15 @@
-# [jTypes](http://www.jTypes.com/) - Build application libraries in JavaScript using encapsulation, inheritance, and polymorphism
+# [jTypes](http://www.jTypes.com/) - Scalable class-based JavaScript
 
 ## What is jTypes?
 
-jTypes is the most comprehensive and robust JavaScript library for overcoming differential inheritance with prototype-based objects. Its lightweight yet powerful design provides web programmers on any platform or browser the ability to emulate classical inheritance where objects are defined by classes.
+jTypes provides developers with robust type management in JavaScript to improve the maintainability and scalability of web-based application engineering. By utilizing familiar and proven design patterns from popular languages such as C++, C#, and Java, jTypes can simplify the development of web apps, libraries, and tools. Since it is not a new language, jTypes doesn't require any transcompilation to messy and unmaintainable JavaScript like other web programming languages. This makes it extremely simple and straightforward, especially for developers that are experienced with classical inheritance. Using existing and upcoming language components that are implemented across all browsers and platforms, jTypes offers an efficient and effective framework for class-based object-oriented development that can quickly and easily adapt to the "quirks" of a constantly evolving web.
 
-If you're looking for a more down-to-earth explanation rather than the generic description or tagline, then here's the deal: <em>jTypes will provide you with the ability to develop robust, modular, and scalable application libraries in JavaScript using encapsulation, inheritance, and polymorphism</em>.
-
-What exactly does that mean? You know all those keywords from languages such as C++ or C# that you started missing quite badly after you transitioned to JavaScript? You know what we're talking about. All those beautiful modifiers of classical inheritance such as `virtual`, `abstract`, and `override` or `private`, `protected`, and `public` that gave you so much more control and freedom with your libraries. Well jTypes lets you take those keywords back, so you can develop extremely powerful and robust web applications using the principals of classical inheritance.
+<em>jTypes provides developers with the ability to build robust, modular, and scalable application libraries in JavaScript using encapsulation, inheritance, and polymorphism.</em> What exactly does that mean? You know all those keywords from languages such as C++ or C# that you started missing quite badly after you transitioned to JavaScript? You know what we're talking about; all those modifiers of classical inheritance such as `virtual`, `abstract`, and `override` or `private`, `protected`, and `public` that gave you so much more control and freedom with your libraries. Well jTypes lets you use those keywords in JavaScript, so you can develop extremely powerful and robust web applications using the principals of classical inheritance.
 
 
 ## What are the requirements?
 
-jTypes requires JavaScript 1.8.5, which is supported by any modern browser (MSIE 9+).
+jTypes requires ECMAScript 5, which is supported by any modern browser (MSIE 9+).
 
 ## Contribute
 
