@@ -17,7 +17,7 @@ We strongly encourage anyone who is interested in contributing to contact us thr
 
 jTypes is a free open-source library developed by Gaulinsoft, a small software consulting company in Chicago, IL. We only have a few employees and spend a majority of our time working with clients on various consulting projects. This library was created internally in our free-time to simplify the development of some of our other in-house libraries which we also hope to release in the near future. Therefore, any contributions (in the form of code optimization, design ideas, unit testing, bug tracking, ect.) are greatly appreciated and really go a long way to help us out.
 
-We hope you find jTypes to be a very useful tool in the development of your application libraries and we have many more great things to come, so be sure to check-in every once in a while to see what's new!
+We hope you find jTypes to be a very useful tool in the development of your applications or libraries and we have many more great things to come, so be sure to check-in every once in a while to see what's new!
 
 
 ## How to define a class
@@ -25,12 +25,12 @@ We hope you find jTypes to be a very useful tool in the development of your appl
 In the following example, a class is compiled and the type reference is stored in the `Person` variable. A constructor is provided to take in three arguments and set the corresponding fields. Two `public` `readonly` fields are defined, and a `protected` field is defined as well. A `public` method along with a `public` `virtual` method are defined. Finally, a property with both `get` and `set` accessors is provided:
 
 ```javascript
-var Person = $$(function($fName, $lName, $age)
+var Person = jTypes(function(fName, lName, age)
 {
-    this.firstName = $fName;
-    this.lastName  = $lName;
+    this.firstName = fName;
+    this.lastName  = lName;
 
-    this._age = $age;
+    this._age = age;
 },
 {
     'public readonly firstName': '',
@@ -54,10 +54,10 @@ var Person = $$(function($fName, $lName, $age)
         {
             return this._age;
         },
-        'set': function($v)
+        'set': function(v)
         {
-            if ($v > 0)
-                this._age = $v;
+            if (v > 0)
+                this._age = v;
         }
     }
 });
@@ -68,11 +68,11 @@ var Person = $$(function($fName, $lName, $age)
 In the following example, a class is derived from the `Person` class and the type reference is stored in the `Employee` variable. Four arguments are provided to the constructor, with which the first three arguments are passed into the base constructor, while the final argument is used to set a `protected` field defined in the class. A `public` method is defined as an `override` for the base `virtual` method. This method also calls the base `virtual` method. Finally, a property with only a `get` accessor is provided, which will act as if it is a read-only field:
 
 ```javascript
-var Employee = $$(Person, function($fName, $lName, $age, $salary)
+var Employee = jTypes(Person, function(fName, lName, age, salary)
 {
-    this.__base($fName, $lName, $age);
+    this.__base(fName, lName, age);
     
-    this._salary = $salary;
+    this._salary = salary;
 },
 {
     'protected _salary': 0,
@@ -180,9 +180,3 @@ console.log(e.age);// 42
 // check that the salary increased 3% (by the overridden method)
 console.log(e.salary);// 77250
 ```
-
-## Recent performance tests
-
-![jTypes 2.1.2b Compiler Performance](https://lh3.googleusercontent.com/-j9wM6tywbJ4/Ue6906xfa9I/AAAAAAAAAJM/ObpsYcfS8cA/w897-h465-no/2.1.2+%2528compile%2529.bmp "jTypes 2.1.2b Compiler Performance")
-
-![jTypes 2.1.2b Instantiator Performance](https://lh3.googleusercontent.com/-L5LODtb2LIE/Ue6908M_uyI/AAAAAAAAAJI/1sHW5NaS438/w897-h465-no/2.1.2+%2528instantiate%2529.bmp "jTypes 2.1.2b Instantiator Performance")
