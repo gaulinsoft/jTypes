@@ -18,7 +18,7 @@
 */
 (function()
 {
-    console.log('Starting unit tests on jTypes version ' + $$.version);
+    console.log('Starting compiler tests on jTypes version ' + $$.version);
 
     // Get the starting time
     var $_ticks = Date.now();
@@ -518,5 +518,5 @@
         })(_ + '5');
     })('P');
 
-    console.log('Stopping unit tests after ' + parseInt(Date.now() - $_ticks, 10) + ' milliseconds');
+    console.log('Stopping compiler tests after ' + parseInt(Date.now() - $_ticks, 10) + ' milliseconds');
 })();
