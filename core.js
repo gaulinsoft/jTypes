@@ -46,7 +46,7 @@ if (typeof jT_Shorthand != 'string')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0a534';
+        $_version = '2.2.0a536';
 
     // ########## FLAGS ##########
 
@@ -743,6 +743,76 @@ if (typeof jT_Shorthand != 'string')
     var $_symbol_modifiers = $_symbolGenerator('modifiers');
     var $_symbol_name      = $_symbolGenerator('name');
   //var $_symbol_factory   = $_symbolGenerator('factory');
+
+    //var $_directive_constraint,
+    //    $_directive_inherits,
+    //    $_directive_instructions,
+    //    $_directive_name,
+    //    $_directive_value;
+
+    var $_directive_constraint_filter = 0,
+        $_directive_constraint_class  = 0,
+        $_directive_inherits          = 1,
+        $_directive_instructions      = 2,
+        $_directive_name              = 3,
+        $_directive_value             = 4,
+        
+        $_directive__length = 5;
+
+    var $_instructions_build,// !!$constraint
+        $_instructions_constraint,// !!$constraint
+        $_instructions_constraint_default,// $constraint[$constraint.length] == '!'
+        $_instructions_constraint_new;// !!$native
+
+    var $_instructions_base                = 1 << 0,
+        $_instructions_configurable        = 1 << 1,
+        $_instructions_data                = 1 << 2,
+        $_instructions_data_readonly       = 1 << 3,
+        $_instructions_enumerable          = 1 << 4,
+        $_instructions_get                 = 1 << 5,
+        $_instructions_override            = 1 << 6,
+        $_instructions_override_descriptor = 1 << 7,
+        $_instructions_override_get        = 1 << 8,
+        $_instructions_override_set        = 1 << 9,
+        $_instructions_overridden          = 1 << 10,
+        $_instructions_overridden_get      = 1 << 11,
+        $_instructions_overridden_private  = 1 << 12,
+        $_instructions_overridden_set      = 1 << 13,
+        $_instructions_private             = 1 << 14,
+        $_instructions_private_get         = 1 << 15,
+        $_instructions_private_set         = 1 << 16,
+        $_instructions_protected           = 1 << 17,
+        $_instructions_protected_get       = 1 << 18,
+        $_instructions_protected_set       = 1 << 19,
+        $_instructions_public              = 1 << 20,
+        $_instructions_set                 = 1 << 21,
+        $_instructions_this                = 1 << 22,
+        $_instructions_value               = 1 << 23,
+        $_instructions_writable            = 1 << 24;
+
+    var $_cache_symbols_base        = -1,
+        $_cache_symbols_constructor = -1,
+        $_cache_symbols_private     = -1,
+      //$_cache_symbols_protected   = -1,
+        $_cache_symbols_public      = -1;
+
+    var $_default_class = 2,// TYPE
+        $_default_data  = 0,// SYMBOL
+        $_default_new   = 1,// NEW
+        
+        $_default__length = 3;
+
+    var $_directive_symbols_base        = 1,
+        $_directive_symbols_constructor = 3,
+        $_directive_symbols_private     = 0,
+      //$_directive_symbols_protected   = -1,
+        $_directive_symbols_public      = 2,
+        
+        $_directive_symbols__length = 4;
+
+    var $_symbol_data,
+        $_symbol_data_readonly,
+        $_symbol_instance;
 
 
 
@@ -3307,7 +3377,7 @@ if (typeof jT_Shorthand != 'string')
                 if ($i > 0)
                 {
                     // If the definition inherits an accessor or mutator method or the override array has inherited indices, push the index into the override array
-                    if (!$get && $modifiers & $_property_get || !$set && $modifiers & $_property_set || $override.length > 2)
+                    if (!$get && $modifiers & $_modifiers_property_get || !$set && $modifiers & $_modifiers_property_set || $override.length > 2)
                         $override.push($i);
                     // Set the base instruction
                     else
@@ -3315,7 +3385,7 @@ if (typeof jT_Shorthand != 'string')
                 }
             }
             // Get the definition access modifier
-            else switch ($modifiers & ($_modifiers_private | $_instructions_protected | $_modifiers_public))
+            else switch ($modifiers & ($_modifiers_private | $_modifiers_protected | $_modifiers_public))
             {
                 // If the definition is public
                 case $_modifiers_public:
@@ -3457,7 +3527,7 @@ if (typeof jT_Shorthand != 'string')
                 }
             }
             // Get the definition access modifier
-            else switch ($modifiers & ($_modifiers_private | $_instructions_protected | $_modifiers_public))
+            else switch ($modifiers & ($_modifiers_private | $_modifiers_protected | $_modifiers_public))
             {
                 // If the definition is public
                 case $_modifiers_public:
@@ -3672,52 +3742,6 @@ if (typeof jT_Shorthand != 'string')
     };
 
     // ---------- RUNTIME ----------
-
-    //var $_directive_constraint,
-    //    $_directive_inherits,
-    //    $_directive_instructions,
-    //    $_directive_name,
-    //    $_directive_value;
-
-    var $_directive_constraint_filter = 0,
-        $_directive_constraint_class  = 0,
-        $_directive_inherits          = 1,
-        $_directive_instructions      = 2,
-        $_directive_name              = 3,
-        $_directive_value             = 4,
-        
-        $_directive__length = 5;
-
-    var $_instructions_build,// !!$constraint
-        $_instructions_constraint,// !!$constraint
-        $_instructions_constraint_default,// $constraint[$constraint.length] == '!'
-        $_instructions_constraint_new;// !!$native
-
-    var $_instructions_base                = 1 << 0,
-        $_instructions_configurable        = 1 << 1,
-        $_instructions_data                = 1 << 2,
-        $_instructions_data_readonly       = 1 << 3,
-        $_instructions_enumerable          = 1 << 4,
-        $_instructions_get                 = 1 << 5,
-        $_instructions_override            = 1 << 6,
-        $_instructions_override_descriptor = 1 << 7,
-        $_instructions_override_get        = 1 << 8,
-        $_instructions_override_set        = 1 << 9,
-        $_instructions_overridden          = 1 << 10,
-        $_instructions_overridden_get      = 1 << 11,
-        $_instructions_overridden_private  = 1 << 12,
-        $_instructions_overridden_set      = 1 << 13,
-        $_instructions_private             = 1 << 14,
-        $_instructions_private_get         = 1 << 15,
-        $_instructions_private_set         = 1 << 16,
-        $_instructions_protected           = 1 << 17,
-        $_instructions_protected_get       = 1 << 18,
-        $_instructions_protected_set       = 1 << 19,
-        $_instructions_public              = 1 << 20,
-        $_instructions_set                 = 1 << 21,
-        $_instructions_this                = 1 << 22,
-        $_instructions_value               = 1 << 23,
-        $_instructions_writable            = 1 << 24;
     
     var $_buildRuntimeConstraint  = function($constraint, $name, $directive, $primitive)
     {
@@ -4369,7 +4393,7 @@ if (typeof jT_Shorthand != 'string')
                     // Set the base descriptor on the base instance object
                     $__defineProperty($base, $name, $descriptorBase);
 
-                    // TRIGGER INHERITS
+                    // TRIGGER INHERITS (there are no inherits here because you can't override the private...)
 
                     // If there is an overridden get accessor instruction, get the get accessor for the descriptor from the overrides object
                     if ($instructions & $_instructions_overridden_get)
@@ -4415,7 +4439,27 @@ if (typeof jT_Shorthand != 'string')
                     // If there is an overridden instruction
                     if ($instructions & $_instructions_overridden)
                     {
-                        // TRIGGER INHERITS
+                        //var $inherits = $directive[$_directive_inherits];
+                        //if ($inherits)
+                        //{
+                        //    //
+                        //    var $descriptorInherits = $descriptor;
+
+                        //    for (var $j = $inherits.length - 1; $j >= 0; $j--)
+                        //    {
+                        //        var $inheritsBase   = $instance[$inherits[$j]][3],
+                        //            $descriptorBase = $inheritsBase[$name];
+
+                        //        if (!$descriptorBase['get'])
+                        //            $descriptorBase['get'] = $descriptorInherits['get'];
+                        //        else if (!$descriptorBase['set'])
+                        //            $descriptorBase['set'] = $descriptorInherits['set'];
+
+                        //        $__defineProperty($inheritsBase, $name, $descriptorBase);
+
+                        //        $descriptorInherits = $descriptorBase;
+                        //    }
+                        //}
 
                         // If there is an overridden get accessor instruction, get the get accessor for the descriptor from the overrides object
                         if ($instructions & $_instructions_overridden_get)
@@ -4428,30 +4472,6 @@ if (typeof jT_Shorthand != 'string')
                             $descriptor = $overrides[$name];
                     }
                 }
-
-                // ### INHERITS ###
-                //var $inherits = $directive[$_directive_inherits];
-
-                //if ($inherits)
-                //{
-                //    //
-                //    var $descriptorInherits = $descriptor;
-
-                //    for (var $j = $inherits.length - 1; $j >= 0; $j--)
-                //    {
-                //        var $inheritsBase   = $instance[$inherits[$j]][3],
-                //            $descriptorBase = $inheritsBase[$name];
-
-                //        if (!$descriptorBase['get'])
-                //            $descriptorBase['get'] = $descriptorInherits['get'];
-                //        else if (!$descriptorBase['set'])
-                //            $descriptorBase['set'] = $descriptorInherits['set'];
-
-                //        $__defineProperty($inheritsBase, $name, $descriptorBase);
-
-                //        $descriptorInherits = $descriptorBase;
-                //    }
-                //}
 
                 // If there is a protected instruction
                 if ($instructions & $_instructions_protected)
@@ -4778,30 +4798,6 @@ if (typeof jT_Shorthand != 'string')
             return $function.apply($private, arguments);
         };
     };
-    
-    var $_cache_symbols_base        = -1,
-        $_cache_symbols_constructor = -1,
-        $_cache_symbols_private     = -1,
-      //$_cache_symbols_protected   = -1,
-        $_cache_symbols_public      = -1;
-
-    var $_default_class = 2,// TYPE
-        $_default_data  = 0,// SYMBOL
-        $_default_new   = 1,// NEW
-        
-        $_default__length = 3;
-
-    var $_directive_symbols_base        = 1,
-        $_directive_symbols_constructor = 3,
-        $_directive_symbols_private     = 0,
-      //$_directive_symbols_protected   = -1,
-        $_directive_symbols_public      = 2,
-        
-        $_directive_symbols__length = 4;
-
-    var $_symbol_data,
-        $_symbol_data_readonly,
-        $_symbol_instance;
 
     var $_symbolsRuntimeDefaults = function($this, $defaults)
     {
