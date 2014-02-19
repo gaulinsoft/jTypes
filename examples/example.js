@@ -25,8 +25,8 @@ jTypes('abstract Shape', function(x, y, fill, stroke)
     'public Color fill':   null,
     'public Color stroke': null,
     
-    'public abstract number area':      null,
-    'public abstract number perimeter': null
+    'public abstract int area':      null,
+    'public abstract int perimeter': null
 });
 
 jTypes('Circle', jTypes.Shape, function(x, y, radius, fill, stroke)
@@ -38,11 +38,11 @@ jTypes('Circle', jTypes.Shape, function(x, y, radius, fill, stroke)
 {
     'public int radius': 0,
 
-    'public override number area': function()
+    'public override int area': function()
     {
         return Math.PI * this.radius * this.radius;
     },
-    'public override number perimeter': function()
+    'public override int perimeter': function()
     {
         return 2 * Math.PI * this.radius;
     }
@@ -59,11 +59,11 @@ jTypes('Rectangle', jTypes.Shape, function(x, y, width, height, fill, stroke)
     'public int width':  0,
     'public int height': 0,
 
-    'public override number area': function()
+    'public override int area': function()
     {
         return this.width * this.height;
     },
-    'public override number perimeter': function()
+    'public override int perimeter': function()
     {
         return 2 * (this.width + this.height);
     }
