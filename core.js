@@ -52,7 +52,7 @@ if (typeof jT_Shorthand != 'string')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0b576';
+        $_version = '2.2.0b577';
 
     // ########## FLAGS ##########
 
@@ -3348,12 +3348,13 @@ if (typeof jT_Shorthand != 'string')
             $inherits     = null,
             $instructions = 0,
             $overridden   = null,
-            $symbol       = $modifiers & ($_modifiers_field | $_modifiers_property_auto) && $__symbol ?
+            $data         = $modifiers & ($_modifiers_field | $_modifiers_property_auto),
+            $symbol       = $data && $__symbol ?
                             $__symbol() :
                             null;
 
-        // If a constraint was provided
-        if ($constraint)
+        // If a constraint was provided and the definition is a field or auto property
+        if ($constraint && $data)
         {
             // Check if the constraint is a native primitive constraint
             var $native = $_definitionsCompilerConstraint($constraint, true, true);
