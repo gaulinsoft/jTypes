@@ -52,7 +52,7 @@ if (typeof jT_Shorthand != 'string')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0b577';
+        $_version = '2.2.0b580';
 
     // ########## FLAGS ##########
 
@@ -84,6 +84,7 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_auto_invalid_default        = '"{0}" cannot have more than one default value for the automatically implemented property.',
         $_lang_$$_class_abstract_instance     = 'abstract classes cannot be instantiated.',
         $_lang_$$_class_abstract_override     = '{0} must implement the inherited abstract {2} "{1}" with the override modifier.',
+        $_lang_$$_class_base_invalid          = 'class cannot have an uncompiled base class "{0}".',
         $_lang_$$_class_conflict              = '{0} cannot have the {1} modifier.',
         $_lang_$$_class_conflict_abstract     = 'abstract {0} cannot have the {1} modifier.',
         $_lang_$$_class_conflict_and          = '{0} cannot have the {1} and {2} modifiers.',
@@ -104,6 +105,7 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_class_inherit_unsafe        = '{0} cannot inherit from a .NET class.',
         $_lang_$$_class_keyword_duplicate     = 'class cannot have a duplicate {0} modifier.',
         $_lang_$$_class_keyword_invalid       = '"{0}" is not a valid class modifier.',
+        $_lang_$$_class_name_invalid          = '"{0}" is not a valid class name.',
         $_lang_$$_class_this_new              = 'classes cannot be compiled using the new operator.',
         $_lang_$$_conflict_and                = '"{0}" cannot have the {1} and {2} modifiers.',
         $_lang_$$_conflict_constraint         = '"{0}" must be a field or automatically implemented property to have the "{1}" type constraint.',
@@ -1235,6 +1237,39 @@ if (typeof jT_Shorthand != 'string')
         // If a modifiers string was provided
         if ($modifiers)
         {
+            // Create the base class name
+            var $baseName = null;
+
+            // If a base class was not provided and the modifiers string contains the extends character
+            if (!$base && $modifiers.indexOf(':') >= 0)
+            {
+                // Break the modifiers string at the extends character
+                $modifiers = $modifiers.split(':');
+
+                // If the extends character was provided more than once, throw an exception
+                if ($modifiers.length != 2)
+                    $_exceptionFormat($_lang_$$_class_keyword_duplicate, '":"');
+                
+                // Get the base class name and modifiers string
+                $baseName  = $modifiers[1].trim();
+                $modifiers = $modifiers[0].trim();
+
+                // If a base class name was not provided, throw an exception
+                if (!$baseName)
+                    $_exceptionFormat($_lang_$$_class_keyword_invalid, ':');
+
+                // If the base class name is not a valid class name, throw an exception
+                if (!$_const_regexp_class.test($baseName))
+                    $_exceptionFormat($_lang_$$_class_name_invalid, $baseName);
+                
+                // Get the base class from the globals object
+                $base = $_globals[$baseName];
+
+                // If a base class was not found in the globals object, throw an exception
+                if (!$base)
+                    $_exceptionFormat($_lang_$$_class_base_invalid, $baseName);
+            }
+
             // Create the keywords array
             var $keywords = $modifiers.trim().split(' ');
 
@@ -1257,9 +1292,16 @@ if (typeof jT_Shorthand != 'string')
                     // If the keyword is not the unsafe token
                     if (!$_unsafe || $keyword != $_unsafe)
                     {
-                        // If the keyword is not a valid class name (or not the last keyword in the keywords array), throw an exception
-                        if ($i != $j - 1 || !$_const_regexp_class.test($keyword))
+                        // If the keyword is not the last keyword in the keywords array, throw an exception
+                        if ($i != $j - 1)
                             $_exceptionFormat($_lang_$$_class_keyword_invalid, $keyword);
+
+                        // If the keyword is not a valid class name, throw an exception
+                        if (!$_const_regexp_class.test($keyword))
+                            $_exceptionFormat($baseName ?
+                                              $_lang_$$_class_name_invalid :
+                                              $_lang_$$_class_keyword_invalid,
+                                              $keyword);
 
                         // Set the class name
                         $name = $keyword;
@@ -1288,6 +1330,9 @@ if (typeof jT_Shorthand != 'string')
                 // Set the exception class name
                 $_name = $name;
             }
+            // If a base class was provided in the modifiers string, throw an exception
+            else if ($baseName)
+                $_exceptionFormat($_lang_$$_class_keyword_invalid, ':');
         }
         // Reset the modifiers
         else
