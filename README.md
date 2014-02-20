@@ -9,7 +9,11 @@ jTypes provides developers with robust type management in JavaScript to improve 
 
 ## What are the requirements?
 
-jTypes requires ECMAScript 5, which is supported by any modern browser (MSIE 9+).
+jTypes requires ECMAScript 5, which is supported by any modern browser (MSIE 9+) or platform.
+
+## jTypes 2.2 Beta Performance
+  
+ -![jTypes 2.2 Beta Performance](http://content.jtypes.com/2.2.0b577.png "jTypes 2.2 Beta Performance")
 
 ## Contribute
 
