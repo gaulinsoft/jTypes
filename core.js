@@ -27,6 +27,10 @@ if (typeof jT_FunctionLock != 'boolean')
 if (typeof jT_Harmony != 'boolean')
     jT_Harmony = true;
 
+// Ensure the global unsafe harmony flag is a boolean
+if (typeof jT_HarmonyUnsafe != 'boolean')
+    jT_HarmonyUnsafe = true;//false;
+
 // Ensure the global prototype lock flag is a boolean
 if (typeof jT_PrototypeLock != 'boolean')
     jT_PrototypeLock = false;
@@ -48,16 +52,17 @@ if (typeof jT_Shorthand != 'string')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0a540';
+        $_version = '2.2.0b576';
 
     // ########## FLAGS ##########
 
     // Create the internal flags
-    var $_debug     = !$_minify,
-        $_funcLock  = jT_FunctionLock,
-        $_harmony   = jT_Harmony,
-        $_protoLock = jT_PrototypeLock,
-        $_strict    = false;
+    var $_debug         = !$_minify,
+        $_funcLock      = jT_FunctionLock,
+        $_harmony       = jT_Harmony,
+        $_harmonyUnsafe = jT_HarmonyUnsafe,
+        $_protoLock     = jT_PrototypeLock,
+        $_strict        = false;
 
     // ########## LANGUAGE ##########
 
@@ -103,6 +108,11 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_conflict_and                = '"{0}" cannot have the {1} and {2} modifiers.',
         $_lang_$$_conflict_constraint         = '"{0}" must be a field or automatically implemented property to have the "{1}" type constraint.',
         $_lang_$$_const_constraint            = '"{0}" cannot have a type constraint with the const modifier.',
+        $_lang_$$_constraint_invalid          = '"{0}" has an invalid type constraint "{1}".',
+        $_lang_$$_constraint_invalid_generic  = '"{1}" is not a valid type constraint.',
+        $_lang_$$_constraint_invalid_value    = '"{0}" must have a value of the type {1}.',
+        $_lang_$$_constraint_primitive        = '"{0}" cannot have a non-primitive type constraint "{1}" because it is a {2}.',
+        $_lang_$$_context_generic             = '"{0}" is not generic and must be accessed on an instance.',
         $_lang_$$_keyword_duplicate           = '"{0}" cannot have a duplicate {1} modifier.',
         $_lang_$$_keyword_invalid             = '"{0}" has an invalid modifier "{1}".',
         $_lang_$$_name_duplicate              = '"{0}" cannot have more than one {1}definition.',
@@ -131,6 +141,7 @@ if (typeof jT_Shorthand != 'string')
         $_lang_$$_property_readonly_invalid   = '"{0}" must have both accessors to have the readonly modifier.',
         $_lang_$$_property_value_abstract     = '"{0}" must have a either a null or undefined reference or a function for the {1} accessor.',
         $_lang_$$_property_value_function     = '"{0}" must have a function for the {1} accessor.',
+        $_lang_$$_readonly_data               = '"{0}" cannot be set because it is a read-only {1}.',
         $_lang_$$_readonly_invalid            = '"{0}" cannot have the readonly modifier because it is a {1} definition.',
         $_lang_$$_readonly_invalid_type       = '"{0}" must be a field or property to have the readonly modifier.',
         $_lang_$$_readonly_set                = '"{0}" must implement a set accessor to have the readonly modifier.',
@@ -402,6 +413,7 @@ if (typeof jT_Shorthand != 'string')
         $_const_float_min               = -$_const_float_max,
         $_const_format_search           = /([\{]+)([0-9]+)\}/g,
         $_const_hash_class              = 6,
+        $_const_hash_symbol             = 12,
         $_const_int_max                 = 9007199254740992,
         $_const_int_min                 = -$_const_int_max,
         $_const_int32_max               = 2147483647,
@@ -461,7 +473,19 @@ if (typeof jT_Shorthand != 'string')
         $_cache_static      = 6,
         
         // Create the length
-        $_cache__length = 8;
+        $_cache__length = 8,
+        
+        // Create the cache symbols indices
+        $_cache_symbols_base      = 11,
+        $_cache_symbols_construct = 12,
+        $_cache_symbols_defaults  = 14,
+        $_cache_symbols_private   = 8,
+      //$_cache_symbols_protected = 9,
+        $_cache_symbols_public    = 10,
+        $_cache_symbols_root      = 13,
+        
+        // Create the symbols length
+        $_cache_symbols__length = 15;
 
     // ---------- CONSTRAINTS ----------
 
@@ -494,16 +518,29 @@ if (typeof jT_Shorthand != 'string')
     if ($_harmony)
         $_constraints['symbol'] = $_constraints_null | $_constraints_suppress;
 
+    // ---------- DEFINITIONS ----------
+
+    // Create the definition indices
+    var $_definition_constraint = 3,// @
+        $_definition_modifiers  = 2,// @
+        $_definition_name       = 0,// @
+        $_definition_type       = 4,// @
+        $_definition_value      = 1,// @
+        
+        // Create the length
+        $_definition__length = 5;
+
     // ---------- DIRECTIVES ----------
 
     // Create the directive indices
-    var $_directive_inherits     = 3,
+    var $_directive_filter       = 3,
+        $_directive_inherits     = 4,
         $_directive_instructions = 2,
         $_directive_name         = 0,
         $_directive_value        = 1,
         
         // Create the length
-        $_directive__length = 4;
+        $_directive__length = 5;
 
     // ---------- INJECTIONS ----------
 
@@ -513,6 +550,15 @@ if (typeof jT_Shorthand != 'string')
         $_inject_prototype = 2,// @
         $_inject_public    = 3,// @
         $_inject_static    = 4;// @
+
+    // ---------- INSTANCES ----------
+
+    // Create the instance indices
+    var $_instance_base      = 3,
+        $_instance_construct = 4,
+        $_instance_private   = 0,
+        $_instance_protected = 1,
+        $_instance_public    = 2;
 
     // ---------- INSTRUCTIONS ----------
 
@@ -566,18 +612,17 @@ if (typeof jT_Shorthand != 'string')
         $_modifiers_readonly  = 1 << 14,// @
         $_modifiers_sealed    = 1 << 15,// @
         $_modifiers_static    = 1 << 16,// @
-        $_modifiers_type      = 1 << 17,// @
-        $_modifiers_virtual   = 1 << 18,// @
-        $_modifiers_visible   = 1 << 19,// @
+        $_modifiers_virtual   = 1 << 17,// @
+        $_modifiers_visible   = 1 << 18,// @
         
         // Create the property modifier bits
-        $_modifiers_property_auto          = 1 << 20,// @
-        $_modifiers_property_get           = 1 << 21,// @
-        $_modifiers_property_get_private   = 1 << 22,// @
-        $_modifiers_property_get_protected = 1 << 23,// @
-        $_modifiers_property_set           = 1 << 24,// @
-        $_modifiers_property_set_private   = 1 << 25,// @
-        $_modifiers_property_set_protected = 1 << 26;// @
+        $_modifiers_property_auto          = 1 << 19,// @
+        $_modifiers_property_get           = 1 << 20,// @
+        $_modifiers_property_get_private   = 1 << 21,// @
+        $_modifiers_property_get_protected = 1 << 22,// @
+        $_modifiers_property_set           = 1 << 23,// @
+        $_modifiers_property_set_private   = 1 << 24,// @
+        $_modifiers_property_set_protected = 1 << 25;// @
     
     // Set the modifiers in the modifiers map
     $_modifiers['abstract']  = $_modifiers_abstract;
@@ -618,7 +663,7 @@ if (typeof jT_Shorthand != 'string')
     // Set the class modifiers in the class modifiers map
     $_modifiers_class['abstract']  = $_modifiers_class_abstract;
     $_modifiers_class['expando']   = $_modifiers_class_expando;
-    $_modifiers_class['export']    = $_modifiers_class_export;
+//  $_modifiers_class['export']    = $_modifiers_class_export;
     $_modifiers_class['internal']  = $_modifiers_class_internal;
     $_modifiers_class['model']     = $_modifiers_class_model;
     $_modifiers_class['optimized'] = $_modifiers_class_optimized;
@@ -626,25 +671,6 @@ if (typeof jT_Shorthand != 'string')
     $_modifiers_class['sealed']    = $_modifiers_class_sealed;
     $_modifiers_class['struct']    = $_modifiers_class_struct;
     $_modifiers_class['unlocked']  = $_modifiers_class_unlocked;
-
-    // ---------- PACKAGES ----------
-
-    // Create the package indices
-    var $_package_constraint = 2,
-        $_package_modifiers  = 1,
-        $_package_value      = 0,
-        
-        // Create the length
-        $_package__length = 3;
-
-    // If symbols are supported
-    if ($__symbol)
-    {
-        // Create the package symbols
-        $_package_constraint = $__symbol();
-        $_package_modifiers  = $__symbol();
-        $_package_value      = $__symbol();
-    }
 
     // ---------- .NET ----------
 
@@ -830,103 +856,94 @@ if (typeof jT_Shorthand != 'string')
     // ---------- PRECOMPILES ----------
 
     // Create the precompile obfuscated variable names
-//  var $_precompile_dump       = $_generator(1);
-//  var $_precompile_injections = $_generator(1);
-//  var $_precompile_matrix     = $_generator(1);
-//  var $_precompile_null       = $_generator(1);
-//  var $_precompile_readonly   = $_generator(1);
-//  var $_precompile_reference  = $_generator(1);
+//  var $_precompile_dump       = $_generator(1),
+//      $_precompile_injections = $_generator(1),
+//      $_precompile_matrix     = $_generator(1),
+//      $_precompile_null       = $_generator(1),
+//      $_precompile_readonly   = $_generator(1),
+//      $_precompile_reference  = $_generator(1);
 
     // ---------- SYMBOLS ----------
 
-    // Create the symbol generator helper function
-    var $_symbolGenerator = function($name, $length)
+    // Create the symbol helper function
+    var $_symbolBuilder   = function()
     {
         // If symbols are supported, return a symbol
         if ($__symbol)
             return $__symbol();
+    };
+    var $_symbolGenerator = function($name)
+    {
+        // If symbols are not being emulated
+        if ($__symbol !== $_symbolGenerator)
+        {
+            // If symbols are supported, return a symbol
+            if ($__symbol)
+                return $__symbol();
+        }
+        // Return the generated symbol hash with the prepended symbol-prefix
+        else
+            return $_const_prefix_symbol + $_generator($_const_hash_symbol);
 
         // If the minify flag is not set and a name was provided, return the symbol-prefixed name
         if (!$_minify && $name)
             return $_const_prefix_symbol + $name;
 
         // Return the generated hash with the prepended symbol-prefix
-        return $_const_prefix_symbol + $_generator($length);
+        return $_const_prefix_symbol + $_generator();
     };
+
+    // If symbols are not supported, the harmony flag is set, and the global harmony unsafe flag is set, expose symbols as strings
+    if (!$__symbol && $_harmony && $_harmonyUnsafe)
+        $__symbol = $_symbolGenerator;
 
     // Create the obfuscated symbol hashes
 //  var $_symbol_factory   = $_symbolGenerator('factory');
-    var $_symbol_internal  = $_symbolGenerator('internal');
-    var $_symbol_lock      = $_symbolGenerator('lock');
-    var $_symbol_metaclass = $_symbolGenerator('metaclass');
-    var $_symbol_modifiers = $_symbolGenerator('modifiers');
-    var $_symbol_name      = $_symbolGenerator('name');
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    // ##################################################
+    var $_symbol_internal  = $_symbolGenerator('internal'),
+        $_symbol_lock      = $_symbolGenerator('lock'),
+        $_symbol_metaclass = $_symbolGenerator('metaclass'),
+        $_symbol_modifiers = $_symbolGenerator('modifiers'),
+        $_symbol_name      = $_symbolGenerator('name'),
 
-    // ---------- DEFINITIONS ----------
+        // Create the optimized symbols
+        $_symbol_class         = $_symbolBuilder(),
+        $_symbol_data          = $_symbolBuilder(),
+        $_symbol_data_readonly = $_symbolBuilder(),
+        $_symbol_instance      = $_symbolBuilder(),
+        $_symbol_package       = $_symbolBuilder();
 
-    // Create the definition indices
-    var $_definition_modifiers  = 0,// @
-        $_definition_name       = 1,// @
-        $_definition_type       = 2,// @
-        $_definition_value      = 3,// @
-        $_definition_constraint = 4,// @
+    // ---------- FILTERS ----------
+
+    // Create the filter symbol hashes
+    var $_filter_async_global = $_symbolGenerator('global'),
+        $_filter_async_model  = $_symbolGenerator('model'),
+        $_filter_async_struct = $_symbolGenerator('struct'),
+        $_filter_cast         = $_symbolGenerator('cast'),
+        $_filter_constraint   = $_symbolGenerator('constraint'),
+        $_filter_default      = $_symbolGenerator('default'),
+        $_filter_native       = $_symbolGenerator('native'),
+        $_filter_null         = $_symbolGenerator('null'),
+        $_filter_suppress     = $_symbolGenerator('suppress'),
+        $_filter_type         = $_symbolGenerator('type');
+
+    // ---------- PACKAGES ----------
+
+    // Create the package indices
+    var $_package_constraint = 2,
+        $_package_modifiers  = 1,
+        $_package_value      = 0,
         
         // Create the length
-        $_definition__length = 5;
+        $_package__length = 3;
 
-    var $_cache_symbols_base        = -1,
-        $_cache_symbols_constructor = -1,
-        $_cache_symbols_private     = -1,
-      //$_cache_symbols_protected   = -1,
-        $_cache_symbols_public      = -1;
-
-    var $_default_class = 2,// TYPE
-        $_default_data  = 0,// SYMBOL
-        $_default_new   = 1,// NEW
-        
-        $_default__length = 3;
-
-    var $_directive_constraint_filter = 4,
-        $_directive_constraint_class  = 5;
-
-    var $_instructions_build,// !!$constraint
-        $_instructions_constraint,// !!$constraint
-        $_instructions_constraint_default,// $constraint[$constraint.length] == '!'
-        $_instructions_constraint_new;// !!$native
-
-    var $_directive_symbols_base        = 1,
-        $_directive_symbols_constructor = 3,
-        $_directive_symbols_private     = 0,
-      //$_directive_symbols_protected   = -1,
-        $_directive_symbols_public      = 2,
-        
-        $_directive_symbols__length = 4;
-
-    var $_symbol_class,
-        $_symbol_data,
-        $_symbol_data_readonly,
-        $_symbol_instance,
-        $_symbol_package;
-
-    // ##################################################
-    
-    
-    
-    
-    
-    
-    
-    
+    // If symbols are supported
+    if ($__symbol)
+    {
+        // Create the package symbols
+        $_package_constraint = $__symbol();
+        $_package_modifiers  = $__symbol();
+        $_package_value      = $__symbol();
+    }
     
     // ########## BUILT-INS ##########
 
@@ -959,8 +976,12 @@ if (typeof jT_Shorthand != 'string')
     // Set the base class of all classes prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
     $_class.prototype = $_prototype;
 
-    // Set the base class of all classes prototype without the "writable" flag
-    $_data($_class, 'prototype', $_prototype, true);
+    // Freeze the base class of all classes
+    $__freeze($_class);
+
+    // If the global prototype lock flag was set, freeze the base prototype of all class prototypes
+    if ($_protoLock)
+        $__freeze($_prototype)
 
     // ---------- SYMBOLS ----------
 
@@ -974,7 +995,7 @@ if (typeof jT_Shorthand != 'string')
             $_lock_class = $class;
         } });
     };
-    var $_lockSymbolsInstance = function($instances, $base, $private, $protected, $public)
+    var $_lockSymbolsInstance = function($instances, $private, $protected, $public, $base, $constructor)
     {
         // Create the descriptor
         var $descriptor = { 'value': function()
@@ -991,6 +1012,10 @@ if (typeof jT_Shorthand != 'string')
         // If a base instance was provided, define the lock function on it
         if ($base)
             $__defineProperty($base, $_symbol_lock, $descriptor);
+
+        // If a constructor instance was provided, define the lock function on it
+        if ($constructor)
+            $__defineProperty($constructor, $_symbol_lock, $descriptor);
     };
     var $_lockSymbolsPackage  = function($package)
     {
@@ -1011,7 +1036,7 @@ if (typeof jT_Shorthand != 'string')
             // Set the class symbol on the class
             $class[$_symbol_class] = $class;
         };
-        $_lockSymbolsInstance = function($instances, $base, $private, $protected, $public)
+        $_lockSymbolsInstance = function($instances, $private, $protected, $public, $base, $constructor)
         {
             // Set the instance symbol on the private, protected, and public instances
             $private  [$_symbol_instance] = $private;
@@ -1021,6 +1046,10 @@ if (typeof jT_Shorthand != 'string')
             // If a base instance was provided, set the instance symbol on it
             if ($base)
                 $base[$_symbol_instance] = $base;
+
+            // If a constructor instance was provided, set the instance symbol on it
+            if ($constructor)
+                $constructor[$_symbol_instance] = $constructor;
         };
         $_lockSymbolsPackage  = function($package)
         {
@@ -1072,7 +1101,7 @@ if (typeof jT_Shorthand != 'string')
             return false;
 
         // Return true if the instance matches either the private, protected, public, or base instances
-        return $instance === $_lock_instances[0] || $instance === $_lock_instances[1] || $instance === $_lock_instances[2] || $instance === $_lock_instances[3];
+        return $instance === $_lock_instances[$_instance_private] || $instance === $_lock_instances[$_instance_protected] || $instance === $_lock_instances[$_instance_public] || $instance === $_lock_instances[$_instance_base] || $instance === $_lock_instances[$_instance_construct];
     };
     var $_unlockSymbolsPackage  = function($package)
     {
@@ -1338,7 +1367,7 @@ if (typeof jT_Shorthand != 'string')
                               $name);
 
         // Create the cache, internal index, and metadata
-        var $cache      = new $__array($_cache__length),
+        var $cache      = new $__array($__symbol ? $_cache_symbols__length : $_cache__length),
             $internal   = -1,
             $metaclass  = null,
             $metalength = 1;
@@ -1350,9 +1379,23 @@ if (typeof jT_Shorthand != 'string')
 //      if ($import || $optimized)
 //          $cache[$_cache_dump] = $__create(null);
 
-        // Create the base metaclass and modifiers references
-        var $baseMetaclass = null,
-            $baseModifiers = null;
+        // If symbols are supported
+        if ($__symbol)
+        {
+            // Create the base, construct, private, protected, and public data symbols
+            $cache[$_cache_symbols_base]      = $__symbol();
+            $cache[$_cache_symbols_construct] = $__symbol();
+            $cache[$_cache_symbols_private]   = $__symbol();
+          //$cache[$_cache_symbols_protected] = $__symbol();
+            $cache[$_cache_symbols_public]    = $__symbol();
+        }
+
+        // Create the base metaclass and modifiers references (along with the cache references)
+        var $baseMetaclass  = null,
+            $baseModifiers  = null,
+            $cachePrototype = null,
+            $cacheStatic    = null,
+            $defaults       = null;
         
         // If a base class was provided
         if ($base)
@@ -1488,8 +1531,16 @@ if (typeof jT_Shorthand != 'string')
                                   $_const_keyword_class);
 
             // Create the cache uncompiles
-            $cache[$_cache_prototype] = $__create($baseMetaclass[0][$_cache_prototype]);
-            $cache[$_cache_static]    = $__create(null);
+            $cache[$_cache_prototype] = $cachePrototype = $__create($baseMetaclass[0][$_cache_prototype]);
+            $cache[$_cache_static]    = $cacheStatic    = $__create(null);
+
+            // If symbols are supported
+            if ($__symbol)
+            {
+                // Create the defaults object and get the root data symbol from the base cache
+                $cache[$_cache_symbols_defaults] = $defaults = $__create($baseMetaclass[0][$_cache_symbols_defaults]);
+                $cache[$_cache_symbols_root]     = $baseMetaclass[0][$_cache_symbols_root];
+            }
 
             // Create the metadata
             $metalength = $baseMetaclass.length + 1;
@@ -1513,20 +1564,24 @@ if (typeof jT_Shorthand != 'string')
             {
                 // Create the cache definitions objects
                 $cache[$_cache_public]    = $__create(null);
-                $cache[$_cache_protected] = !$struct ?
-                                            $__create(null) :
-                                            null;
-                $cache[$_cache_private]   = $__create(!$struct ?
-                                                      $cache[$_cache_protected] :
-                                                      null);
+                $cache[$_cache_protected] = $__create(null);
+                $cache[$_cache_private]   = $__create($cache[$_cache_protected]);
             }
 
             // Create the cache uncompiles
-            $cache[$_cache_prototype] = $__create(null);
-            $cache[$_cache_static]    = $__create(null);
+            $cache[$_cache_prototype] = $cachePrototype = $__create(null);
+            $cache[$_cache_static]    = $cacheStatic    = $__create(null);
+
+            // If symbols are supported
+            if ($__symbol)
+            {
+                // Create the defaults object and root data symbol
+                $cache[$_cache_symbols_defaults] = $defaults = $__create(null);
+                $cache[$_cache_symbols_root]     = $__symbol();
+            }
 
             // Create the metaclass
-            $metaclass = !$struct ? [$cache] : $cache;
+            $metaclass = [$cache];
         }
 
         // If the argument count does not match the number of arguments
@@ -1580,12 +1635,10 @@ if (typeof jT_Shorthand != 'string')
         // If any injections arguments were provided (and the unsafe modifier was set)
         if ($modifiers & $_modifiers_class_unsafe && arguments[$argument])
         {
-            // Inject the private, protected, and public definitions
-            $_definitionsCompilerInjections(!$import ? $cache[$_cache_private]   : null, $import || $optimized ? $cache[$_cache_dump] : null, arguments[$argument + $_inject_private]);
-            $_definitionsCompilerInjections(!$import ? $cache[$_cache_protected] : null, $import || $optimized ? $cache[$_cache_dump] : null, arguments[$argument + $_inject_protected]);
-            $_definitionsCompilerInjections(!$import ? $cache[$_cache_public]    : null, $import || $optimized ? $cache[$_cache_dump] : null, arguments[$argument + $_inject_public]);
-            
-            // Inject the prototype and static definitions
+            // Inject the definitions
+            $_definitionsCompilerInjections($cache[$_cache_private],   null, arguments[$argument + $_inject_private]);
+            $_definitionsCompilerInjections($cache[$_cache_protected], null, arguments[$argument + $_inject_protected]);
+            $_definitionsCompilerInjections($cache[$_cache_public],    null, arguments[$argument + $_inject_public]);
             $_definitionsCompilerInjections($cache[$_cache_prototype], null, arguments[$argument + $_inject_prototype]);
             $_definitionsCompilerInjections($cache[$_cache_static],    null, arguments[$argument + $_inject_static]);
         }
@@ -1624,7 +1677,9 @@ if (typeof jT_Shorthand != 'string')
             $prototype = new $_class();
 
         var $merge        = 0,
-            $metainstance = new $__array($metalength),
+            $metainstance = new $__array($__symbol ?
+                                         $metalength :
+                                         $metalength + 1),
             $overrides    = {};
 
         for (var $i = 0; $i < $metalength; $i++)
@@ -1636,57 +1691,42 @@ if (typeof jT_Shorthand != 'string')
                 $directives    = new $__array($privateKeys.length + $protectedKeys.length);
             
             for (var $j = 0, $k = $privateKeys.length; $j < $k; $j++)
-                if ($_definitionsCompilerDirective($directives, $overrides, $prototype, $i, $j, $private[$privateKeys[$j]]))
+                if ($_definitionsCompilerDirective($directives, $overrides, $defaults, $primitive, $struct, $i, $j, $private[$privateKeys[$j]]))
                     $merge = $i + 1;
 
             for (var $j = 0, $k = $protectedKeys.length, $l = $privateKeys.length; $j < $k; $j++)
-                if ($_definitionsCompilerDirective($directives, $overrides, $prototype, $i, $j + $l, $protected[$protectedKeys[$j]]))
+                if ($_definitionsCompilerDirective($directives, $overrides, $defaults, $primitive, $struct, $i, $j + $l, $protected[$protectedKeys[$j]]))
                     $merge = $i + 1;
 
             $metainstance[$i] = $directives;
         }
 
-        //// Create the inherited definitions reference
-        //var $inherits = null;
-
-        //// If there is more than 1 level in the cache, get the inherited definitions object
-        //if ($levels > 1)
-        //    $inherits = $metaclass[1][$_cache_protected];
-
-        //// Create the cache, external index, level count, and the external type reference
-        //var $type = null;
-
-        //// Create the external type method and internal type method reference
-        //var $typeExternal = function()
-        //{
-        //    // Return the external type
-        //    return $type;
-        //};
-        //var $typeInternal = null;
-
         // Create the class
-        var $class = $cache[$_cache_class] = $_buildRuntimeMatrix($metaclass, $metainstance, $metalength, $abstract, $import, $internal, $merge, $model, $optimized, false, $struct, !!($modifiers & $_modifiers_class_unlocked));
+        var $build = $__symbol ?
+                        [] :
+                        null,
+            $class = $cache[$_cache_class] = !$__symbol ?
+                                             $_buildRuntimeMatrix($metaclass, $metainstance, $metalength, $abstract, $import, $internal, $merge, $model, $optimized, false, $struct, !!($modifiers & $_modifiers_class_unlocked)) :
+                                             $struct ?
+                                             $_symbolsRuntimeStruct($metaclass, $metainstance, $build, $defaults, $constructor, $primitive) :
+                                             $_symbolsRuntimeMatrix($metaclass, $metainstance, $metalength, $build, $defaults, $abstract, $model, $primitive);
 
-        //// If the class is internal
-        //if ($modifiers & $_modifiers_class_internal)
-        //{
-        //    // Set the external type
-        //    $type = $external < $levels ? $metaclass[$external][$_cache_class] : $_class;
+        // Get the cache prototype and static keys
+        var $cachePrototypeKeys = $__keys($cachePrototype),
+            $cacheStaticKeys    = $__keys($cacheStatic);
 
-        //    // Create the internal type method
-        //    $typeInternal = function()
-        //    {
-        //        // Return the internal type
-        //        return $class;
-        //    };
-        //}
-        //// Set the external type to the class
-        //else
-        //    $type = $class;
+        for (var $i = 0, $j = $cachePrototypeKeys.length; $i < $j; $i++)
+            $_definitionsCompilerStatic($prototype, $cachePrototype[$cachePrototypeKeys[$i]]);
 
         // If a class name was provided, set the "toString()" method on the prototype
         if ($modifiers & $_modifiers_class_global)
             $_data($prototype, 'toString', $_definitionsCompilerToString($name));
+
+        // Freeze the prototype
+        $__freeze($prototype);
+
+        for (var $i = 0, $j = $cacheStaticKeys.length; $i < $j; $i++)
+            $_definitionsCompilerStatic($class, $cacheStatic[$cacheStaticKeys[$i]]);
 
         // Set the class metadata
         $_data($class, $_symbol_metaclass, $__symbol ? $metaclass : $_lock($metaclass));
@@ -1699,10 +1739,7 @@ if (typeof jT_Shorthand != 'string')
         // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
         $class.prototype = $prototype;
 
-        // Set the class prototype without the "writable" flag
-        $_data($class, 'prototype', $prototype);
-
-        // If a static "constructor" definition was not provided, set the class constructor reference
+        // If a static "constructor()" definition was not provided, set the class constructor() reference
         if (!$__hasOwnProperty__.call($cache[$_cache_static], 'constructor'))
             $_data($class, 'constructor', $$);
 
@@ -1713,21 +1750,37 @@ if (typeof jT_Shorthand != 'string')
         // Lock the class type
         $_lockSymbolsClass($class);
 
-        // Prevent extensions on the class and prototype
+        // Prevent extensions on the class
         $__preventExtensions($class);
-        $__preventExtensions($prototype);
+
+        if (!$abstract && $__symbol)
+            $_symbolsCompilerGeneric($metaclass,
+                                     $metainstance,
+                                     $metalength,
+                                     $build,
+                                     $internal,
+                                     $merge,
+                                     $prototype,
+                                     $struct,
+                                     !!($modifiers & $_modifiers_class_unlocked),
+                                     !($modifiers & $_modifiers_class_internal) ?
+                                     $class :
+                                     $internal < $metalength ?
+                                     $metaclass[$internal][$_cache_class] :
+                                     $_class);
 
         // If the class is global
         if ($modifiers & $_modifiers_class_global)
         {
+            // Set the class in the globals object
+            $_globals[$name] = $class;
+
             // Define the global class constant
             $_defineField($name, $class, false);
 
             // Reset the exception class name
             $_name = '';
         }
-
-        // STATIC + PROTOTYPE UNCOMPILES
 
         // Return the class
         return $class;
@@ -1789,11 +1842,21 @@ if (typeof jT_Shorthand != 'string')
                     // Trim the modifiers
                     $modifiers = $modifiers.trim();
 
+                    // If the constraint is a class
+                    if (typeof $constraint == 'function' && $_unlockSymbolsClass($constraint))
+                    {
+                        // Get the class name
+                        var $name = $constraint[$_symbol_name];
+
+                        // If the class is not found in the globals object, set it in the globals object
+                        if (!$_globals[$name])
+                            $_globals[$name] = $constraint;
+                    }
                     // If the constraint is a string primitive, trim it
-                    if (typeof $constraint == 'string')
+                    else if (typeof $constraint == 'string')
                         $constraint = $constraint.trim();
-                    // If the constraint is not a class, throw an exception
-                    else// if (typeof $constraint != 'function' || !$_unlockSymbolsClass($constraint))
+                    // Throw an exception
+                    else
                         $_exceptionArguments($type, arguments);
 
                     // Set the package data
@@ -3207,21 +3270,21 @@ if (typeof jT_Shorthand != 'string')
             $definition[$_definition_value]      = $value;
             
             // If the class is optimized, set the definition value in the dump object
-            if ($optimized)
-                $cache[$_cache_dump][$name] = $value;
+//          if ($optimized)
+//              $cache[$_cache_dump][$name] = $value;
         }
         else
         {
           //$modifiers = 0;
             
             // Set the definition value in the dump object
-            $cache[$_cache_dump][$name] = $type == 'field' ?
-                                          $_definitionsCompilerPrimitive($value) :
-                                          $type != 'property ' ?
-                                          $value :
-                                          $auto ?
-                                          $_definitionsCompilerPrimitive($value[2]) :
-                                          $_definitionsCompilerProperty([null, null], null, 0, $struct, $name, $value);
+//          $cache[$_cache_dump][$name] = $type == 'field' ?
+//                                        $_definitionsCompilerPrimitive($value) :
+//                                        $type != 'property ' ?
+//                                        $value :
+//                                        $auto ?
+//                                        $_definitionsCompilerPrimitive($value[2]) :
+//                                        $_definitionsCompilerProperty([null, null], null, 0, $struct, $name, $value);
 
           //if ($package && typeof $constraint == 'function')
           //    $imports[$name] = $constraint;
@@ -3269,7 +3332,7 @@ if (typeof jT_Shorthand != 'string')
         // Return true if no flags were set that are not found in the constraint bits
         return !($flags & ~$constraint);
     };
-    var $_definitionsCompilerDirective      = function($directives, $overrides, $prototype, $i, $j, $definition)
+    var $_definitionsCompilerDirective      = function($directives, $overrides, $defaults, $primitive, $struct, $i, $j, $definition)
     {
         // Get the definition constraint, modifiers, name, type, and value
         var $constraint = $definition[$_definition_constraint],
@@ -3277,26 +3340,56 @@ if (typeof jT_Shorthand != 'string')
             $name       = $definition[$_definition_name],
             $value      = $definition[$_definition_value];
 
-        // Create the directive and the overridden index
-        var $directive  = $__array($_directive__length),
-            $overridden = null;
+        // Create the directive, constraint filter, inherits array, instructions, and overridden index
+        var $directive    = new $__array($_directive__length),
+            $filter       = $constraint ?
+                            $_buildRuntimeFilter($constraint, $name) :
+                            null,
+            $inherits     = null,
+            $instructions = 0,
+            $overridden   = null,
+            $symbol       = $modifiers & ($_modifiers_field | $_modifiers_property_auto) && $__symbol ?
+                            $__symbol() :
+                            null;
 
-        // don't do enum defaults in definitions, do them here
+        // If a constraint was provided
+        if ($constraint)
+        {
+            // Check if the constraint is a native primitive constraint
+            var $native = $_definitionsCompilerConstraint($constraint, true, true);
 
-        //if ($constraint)
-        //{
-        //    var $constraintHandler = $_buildRuntimeConstraint($constraint, $name, $directive);
+            // Set the value within the applied constraint filter if it is a native primitive constraint, otherwise treat the value as null
+            $value = $native ?
+                     $filter($value) :
+                     null;
 
-        //    $value = $_definitionsCompilerConstraint($constraint, true, true) ?
-        //             $constraintHandler($value) :
-        //             null;
-        //}
+            // If a data symbol was created
+            if ($symbol)
+            {
+                // Set the default value descriptor for the hidden instance data in the defaults object
+                $defaults[$symbol] = $value;
 
-        $constraint = $constraint && $_definitionsCompilerConstraint($constraint, true, false) ?
-                      $_buildRuntimeConstraint($constraint, $name, $directive) :
-                      null;
+                // If the filter has already been compiled
+                if ($filter[$_filter_native] || $filter[$_filter_async_global])
+                {
+                    // If the primitive flag is set and the filter is not a struct type, throw an exception
+                    if ($primitive && !$native && !$filter[$_filter_async_struct])
+                        $_exceptionFormat($_lang_$$_constraint_primitive,
+                                          $name,
+                                          $constraint,
+                                          $filter[$_filter_async_model] ?
+                                          $_const_keyword_model :
+                                          $_const_keyword_class);
 
-        var $instructions = 0;// get from constraint builder?
+                    // If the filter has either the default flag or is a struct type without the nullable modifier, set the default value descriptor for the hidden instance data on the defaults object
+                    if ($filter[$_filter_default] || $filter[$_filter_async_struct] && !$filter[$_filter_null])
+                        $__defineProperty($defaults, $symbol, $_symbolsCompilerDefault($name, $symbol, $filter, {}));
+                }
+            }
+        }
+        // If a data symbol was created, set the default value descriptor for the hidden instance data in the defaults object
+        else if ($symbol)
+            $defaults[$symbol] = $value;
 
         // If the definition is a property
         if ($modifiers & ($_modifiers_property_get | $_modifiers_property_set))
@@ -3318,11 +3411,11 @@ if (typeof jT_Shorthand != 'string')
             else
             {
                 // If the property has an accessor method, set the get accessor instruction
-                if ($modifiers & $_modifiers_property_get)
+                if ($value[0] != null)
                     $instructions |= $_instructions_get;
                 
                 // If the property has a mutator method, set the set accessor instruction
-                if ($modifiers & $_modifiers_property_set)
+                if ($value[1] != null)
                     $instructions |= $_instructions_set;
 
                 // If the property is not abstract, set the context instruction
@@ -3406,8 +3499,10 @@ if (typeof jT_Shorthand != 'string')
                 // If the definition is protected
                 case $_modifiers_protected:
 
-                    // Set the protected instruction
-                    $instructions |= $_instructions_protected;
+                    // Set the protected instruction (or private the instruction if the class has the struct modifier)
+                    $instructions |= $struct ?
+                                     $_instructions_private :
+                                     $_instructions_protected;
 
                     // If the definition is abstract or virtual
                     if ($modifiers & ($_modifiers_abstract | $_modifiers_virtual))
@@ -3541,8 +3636,10 @@ if (typeof jT_Shorthand != 'string')
                 // If the definition is protected
                 case $_modifiers_protected:
 
-                    // Set the protected instruction
-                    $instructions |= $_instructions_protected;
+                    // Set the protected instruction (or private the instruction if the class has the struct modifier)
+                    $instructions |= $struct ?
+                                     $_instructions_private :
+                                     $_instructions_protected;
 
                     // If the definition is abstract or virtual
                     if ($modifiers & ($_modifiers_abstract | $_modifiers_virtual))
@@ -3577,12 +3674,12 @@ if (typeof jT_Shorthand != 'string')
             }
         }
 
-        // Set the directive instructions, name, and value
+        // Set the directive filter, inherits array, instructions, name, and value
+        $directive[$_directive_filter]       = $filter;
+        $directive[$_directive_inherits]     = $inherits;
         $directive[$_directive_instructions] = $instructions;
         $directive[$_directive_name]         = $name;
-        $directive[$_directive_value]        = $value;
-
-        $directive[$_directive_constraint_filter] = $constraint;
+        $directive[$_directive_value]        = $symbol || $value;
 
         // If a directives array was not provided, return the directive
         if (!$directives)
@@ -3634,7 +3731,7 @@ if (typeof jT_Shorthand != 'string')
 
         // If the value is a string, return the primitive value of the string
         if ($type == 'string')
-            return $__string_valueOf__.call($value)
+            return $__string_valueOf__.call($value);
 
       //if ($type == 'symbol')
       //    return $__symbol_valueOf__.call($value);
@@ -3675,6 +3772,35 @@ if (typeof jT_Shorthand != 'string')
 
         // Return the property modifiers
         return $property;
+    };
+    var $_definitionsCompilerStatic         = function($object, $definition)
+    {
+        var $constraint = $definition[$_definition_constraint],
+            $modifiers  = $definition[$_definition_modifiers],
+            $name       = $definition[$_definition_name],
+            $value      = $definition[$_definition_value],
+            $descriptor = { 'enumerable': $modifiers & $_modifiers_field ?
+                                          !($modifiers & $_modifiers_hidden) :
+                                          $modifiers & $_modifiers_method ?
+                                          !!($modifiers & $_modifiers_visible) :
+                                          true };
+
+        if ($modifiers & $_modifiers_const)
+        {
+            $descriptor['value']    = $value;
+            $descriptor['writable'] = false;
+        }
+        else
+            $_buildRuntimeData($name,
+                               $value,
+                               $constraint ?
+                               $_buildRuntimeFilter($constraint, $name) :
+                               null,
+                               $descriptor,
+                               false,
+                               null);
+
+        $__defineProperty($object, $name, $descriptor);
     };
     var $_definitionsCompilerThrowDuplicate = function($definitions, $name, $type)
     {
@@ -3742,116 +3868,485 @@ if (typeof jT_Shorthand != 'string')
     };
     
     // Create the symbols compiler helpers
-    var $_symbolsCompilerData = function($name, $data, $constraint, $descriptor, $auto, $readonly)
+    var $_symbolsCompilerConstructor = function($construct, $data0, $base)
+    {
+        // Set the data descriptor on the construct instance object
+        $__defineProperty($construct, '__data', $_symbolsCompilerData('__data', $data0, null, {}, false, true, false));
+
+        // If a base constructor was provided, set the base descriptor on the construct instance object
+        if ($base)
+            $__defineProperty($construct, '__base', { 'value': $base });
+    };
+    var $_symbolsCompilerData        = function($name, $symbol, $filter, $descriptor, $auto, $constant, $readonly)
     {
         // Set the get accessor in the descriptor
         $descriptor['get'] = function()
         {
-            // If the context is not an instance, throw an exception
-            if (!this || this !== this[$_symbol_instance])
-                throw '';
+            // Get the hidden instance data from the function context
+            var $data = this ?
+                        this[$_symbol_data] :
+                        null;
 
-            // Return the instance data
-            return this[$_symbol_instance_data][$data];
+            // If no hidden instance data was found, throw an exception
+            if (!$data)
+                $_exceptionFormat($_lang_$$_context_generic, $name);
+
+            // Return the value from the hidden instance data
+            return $data[$symbol];
         };
 
-        // If a constraint was provided
-        if ($constraint)
+        // If the constant flag is set, return the descriptor
+        if ($constant)
+            return $descriptor;
+
+        // If a constraint filter was provided
+        if ($filter)
         {
-            // If a readonly accessor was provided, set the readonly set accessor in the descriptor
+            // If the readonly flag is set, set the readonly set accessor in the descriptor
             if ($readonly)
                 $descriptor['set'] = function($v)
                 {
-                    // If the context is not an instance, throw an exception
-                    if (!this || this !== this[$_symbol_instance])
-                        throw '';
+                    // Get the hidden instance data from the function context
+                    var $data = this ?
+                                this[$_symbol_data] :
+                                null;
 
-                    // If the readonly flag is set, throw an exception
-                    if ($instance[$_symbol_instance_readonly])
-                        $_exceptionFormat($_lang_$$_readonly_data, $name, $auto ? 'property' : 'field');
+                    // If no hidden instance data was found, throw an exception
+                    if (!$data)
+                        $_exceptionFormat($_lang_$$_context_generic, $name);
 
-                    // Set the instance data to the value with the constraint
-                    this[$_symbol_instance_data][$data] = $constraint($v, $name);
+                    // If the readonly flag is set in the hidden instance data, throw an exception
+                    if ($data[$_symbol_data_readonly])
+                        $_exceptionFormat($_lang_$$_readonly_data, $name, $auto ? $_const_keyword_property : $_const_keyword_field);
+
+                    // Set the value to the accessor value with the applied constraint filter
+                    $data[$symbol] = $filter($v, $name);
                 };
             // Set the set accessor in the descriptor
             else
                 $descriptor['set'] = function($v)
                 {
-                    // If the context is not an instance, throw an exception
-                    if (!this || this !== this[$_symbol_instance])
-                        throw '';
+                    // Get the hidden instance data from the function context
+                    var $data = this ?
+                                this[$_symbol_data] :
+                                null;
 
-                    // Set the instance data to the value with the constraint
-                    this[$_symbol_instance_data][$data] = $constraint($v, $name);
+                    // If no hidden instance data was found, throw an exception
+                    if (!$data)
+                        $_exceptionFormat($_lang_$$_context_generic, $name);
+
+                    // Set the value to the accessor value with the applied constraint filter
+                    $data[$symbol] = $filter($v, $name);
                 };
         }
-        // If a readonly accessor was provided, set the readonly set accessor in the descriptor
+        // If the readonly flag is set, set the readonly set accessor in the descriptor
         else if ($readonly)
             $descriptor['set'] = function($v)
             {
-                // If the context is not an instance, throw an exception
-                if (!this || this !== this[$_symbol_instance])
-                    throw '';
+                // Get the hidden instance data from the function context
+                var $data = this ?
+                            this[$_symbol_data] :
+                            null;
 
-                // Get the instance
-                var $instance = this[$_symbol_instance_data];
+                // If no hidden instance data was found, throw an exception
+                if (!$data)
+                    $_exceptionFormat($_lang_$$_context_generic, $name);
 
-                // If the readonly flag is set, throw an exception
-                if ($instance[$_symbol_instance_readonly])
-                    $_exceptionFormat($_lang_$$_readonly_data, $name, $auto ? 'property' : 'field');
+                // If the readonly flag is set in the hidden instance data, throw an exception
+                if ($data[$_symbol_data_readonly])
+                    $_exceptionFormat($_lang_$$_readonly_data, $name, $auto ? $_const_keyword_property : $_const_keyword_field);
 
-                // Set the instance data to the value
-                $instance[$data] = $v;
+                // Set the value to the accessor value
+                $data[$symbol] = $v;
             };
         // Set the set accessor in the descriptor
         else
             $descriptor['set'] = function($v)
             {
-                // If the context is not an instance, throw an exception
-                if (!this || this !== this[$_symbol_instance])
-                    throw '';
+                // Get the hidden instance data from the function context
+                var $data = this ?
+                            this[$_symbol_data] :
+                            null;
 
-                // Set the instance data to the value
-                this[$_symbol_instance_data][$data] = $v;
+                // If no hidden instance data was found, throw an exception
+                if (!$data)
+                    $_exceptionFormat($_lang_$$_context_generic, $name);
+
+                // Set the value to the accessor value
+                $data[$symbol] = $v;
             };
+
+        // Return the descriptor
+        return $descriptor;
     };
-    var $_symbolsCompilerThis = function($name, $data, $constraint, $function, $arguments)
+    var $_symbolsCompilerDefault     = function($name, $symbol, $filter, $descriptor)
     {
-        // If a constraint was provided
-        if ($constraint)
+        // Set the get and set accessors in the descriptor
+        $descriptor['configurable'] = true;
+        $descriptor['enumerable']   = true;
+        $descriptor['get']          = function()
+        {
+            // Create the default value within the applied constraint filter
+            var $value = $filter(null);
+
+            // Define the writable value on the hidden instance data
+            $__defineProperty(this, $symbol,
+            {
+                'configurable': true,
+                'enumerable':   true,
+                'value':        $value,
+                'writable':     true
+            });
+
+            // Return the default value
+            return $value;
+        };
+        $descriptor['set']          = function($v)
+        {
+            // Define the writable value on the hidden instance data
+            $__defineProperty(this, $symbol,
+            {
+                'configurable': true,
+                'enumerable':   true,
+                'value':        $v,
+                'writable':     true
+            });
+        };
+
+        // Return the descriptor
+        return $descriptor;
+    };
+    var $_symbolsCompilerGeneric     = function($metaclass, $metainstance, $metalength, $build, $internal, $merge, $prototype, $struct, $unlocked, $type)
+    {
+        // Create the instance matrix, root instance object, names map, and overrides object
+        var $instance    = new $__array($metalength + 1),
+            $this        = $__create($prototype),
+            $private     = null,
+            $protected   = !$struct ?
+                           $this :
+                           null,
+            $public      = $this,
+            $base        = !$struct ?
+                           $this :
+                           null,
+            $super       = null,
+            $construct   = null,
+            $names       = $__create(null),
+            $overrides   = !$struct && $merge > 1 ?
+                           $__create(null) :
+                           null,
+            $data3       = null;
+        
+        for (var $i = $metalength - 1; $i >= 0; $i--)
+        {
+            // Get the cache, constructor, class, and private data symbol
+            var $cache       = $metaclass[$i],
+                $constructor = $cache[$_cache_constructor],
+                $class       = $cache[$_cache_class],
+                $data0       = $cache[$_cache_symbols_private];
+
+            // Set the class name and index in the names map
+            $names[$class[$_symbol_name]] = $i;
+
+            // Create the instance objects
+            $public    = $__create($public);
+            $protected = !$struct ?
+                         $__create($protected) :
+                         null;
+            $private   = $__create($struct ?
+                                   $public :
+                                   $protected);
+            $base      = $i == 0 ?
+                         null :
+                         $i < $merge ?
+                         $__create($base) :
+                         $protected;
+            $construct = !$struct && $constructor ?
+                         $__create($private) :
+                         null;
+
+            // Define the internal properties on the instance objects
+            $_symbolsCompilerInternals($i, $private, $protected, $public, $base, $cache[$_cache_symbols_public], $data3, $cache[$_cache_symbols_root], $class, $internal, $unlocked);
+
+            // If a construct instance object was created, define the internal properties on the construct instance object
+            if ($construct)
+                $_symbolsCompilerConstructor($construct, $data0, $super);
+               
+            // Create the instances in the instance matrix
+            var $instances = $instance[$i] = $struct ?
+                                             [$private, $protected, $public] :
+                                             [$private, $protected, $public, $base, $construct];
+
+            // If there are no overrides in the instance matrix
+            if (!$overrides)
+            {
+                // Get the directives from the directives matrix
+                var $directives = $metainstance[$i];
+
+                // Execute the directives on the instance objects
+                for (var $j = 0, $k = $directives.length; $j < $k; $j++)
+                    $_buildRuntimeDirective($instance, $i, $private, $protected, $public, $base, $directives[$j], $overrides, null, $data0, $build);
+                
+                // Freeze the instance objects
+                $__freeze($private);
+                $__freeze($public);
+
+                // If a protected instance object was created, freeze it
+                if ($protected)
+                    $__freeze($protected);
+
+                // If base instance object is unique, freeze it
+                if ($base && $base !== $protected)
+                    $__freeze($base);
+
+                // If a construct instance object was created, freeze it
+                if ($construct)
+                    $__freeze($construct);
+
+                // Set the symbols directive in the metainstance matrix
+                $metainstance[$i] = $instances;
+            }
+
+            // If the cache is inherited
+            if ($i > 0)
+            {
+                // Get the base data symbol
+                $data3 = $cache[$_cache_symbols_base];
+
+                // If the cache has a constructor, create the super constructor
+                if ($constructor)
+                    $super = $_symbolsCompilerThis('~constructor', $cache[$_cache_symbols_construct], null, $constructor);
+            }
+        }
+
+        // If there are overrides in the instance matrix
+        if ($overrides)
+        {
+            for (var $i = 0; $i < $metalength; $i++)
+            {
+                // Get the private data symbol, directives, and instances array
+                var $data0      = $metaclass[$i][$_cache_symbols_private],
+                    $directives = $metainstance[$i],
+                    $instances  = $instance[$i];
+                    
+                // Get the instance objects from the instances array
+                $private   = $instances[$_instance_private];
+                $protected = $instances[$_instance_protected];
+                $public    = $instances[$_instance_public];
+                $base      = $instances[$_instance_base];
+                $construct = $instances[$_instance_construct];
+
+                // Execute the directives on the instance objects
+                for (var $j = 0, $k = $directives.length; $j < $k; $j++)
+                    $_buildRuntimeDirective($instance, $i, $private, $protected, $public, $base, $directives[$j], $overrides, null, $data0, $build);
+            }
+
+            for (var $i = $metalength - 1; $i >= 0; $i--)
+            {
+                // Get the instances array
+                var $instances = $instance[$i];
+                    
+                // Get the instance objects from the instances array
+                $private   = $instances[$_instance_private];
+                $protected = $instances[$_instance_protected];
+                $public    = $instances[$_instance_public];
+                $base      = $instances[$_instance_base];
+                $construct = $instances[$_instance_construct];
+
+                // Freeze the instance objects
+                $__freeze($private);
+                $__freeze($public);
+
+                // If a protected instance object was created, freeze it
+                if ($protected)
+                    $__freeze($protected);
+
+                // If base instance object is unique, freeze it
+                if ($base && $base !== $protected)
+                    $__freeze($base);
+
+                // If a construct instance object was created, freeze it
+                if ($construct)
+                    $__freeze($construct);
+
+                // Set the symbols directive in the metainstance matrix
+                $metainstance[$i] = $instances;
+            }
+        }
+
+        // Define the root instance methods on the root instance object
+        $_symbolsCompilerRoot($this, $metaclass, $names, $type);
+
+        // Freeze the root instance object
+        $__freeze($this);
+
+        // Set the root instance object in the instance matrix
+        $metainstance[$metalength] = $this;
+    };
+    var $_symbolsCompilerInternals   = function($i, $private, $protected, $public, $base, $data2, $data3, $data5, $type, $internal, $unlocked)
+    {
+        // Create the internal descriptors
+        var $descriptorSelf = $_symbolsCompilerData('__self', $data5, null, {}, false, true, false),
+            $descriptorThis = $_symbolsCompilerData('__this', $data2, null, {}, false, true, false),
+            $descriptorType = { 'value': $type },
+            $descriptorBase = $data3 ?
+                              $_symbolsCompilerData('__base', $data3, null, {}, false, true, false) :
+                              null;
+        
+        // If the class is not unlocked or the base instance object is unique
+        if (!$unlocked || $base !== $protected)
+        {
+            // If these are not the first instance objects in the prototype chain, set the base descriptor on the private instance object
+            if ($data3)
+                $__defineProperty($private, '__base', $descriptorBase);
+
+            // Set the self, public, and type descriptors on the private instance object
+            $__defineProperty($private, '__self', $descriptorSelf);
+            $__defineProperty($private, '__this', $descriptorThis);
+            $__defineProperty($private, '__type', $descriptorType);
+        }
+
+        // If these are the first instance objects in the prototype chain, set the self descriptor on the public instance object
+        if (!$data3)
+            $__defineProperty($public, '__self', $descriptorSelf);
+
+        // If these are not internal instance objects, set the type descriptor on the public instance object
+        if ($i >= $internal)
+            $__defineProperty($public, '__type', $descriptorType);
+        // If these are the first instance objects in the prototype chain or are switching to internal instance objects, set the type descriptor on the public instance object
+        else if (!$data3 || $i == $internal - 1)
+            $__defineProperty($public, '__type', { 'value': null });
+
+        // If the class is unlocked and a base instance object was provided
+        if ($unlocked && $base)
+        {
+            // If these are not the first instance objects in the prototype chain, set the base descriptor on the base instance object
+            if ($data3)
+                $__defineProperty($base, '__base', $descriptorBase);
+
+            // Set the self, public, and type descriptors on the base instance object
+            $__defineProperty($base, '__self', $descriptorSelf);
+            $__defineProperty($base, '__this', $descriptorThis);
+            $__defineProperty($base, '__type', $descriptorType);
+        }
+    };
+    var $_symbolsCompilerRoot        = function($root, $metaclass, $names, $type)
+    {
+        // Set the data descriptor on the construct instance object
+        $__defineProperty($root, 'as', { 'value': function($class)
+        {
+            // Get the hidden instance data from the function context
+            var $data = this ?
+                        this[$_symbol_data] :
+                        null;
+
+            // If no hidden instance data was found, throw an exception
+            if (!$data)
+                $_exceptionFormat($_lang_$$_context_generic, 'as()');
+
+            // If the class is not a class, return null
+            if (!$class || $class[$_symbol_class] !== $class)
+                return null;
+
+            // Get the index from the names map for the name of the provided class
+            var $index = $names[$class[$_symbol_name]];
+
+            // If an index was not found in the names map, return null
+            if ($index == null)
+                return null;
+
+            // Return the public instance object from the hidden instance data
+            return $data[$metaclass[$index][$_cache_symbols_public]];
+        } });
+
+        // Set the data descriptor on the construct instance object
+        $__defineProperty($root, 'is', { 'value': function($class)
+        {
+            // Get the hidden instance data from the function context
+            var $data = this ?
+                        this[$_symbol_data] :
+                        null;
+
+            // If no hidden instance data was found, throw an exception
+            if (!$data)
+                $_exceptionFormat($_lang_$$_context_generic, 'is()');
+
+            // If the class is not a class, return false
+            if (!$class || $class[$_symbol_class] !== $class)
+                return false;
+
+            // Return true if an index was found in the names map for the name of the provided class
+            return $names[$class[$_symbol_name]] != null;
+        } });
+
+        // Set the type method descriptor on the root instance object
+        $__defineProperty($root, 'type', { 'value': function()
+        {
+            // Get the hidden instance data from the function context
+            var $data = this ?
+                        this[$_symbol_data] :
+                        null;
+
+            // If no hidden instance data was found, throw an exception
+            if (!$data)
+                $_exceptionFormat($_lang_$$_context_generic, 'type()');
+
+            // Return the instance type
+            return $type;
+        } });
+    };
+    var $_symbolsCompilerThis        = function($name, $symbol, $filter, $function, $arguments)
+    {
+        // If a constraint filter was provided
+        if ($filter)
         {
             // If the function is an accessor method, return the constrained context wrapper get accessor
             if ($arguments == 0)
                 return function()
                 {
-                    // If the context is not an instance, throw an exception
-                    if (!this || this !== this[$_symbol_instance])
-                        throw '';
+                    // Get the hidden instance data from the function context
+                    var $data = this ?
+                                this[$_symbol_data] :
+                                null;
 
-                    // Call the function in the private context and return the return value within the provided constraint
-                    return $constraint($function.call(this[$_symbol_instance_data][$data]), $name);
+                    // If no hidden instance data was found, throw an exception
+                    if (!$data)
+                        $_exceptionFormat($_lang_$$_context_generic, $name + '()');
+
+                    // Call the function in the context of an instance and return the return value with the applied constraint filter
+                    return $filter($function.call($data[$symbol]), $name);
                 };
             // If the function is a mutator method, return the constrained context wrapper set accessor
             else if ($arguments == 1)
                 return function($v)
                 {
-                    // If the context is not an instance, throw an exception
-                    if (!this || this !== this[$_symbol_instance])
-                        throw '';
+                    // Get the hidden instance data from the function context
+                    var $data = this ?
+                                this[$_symbol_data] :
+                                null;
+
+                    // If no hidden instance data was found, throw an exception
+                    if (!$data)
+                        $_exceptionFormat($_lang_$$_context_generic, $name + '()');
                     
-                    // Call the function in the private context with the accessor value and return the return value within the provided constraint
-                    return $function.call(this[$_symbol_instance_data][$data], $constraint($v, $name));
+                    // Call the function in the context of an instance with the accessor value and return the return value with the applied constraint filter
+                    return $function.call($data[$symbol], $filter($v, $name));
                 };
 
             // Return the constrained context wrapper function
             return function()
             {
-                // If the context is not an instance, throw an exception
-                if (!this || this !== this[$_symbol_instance])
-                    throw '';
+                // Get the hidden instance data from the function context
+                var $data = this ?
+                            this[$_symbol_data] :
+                            null;
+
+                // If no hidden instance data was found, throw an exception
+                if (!$data)
+                    $_exceptionFormat($_lang_$$_context_generic, $name + '()');
                 
-                // Apply the function in the private context with the provided arguments and return the return value within the provided constraint
-                return $constraint($function.apply(this[$_symbol_instance_data][$data], arguments), $name);
+                // Apply the function in the context of an instance with the provided arguments and return the return value with the applied constraint filter
+                return $filter($function.apply($data[$symbol], arguments), $name);
             };
         }
         
@@ -3859,151 +4354,547 @@ if (typeof jT_Shorthand != 'string')
         if ($arguments == 0)
             return function()
             {
-                // If the context is not an instance, throw an exception
-                if (!this || this !== this[$_symbol_instance])
-                    throw '';
+                // Get the hidden instance data from the function context
+                var $data = this ?
+                            this[$_symbol_data] :
+                            null;
 
-                // Call the function in the private context and return the return value
-                return $function.call(this[$_symbol_instance_data][$data]);
+                // If no hidden instance data was found, throw an exception
+                if (!$data)
+                    $_exceptionFormat($_lang_$$_context_generic, $name + '()');
+
+                // Call the function in the context of an instance and return the return value
+                return $function.call($data[$symbol]);
             };
         // If the function is a mutator method, return the context wrapper set accessor
         else if ($arguments == 1)
             return function($v)
             {
-                // If the context is not an instance, throw an exception
-                if (!this || this !== this[$_symbol_instance])
-                    throw '';
+                // Get the hidden instance data from the function context
+                var $data = this ?
+                            this[$_symbol_data] :
+                            null;
 
-                // Call the function in the private context with the accessor value and return the return value
-                return $function.call(this[$_symbol_instance_data][$data], $v);
+                // If no hidden instance data was found, throw an exception
+                if (!$data)
+                    $_exceptionFormat($_lang_$$_context_generic, $name + '()');
+
+                // Call the function in the context of an instance with the accessor value and return the return value
+                return $function.call($data[$symbol], $v);
             };
 
         // Return the context wrapper function
         return function()
         {
-            // If the context is not an instance, throw an exception
-            if (!this || this !== this[$_symbol_instance])
-                throw '';
+            // Get the hidden instance data from the function context
+            var $data = this ?
+                        this[$_symbol_data] :
+                        null;
+
+            // If no hidden instance data was found, throw an exception
+            if (!$data)
+                $_exceptionFormat($_lang_$$_context_generic, $name + '()');
             
-            // Apply the function in the private context with the provided arguments and return the return value
-            return $function.apply(this[$_symbol_instance_data][$data], arguments);
+            // Apply the function in the context of an instance with the provided arguments and return the return value
+            return $function.apply($data[$symbol], arguments);
         };
     };
 
     // ---------- RUNTIME ----------
     
     // Create the build runtime helpers
-    var $_buildRuntimeConstraint  = function($constraint, $name, $directive, $primitive)
+    var $_buildRuntimeConstructor = function($constructor, $base, $private)
     {
-        // Create the flags, get the internal type of the constraint, and check if a constraint handler was already created
-        var $cast     = false,
-            $default  = false,
-            $global   = null,
-            $null     = false,
-            $suppress = false,
-            $type     = '',
-            $typeof   = typeof $constraint,
-            $handler  = $name != null && $typeof == 'string' ?
-                        $_filters[$constraint] :
-                        null;
+        // If no constructor was provided, return the base constructor
+        if (!$constructor)
+            return $base;
 
-        // $callback = $name != null && $typeof == 'string' ? $_callbacks[$constraint] : 
+        // Create the constructor instance object
+        var $this = $__create($private);
 
-        // If a constraint handler was already created, return it
-        if ($handler)
-            return $handler;
+        // Set the data descriptor on the constructor instance object
+        $__defineProperty($this, '__data', { 'value': $private });
 
-        // If the constraint is a primitive string
-        if ($typeof == 'string')
+        // If a base constructor was provided, set the base descriptor on the constructor instance object
+        if ($base)
+            $__defineProperty($this, '__base', { 'value': $base });
+
+        // Freeze the constructor instance object
+        $__freeze($this);
+
+        // Return the constructor context wrapper function
+        return function()
         {
-            // Get the cast and nullable flags along with the type string
-            $cast     = $constraint[0] == '~';
-            $default  = $constraint[$constraint.length - 1] == '!';
-            $null     = $constraint[$constraint.length - 1] == '?';
-            $suppress = $constraint[0] == '@';
-            $type     = $constraint;
+            // Apply the constructor in the constructor context with the provided arguments and return its return value
+            return $constructor.apply($this, arguments);
+        };
+    };
+    var $_buildRuntimeData        = function($name, $value, $filter, $descriptor, $auto, $readonly)
+    {
+        // Set the get accessor in the descriptor
+        $descriptor['get'] = function()
+        {
+            // Return the value
+            return $value;
+        };
 
-            if ($cast || $suppress)
-                $type = $type.substr(1);
+        // If a constraint filter was provided
+        if ($filter)
+        {
+            // If a readonly accessor was provided, set the readonly set accessor in the descriptor
+            if ($readonly)
+                $descriptor['set'] = function($v)
+                {
+                    // If the readonly accessor is set, throw an exception
+                    if ($readonly())
+                        $_exceptionFormat($_lang_$$_readonly_data,
+                                          $name,
+                                          $auto ?
+                                          $_const_keyword_property :
+                                          $_const_keyword_field);
 
-            if ($default || $null)
-                $type = $type.substr(0, $type.length - 1);
-
-            // If the type string starts with a capital letter
-            if ($type[0] >= 'A' && $type[0] <= 'Z')
+                    // Set the value with the applied constraint filter
+                    $value = $filter($v, $name);
+                };
+            // Set the set accessor in the descriptor
+            else
+                $descriptor['set'] = function($v)
+                {
+                    // Set the value with the applied constraint filter
+                    $value = $filter($v, $name);
+                };
+        }
+        // If a readonly accessor was provided, set the readonly set accessor in the descriptor
+        else if ($readonly)
+            $descriptor['set'] = function($v)
             {
-                // Get the global class from the globals object
-                $global = $_globals[$type];
+                // If the readonly accessor is set, throw an exception
+                if ($readonly())
+                    $_exceptionFormat($_lang_$$_readonly_data,
+                                      $name,
+                                      $auto ?
+                                      $_const_keyword_property :
+                                      $_const_keyword_field);
 
-                // If the global class was not found in the globals object, throw an exception
-                if (!$global)
-                    $_exceptionFormat($name ? $_lang_$$_class_constraint : $_lang_$$_class_constraint_nameless, $name, $type);
+                // Set the value
+                $value = $v;
+            };
+        // Set the set accessor in the descriptor
+        else
+            $descriptor['set'] = function($v)
+            {
+                // Set the value
+                $value = $v;
+            };
 
-                // Set the global class as the constraint
-                $constraint = $global;
+        // Return the descriptor
+        return $descriptor;
+    };
+    var $_buildRuntimeDirective   = function($instance, $i, $private, $protected, $public, $base, $directive, $overrides, $readonly, $data0, $build)
+    {
+        // Get the directive constraint filter, instructions, name, and value
+        var $filter       = $directive[$_directive_filter],
+            $instructions = $directive[$_directive_instructions],
+            $name         = $directive[$_directive_name],
+            $value        = $directive[$_directive_value];
+
+        // If a build array was provided and the directive has a constraint filter that has yet to be compiled, push the directive into the build array
+        if ($build && $filter && !$filter[$_filter_native] && !$filter[$_filter_async_global])
+            $build.push($directive);
+
+        // Create the descriptor
+        var $descriptor = (
+        {
+            'configurable': !!($instructions & $_instructions_configurable),
+            'enumerable':   !!($instructions & $_instructions_enumerable)
+        });
+
+        // If there are get or set accessor instructions
+        if ($instructions & ($_instructions_get | $_instructions_set))
+        {
+            // If there is a data instruction
+            if ($instructions & $_instructions_data)
+            {
+                // If there is not a readonly instruction, clear the readonly accessor
+                if (!($instructions & $_instructions_data_readonly))
+                    $readonly = null;
+                // If a private data symbol was provided, set the readonly flag
+                else if ($data0)
+                    $readonly = true;
+
+                // If a private data symbol was provided, set the hidden instance data get and set accessors in the descriptor
+                if ($data0)
+                    $_symbolsCompilerData($name, $value, $filter, $descriptor, true, false, $readonly);
+                // Set the data get and set accessors in the descriptor
+                else
+                    $_buildRuntimeData($name, $value, $filter, $descriptor, true, $readonly);
+            }
+            else
+            {
+                // If there is a get accessor instruction, set the get accessor in the descriptor
+                if ($instructions & $_instructions_get)
+                    $descriptor['get'] = !($instructions & $_instructions_this) ?
+                                         $value[0] :
+                                         $data0 ?
+                                         $_symbolsCompilerThis($name, $data0,   $filter, $value[0], 0) :
+                                         $_buildRuntimeThis   ($name, $private, $filter, $value[0], 0);
+
+                // If there is a set accessor instruction, set the set accessor in the descriptor
+                if ($instructions & $_instructions_set)
+                    $descriptor['set'] = !($instructions & $_instructions_this) ?
+                                         $value[1] :
+                                         $data0 ?
+                                         $_symbolsCompilerThis($name, $data0,   $filter, $value[1], 1) :
+                                         $_buildRuntimeThis   ($name, $private, $filter, $value[1], 1);
+            }
+
+            // If there is an override instruction
+            if ($instructions & $_instructions_override)
+            {
+                // If there is a base instruction, set the descriptor on the base instance object
+                if ($instructions & $_instructions_base)
+                    $__defineProperty($base, $name, $descriptor);
+                // If there is a base instance object, set the descriptor cache in it
+                else if ($base)
+                    $base[$name] = $descriptor;
+
+                // If there is a descriptor override instruction, set the descriptor in the overrides object
+                if ($instructions & $_instructions_override_descriptor)
+                    $overrides[$name] = $descriptor;
+                // If there is a get accessor override instruction, set the get accessor from the descriptor in the overrides object
+                else if ($instructions & $_instructions_override_get)
+                    $overrides[$name]['get'] = $descriptor['get'];
+                // If there is a set accessor override instruction, set the set accessor from the descriptor in the overrides object
+                else if ($instructions & $_instructions_override_set)
+                    $overrides[$name]['set'] = $descriptor['set'];
+            }
+            else
+            {
+                // If there is a private overridden instruction
+                if ($instructions & $_instructions_overridden_private)
+                {
+                    // Create the base descriptor
+                    var $descriptorBase = $__create($descriptor);
+
+                    // If there is a private set accessor instruction, undefine the set accessor in the base descriptor
+                    if ($instructions & $_instructions_private_set)
+                        $descriptorBase['set'] = undefined;
+                    // If there is a private get accessor instruction, undefine the get accessor in the base descriptor
+                    else if ($instructions & $_instructions_private_get)
+                        $descriptorBase['get'] = undefined;
+
+                    // Set the base descriptor on the base instance object
+                    $__defineProperty($base, $name, $descriptorBase);
+
+                    // If there is an overridden get accessor instruction
+                    if ($instructions & $_instructions_overridden_get)
+                    {
+                        // Get the get accessor for the descriptor from the overrides object
+                        $descriptor['get'] = $overrides[$name]['get'];
+
+                        // Set the descriptor on the private instance object
+                        $__defineProperty($private, $name, $descriptor);
+
+                        // Undefine the set accessor in the descriptor
+                        $descriptor['set'] = undefined;
+                    }
+                    // If there is an overridden set accessor instruction
+                    else if ($instructions & $_instructions_overridden_set)
+                    {
+                        // Get the set accessor for the descriptor from the overrides object
+                        $descriptor['set'] = $overrides[$name]['set'];
+
+                        // Set the descriptor on the private instance object
+                        $__defineProperty($private, $name, $descriptor);
+
+                        // Undefine the get accessor in the descriptor
+                        $descriptor['get'] = undefined;
+                    }
+                }
+                else
+                {
+                    // If there is a private instruction
+                    if ($instructions & $_instructions_private)
+                    {
+                        // Set the descriptor on the private instance object
+                        $__defineProperty($private, $name, $descriptor);
+
+                        // If there is a private set accessor instruction, undefine the set accessor in the descriptor
+                        if ($instructions & $_instructions_private_set)
+                            $descriptor['set'] = undefined;
+                        // If there is a private get accessor instruction, undefine the get accessor in the descriptor
+                        else if ($instructions & $_instructions_private_get)
+                            $descriptor['get'] = undefined;
+                    }
+
+                    // If there is a base instruction (and the base instance object is unique), set the descriptor on the base instance object
+                    if ($instructions & $_instructions_base && $base !== $protected)
+                        $__defineProperty($base, $name, $descriptor);
+
+                    // If there is an overridden instruction
+                    if ($instructions & $_instructions_overridden)
+                    {
+                        // Get the directive inherits array
+                        var $inherits = $directive[$_directive_inherits];
+
+                        // If a directive inherits array was found
+                        if ($inherits)
+                        {
+                            // Create the inherited descriptor reference
+                            var $descriptorInherits = $descriptor;
+
+                            // Loop through each cached base descriptor from base to derived
+                            for (var $j = $inherits.length - 1; $j >= 0; $j--)
+                            {
+                                // Get the derived base instance object and the cached base descriptor
+                                var $baseDerived     = $instance[$inherits[$j]][$_instance_base],
+                                    $descriptorCache = $baseDerived[$name];
+
+                                // If the cached base descriptor does not have a set accessor, set the set accessor from the inherited descriptor in the cached base descriptor
+                                if (!$descriptorCache['set'])
+                                    $descriptorCache['set'] = $descriptorInherits['set'];
+                                // If the cached base descriptor does not have a get accessor, set the get accessor from the inherited descriptor in the cached base descriptor
+                                else if (!$descriptorCache['get'])
+                                    $descriptorCache['get'] = $descriptorInherits['get'];
+
+                                // Set the cached base descriptor on the derived base instance object
+                                $__defineProperty($baseDerived, $name, $descriptorCache);
+
+                                // Set the inherited descriptor as the cached base descriptor
+                                $descriptorInherits = $descriptorCache;
+                            }
+                        }
+
+                        // If there is an overridden get accessor instruction, get the get accessor for the descriptor from the overrides object
+                        if ($instructions & $_instructions_overridden_get)
+                            $descriptor['get'] = $overrides[$name]['get'];
+                        // If there is an overridden set accessor instruction, get the set accessor for the descriptor from the overrides object
+                        else if ($instructions & $_instructions_overridden_set)
+                            $descriptor['set'] = $overrides[$name]['set'];
+                        // Get the descriptor from the overrides object
+                        else
+                            $descriptor = $overrides[$name];
+                    }
+                }
+
+                // If there is a protected instruction
+                if ($instructions & $_instructions_protected)
+                {
+                    // Set the descriptor on the protected instance object
+                    $__defineProperty($protected, $name, $descriptor);
+
+                    // If there is a protected set accessor instruction, undefine the set accessor in the descriptor
+                    if ($instructions & $_instructions_protected_set)
+                        $descriptor['set'] = undefined;
+                    // If there is a protected get accessor instruction, undefine the get accessor in the descriptor
+                    else if ($instructions & $_instructions_protected_get)
+                        $descriptor['get'] = undefined;
+                }
+
+                // If there is a public instruction, set the descriptor on the public instance object
+                if ($instructions & $_instructions_public)
+                    $__defineProperty($public, $name, $descriptor);
             }
         }
-
-        // If a global class was found in the globals object or the constraint is not a primitive string
-        if ($global || $typeof != 'string')
+        else
         {
-            // If the constraint is not a class, throw an exception
-            if (!$global && ($typeof != 'function' || !$_unlockSymbolsClass($constraint)))
-                $_exceptionFormat($name ? $_lang_$$_class_constraint : $_lang_$$_class_constraint_nameless, $name, '(' + $$_type($constraint) + ')');
-
-            var $modifiers = $constraint[$_symbol_modifiers];
-
-            if ($cast)
-                throw '';
-                
-            if ($default && !($modifiers & $_modifiers_class_model))
-                throw '';
-
-            if ($null && !($modifiers & $_modifiers_class_struct))
-                throw '';
-
-            // Create the class constraint handler
-            $handler = function($value, $name)
+            // If there is a value instruction
+            if ($instructions & $_instructions_value)
             {
-                // If the value is either null, undefined, or not an instance, return null
-                if ($value == null || !$_unlockSymbolsInstance($value))
+                // Set the writable flag and value in the descriptor
+                $descriptor['writable'] = !!($instructions & $_instructions_writable);
+                $descriptor['value']    = !($instructions & $_instructions_this) ?
+                                          $value :
+                                          $data0 ?
+                                          $_symbolsCompilerThis($name, $data0,   $filter, $value) :
+                                          $_buildRuntimeThis   ($name, $private, $filter, $value);
+            }
+            // If there is a data instruction
+            else if ($instructions & $_instructions_data)
+            {
+                // If there is not a readonly instruction, clear the readonly accessor
+                if (!($instructions & $_instructions_data_readonly))
+                    $readonly = null;
+                // If a private data symbol was provided, set the readonly flag
+                else if ($data0)
+                    $readonly = true;
+
+                // If a private data symbol was provided, set the hidden instance data get and set accessors in the descriptor
+                if ($data0)
+                    $_symbolsCompilerData($name, $value, $filter, $descriptor, false, false, $readonly);
+                // Set the data get and set accessors in the descriptor
+                else
+                    $_buildRuntimeData($name, $value, $filter, $descriptor, false, $readonly);
+            }
+
+            // If there is a base instruction (and the base instance object is unique), set the descriptor on the base instance object
+            if ($instructions & $_instructions_base && $base !== $protected)
+                $__defineProperty($base, $name, $descriptor);
+
+            // If there is an override instruction
+            if ($instructions & $_instructions_override)
+            {
+                // If there is a descriptor override instruction, set the descriptor in the overrides object
+                if ($instructions & $_instructions_override_descriptor)
+                    $overrides[$name] = $descriptor;
+            }
+            else
+            {
+                // If there is a private instruction, set the descriptor on the private instance object
+                if ($instructions & $_instructions_private)
+                    $__defineProperty($private, $name, $descriptor);
+
+                // If there is an overridden instruction, get the descriptor from the overrides object
+                if ($instructions & $_instructions_overridden)
+                    $descriptor = $overrides[$name];
+
+                // If there is a protected instruction, set the descriptor on the protected instance object
+                if ($instructions & $_instructions_protected)
+                    $__defineProperty($protected, $name, $descriptor);
+
+                // If there is a public instruction, set the descriptor on the public instance object
+                if ($instructions & $_instructions_public)
+                    $__defineProperty($public, $name, $descriptor);
+            }
+        }
+    };
+    var $_buildRuntimeFilter      = function($constraint, $name)
+    {
+        // Check if the constraint filter was cached
+        var $filter = $_filters[$constraint];
+
+        // If the constraint filter was cached, return it
+        if ($filter)
+            return $filter;
+
+        // Create the cast, default, native, nullable, and suppress flags
+        var $cast     = $constraint[0] == '~',
+            $default  = $constraint[$constraint.length - 1] == '!',
+            $global   = null,
+            $native   = true,
+            $null     = $constraint[$constraint.length - 1] == '?',
+            $suppress = $constraint[0] == '@',
+            $type     = $constraint;
+
+        // If the cast or suppress flags are set, trim the first character from the type string
+        if ($cast || $suppress)
+            $type = $type.substr(1);
+
+        // If the default or nullable flags are set, trim the last character from the type string
+        if ($default || $null)
+            $type = $type.substr(0, $type.length - 1);
+        
+        // If the type string starts with a capital letter or the first letter of the symbol prefix
+        if ($type[0] >= 'A' && $type[0] <= 'Z' || $type[0] == $_const_prefix_symbol[0])
+        {
+            // Unset the native flag
+            $native = false;
+
+            // Create the construct flag
+            var $construct = null;
+
+            // If symbols are supported, create the class constraint filter
+            if ($__symbol)
+                $filter = function($value, $name)
+                {
+                    // If the construct flag has not been cached
+                    if ($construct == null)
+                    {
+                        // If the global class was asynchronously compiled, get the global class from the filter
+                        if (!$global)
+                            $global = $filter[$_filter_async_global];
+                        
+                        // Set the construct flag if the default flag is set and the class is a model or the nullable flag is not set and the class is a struct
+                        $construct = $default && $filter[$_filter_async_model] || !$null && $filter[$_filter_async_struct];
+                    }
+
+                    //  ########## OPTIMIZE FOR SYMBOLS ##########
+
+                    // If the value is an instance of the global class
+                    if ($value instanceof $global)
+                    {
+                        // Cast the value as an instance of the global class
+                        $value = $value.as($global);
+
+                        // If the cast was successful, return the value
+                        if ($value)
+                            return $value;
+                    }
+                    // If the value is not null, a name was provided, and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    else if ($value !== null && $name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
+
+                    // If the construct flag is set, return a default instance of the class
+                    if ($construct)
+                        return $global();
+                    
                     return null;
+                };
+            // Create the class constraint filter
+            else
+                $filter = function($value, $name)
+                {
+                    // If the construct flag has not been cached
+                    if ($construct == null)
+                    if ($construct == null)
+                    {
+                        // If the global class was asynchronously compiled, get the global class from the filter
+                        if (!$global)
+                            $global = $filter[$_filter_async_global];
+                        
+                        // Set the construct flag if the default flag is set and the class is a model or the nullable flag is not set and the class is a struct
+                        $construct = $default && $filter[$_filter_async_model] || !$null && $filter[$_filter_async_struct];
+                    }
 
-                // If the instance is an instance object of the constraint class, return the value
-                if ($_lock_instances[0].__type === $constraint)
-                    return $value;
+                    // If the value is an instance of the global class
+                    if ($value instanceof $global)
+                    {
+                        // Cast the value as an instance of the global class
+                        $value = $value.as($global);
 
-                // Return the value cast as the constraint class
-                return $value.as($constraint);
-            };
+                        // If the cast was successful, return the value
+                        if ($value)
+                            return $value;
+                    }
+                    // If the value is not null, a name was provided, and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    else if ($value !== null && $name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
+
+                    // If the construct flag is set, return a default instance of the class
+                    if ($construct)
+                        return $global();
+                    
+                    return null;
+                };
+
+            // If a name was not provided or the global class was found in the globals object, get the global class from the globals object
+            if (!$name || $_globals[$type])
+                $global = $_buildRuntimeGlobal($filter, $constraint, $type, $default, $null, $name);
         }
         else switch ($type)
         {
             case 'array':
 
-                // Create the array constraint handler
-                $class   = $__array;
-                $new     = true;
-                $handler = function($value, $name)
+                // Create the array constraint filter
+                $filter = function($value, $name)
                 {
-                    // If the value is an array, return it
-                    if ($__array_isArray($value))
+                    // If the value is either null or an array, return it
+                    if ($value === null && !$cast || $__array_isArray($value))
                         return $value;
 
                     // If the cast flag is set, return the value cast as an array
                     if ($cast)
                         return $$_asArray($value);
 
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
+                    // If the default flag is set, return an empty array
+                    if ($default)
+                        return [];
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // Return an empty array
-                    return [];
+                    return null;
                 };
 
                 break;
@@ -4011,8 +4902,8 @@ if (typeof jT_Shorthand != 'string')
             case 'boolean':
             case 'bool':
 
-                // Create the boolean constraint handler
-                $handler = function($value, $name)
+                // Create the boolean constraint filter
+                $filter = function($value, $name)
                 {
                     // If the value is a boolean primitive, return it
                     if (typeof $value == 'boolean')
@@ -4027,14 +4918,14 @@ if (typeof jT_Shorthand != 'string')
                         return $__boolean_valueOf__.call($value);
 
                     // If the nullable flag is set, return null
-                    if ($nullable)
+                    if ($null)
                         return null;
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // Return false
+                    // Return an empty boolean primitive
                     return false;
                 };
 
@@ -4042,98 +4933,95 @@ if (typeof jT_Shorthand != 'string')
 
             case 'date':
 
-                // Create the date constraint handler
-                $class   = $__date;
-                $new     = true;
-                $handler = function($value, $name)
+                // Create the date constraint filter
+                $filter = function($value, $name)
                 {
-                    // If the value is a date object, return it
-                    if ($$_type($value) == 'date')
+                    // If the value is either null or a date object, return it
+                    if ($value === null && !$cast || $$_type($value) == 'date')
                         return $value;
 
                     // If the cast flag is set, return the value cast as a date
                     if ($cast)
                         return $$_asDate($value);
 
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
+                    // If the default flag is set, return an empty date object
+                    if ($default)
+                        return new $__date($__NaN__);
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // Return an invalid date object
-                    return new $__date($__NaN__);
+                    return null;
                 };
 
                 break;
 
             case 'error':
 
-                // Create the error constraint handler
-                $class   = $__error;
-                $new     = true;
-                $handler = function($value, $name)
+                // Create the error constraint filter
+                $filter = function($value, $name)
                 {
-                    // If the value is an error object, return it
-                    if ($$_type($value) == 'error')
+                    // If the value is either null or an error object, return it
+                    if ($value === null || $$_type($value) == 'error')
                         return $value;
 
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
+                    // If the default flag is set, return an empty error object
+                    if ($default)
+                        return new $__error();
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // Return an empty error object
-                    return new $__error();
+                    return null;
                 };
 
                 break;
 
             case 'function':
 
-                // Create the function constraint handler
-                $class   = $__function;
-                $new     = true;
-                $handler = function($value, $name)
-                {
-                    // If the value is a function and not a class
-                    if (typeof $value == 'function' && (!$value[$_symbol_lock] || !$_unlockSymbolsClass($value)))
-                        return $value;
-
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
-
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
-
-                    // Return an empty function object
-                    return new $__function();
-                };
-
+                // If symbols are supported, create the function constraint filter
                 if ($__symbol)
-                    $handler = function($value, $name)
+                    $filter = function($value, $name)
                     {
-                        // If the value is a function and not a class
-                        if (typeof $value == 'function' && $value[$_symbol_class] !== $value)
+                        // If the value is either null or a function (and not a class), return it
+                        if ($value === null || typeof $value == 'function' && $value[$_symbol_class] !== $value)
                             return $value;
 
-                        // If the nullable flag is set, return null
-                        if ($nullable)
-                            return null;
+                        // If the default flag is set, return an empty function
+                        if ($default)
+                            return function()
+                            {
+                                //
+                            };
 
-                        // If a name was provided and strict mode is enabled, throw an exception
-                        if ($name && $_strict)
-                            $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                        // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                        if ($name && !$suppress && $_strict)
+                            $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                        // Return an empty function object
-                        return new $__function();
+                        return null;
+                    };
+                // Create the function constraint filter
+                else
+                    $filter = function($value, $name)
+                    {
+                        // If the value is either null or a function (and not a class), return it
+                        if ($value === null || typeof $value == 'function' && (!$value[$_symbol_lock] || !$_unlockSymbolsClass($value)))
+                            return $value;
+
+                        // If the default flag is set, return an empty function
+                        if ($default)
+                            return function()
+                            {
+                                //
+                            };
+
+                        // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                        if ($name && !$suppress && $_strict)
+                            $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
+
+                        return null;
                     };
 
                 break;
@@ -4141,8 +5029,8 @@ if (typeof jT_Shorthand != 'string')
             case 'integer':
             case 'int':
 
-                // Create the integer constraint handler
-                $handler = function($value, $name)
+                // Create the integer constraint filter
+                $filter = function($value, $name)
                 {
                     // If the value is not a primitive number
                     if (typeof $value != 'number')
@@ -4155,12 +5043,12 @@ if (typeof jT_Shorthand != 'string')
                                 return $$_asInteger($value);
 
                             // If the nullable flag is set, return null
-                            if ($nullable)
+                            if ($null)
                                 return null;
 
-                            // If a name was provided and strict mode is enabled, throw an exception
-                            if ($name && $_strict)
-                                $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                            // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                            if ($name && !$suppress && $_strict)
+                                $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
                             // Return zero
                             return 0;
@@ -4195,8 +5083,8 @@ if (typeof jT_Shorthand != 'string')
             case 'number':
             case 'float':
 
-                // Create the number constraint handler
-                $handler = function($value, $name)
+                // Create the number constraint filter
+                $filter = function($value, $name)
                 {
                     // If the value is a number primitive, return it
                     if (typeof $value == 'number')
@@ -4211,14 +5099,14 @@ if (typeof jT_Shorthand != 'string')
                         return $__number_valueOf__.call($value);
 
                     // If the nullable flag is set, return null
-                    if ($nullable)
+                    if ($null)
                         return null;
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // Return not-a-number
+                    // Return an empty number primitive
                     return $__NaN__;
                 };
 
@@ -4226,82 +5114,89 @@ if (typeof jT_Shorthand != 'string')
 
             case 'object':
 
-                // Create the object constraint handler
-                $class   = $__object;
-                $new     = true;
-                $handler = function($value, $name)
+                // Create the object constraint filter
+                $filter = function($value, $name)
                 {
-                    // If the value is neither null nor undefined, return it
-                    if ($value != null)
+                    // If the value is either null or an object, return it
+                    if ($value === null || $$_type($value) == 'object')
                         return $value;
 
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
+                    // If the default flag is set, return an empty object
+                    if ($default)
+                        return {};
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // Return an empty object
-                    return {};
+                    return null;
                 };
 
                 break;
 
             case 'primitive':
 
-                // Create the primitive constraint handler
-                $handler = function($value, $name)
+                // Create the primitive constraint filter
+                $filter = function($value, $name)
                 {
                     // If the value is a primitive, return it
                     if ($$_isPrimitive($value))
                         return $value;
 
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
+                    // Get the value type
+                    var $type = $_types[$__toString__.call($value)] || 'object';
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If the value is a boolean, return the primitive value of the boolean
+                    if ($type == 'boolean')
+                        return $__boolean_valueOf__.call($value);
+
+                    // If the value is a number, return the primitive value of the number
+                    if ($type == 'number')
+                        return $__number_valueOf__.call($value);
+
+                    // If the value is a string, return the primitive value of the string
+                    if ($type == 'string')
+                        return $__string_valueOf__.call($value);
+
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
+
+                    return null;
                 };
 
                 break;
 
             case 'regexp':
 
-                // Create the regexp constraint handler
-                $class   = $__regexp;
-                $new     = true;
-                $handler = function($value, $name)
+                // Create the regexp constraint filter
+                $filter = function($value, $name)
                 {
-                    // If the value is a regexp object, return it
-                    if ($$_type($value) == 'regexp')
+                    // If the value is either null or a regexp object, return it
+                    if ($value === null && !$cast || $$_type($value) == 'regexp')
                         return $value;
 
                     // If the cast flag is set, return the value cast as a regular expression
                     if ($cast)
                         return $$_asRegExp($value);
 
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
+                    // If the default flag is set, return an empty regexp object
+                    if ($default)
+                        return new $__regexp();
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // Return an empty regexp object
-                    return new $__regexp();
+                    return null;
                 };
 
                 break;
 
             case 'string':
 
-                // Create the string constraint handler
-                $handler = function($value, $name)
+                // Create the string constraint filter
+                $filter = function($value, $name)
                 {
                     // If the value is a string primitive, return it
                     if (typeof $value == 'string')
@@ -4316,446 +5211,163 @@ if (typeof jT_Shorthand != 'string')
                         return $__string_valueOf__.call($value);
 
                     // If the nullable flag is set, return null
-                    if ($nullable)
+                    if ($null)
                         return null;
 
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // Return an empty string
+                    // Return an empty string primitive
                     return '';
                 };
 
                 break;
 
             case 'symbol':
+                
+                // If symbols are supported, create the symbol constraint filter
+                if ($__symbol)
+                    $filter = function($value, $name)
+                    {
+                        // If the value is a symbol primitive, return it
+                        if (typeof $value == 'symbol')
+                            return $value;
 
-                // If symbols are not supported, break
-                if (!$__symbol)
-                    break;
+                      //if ($$_type($value) == 'symbol')
+                      //    return $__symbol_valueOf__.call($value);
 
-                // Create the symbol constraint handler
-                $handler = function($value, $name)
-                {
-                    // If the value is a symbol primitive, return it
-                    if (typeof $value == 'symbol')
-                        return $value;
+                        // If the nullable flag is set, return null
+                        if ($null)
+                            return null;
 
-                  //if ($$_type($value) == 'symbol')
-                  //    return $__symbol_valueOf__.call($value);
+                        // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                        if ($name && !$suppress && $_strict)
+                            $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
-
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
-
-                    // Return a symbol
-                    return $__symbol();
-                };
+                        // Return a symbol
+                        return $__symbol();
+                    };
+                // Create the empty symbol constraint filter
+                else
+                    $filter = function($value, $name)
+                    {
+                        //
+                    };
 
                 break;
 
             case 'type':
 
-                // Create the type constraint handler
-                $handler = function($value, $name)
-                {
-                    // If the value is a class, return it
-                    if (typeof $value == 'function' && $_unlockSymbolsClass($value))
-                        return $value;
-
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
-
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
-
-                    // Return an empty class
-                    return $$({});
-                };
-
+                // If symbols are supported, create the type constraint filter
                 if ($__symbol)
-                    $handler = function($value, $name)
+                    $filter = function($value, $name)
                     {
-                        // If the value is a class, return it
-                        if ($value && $value[$_symbol_class] === $value)
+                        // If the value is either null or a class, return it
+                        if ($value === null || $value && $value[$_symbol_class] === $value)
                             return $value;
 
-                        // If the nullable flag is set, return null
-                        if ($nullable)
-                            return null;
+                        // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                        if ($name && !$suppress && $_strict)
+                            $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
 
-                        // If a name was provided and strict mode is enabled, throw an exception
-                        if ($name && $_strict)
-                            $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
+                        return null;
+                    };
+                // Create the type constraint filter
+                else
+                    $filter = function($value, $name)
+                    {
+                        // If the value is either null or a class, return it
+                        if ($value === null || typeof $value == 'function' && $_unlockSymbolsClass($value))
+                            return $value;
 
-                        // Return an empty class
-                        return $$({});
+                        // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                        if ($name && !$suppress && $_strict)
+                            $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
+
+                        return null;
                     };
 
                 break;
 
             case 'window':
 
-                // Create the window constraint handler
-                $handler = function($value, $name)
+                // Create the window constraint filter
+                $filter = function($value, $name)
                 {
-                    // If the value is a window object, return it
-                    if ($$_type($value) == 'window')
+                    // If the value is either null or a window object, return it
+                    if ($value === null || $$_type($value) == 'window')
                         return $value;
 
-                    // If the nullable flag is set, return null
-                    if ($nullable)
-                        return null;
-
-                    // If a name was provided and strict mode is enabled, throw an exception
-                    if ($name && $_strict)
-                        $_exceptionFormat($_lang_$$_class_constraint_type, $name, $type);
-
-                    // Return the global window reference
-                    return window;
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
+                    
+                    return null;
                 };
 
                 break;
         }
 
-        if (!$handler)
-            $_exceptionFormat($name ? $_lang_$$_class_constraint : $_lang_$$_class_constraint_nameless, $name, $type);
+        // If no constraint filter was created, throw an exception
+        if (!$filter)
+            $_exceptionFormat($name ?
+                              $_lang_$$_constraint_invalid :
+                              $_lang_$$_constraint_invalid_generic,
+                              $name,
+                              $constraint);
 
-        // Set the constraint handler in the constraints cache
-        $_filters[$constraint] = $handler;
+        // Set the synchronous constraint filter data
+        $filter[$_filter_cast]       = $cast;
+        $filter[$_filter_constraint] = $constraint;
+        $filter[$_filter_default]    = $default;
+        $filter[$_filter_native]     = $native;
+        $filter[$_filter_null]       = $null;
+        $filter[$_filter_suppress]   = $suppress;
+        $filter[$_filter_type]       = $type;
 
-        // Return the constraint handler
-        return $handler;
+        // Set the constraint filter in the constraint filters cache
+        $_filters[$constraint] = $filter;
+
+        // Return the constraint filter
+        return $filter;
     };
-    var $_buildRuntimeConstructor = function($constructor, $base, $private)
+    var $_buildRuntimeGlobal      = function($filter, $constraint, $type, $default, $null, $name)
     {
-        // If no constructor was provided, return the base constructor
-        if (!$constructor)
-            return $base;
+        // Get the global class from the globals object
+        var $global = $_globals[$type];
 
-        // Create the constructor instance object
-        var $this = $__create($private);
+        // If the global class was not found in the globals object, throw an exception
+        if (!$global)
+            $_exceptionFormat($name ?
+                              $_lang_$$_constraint_invalid :
+                              $_lang_$$_constraint_invalid_generic,
+                              $name,
+                              $constraint);
 
-        // Set the data descriptor on the constructor instance object
-        $__defineProperty($this, '__data', { 'value': $private });
+        // Get the class modifiers and check if the class is a model or a struct
+        var $modifiers = $global[$_symbol_modifiers],
+            $model     = !!($modifiers & $_modifiers_class_model),
+            $struct    = !!($modifiers & $_modifiers_class_struct);
 
-        // If a base constructor was provided, set the base descriptor on the constructor instance object
-        if ($base)
-            $__defineProperty($this, '__base', { 'value': $base });
+        // If the default flag is set and the class is not a model or the null flag is set and the class is not a struct, throw an exception
+        if ($default && !$model || $null && !$struct)
+            $_exceptionFormat($name ?
+                              $_lang_$$_constraint_invalid :
+                              $_lang_$$_constraint_invalid_generic,
+                              $name,
+                              $constraint);
 
-        // Freeze the constructor instance object
-        $__freeze($this);
+        // Set the asynchronous constraint filter data
+        $filter[$_filter_async_global] = $global;
+        $filter[$_filter_async_model]  = $model;
+        $filter[$_filter_async_struct] = $struct;
 
-        // Return the constructor context wrapper function
-        return function()
-        {
-            // Apply the constructor in the constructor context with the provided arguments and return its return value
-            return $constructor.apply($this, arguments);
-        };
-    };
-    var $_buildRuntimeData        = function($name, $value, $constraint, $descriptor, $auto, $readonly)
-    {
-        // Set the get accessor in the descriptor
-        $descriptor['get'] = function()
-        {
-            // Return the value
-            return $value;
-        };
-
-        // If a constraint was provided
-        if ($constraint)
-        {
-            // If a readonly accessor was provided, set the readonly set accessor in the descriptor
-            if ($readonly)
-                $descriptor['set'] = function($v)
-                {
-                    // If the readonly accessor is set, throw an exception
-                    if ($readonly())
-                        $_exceptionFormat($_lang_$$_readonly_data, $name, $auto ? 'property' : 'field');
-
-                    // Set the value with the constraint
-                    $value = $constraint($v, $name);
-                };
-            // Set the set accessor in the descriptor
-            else
-                $descriptor['set'] = function($v)
-                {
-                    // Set the value with the constraint
-                    $value = $constraint($v, $name);
-                };
-        }
-        // If a readonly accessor was provided, set the readonly set accessor in the descriptor
-        else if ($readonly)
-            $descriptor['set'] = function($v)
-            {
-                // If the readonly accessor is set, throw an exception
-                if ($readonly())
-                    $_exceptionFormat($_lang_$$_readonly_data, $name, $auto ? 'property' : 'field');
-
-                // Set the value
-                $value = $v;
-            };
-        // Set the set accessor in the descriptor
-        else
-            $descriptor['set'] = function($v)
-            {
-                // Set the value
-                $value = $v;
-            };
-    };
-    var $_buildRuntimeDirective   = function($instance, $i, $base, $private, $protected, $public, $directive, $overrides, $readonly, $compile)
-    {
-        // Get the directive instructions, name, and value
-        var $instructions = $directive[$_directive_instructions],
-            $name         = $directive[$_directive_name],
-            $value        = $directive[$_directive_value],
-            $symbol       = null;
-
-        //if ($compile)
-        //    $symbol = $directive[$_directive_symbol];
-
-        // If the build instruction is set, build the constraint
-        if ($instructions & $_instructions_build)
-            $instructions = $_buildRuntimeConstraint(null, $name, $directive);
-
-        // Get the directive constraint handler and type
-        var $constraintHandler = $directive[$_directive_constraint_filter];
-
-        if ($instructions & $_instructions_constraint_default)
-            $value = $instructions & $_instructions_constraint_new ?
-                     new $value() :
-                     $value();
-
-        // Create the descriptor
-        var $descriptor = (
-        {
-            'configurable': !!($instructions & $_instructions_configurable),
-            'enumerable':   !!($instructions & $_instructions_enumerable)
-        });
-
-        // If there are get or set accessor instructions
-        if ($instructions & ($_instructions_get | $_instructions_set))
-        {
-            // If there is not a data instruction
-            if (~$instructions & $_instructions_data)
-            {
-                // If there is a get accessor instruction, set the get accessor in the descriptor
-                if ($instructions & $_instructions_get)
-                    $descriptor['get'] = !($instructions & $_instructions_this) ?
-                                         $value[0] :
-                                         $compile ?// write it this way so the functions have the ability to be inlined
-                                         $_symbolsCompilerThis($name, $compile, $constraintHandler, $value[0], 0) :
-                                         $_buildRuntimeThis($name, $private, $constraintHandler, $value[0], 0);
-
-                // If there is a set accessor instruction, set the set accessor in the descriptor
-                if ($instructions & $_instructions_set)
-                    $descriptor['set'] = !($instructions & $_instructions_this) ?
-                                         $value[1] :
-                                         $compile ?
-                                         $_symbolsCompilerThis($name, $compile, $constraintHandler, $value[1], 1) :
-                                         $_buildRuntimeThis($name, $private, $constraintHandler, $value[1], 1);
-            }
-            else if ($compile)
-                $_symbolsCompilerData($name, $symbol, $constraintHandler, $descriptor, true, $instructions & $_instructions_data_readonly)
-            // Set the data get and set accessors in the descriptor
-            else
-                $_buildRuntimeData($name, $value, $constraintHandler, $descriptor, true, $instructions & $_instructions_data_readonly ? $readonly : null);
-
-            // If there is not an override instruction
-            if (~$instructions & $_instructions_override)
-            {
-                // If there is a private overridden instruction
-                if ($instructions & $_instructions_overridden_private)
-                {
-                    // Create the base descriptor
-                    var $descriptorBase = $__create($descriptor);
-
-                    // If there is a private set accessor instruction, undefine the set accessor in the base descriptor
-                    if ($instructions & $_instructions_private_set)
-                        $descriptorBase['set'] = undefined;
-                    // If there is a private get accessor instruction, undefine the get accessor in the base descriptor
-                    else if ($instructions & $_instructions_private_get)
-                        $descriptorBase['get'] = undefined;
-
-                    // Set the base descriptor on the base instance object
-                    $__defineProperty($base, $name, $descriptorBase);
-
-                    // TRIGGER INHERITS (there are no inherits here because you can't override the private...)
-
-                    // If there is an overridden get accessor instruction, get the get accessor for the descriptor from the overrides object
-                    if ($instructions & $_instructions_overridden_get)
-                    {
-                        $descriptor['get'] = $overrides[$name]['get'];
-
-                        // Set the descriptor on the private instance object
-                        $__defineProperty($private, $name, $descriptor);
-
-                        $descriptor['set'] = undefined;
-                    }
-                    // If there is an overridden set accessor instruction, get the set accessor for the descriptor from the overrides object
-                    else if ($instructions & $_instructions_overridden_set)
-                    {
-                        $descriptor['set'] = $overrides[$name]['set'];
-
-                        // Set the descriptor on the private instance object
-                        $__defineProperty($private, $name, $descriptor);
-
-                        $descriptor['get'] = undefined;
-                    }
-                }
-                else
-                {
-                    // If there is a private instruction
-                    if ($instructions & $_instructions_private)
-                    {
-                        // Set the descriptor on the private instance object
-                        $__defineProperty($private, $name, $descriptor);
-
-                        // If there is a private set accessor instruction, undefine the set accessor in the descriptor
-                        if ($instructions & $_instructions_private_set)
-                            $descriptor['set'] = undefined;
-                        // If there is a private get accessor instruction, undefine the get accessor in the descriptor
-                        else if ($instructions & $_instructions_private_get)
-                            $descriptor['get'] = undefined;
-                    }
-
-                    // If there is a base instruction, set the descriptor on the base instance object
-                    if ($instructions & $_instructions_base && $base !== $protected)
-                        $__defineProperty($base, $name, $descriptor);
-
-                    // If there is an overridden instruction
-                    if ($instructions & $_instructions_overridden)
-                    {
-                        //var $inherits = $directive[$_directive_inherits];
-                        //if ($inherits)
-                        //{
-                        //    //
-                        //    var $descriptorInherits = $descriptor;
-
-                        //    for (var $j = $inherits.length - 1; $j >= 0; $j--)
-                        //    {
-                        //        var $inheritsBase   = $instance[$inherits[$j]][3],
-                        //            $descriptorBase = $inheritsBase[$name];
-
-                        //        if (!$descriptorBase['get'])
-                        //            $descriptorBase['get'] = $descriptorInherits['get'];
-                        //        else if (!$descriptorBase['set'])
-                        //            $descriptorBase['set'] = $descriptorInherits['set'];
-
-                        //        $__defineProperty($inheritsBase, $name, $descriptorBase);
-
-                        //        $descriptorInherits = $descriptorBase;
-                        //    }
-                        //}
-
-                        // If there is an overridden get accessor instruction, get the get accessor for the descriptor from the overrides object
-                        if ($instructions & $_instructions_overridden_get)
-                            $descriptor['get'] = $overrides[$name]['get'];
-                        // If there is an overridden set accessor instruction, get the set accessor for the descriptor from the overrides object
-                        else if ($instructions & $_instructions_overridden_set)
-                            $descriptor['set'] = $overrides[$name]['set'];
-                        // Get the descriptor from the overrides object
-                        else
-                            $descriptor = $overrides[$name];
-                    }
-                }
-
-                // If there is a protected instruction
-                if ($instructions & $_instructions_protected)
-                {
-                    // Set the descriptor on the protected instance object
-                    $__defineProperty($protected, $name, $descriptor);
-
-                    // If there is a protected set accessor instruction, undefine the set accessor in the descriptor
-                    if ($instructions & $_instructions_protected_set)
-                        $descriptor['set'] = undefined;
-                    // If there is a protected get accessor instruction, undefine the get accessor in the descriptor
-                    else if ($instructions & $_instructions_protected_get)
-                        $descriptor['get'] = undefined;
-                }
-
-                // If there is a public instruction, set the descriptor on the public instance object
-                if ($instructions & $_instructions_public)
-                    $__defineProperty($public, $name, $descriptor);
-            }
-            else
-            {
-                // If there is a base instruction, set the descriptor on the base instance object
-                if ($instructions & $_instructions_base)
-                    $__defineProperty($base, $name, $descriptor);
-                // If there is a base instance object, set the descriptor cache in it
-                else if ($base)
-                    $base[$name] = $descriptor;
-
-                // If there is a descriptor override instruction, set the descriptor in the overrides object
-                if ($instructions & $_instructions_override_descriptor)
-                    $overrides[$name] = $descriptor;
-                // If there is a get accessor override instruction, set the get accessor from the descriptor in the overrides object
-                else if ($instructions & $_instructions_override_get)
-                    $overrides[$name]['get'] = $descriptor['get'];
-                // If there is a set accessor override instruction, set the set accessor from the descriptor in the overrides object
-                else if ($instructions & $_instructions_override_set)
-                    $overrides[$name]['set'] = $descriptor['set'];
-            }
-        }
-        else
-        {
-            // If there is a value instruction
-            if ($instructions & $_instructions_value)
-            {
-                // Set the writable flag and value in the descriptor
-                $descriptor['writable'] = !!($instructions & $_instructions_writable);
-                $descriptor['value']    = !($instructions & $_instructions_this) ?
-                                          $value :
-                                          $compile ?
-                                          $_symbolsCompilerThis($name, $compile, $constraintHandler, $value) :
-                                          $_buildRuntimeThis($name, $private, $constraintHandler, $value);
-            }
-            else if ($compile)
-                $_symbolsCompilerData($name, $symbol, $constraintHandler, $descriptor, false, $instructions & $_instructions_data_readonly);
-            // If there is a data instruction
-            else if ($instructions & $_instructions_data)
-                $_buildRuntimeData($name, $value, $constraintHandler, $descriptor, false, $instructions & $_instructions_data_readonly ? $readonly : null);
-
-            // If there is a base instruction, set the descriptor on the base instance object
-            if ($instructions & $_instructions_base && $base !== $protected)
-                $__defineProperty($base, $name, $descriptor);
-
-            // If there is not an override instruction
-            if (~$instructions & $_instructions_override)
-            {
-                // If there is a private instruction, set the descriptor on the private instance object
-                if ($instructions & $_instructions_private)
-                    $__defineProperty($private, $name, $descriptor);
-
-                // If there is an overridden instruction, get the descriptor from the overrides object
-                if ($instructions & $_instructions_overridden)
-                    $descriptor = $overrides[$name];
-
-                // If there is a protected instruction, set the descriptor on the protected instance object
-                if ($instructions & $_instructions_protected)
-                    $__defineProperty($protected, $name, $descriptor);
-
-                // If there is a public instruction, set the descriptor on the public instance object
-                if ($instructions & $_instructions_public)
-                    $__defineProperty($public, $name, $descriptor);
-            }
-            // If there is a descriptor override instruction, set the descriptor in the overrides object
-            else if ($instructions & $_instructions_override_descriptor)
-                $overrides[$name] = $descriptor;
-        }
+        // Return the global class
+        return $global;
     };
     var $_buildRuntimeInternals   = function($instance, $i, $base, $private, $protected, $public, $this, $type, $internal, $unlocked)
     {
-        // set instance locks?
-
         // Check if these are the root instance objects
         var $root = $i == $instance.length - 1;
         
@@ -4764,10 +5376,10 @@ if (typeof jT_Shorthand != 'string')
             $descriptorThis = { 'value': $public },
             $descriptorType = { 'value': $type },
             $descriptorBase = !$root ?
-                                { 'value': $instance[$i + 1][3] } :
-                                null;
+                              { 'value': $instance[$i + 1][$_instance_base] } :
+                              null;
         
-        // If the class is not unlocked or the base and protected instance objects are not merged
+        // If the class is not unlocked or the base instance object is unique
         if (!$unlocked || $base !== $protected)
         {
             // If these are not the root instance objects, set the internal base reference on the private instance object
@@ -4787,7 +5399,7 @@ if (typeof jT_Shorthand != 'string')
         // If these are not internal instance objects, set the internal type reference on the public instance object
         if ($i >= $internal)
             $__defineProperty($public, '__type', $descriptorType);
-        // If these are the root instance objects or switching to internal instance objects, set the internal type reference on the public instance object
+        // If these are the root instance objects or are switching to internal instance objects, set the internal type reference on the public instance object
         else if ($root || $i == $internal - 1)
             $__defineProperty($public, '__type', { 'value': null });
 
@@ -4804,7 +5416,7 @@ if (typeof jT_Shorthand != 'string')
             $__defineProperty($base, '__type', $descriptorType);
         }
     };
-    var $_buildRuntimeMatrix      = function($metaclass, $metainstance, $metalength, $abstract, $import, $internal, $merge, $model, $optimized, $readonlys, $struct, $unlocked, $compile)
+    var $_buildRuntimeMatrix      = function($metaclass, $metainstance, $metalength, $abstract, $import, $internal, $merge, $model, $optimized, $readonlys, $struct, $unlocked, $symbols)
     {
         //if ($root)
         //{
@@ -4819,7 +5431,7 @@ if (typeof jT_Shorthand != 'string')
         //}
 
         // If the class is abstract, return the runtime class constructor
-        if ($abstract)
+        if (!$symbols && $abstract)
             return function()
             {
                 // Throw an exception
@@ -4834,6 +5446,7 @@ if (typeof jT_Shorthand != 'string')
                 $init        = false,
                 $this        = this,
                 $base        = $this,
+                $context     = null,
                 $instance    = new $__array($metalength),
                 $new         = $this instanceof $class && $this[$_symbol_lock] !== $this,
                 $private     = null,
@@ -4843,7 +5456,7 @@ if (typeof jT_Shorthand != 'string')
                 $overrides   = $merge > 1 ?
                                $__create(null) :
                                null,
-                $readonly    = $readonlys ?
+                $readonly    = !$symbols && $readonlys ?
                                (function()
                                {
                                    // Return the init flag
@@ -4866,8 +5479,6 @@ if (typeof jT_Shorthand != 'string')
 
             for (var $i = $metalength - 1; $i >= 0; $i--)
             {
-                var $cache = $metaclass[$i];
-
                 // Create the instance objects
                 $protected = $__create($protected);
                 $private   = $__create($protected);
@@ -4877,8 +5488,21 @@ if (typeof jT_Shorthand != 'string')
                              $i < $merge ?
                              $__create($base) :
                              $protected;
+               
+                // Get the cache and create the instances in the instance matrix
+                var $cache     = $metaclass[$i],
+                    $instances = $instance[$i] = [$private, $protected, $public, $base, $context];
 
-                if ($compile)
+                // Create the constructor
+                $constructor = $symbols ? 
+                               $_symbolsCompilerConstructor($cache[$_cache_constructor], $constructor, $private) :
+                               // ^ need constructor, private context symbol, base constructor, base constructor context symbol ($cache[$_cache_symbols_construct])
+                               $_buildRuntimeConstructor($cache[$_cache_constructor], $constructor, $private);
+
+                // Lock the instance type on the instances
+                $_lockSymbolsInstance($instances, $private, $protected, $public, $base, $context);
+
+                if ($symbols)
                 {
                     //
                 }
@@ -4886,22 +5510,16 @@ if (typeof jT_Shorthand != 'string')
                 else
                     $_buildRuntimeInternals($instance, $i, $base, $private, $protected, $public, $this, $cache[$_cache_class], $internal, $unlocked);
 
-                // Create the instances in the instance matrix
-                $instance[$i] = [$private, $protected, $public, $base];
-
                 // If there are no overrides in the instance matrix
                 if (!$overrides)
                 {
                     // Get the directives from the directives matrix
                     var $directives = $metainstance[$i];
-
+                    
                     // Execute the directives on the instance objects
                     for (var $j = 0, $k = $directives.length; $j < $k; $j++)
-                        $_buildRuntimeDirective($instance, $i, $base, $private, $protected, $public, $directives[$j], $overrides, $readonly, $compile);
+                        $_buildRuntimeDirective($instance, $i, $private, $protected, $public, $base, $directives[$j], $overrides, $readonly);
                 }
-
-                // Create the constructor
-                $constructor = $_buildRuntimeConstructor($cache[$_cache_constructor], $constructor, $private);
             }
 
             // If there are overrides in the instance matrix
@@ -4914,27 +5532,27 @@ if (typeof jT_Shorthand != 'string')
                     var $instances  = $instance[$i];
                     
                     // Get the instance objects from the instances
-                    $private   = $instances[0];
-                    $protected = $instances[1];
-                    $public    = $instances[2];
-                    $base      = $instances[3];
-
+                    $private   = $instances[$_instance_private];
+                    $protected = $instances[$_instance_protected];
+                    $public    = $instances[$_instance_public];
+                    $base      = $instances[$_instance_base];
+                    
                     // Execute the directives on the instance objects
                     for (var $j = 0, $k = $directives.length; $j < $k; $j++)
-                        $_buildRuntimeDirective($instance, $i, $base, $private, $protected, $public, $directives[$j], $overrides, $readonly, $compile);
+                        $_buildRuntimeDirective($instance, $i, $private, $protected, $public, $base, $directives[$j], $overrides, $readonly);
                 }
 
                 // Reset the private and public instance object references
-                $private = $instance[0][0];
-                $public  = $instance[0][2];
+                $private = $instance[0][$_instance_private];
+                $public  = $instance[0][$_instance_public];
             }
 
-            if ($compile)
+            if ($symbols)
                 return $instance;
 
             // If a constructor was provided and the new operator was used or the class is neither a model nor a struct, apply the constructor and store its return value
             if ($constructor && ($new || !$model && !$struct))
-                $return = $constructor.apply(this, arguments);
+                $return = $constructor.apply($context, arguments);
 
             // Set the init flag
             $init = true;
@@ -4950,74 +5568,94 @@ if (typeof jT_Shorthand != 'string')
         // Return the runtime class constructor
         return $class;
     };
-    var $_buildRuntimeThis        = function($name, $private, $constraint, $function, $arguments)
+    var $_buildRuntimeThis        = function($name, $private, $filter, $function, $arguments)
     {
-        // If a constraint was provided
-        if ($constraint)
+        // If a constraint filter was provided
+        if ($filter)
         {
-            // If the function is a get accessor, return the context wrapper accessor function
+            // If the function is an accessor method, return the constrained context wrapper get accessor
             if ($arguments == 0)
                 return function()
                 {
-                    // Call the function in the private context and return the return value within the provided constraint
-                    return $constraint($function.call($private), $name);
+                    // Call the function in the context of a private instance and return the return value with the applied constraint filter
+                    return $filter($function.call($private), $name);
                 };
-            // If the function is a set accessor, return the context wrapper accessor function
+            // If the function is a mutator method, return the constrained context wrapper set accessor
             else if ($arguments == 1)
                 return function($v)
                 {
-                    // Call the function in the private context with the accessor value and return the return value within the provided constraint
-                    return $function.call($private, $constraint($v, $name));
+                    // Call the function in the context of a private instance with the accessor value and return the return value with the applied constraint filter
+                    return $function.call($private, $filter($v, $name));
                 };
 
-            // Return the context wrapper function
+            // Return the constrained context wrapper function
             return function()
             {
-                // Apply the function in the private context with the provided arguments and return the return value within the provided constraint
-                return $constraint($function.apply($private, arguments), $name);
+                // Apply the function in the context of a private instance with the provided arguments and return the return value with the applied constraint filter
+                return $filter($function.apply($private, arguments), $name);
             };
         }
         
-        // If the function is a get accessor, return the context wrapper accessor function
+        // If the function is an accessor method, return the context wrapper get accessor
         if ($arguments == 0)
             return function()
             {
-                // Call the function in the private context and return the return value
+                // Call the function in the context of a private instance and return the return value
                 return $function.call($private);
             };
-        // If the function is a set accessor, return the context wrapper accessor function
+        // If the function is a mutator method, return the context wrapper set accessor
         else if ($arguments == 1)
             return function($v)
             {
-                // Call the function in the private context with the accessor value and return the return value
+                // Call the function in the context of a private instance with the accessor value and return the return value
                 return $function.call($private, $v);
             };
 
         // Return the context wrapper function
         return function()
         {
-            // Apply the function in the private context with the provided arguments and return the return value
+            // Apply the function in the context of a private instance with the provided arguments and return the return value
             return $function.apply($private, arguments);
         };
     };
 
     // Create the symbols runtime helpers
-    var $_symbolsRuntimeDefaults = function($this, $defaults)
+    var $_symbolsRuntimeBuild  = function($directives, $defaults, $primitive)
     {
-        // Loop through the defaults array
-        for (var $i = 0, $j = $defaults.length; $i < $j; $i++)
+        // Loop through the build directives
+        for (var $i = 0, $j = $directives.length; $i < $j; $i++)
         {
-            // Get the default metadata and class
-            var $default = $defaults[$i],
-                $class   = $default[$_default_class];
+            // Get the directive, constraint filter, name, and value (along with the global class from the globals object)
+            var $directive = $directives[$i],
+                $filter    = $directive[$_directive_filter],
+                $name      = $directive[$_directive_name],
+                $value     = $directive[$_directive_value],
+                $default   = $filter[$_filter_default],
+                $null      = $filter[$_filter_null],
+                $global    = $_buildRuntimeGlobal($filter, $filter[$_filter_constraint], $filter[$_filter_type], $default, $null, $name),
+                $struct    = $filter[$_filter_async_struct];
 
-            // Create the default data and set it on the instance
-            $this[$default[$_default_data]] = $default[$_default_new] ?
-                                              new $class() :
-                                              $class();
+            // If the value is not a data symbol, continue
+            if (typeof $value != 'symbol')
+                continue;
+
+            // If the primitive flag is set and the filter is not a struct type, throw an exception
+            if ($primitive && !$struct)
+                $_exceptionFormat($_lang_$$_constraint_primitive,
+                                  $name,
+                                  $filter[$_filter_constraint],
+                                  $filter[$_filter_async_model] ?
+                                  $_const_keyword_model :
+                                  $_const_keyword_class);
+
+            // If the filter has either the default flag or is a struct type without the nullable modifier, set the default value descriptor for the hidden instance data on the defaults object
+            if ($default || $struct && !$null)
+                $__defineProperty($defaults, $value, $_symbolsCompilerDefault($name, $value, $filter, {}));
         }
+
+        return null;
     };
-    var $_symbolsRuntimeMatrix   = function($metaclass, $metainstance, $metalength, $constructor, $defaults, $abstract, $model)
+    var $_symbolsRuntimeMatrix = function($metaclass, $metainstance, $metalength, $build, $defaults, $abstract, $model, $primitive)
     {
         // If the class is abstract, return the runtime class constructor
         if ($abstract)
@@ -5027,91 +5665,125 @@ if (typeof jT_Shorthand != 'string')
                 $_exception($_lang_$$_class_abstract_instance);
             };
 
+        // Get the root data symbol (but the root metainstance has yet to be compiled)
+        var $metaroot   = null,
+            $symbolRoot = $metaclass[0][$_cache_symbols_root];
+
         // Create the runtime class constructor
         var $class = function()
         {
-            // Check if the new operator was used and if not, create an instance
-            var $new         = this instanceof $class && this[$_symbol_instance] !== this,
-                $this        = $new ?
-                               this :
-                               $__create($class.prototype),
+            // If a build array is pending, execute the build array on the prototype
+            if ($build)
+                $build = $_symbolsRuntimeBuild($build, $defaults, $primitive);
+
+            // Check if the new operator was used and if not, create the hidden instance data
+            var $new         = this instanceof $class,
+                $this        = $__create($defaults),
                 $base        = null,
-                $context     = null,
+                $construct   = null,
                 $private     = null,
                 $protected   = null,
-                $public      = $this,
+                $public      = null,
+                $constructor = null,
                 $return      = undefined;
+
+            // If the root metainstance has not been cached, store it
+            if (!$metaroot)
+                $metaroot = $metainstance[$metalength];
+
+            // Create the root instance object (and set it in the hidden instance data)
+            var $root = $this[$symbolRoot] = $__create($metaroot);
+
+            // Set the hidden instance data on the root instance object (and lock the instance type on it as well)
+            $root[$_symbol_data]     = $this;
+            $root[$_symbol_instance] = $root;
+
+            // If the global prototype lock flag is set, freeze the root instance object
+            if ($_protoLock)
+                $__freeze($root);
 
             // Loop through the metadata from base to derived
             for (var $i = $metalength - 1; $i >= 0; $i--)
             {
-                // Get the cache from the metaclass and the directive from the metainstance
+                // Get the cache from the metaclass and the symbols directive from the metainstance
                 var $cache     = $metaclass[$i],
                     $directive = $metainstance[$i];
 
-                // Create the private, protected, and public instance objects
-                $private   = $this[$cache[$_cache_symbols_private]]   = $__create($directive[$_directive_symbols_private]);
-              //$protected = $this[$cache[$_cache_symbols_protected]] = $__create($directive[$_directive_symbols_protected]);
-                $public    = $this[$cache[$_cache_symbols_public]]    = $__create($directive[$_directive_symbols_public]);
+                // Create the private, protected, and public instance objects (and set them in the hidden instance data)
+                $private   = $this[$cache[$_cache_symbols_private]]   = $__create($directive[$_instance_private]);
+              //$protected = $this[$cache[$_cache_symbols_protected]] = $__create($directive[$_instance_protected]);
+                $public    = $this[$cache[$_cache_symbols_public]]    = $__create($directive[$_instance_public]);
                 
-                // Set the private instance object data and lock the instance type on the object
-                $private[$_symbol_data]     = $this;
-                $private[$_symbol_instance] = $private;
-
-                // Set the protected instance object data and lock the instance type on the object
+                // Set the hidden instance data on the private, protected, and public instance objects (and lock the instance type on them as well)
+                $private  [$_symbol_data]     = $this;
+                $private  [$_symbol_instance] = $private;
               //$protected[$_symbol_data]     = $this;
               //$protected[$_symbol_instance] = $protected;
-                
-                // Set the public instance object data and lock the instance type on the object
-                $public[$_symbol_data]     = $this;
-                $public[$_symbol_instance] = $public;
+                $public   [$_symbol_data]     = $this;
+                $public   [$_symbol_instance] = $public;
 
-                // If the cache is a base cache
+                // If the global prototype lock flag is set
+                if ($_protoLock)
+                {
+                    // Freeze the private, protected, and public instance objects
+                    $__freeze($private);
+                  //$__freeze($protected);
+                    $__freeze($public);
+                }
+
+                // If the cache is inherited
                 if ($i > 0)
                 {
-                    // Create the base instance object
-                    $base = $this[$cache[$_cache_symbols_base]] = $__create($directive[$_directive_symbols_base]);
-                    
-                    // Set the base instance object data and lock the instance type on the object
+                    // Create the base instance object (and set it in the hidden instance data)
+                    $base = $this[$cache[$_cache_symbols_base]] = $__create($directive[$_instance_base]);
+
+                    // Set the hidden instance data on the base instance object (and lock the instance type on it as well)
                     $base[$_symbol_data]     = $this;
                     $base[$_symbol_instance] = $base;
+
+                    // If the global prototype lock flag is set, freeze the base instance object
+                    if ($_protoLock)
+                        $__freeze($base);
                 }
                 // Reset the base instance object
                 else
                     $base = null;
 
-                // If the class has no constructor, continue
-                if (!$constructor)
+                // If the new keyword was not used and the class is a model, continue
+                if (!$new && $model)
                     continue;
 
-                // Get the constructor metainstance from the directive
-                var $metaconstructor = $directive[$_directive_symbols_constructor];
+                // Get the construct metainstance from the symbols directive
+                var $metaconstruct = $directive[$_instance_construct];
 
-                // If a constructor metainstance was found
-                if ($metaconstructor)
-                {
-                    // Create the constructor context instance object
-                    $context = $this[$cache[$_cache_symbols_constructor]] = $__create($metaconstructor);
-                    
-                    // Set the constructor context instance object data and lock the instance type on the object
-                    $context[$_symbol_data]     = $this;
-                    $context[$_symbol_instance] = $context;
-                }
+                // If a construct metainstance was not found, continue
+                if (!$metaconstruct)
+                    continue;
+
+                // Create the construct instance object (and set it in the hidden instance data)
+                $construct = $this[$cache[$_cache_symbols_construct]] = $__create($metaconstruct);
+
+                // Set the hidden instance data on the construct instance object (and lock the instance type on it as well)
+                $construct[$_symbol_data]     = $this;
+                $construct[$_symbol_instance] = $construct;
+
+                // If the global prototype lock flag is set, freeze the construct instance object
+                if ($_protoLock)
+                    $__freeze($construct);
+
+                // Get the constructor from the cache
+                $constructor = $cache[$_cache_constructor];
             }
 
-            // If default metadata was provided, construct the default data
-            if ($defaults)
-                $_symbolsRuntimeDefaults($this, $defaults);
-
-            // If the class has a constructor and the new operator was used or the class is not a model, apply the constructor and store its return value
+            // If the class has a constructor and the new operator was used or the class is not a model, apply the constructor in the context of a construct instance and store its return value
             if ($constructor && ($new || !$model))
-                $return = $constructor.apply($context, arguments);
+                $return = $constructor.apply($construct, arguments);
 
-            // Set the readonly data flag
+            // Set the readonly flag in the hidden instance data
             $this[$_symbol_data_readonly] = true;
 
-            // If the constructor returned neither undefined nor the constructor context instance object, return its return value
-            if ($return !== undefined && $return !== $context)
+            // If the constructor returned neither undefined nor the construct instance object, return its return value
+            if ($return !== undefined && $return !== $construct)
                 return $return;
 
             // Return the public instance object
@@ -5121,38 +5793,74 @@ if (typeof jT_Shorthand != 'string')
         // Return the runtime class constructor
         return $class;
     };
-    var $_symbolsRuntimeStruct   = function($metaclass, $metainstance, $metalength, $constructor, $defaults)
+    var $_symbolsRuntimeStruct = function($metaclass, $metainstance, $build, $defaults, $constructor, $primitive)
     {
+        // Get the private, public, and root data symbols (but the private, public, and root metainstances have yet to be compiled)
+        var $cache         = $metaclass[0],
+            $metaprivate   = null,
+            $metapublic    = null,
+            $metaroot      = null,
+            $symbolPrivate = $cache[$_cache_symbols_private],
+            $symbolPublic  = $cache[$_cache_symbols_public],
+            $symbolRoot    = $cache[$_cache_symbols_root];
+
         // Create the runtime struct constructor
         var $struct = function()
         {
-            // Check if the new operator was used and if not, create an instance
-            var $new         = this instanceof $struct && !this[$_symbol_instance],
-                $this        = $new ?
-                               this :
-                               $__create($struct.prototype);
+            // If a build array is pending, execute the build array on the prototype
+            if ($build)
+                $build = $_symbolsRuntimeBuild($build, $defaults, $primitive);
 
-            // Create the private and public instance objects
-            var $private = $this[$metaclass[$_cache_symbols_private]] = $__create($metainstance[$_directive_symbols_private]);
-            var $public  = $this[$metaclass[$_cache_symbols_public]]  = $__create($metainstance[$_directive_symbols_public]);
+            // Check if the new operator was used and if not, create the hidden instance data
+            var $new  = this instanceof $struct,
+                $this = $__create($defaults);
 
-            // Set the private instance object data and lock the instance type on the object
+            // If the root metainstance has not been cached, store it
+            if (!$metaroot)
+                $metaroot = $metainstance[1];
+
+            // Create the root instance object (and set it in the hidden instance data)
+            var $root = $this[$symbolRoot] = $__create($metaroot);
+
+            // Set the hidden instance data on the root instance object (and lock the instance type on it as well)
+            $root[$_symbol_data]     = $this;
+            $root[$_symbol_instance] = $root;
+
+            // If the global prototype lock flag is set, freeze the root instance object
+            if ($_protoLock)
+                $__freeze($root);
+
+            // If the private and public metainstances have not been cached
+            if (!$metaprivate && !$metapublic)
+            {
+                // Store the private and public metainstances
+                $metaprivate = $metainstance[0][$_instance_private];
+                $metapublic  = $metainstance[0][$_instance_public];
+            }
+
+            // Create the private and public instance objects (and set them in the hidden instance data)
+            var $private = $this[$symbolPrivate] = $__create($metaprivate);
+            var $public  = $this[$symbolPublic]  = $__create($metapublic);
+
+            // Set the hidden instance data on the private and public instance objects (and lock the instance type on them as well)
             $private[$_symbol_data]     = $this;
             $private[$_symbol_instance] = $private;
+            $public [$_symbol_data]     = $this;
+            $public [$_symbol_instance] = $public;
 
-            // Set the public instance object data and lock the instance type on the object
-            $public[$_symbol_data]     = $this;
-            $public[$_symbol_instance] = $public;
+            // If the global prototype lock flag is set
+            if ($_protoLock)
+            {
+                // Freeze the private and public instance objects
+                $__freeze($private);
+                $__freeze($public);
+            }
 
-            // If default metadata was provided, construct the default data
-            if ($defaults)
-                $_symbolsRuntimeDefaults($this, $defaults);
-
-            // If the struct has a constructor and the new operator was used, apply the constructor
+            // If the struct has a constructor and the new operator was used, apply the constructor in the context of a private instance
             if ($constructor && $new)
                 $constructor.apply($private, arguments);
 
-            // Set the readonly data flag
+            // Set the readonly flag in the hidden instance data
             $this[$_symbol_data_readonly] = true;
 
             // Return the public instance object
@@ -5181,10 +5889,20 @@ if (typeof jT_Shorthand != 'string')
         // Return true if the object is a class and it has the internal modifier
         return $$_isClass($class) && !!($class[$_symbol_modifiers] & $_modifiers_class_internal);
     });
+    $_defineMethod('isModel',          function($class)
+    {
+        // Return true if the object is a class and it has the model modifier
+        return $$_isClass($class) && !!($class[$_symbol_modifiers] & $_modifiers_class_model);
+    });
     $_defineMethod('isOptimizedClass', function($class)
     {
         // Return true if the object is a class and it is optimized
         return $$_isClass($class) && !!($class[$_symbol_modifiers] & $_modifiers_class_optimized);
+    });
+    $_defineMethod('isPrimitiveClass', function($class)
+    {
+        // Return true if the object is a class and it is has the primitive modifier
+        return $$_isClass($class) && !!($class[$_symbol_modifiers] & $_modifiers_class_primitive);
     });
     $_defineMethod('isSealedClass',    function($class)
     {
@@ -5329,8 +6047,15 @@ if (typeof jT_Shorthand != 'string')
     // ---------- PSEUDO-TYPE ----------
     $_defineMethod('isCallableType',  function($object)
     {
-        // Return true if the object is a function
-        return typeof $object == 'function';
+        // If the object is a null reference or undefined, return false
+        if ($object == null)
+            return false;
+
+        // Get the type of the object
+        var $type = $$_type($object);
+
+        // Return true if the object is a class or function
+        return $type == 'class' || $type == 'function';
     });
     $_defineMethod('isPrimitiveType', function($object)
     {
@@ -5398,44 +6123,44 @@ if (typeof jT_Shorthand != 'string')
         // Return the base class from the base cache
         return $metaclass[1][$_cache_class];
     });
-    //$_defineMethod('export', function($class)
-    //{
-    //    // CHECK $class
-    //    if (!$$_isClass($class))
-    //    {
-    //        // If the debug flag is set, throw an exception
-    //        if ($_debug)
-    //            $_exceptionArguments('export', arguments);
+    $_defineMethod('export', function($class)
+    {
+        //// CHECK $class
+        //if (!$$_isClass($class))
+        //{
+        //    // If the debug flag is set, throw an exception
+        //    if ($_debug)
+        //        $_exceptionArguments('export', arguments);
 
-    //        // Return an empty string primitive
-    //        return '';
-    //    }
+        //    // Return an empty string primitive
+        //    return '';
+        //}
 
-    //    // If the class has the import flag
-    //    if ($class[$_symbol_import])
-    //    {
-    //        // If the debug flag is set, throw an exception
-    //        if ($_debug)
-    //            $_exceptionFormat($_lang_export_import);
+        //// If the class has the import flag
+        //if ($class[$_symbol_import])
+        //{
+        //    // If the debug flag is set, throw an exception
+        //    if ($_debug)
+        //        $_exceptionFormat($_lang_export_import);
 
-    //        // Return an empty string primitive
-    //        return '';
-    //    }
+        //    // Return an empty string primitive
+        //    return '';
+        //}
 
-    //    // If the class has the struct flag
-    //    if ($class[$_symbol_struct])
-    //    {
-    //        // If the debug flag is set, throw an exception
-    //        if ($_debug)
-    //            $_exceptionFormat($_lang_export_struct);
+        //// If the class has the struct flag
+        //if ($class[$_symbol_struct])
+        //{
+        //    // If the debug flag is set, throw an exception
+        //    if ($_debug)
+        //        $_exceptionFormat($_lang_export_struct);
 
-    //        // Return an empty string primitive
-    //        return '';
-    //    }
+        //    // Return an empty string primitive
+        //    return '';
+        //}
 
-    //    // Return the precompiled string
-    //    return $class[$_symbol_precompile]($_lock) || '';
-    //});
+        //// Return the precompiled string
+        //return $class[$_symbol_precompile]($_lock) || '';
+    });
 
     // ---------- FUNCTION ----------
     $_defineMethod('empty', function()
@@ -5448,7 +6173,7 @@ if (typeof jT_Shorthand != 'string')
     });
 
     // ---------- OBJECT ----------
-    $_defineMethod('accessor', function($object, $key, $get, $set, $enumerable, $configurable, $type)
+    $_defineMethod('accessor', function($object, $key, $get, $set, $enumerable, $configurable, $constraint)
     {
         // If the object is a primitive value, the key is not a primitive string, or either the get or set accessor is neither null, undefined, nor a function
         if ($$_isPrimitive($object) || typeof $key != 'string' || $get != null && typeof $get != 'function' || $set != null && typeof $set != 'function')
@@ -5462,10 +6187,10 @@ if (typeof jT_Shorthand != 'string')
         }
 
         // If a type constraint was provided
-        if ($type)
+        if ($constraint)
         {
-            // Create the constraint handler
-            var $constraint = $_buildRuntimeConstraint(null, $type);
+            // Create the constraint filter
+            var $filter = $_buildRuntimeFilter($constraint);
 
             // If either a get or set accessor was provided
             if ($get || $set)
@@ -5479,8 +6204,8 @@ if (typeof jT_Shorthand != 'string')
                     // Create the get accessor type constraint wrapper
                     $get = function()
                     {
-                        // Call the get accessor in the given context and return its return value within the constraint
-                        return $constraint($functionGet.call(this));
+                        // Call the get accessor in the given context and return its return value within the applied constraint filter
+                        return $filter($functionGet.call(this));
                     };
                 }
 
@@ -5493,15 +6218,15 @@ if (typeof jT_Shorthand != 'string')
                     // Create the set accessor type constraint wrapper
                     $set = function($v)
                     {
-                        // Call the set accessor in the given context along with the provided argument within the constraint and return its return value
-                        return $functionSet.call(this, $constraint($v));
+                        // Call the set accessor in the given context along with the provided argument within the applied constraint filter and return its return value
+                        return $functionSet.call(this, $filter($v));
                     };
                 }
             }
             else
             {
-                // Create the value
-                var $value = $constraint();
+                // Create the default value within the applied constraint filter
+                var $value = $filter();
 
                 // Create the auto get and set accessors
                 $get = function()
@@ -5511,8 +6236,8 @@ if (typeof jT_Shorthand != 'string')
                 };
                 $set = function($v)
                 {
-                    // Set the value
-                    $value = $constraint($v);
+                    // Set the value within the applied constraint filter
+                    $value = $filter($v);
                 };
             }
         }
