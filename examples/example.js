@@ -26,7 +26,7 @@ jTypes('abstract Shape', function(x, y)
     'public abstract int perimeter': null
 });
 
-jTypes('Circle', jTypes.Shape, function(x, y, radius)
+jTypes('Circle : Shape', function(x, y, radius)
 {
     this.__base(x, y);
 
@@ -45,7 +45,7 @@ jTypes('Circle', jTypes.Shape, function(x, y, radius)
     }
 });
 
-jTypes('Rectangle', jTypes.Shape, function(x, y, width, height)
+jTypes('Rectangle : Shape', function(x, y, width, height)
 {
     this.__base(x, y);
 

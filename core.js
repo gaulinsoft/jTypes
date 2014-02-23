@@ -19,27 +19,31 @@
 
 // ########## GLOBALS ##########
 
-// Ensure the global function lock flag is a boolean
+// ---------- FUNCTION LOCK ----------
 if (typeof jT_FunctionLock != 'boolean')
     jT_FunctionLock = false;
 
-// Ensure the global harmony flag is a boolean
+// ---------- HARMONY ----------
 if (typeof jT_Harmony != 'boolean')
     jT_Harmony = true;
 
-// Ensure the global unsafe harmony flag is a boolean
-if (typeof jT_HarmonyUnsafe != 'boolean')
-    jT_HarmonyUnsafe = true;//false;
+// ---------- LEGACY ----------
+if (typeof jT_Legacy != 'boolean')
+    jT_Legacy = false;//true;
 
-// Ensure the global prototype lock flag is a boolean
+// ---------- PROTOTYPE LOCK ----------
 if (typeof jT_PrototypeLock != 'boolean')
     jT_PrototypeLock = false;
 
-// Ensure the global shorthand is a string
+// ---------- SHORTHAND ----------
 if (typeof jT_Shorthand != 'string')
     jT_Shorthand = typeof jT_Shorthand != 'boolean' || jT_Shorthand ?
                    '$$' :
                    '';
+
+// ---------- WRITABLE ----------
+if (typeof jT_Writable != 'boolean')
+    jT_Writable = typeof intellisense != 'undefined';
 
 (function(window, undefined)
 {
@@ -52,17 +56,17 @@ if (typeof jT_Shorthand != 'string')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0b580';
+        $_version = '2.2.0b597';
 
     // ########## FLAGS ##########
 
     // Create the internal flags
-    var $_debug         = !$_minify,
-        $_funcLock      = jT_FunctionLock,
-        $_harmony       = jT_Harmony,
-        $_harmonyUnsafe = jT_HarmonyUnsafe,
-        $_protoLock     = jT_PrototypeLock,
-        $_strict        = false;
+    var $_debug     = !$_minify,
+        $_funcLock  = jT_FunctionLock,
+        $_harmony   = jT_Harmony,
+        $_legacy    = jT_Legacy,
+        $_protoLock = jT_PrototypeLock,
+        $_strict    = false;
 
     // ########## LANGUAGE ##########
 
@@ -895,8 +899,8 @@ if (typeof jT_Shorthand != 'string')
         return $_const_prefix_symbol + $_generator();
     };
 
-    // If symbols are not supported, the harmony flag is set, and the global harmony unsafe flag is set, expose symbols as strings
-    if (!$__symbol && $_harmony && $_harmonyUnsafe)
+    // If symbols are not supported, the harmony flag is set, and the global legacy flag is not set, expose symbols as strings
+    if (!$__symbol && $_harmony && !$_legacy)
         $__symbol = $_symbolGenerator;
 
     // Create the obfuscated symbol hashes
@@ -983,7 +987,7 @@ if (typeof jT_Shorthand != 'string')
 
     // If the global prototype lock flag was set, freeze the base prototype of all class prototypes
     if ($_protoLock)
-        $__freeze($_prototype)
+        $__freeze($_prototype);
 
     // ---------- SYMBOLS ----------
 
@@ -1962,6 +1966,18 @@ if (typeof jT_Shorthand != 'string')
     $_defineField('intMin',   $_const_int_min,       false);
     $_defineField('max',      $_const_float_max,     false);
     $_defineField('min',      $_const_float_min,     false);
+
+    // ---------- SUPPORT ----------
+
+    // Create the support object
+    var $_support = {};
+
+    // Set the support object flags
+    $_data($_support, 'proxy', !!$__proxy, false, true);
+    $_data($_support, 'symbol', $__symbol && $__symbol !== $_symbolGenerator, false, true);
+
+    // Define the support object
+    $_defineField('support', $_support, false);
 
     // ########## TYPES ##########
 
@@ -4831,7 +4847,7 @@ if (typeof jT_Shorthand != 'string')
             $type = $type.substr(0, $type.length - 1);
         
         // If the type string starts with a capital letter or the first letter of the symbol prefix
-        if ($type[0] >= 'A' && $type[0] <= 'Z' || $type[0] == $_const_prefix_symbol[0])
+        if ($type[0] >= 'A' && $type[0] <= 'Z' || $name && $type[0] == $_const_prefix_symbol[0])
         {
             // Unset the native flag
             $native = false;
@@ -6065,15 +6081,15 @@ if (typeof jT_Shorthand != 'string')
     });
 
     // ---------- TYPE ----------
-    $_defineMethod('isObject',    function($object)
-    {
-        // Return true if the object is neither undefined nor null
-        return $object != null;
-    });
     $_defineMethod('isNull',      function($argument)
     {
         // Return true if the argument is null
         return $argument === null;
+    });
+    $_defineMethod('isObject',    function($object)
+    {
+        // Return true if the object is neither undefined nor null
+        return $object != null;
     });
     $_defineMethod('isUndefined', function($argument)
     {
@@ -6096,6 +6112,10 @@ if (typeof jT_Shorthand != 'string')
         // If the object is a null reference or undefined, return false
         if ($object == null)
             return false;
+
+        // If the object is a function, return true
+        if (typeof $object == 'function')
+            return true;
 
         // Get the type of the object
         var $type = $$_type($object);
@@ -6472,15 +6492,15 @@ if (typeof jT_Shorthand != 'string')
         // Set the module exports as the global namespace
         module.exports = $$;
     }
-    // If a global reference was found
-    else if (window)
+    // If a global reference was found and the global namespace has yet to be defined (or the global writable flag is set)
+    else if (window && (!window.jTypes || jT_Writable))
     {
         // If the global shorthand is set, define the shorthand
         if (jT_Shorthand)
-            $_data(window, jT_Shorthand, $$, false, true);
+            $_data(window, jT_Shorthand, $$, jT_Writable, true);
 
         // Define the global namespace
-        $_data(window, 'jTypes', $$, false, true);
+        $_data(window, 'jTypes', $$, jT_Writable, true);
     }
     // Return the global namespace
     else
