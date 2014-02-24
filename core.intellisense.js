@@ -859,8 +859,7 @@
             $itemExternal = $_item('__type', 'reserved', !$internal ? $class : null, $typeGlyph),
             $itemInternal = $_item('__type', 'reserved', $class, $typeGlyph);
 
-        // Push the data, external, internal, public, and self reference items into the items arrays
-        $itemsConstruct.push($itemData);
+        // Push the external, internal, public, and self reference items into the items arrays
         $itemsConstruct.push($itemSelf);
         $itemsConstruct.push($itemThis);
         $itemsConstruct.push($itemInternal);
@@ -870,6 +869,10 @@
         $itemsPublic   .push($itemSelf);
         $itemsPublic   .push($itemExternal);
 
+        // If the class is not a struct, push the data item into the construct items array
+        if (!$struct)
+            $itemsConstruct.push($itemData);
+
         // Create the data, external, internal, self reference, and public descriptors
         var $descriptorData     = { 'value': $itemData    .value },
             $descriptorExternal = { 'value': $itemExternal.value },
@@ -878,7 +881,6 @@
             $descriptorThis     = { 'value': $itemThis    .value };
 
         // Set the self reference, public, internal, and external descriptors on the contexts
-        Object.defineProperty($thisConstruct, '__data', $descriptorData);
         Object.defineProperty($thisConstruct, '__self', $descriptorSelf);
         Object.defineProperty($thisPrivate,   '__self', $descriptorSelf);
         Object.defineProperty($thisPublic,    '__self', $descriptorSelf);
@@ -888,6 +890,10 @@
         Object.defineProperty($thisConstruct, '__type', $descriptorInternal);
         Object.defineProperty($thisPrivate,   '__type', $descriptorInternal);
         Object.defineProperty($thisPublic,    '__type', $descriptorExternal);
+
+        // If the class is not a struct, set the data descriptor on the construct context
+        if (!$struct)
+            Object.defineProperty($thisConstruct, '__data', $descriptorData);
 
         // If the class is unlocked
         if ($unlocked)
@@ -1073,14 +1079,18 @@
             {
                 // Get the inherited protected item and its name
                 var $item     = $inheritProtected[$i],
-                    $itemName = $itemCurrent.name;
+                    $itemName = $item.name;
+
+                // If the name is reserved, continue
+                if ($itemName == 'as' || ($model || $struct) && ($itemName == 'clone' || $itemName == 'equals') || $itemName == 'is' || $itemName == 'type' || $itemName == '__base' || $itemName == '__data' || $itemName == '__self' || $itemName == '__this' || $itemName == '__type')
+                    continue;
 
                 // If the inherited protected item is already defined, continue
                 if (Object.prototype.hasOwnProperty.call($thisProtected, $itemName))
                     continue;
 
                 // Define the inherited protected definition
-                $defineProtected($itemName, $item.kind, $item.value, $item.descriptor);
+                $defineProtected($itemName, $item.kind, $item.value, $item.descriptor, $item.glyph);
             }
 
             // Loop through the public inherited items
@@ -1099,7 +1109,7 @@
                     continue;
 
                 // Define the inherited public definition
-                $definePublic($itemName, $item.kind, $item.value, $item.descriptor);
+                $definePublic($itemName, $item.kind, $item.value, $item.descriptor, $item.glyph);
             }
         }
 

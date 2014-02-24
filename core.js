@@ -56,7 +56,7 @@ if (typeof jT_Writable != 'boolean')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0b597';
+        $_version = '2.2.0b600';
 
     // ########## FLAGS ##########
 
@@ -84,8 +84,9 @@ if (typeof jT_Writable != 'boolean')
         $_lang_$$_access_conflict             = '"{0}" cannot have the {1} modifier in a {2}.',
         $_lang_$$_access_duplicate            = '"{0}" cannot have more than one access modifier.',
         $_lang_$$_access_invalid              = '"{0}" cannot have the private, protected, or public modifiers because it is a {1} definition.',
-        $_lang_$$_auto_invalid                = '"{0}" must implement both accessors because it is an automatically implemented property.',
+        $_lang_$$_auto_invalid                = '"{0}" must have both accessors because it is an automatically implemented property.',
         $_lang_$$_auto_invalid_default        = '"{0}" cannot have more than one default value for the automatically implemented property.',
+        $_lang_$$_auto_invalid_type           = '"{0}" must have primitive strings for accessors.',
         $_lang_$$_class_abstract_instance     = 'abstract classes cannot be instantiated.',
         $_lang_$$_class_abstract_override     = '{0} must implement the inherited abstract {2} "{1}" with the override modifier.',
         $_lang_$$_class_base_invalid          = 'class cannot have an uncompiled base class "{0}".',
@@ -135,12 +136,13 @@ if (typeof jT_Writable != 'boolean')
         $_lang_$$_primitive_constraint        = '"{0}" must have a primitive type constraint in a primitive {1}.',
         $_lang_$$_property_access_accessor    = '"{0}" must have both accessors to have an access modifier on the {1} accessor.',
         $_lang_$$_property_access_conflict    = '"{0}" cannot have the {2} modifier on the {1} accessor in a {3}.',
-        $_lang_$$_property_access_duplicate   = '"{0}" cannot have access modifiers on both property accessors.',
+        $_lang_$$_property_access_duplicate   = '"{0}" cannot have access modifiers on both accessors.',
         $_lang_$$_property_access_invalid     = '"{0}" has an invalid access modifier "{2}" on the {1} accessor.',
         $_lang_$$_property_access_restrictive = '"{0}" must have a more restrictive access modifier on the {1} accessor.',
         $_lang_$$_property_name_duplicate     = '"{0}" cannot have more than one definition for the {1} accessor.',
         $_lang_$$_property_name_empty         = '"{0}" must have at least one property accessor.',
         $_lang_$$_property_name_invalid       = '"{0}" cannot have a "{1}" property accessor.',
+        $_lang_$$_property_override_accessor  = '"{0}" must implement both accessors of the inherited abstract property.',
         $_lang_$$_property_override_invalid   = '"{0}" has no suitable {1} accessor to override.',
         $_lang_$$_property_private_abstract   = '"{0}" cannot have a private {1} accessor because it is abstract.',
         $_lang_$$_property_private_override   = '"{0}" cannot override a private {1} accessor.',
@@ -3130,9 +3132,39 @@ if (typeof jT_Writable != 'boolean')
                 if ($modifiers & $_modifiers_const)
                     $_exceptionFormat($_lang_$$_requires_or, $name, $_const_keyword_const, $_const_keyword_prototype, $_const_keyword_static);
                 
-                // If the value is null and the abstract modifier was provided, set the "method" type string
-                if ($value === null && $modifiers & $_modifiers_abstract)
-                    $type = 'method';
+                // If the abstract modifier was provided
+                if ($modifiers & $_modifiers_abstract)
+                {
+                    // If the value is an array
+                    if ($__array_isArray($value))
+                    {
+                        // If the array has a default value, throw an exception
+                        if ($value.length > 2)
+                            $_exceptionFormat($_lang_$$_abstract_auto, $name);
+
+                        // If the array does not have accessor or mutator strings, throw an exception
+                        if (typeof $value[0] != 'string' || $value.length > 1 && typeof $value[1] != 'string')
+                            $_exceptionFormat($_lang_$$_auto_invalid_type, $name);
+
+                        // Create the value object
+                        var $object = {};
+
+                        // Set the first method in the value object
+                        $object[$value[0]] = null;
+
+                        // If a second method was provided, set it in the value object
+                        if ($value.length > 1)
+                            $object[$value[1]] = null;
+
+                        // Reset the auto flag and set the "property" type string along with the value as the value object
+                        $auto  = false;
+                        $type  = 'property';
+                        $value = $object;
+                    }
+                    // If the value is null, set the "method" type string
+                    else if ($value === null)
+                        $type = 'method';
+                }
                 
                 // If no enum modifiers were provided, set the default enum modifier
                 if (!$enum)
@@ -3142,149 +3174,6 @@ if (typeof jT_Writable != 'boolean')
                 // If more than one enum modifier was provided, throw an exception
                 else if ($enum != $_modifiers_hidden && $enum != $_modifiers_visible)
                     $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_hidden, $_const_keyword_visible);
-
-                // If the value is not a field
-                if ($type != 'field')
-                {
-                    // If the private modifier was provided along with either the abstract, override, or virtual modifiers, throw an exception
-                    if ($modifiers & $_modifiers_private && $modifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual))
-                        $_exceptionFormat($_lang_$$_virtual_invalid, $name, $_const_keyword_private);
-
-                    // If the abstract modifier was provided
-                    if ($modifiers & $_modifiers_abstract)
-                    {
-                        // If the sealed modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_sealed)
-                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_abstract, $_const_keyword_sealed);
-
-                        // If the virtual modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_virtual)
-                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_abstract, $_const_keyword_virtual);
-
-                        // If the class is not abstract, throw an exception
-                        if (!$abstract)
-                            $_exceptionFormat($_lang_$$_abstract_class, $name);
-
-                        // If the value is an auto property, throw an exception
-                        if ($auto)
-                            $_exceptionFormat($_lang_$$_abstract_auto, $name);
-                    }
-
-                    // Create the base definition and modifiers references
-                    var $baseDefinition = null,
-                        $baseModifiers  = null;
-
-                    // If the override modifier was provided
-                    if ($modifiers & $_modifiers_override)
-                    {
-                        // If the new modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_new)
-                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_new, $_const_keyword_override);
-
-                        // If the virtual modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_virtual)
-                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_override, $_const_keyword_virtual);
-
-                        // Get the base definition
-                        $baseDefinition = $cache[$_cache_protected][$name];
-
-                        // If no base definition was found, throw an exception
-                        if (!$baseDefinition)
-                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
-
-                        // Get the base modifiers
-                        $baseModifiers = $baseDefinition[$_definition_modifiers];
-
-                        // Get the base type-specific modifiers
-                        var $baseAccess      = $baseModifiers & ($_modifiers_public | $_modifiers_protected),
-                            $baseEnum        = $baseModifiers & ($_modifiers_hidden | $_modifiers_visible),
-                            $baseOverridable = $baseModifiers & $_modifiers_sealed ?
-                                               0 :
-                                               $baseModifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual);
-                        
-                        // If the base definition is not overridable or does not match the type or access, enum, or readonly modifiers, throw an exception
-                        if (!$baseOverridable || $type != $baseDefinition[$_definition_type] || $access != $baseAccess || $enum != $baseEnum || $modifiers & $_modifiers_readonly ^ $baseModifiers & $_modifiers_readonly)
-                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
-
-                        // If the base constraint does not match, throw an exception
-                        if ($constraint != $baseDefinition[$_definition_constraint])
-                            $_exceptionFormat($_lang_$$_override_constraint, $name, $baseDefinition[$_definition_constraint]);
-                    }
-                    else
-                    {
-                        // If the sealed modifier was provided, throw an exception
-                        if ($modifiers & $_modifiers_sealed)
-                            $_exceptionFormat($_lang_$$_requires, $name, $_const_keyword_sealed, $_const_keyword_override);
-                        
-                        // Throw if the new modifier was improperly used (or the override modifier was required)
-                        $_definitionsCompilerThrowInherit($cache[$_cache_protected], $modifiers, $name);
-                    }
-
-                    // If the class is sealed and the virtual modifier was provided, throw an exception
-                    if ($sealed && $modifiers & $_modifiers_virtual)
-                        $_exceptionFormat($_lang_$$_virtual_sealed,
-                                          $name,
-                                          $model ?
-                                          $_const_keyword_model :
-                                          $struct ?
-                                          $_const_keyword_struct :
-                                          $_const_keyword_class);
-                    
-                    // If the value is a property
-                    if ($type == 'property')
-                    {
-                        // If the value is an auto property
-                        if ($auto)
-                        {
-                            // If the array does not have accessor and mutator strings, throw an exception
-                            if ($value.length < 2 || typeof $value[0] != 'string' || typeof $value[1] != 'string')
-                                $_exceptionFormat($_lang_$$_auto_invalid, $name);
-
-                            // If the array has more than a single default property value, throw an exception
-                            if ($value.length > 3)
-                                $_exceptionFormat($_lang_$$_auto_invalid_default, $name);
-
-                            // Set the auto property modifiers (and compile the accessor and mutator methods)
-                            $modifiers |= $_modifiers_property_auto;
-                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $struct, $name, $value[0]);
-                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $struct, $name, $value[1]);
-
-                            // Set the default value
-                            $value = $_definitionsCompilerPrimitive($value[2]);
-                        }
-                        else
-                        {
-                            // Create the value array
-                            var $array = [null, null];
-
-                            // Populate the value array and set the property modifiers
-                            $modifiers |= $_definitionsCompilerProperty($array, $cache[$_cache_protected], $modifiers, $struct, $name, $value);
-
-                            // Set the value array
-                            $value = $array;
-                        }
-                        
-                        // If the override modifier was provided, merge the inherited property modifiers into the modifiers
-                        if ($baseDefinition)
-                            $modifiers |= $baseModifiers & ($_modifiers_property_get | $_modifiers_property_get_protected | $_modifiers_property_set | $_modifiers_property_set_protected);
-                    }
-                    // If the readonly modifier was provided, throw an exception
-                    else if ($modifiers & $_modifiers_readonly)
-                        $_exceptionFormat($_lang_$$_readonly_invalid_type, $name);
-
-                    // If the abstract modifier was provided and the value is a method, create the abstract exception handler
-                    if ($modifiers & $_modifiers_abstract && $type == 'method')
-                        $value = $_definitionsCompilerAbstract($name);
-                }
-                else
-                {
-                    // Throw if any virtual modifiers were provided or the new modifier was improperly used (or the override modifier was required)
-                    $_definitionsCompilerThrowVirtual($modifiers, $name);
-                    $_definitionsCompilerThrowInherit($cache[$_cache_protected], $modifiers, $name);
-
-                    // Set the value as a primitive
-                    $value = $_definitionsCompilerPrimitive($value);
-                }
 
                 // If the value is either a field or auto property
                 if ($auto || $type == 'field')
@@ -3308,7 +3197,161 @@ if (typeof jT_Writable != 'boolean')
                 }
                 // If a constraint was provided and it has both the cast and default modifiers, throw an exception
                 else if ($constraint && $constraint[0] == '~' && $constraint[$constraint.length - 1] == '!')
-                        $_exceptionFormat($_lang_$$_conflict_constraint, $name, $constraint);
+                    $_exceptionFormat($_lang_$$_conflict_constraint, $name, $constraint);
+
+                // If the value is not a field
+                if ($type != 'field')
+                {
+                    // If the private modifier was provided along with either the abstract, override, or virtual modifiers, throw an exception
+                    if ($modifiers & $_modifiers_private && $modifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual))
+                        $_exceptionFormat($_lang_$$_virtual_invalid, $name, $_const_keyword_private);
+
+                    // If the abstract modifier was provided
+                    if ($modifiers & $_modifiers_abstract)
+                    {
+                        // If the sealed modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_sealed)
+                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_abstract, $_const_keyword_sealed);
+
+                        // If the virtual modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_virtual)
+                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_abstract, $_const_keyword_virtual);
+
+                        // If the class is not abstract, throw an exception
+                        if (!$abstract)
+                            $_exceptionFormat($_lang_$$_abstract_class, $name);
+
+                        // If the value is a method, create the abstract exception handler
+                        if ($type == 'method')
+                            $value = $_definitionsCompilerAbstract($name);
+                    }
+
+                    // If the value is a property
+                    if ($type == 'property')
+                    {
+                        // If the value is an auto property
+                        if ($auto)
+                        {
+                            // If the array does not have both the accessor and mutator strings, throw an exception
+                            if ($value.length < 2)
+                                $_exceptionFormat($_lang_$$_auto_invalid, $name);
+
+                            // If the array does not have accessor and mutator strings, throw an exception
+                            if (typeof $value[0] != 'string' || typeof $value[1] != 'string')
+                                $_exceptionFormat($_lang_$$_auto_invalid_type, $name);
+
+                            // If the array has more than a single default property value, throw an exception
+                            if ($value.length > 3)
+                                $_exceptionFormat($_lang_$$_auto_invalid_default, $name);
+
+                            // Set the auto property modifiers (and compile the accessor and mutator methods)
+                            $modifiers |= $_modifiers_property_auto;
+                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $struct, $name, $value[0]);
+                            $modifiers |= $_definitionsCompilerAccessor(null, $cache[$_cache_protected], $modifiers, $struct, $name, $value[1]);
+
+                            // Set the default value
+                            $value = $_definitionsCompilerPrimitive($value[2]);
+                        }
+                        else
+                        {
+                            // Create the value array
+                            var $array = [null, null];
+
+                            // Populate the value array and set the property modifiers
+                            $modifiers |= $_definitionsCompilerProperty($array, $cache[$_cache_protected], $modifiers, $struct, $name, $value);
+
+                            // Set the value as the value array
+                            $value = $array;
+                        }
+                    }
+                    // If the readonly modifier was provided, throw an exception
+                    else if ($modifiers & $_modifiers_readonly)
+                        $_exceptionFormat($_lang_$$_readonly_invalid_type, $name);
+
+                    // If the override modifier was provided
+                    if ($modifiers & $_modifiers_override)
+                    {
+                        // If the new modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_new)
+                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_new, $_const_keyword_override);
+
+                        // If the virtual modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_virtual)
+                            $_exceptionFormat($_lang_$$_conflict_and, $name, $_const_keyword_override, $_const_keyword_virtual);
+
+                        // Get the base definition
+                        var $baseDefinition = $cache[$_cache_protected][$name];
+
+                        // If no base definition was found, throw an exception
+                        if (!$baseDefinition)
+                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
+
+                        // Get the base modifiers
+                        var $baseModifiers   = $baseDefinition[$_definition_modifiers],
+                            $baseAccess      = $baseModifiers & ($_modifiers_public | $_modifiers_protected),
+                            $baseEnum        = $baseModifiers & ($_modifiers_hidden | $_modifiers_visible),
+                            $baseOverridable = $baseModifiers & $_modifiers_sealed ?
+                                               0 :
+                                               $baseModifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual);
+                        
+                        // If the base definition is not overridable or does not match the type or access, enum, or readonly modifiers, throw an exception
+                        if (!$baseOverridable || $type != $baseDefinition[$_definition_type] || $access != $baseAccess || $enum != $baseEnum || $modifiers & $_modifiers_readonly ^ $baseModifiers & $_modifiers_readonly)
+                            $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
+
+                        // If the base constraint does not match, throw an exception
+                        if ($constraint != $baseDefinition[$_definition_constraint])
+                            $_exceptionFormat($_lang_$$_override_constraint, $name, $baseDefinition[$_definition_constraint]);
+
+                        // If the value is a property
+                        if ($type == 'property')
+                        {
+                            // Get the inherited property modifiers
+                            var $baseProperty = $baseModifiers & ($_modifiers_property_get | $_modifiers_property_get_protected | $_modifiers_property_set | $_modifiers_property_set_protected);
+
+                            // If the base definition is abstract
+                            if ($baseModifiers & $_modifiers_abstract)
+                            {
+                                // Get the property modifiers
+                                var $property = $modifiers & ($_modifiers_property_get | $_modifiers_property_get_protected | $_modifiers_property_set | $_modifiers_property_set_protected);
+                            
+                                // If base definition does not match the property modifiers, throw an exception
+                                if ($property != $baseProperty)
+                                    $_exceptionFormat($_lang_$$_property_override_accessor, $name);
+                            }
+                            // Merge the inherited property modifiers into the modifiers
+                            else
+                                $modifiers |= $baseProperty;
+                        }
+                    }
+                    else
+                    {
+                        // If the sealed modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_sealed)
+                            $_exceptionFormat($_lang_$$_requires, $name, $_const_keyword_sealed, $_const_keyword_override);
+                        
+                        // Throw if the new modifier was improperly used (or the override modifier was required)
+                        $_definitionsCompilerThrowInherit($cache[$_cache_protected], $modifiers, $name);
+                    }
+
+                    // If the class is sealed and the virtual modifier was provided, throw an exception
+                    if ($sealed && $modifiers & $_modifiers_virtual)
+                        $_exceptionFormat($_lang_$$_virtual_sealed,
+                                          $name,
+                                          $model ?
+                                          $_const_keyword_model :
+                                          $struct ?
+                                          $_const_keyword_struct :
+                                          $_const_keyword_class);
+                }
+                else
+                {
+                    // Throw if any virtual modifiers were provided or the new modifier was improperly used (or the override modifier was required)
+                    $_definitionsCompilerThrowVirtual($modifiers, $name);
+                    $_definitionsCompilerThrowInherit($cache[$_cache_protected], $modifiers, $name);
+
+                    // Set the value as a primitive
+                    $value = $_definitionsCompilerPrimitive($value);
+                }
 
                 // If the access modifier is public, set the definition in the public definitions
                 if ($access == $_modifiers_public)
