@@ -29,7 +29,7 @@ if (typeof jT_Harmony != 'boolean')
 
 // ---------- LEGACY ----------
 if (typeof jT_Legacy != 'boolean')
-    jT_Legacy = false;//true;
+    jT_Legacy = false;
 
 // ---------- PROTOTYPE LOCK ----------
 if (typeof jT_PrototypeLock != 'boolean')
@@ -56,12 +56,13 @@ if (typeof jT_Writable != 'boolean')
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0b600';
+        $_version = '2.2.0b608';
 
     // ########## FLAGS ##########
 
     // Create the internal flags
-    var $_debug     = !$_minify,
+    var $_cache     = false,
+        $_debug     = false,
         $_funcLock  = jT_FunctionLock,
         $_harmony   = jT_Harmony,
         $_legacy    = jT_Legacy,
@@ -75,7 +76,7 @@ if (typeof jT_Writable != 'boolean')
         $_lang_exception_arguments    = '"{0}({1})" has some invalid arguments.',
         $_lang_exception_suffix       = ' [jTypes]',
         $_lang_exception_suffix_class = ' [jTypes::{0}]';
-    
+
     // Create the language constants
     var $_lang_$$_abstract_accessor           = '"{0}" cannot be accessed because it is an abstract property.',
         $_lang_$$_abstract_auto               = '"{0}" cannot have the abstract modifier because it is an automatically implemented property.',
@@ -104,6 +105,7 @@ if (typeof jT_Writable != 'boolean')
         $_lang_$$_class_inherit_locked        = '{0} must inherit from an unlocked {0} to have the unlocked modifier.',
         $_lang_$$_class_inherit_nonexpando    = '{0} must inherit from an expando {0} to have the expando modifier.',
         $_lang_$$_class_inherit_nonimport     = '{0} must inherit from an imported {0} to have a precompiled string.',
+        $_lang_$$_class_inherit_nonprimitive  = '{0} must inherit from a primitive {0} to have the primitive modifier.',
         $_lang_$$_class_inherit_sealed        = '{0} cannot inherit from a sealed {1}.',
         $_lang_$$_class_inherit_unlocked      = '{0} must have the unlocked modifier to inherit from an unlocked {0}.',
         $_lang_$$_class_inherit_unoptimized   = '{0} must inherit from an optimized {0} to have the optimized modifier.',
@@ -118,7 +120,7 @@ if (typeof jT_Writable != 'boolean')
         $_lang_$$_constraint_invalid          = '"{0}" has an invalid type constraint "{1}".',
         $_lang_$$_constraint_invalid_generic  = '"{1}" is not a valid type constraint.',
         $_lang_$$_constraint_invalid_value    = '"{0}" must have a value of the type {1}.',
-        $_lang_$$_constraint_primitive        = '"{0}" cannot have a non-primitive type constraint "{1}" because it is a {2}.',
+        $_lang_$$_constraint_primitive        = '"{0}" cannot have a type constraint "{1}" on fields or automatically implemented properties.',
         $_lang_$$_context_generic             = '"{0}" is not generic and must be accessed on an instance.',
         $_lang_$$_keyword_duplicate           = '"{0}" cannot have a duplicate {1} modifier.',
         $_lang_$$_keyword_invalid             = '"{0}" has an invalid modifier "{1}".',
@@ -142,7 +144,7 @@ if (typeof jT_Writable != 'boolean')
         $_lang_$$_property_name_duplicate     = '"{0}" cannot have more than one definition for the {1} accessor.',
         $_lang_$$_property_name_empty         = '"{0}" must have at least one property accessor.',
         $_lang_$$_property_name_invalid       = '"{0}" cannot have a "{1}" property accessor.',
-        $_lang_$$_property_override_accessor  = '"{0}" must implement both accessors of the inherited abstract property.',
+        $_lang_$$_property_override_accessor  = '"{0}" must override both accessors of the inherited abstract property.',
         $_lang_$$_property_override_invalid   = '"{0}" has no suitable {1} accessor to override.',
         $_lang_$$_property_private_abstract   = '"{0}" cannot have a private {1} accessor because it is abstract.',
         $_lang_$$_property_private_override   = '"{0}" cannot override a private {1} accessor.',
@@ -182,19 +184,19 @@ if (typeof jT_Writable != 'boolean')
         $__isPrototypeOf__          = $__objectProto__.isPrototypeOf,
         $__toString__               = $__objectProto__.toString,
         $__valueOf__                = $__objectProto__.valueOf,
-        
+
         // ---------- ARRAY ----------
         $__array            = Array,
         $__arrayProto__     = $__array.prototype,
         $__array_isArray    = $__array.isArray,
         $__array_toString__ = $__arrayProto__.toString,
-        
+
         // ---------- BOOLEAN ----------
         $__boolean            = Boolean,
         $__booleanProto__     = $__boolean.prototype,
         $__boolean_toString__ = $__booleanProto__.toString,
         $__boolean_valueOf__  = $__booleanProto__.valueOf,
-        
+
         // ---------- DATE ----------
         $__date            = Date,
         $__dateProto__     = $__date.prototype,
@@ -203,34 +205,34 @@ if (typeof jT_Writable != 'boolean')
         $__date_utc__      = $__date.UTC,
         $__date_toString__ = $__dateProto__.toString,
         $__date_valueOf__  = $__dateProto__.valueOf,
-        
+
         // ---------- ERROR ----------
         $__error            = Error,
         $__errorProto__     = $__error.prototype,
         $__error_toString__ = $__errorProto__.toString,
-        
+
         // ---------- FUNCTION ----------
         $__function            = Function,
         $__functionProto__     = $__function.prototype,
         $__function_apply__    = $__functionProto__.apply,
         $__function_call__     = $__functionProto__.call,
         $__function_toString__ = $__functionProto__.toString,
-        
+
         // ---------- NUMBER ----------
         $__number            = Number,
         $__numberProto__     = $__number.prototype,
         $__number_toString__ = $__numberProto__.toString,
         $__number_valueOf__  = $__numberProto__.valueOf,
-        
+
         // Store the number constants
         $__number_maxValue__         = $__number.MAX_VALUE,
         $__number_minValue__         = $__number.MIN_VALUE,
         $__number_negativeInfinity__ = $__number.NEGATIVE_INFINITY,
         $__number_positiveInfinity__ = $__number.POSITIVE_INFINITY,
-        
+
         // Store the global NaN constant
         $__NaN__ = NaN,
-        
+
         // Store the number-related global functions
         $__ceil       = Math.ceil,
         $__floor      = Math.floor,
@@ -239,23 +241,23 @@ if (typeof jT_Writable != 'boolean')
         $__parseFloat = parseFloat,
         $__parseInt   = parseInt,
         $__random     = Math.random,
-        
+
         // ---------- REGEXP ----------
-        $__regexp            =  RegExp,
+        $__regexp            = RegExp,
         $__regexpProto__     = $__regexp.prototype,
         $__regexp_toString__ = $__regexpProto__.toString,
-        
+
         // ---------- STRING ----------
         $__string            = String,
         $__stringProto__     = $__string.prototype,
         $__string_toString__ = $__stringProto__.toString,
         $__string_valueOf__  = $__stringProto__.valueOf,
-        
+
         // ---------- WINDOW ----------
         $__window            = null,
         $__windowProto__     = null,
         $__window_toString__ = null,
-        
+
         // ---------- HARMONY ----------
         $__proxy  = null,
         $__symbol = null;
@@ -428,14 +430,14 @@ if (typeof jT_Writable != 'boolean')
         $_const_int32_min               = -$_const_int32_max - 1,
         $_const_keyword_abstract        = 'abstract',
         $_const_keyword_class           = 'class',
-        $_const_keyword_classes         = $_const_keyword_class + 'es',
+        $_const_keyword_classes         = 'classes',
         $_const_keyword_const           = 'const',
         $_const_keyword_field           = 'field',
         $_const_keyword_get             = 'get',
         $_const_keyword_hidden          = 'hidden',
         $_const_keyword_method          = 'method',
         $_const_keyword_model           = 'model',
-        $_const_keyword_models          = $_const_keyword_model + 's',
+        $_const_keyword_models          = 'models',
         $_const_keyword_new             = 'new',
         $_const_keyword_optimized       = 'optimized',
         $_const_keyword_override        = 'override',
@@ -448,7 +450,7 @@ if (typeof jT_Writable != 'boolean')
         $_const_keyword_set             = 'set',
         $_const_keyword_static          = 'static',
         $_const_keyword_struct          = 'struct',
-        $_const_keyword_structs         = $_const_keyword_struct + 's',
+        $_const_keyword_structs         = 'structs',
         $_const_keyword_unlocked        = 'unlocked',
         $_const_keyword_virtual         = 'virtual',
         $_const_keyword_visible         = 'visible',
@@ -467,22 +469,23 @@ if (typeof jT_Writable != 'boolean')
     // If the harmony flag is set, push the symbol type into the internal JavaScript types array
     if ($_harmony)
         $_const_types.push('Symbol');
-    
+
     // ---------- CACHES ----------
 
     // Create the cache indices
     var $_cache_class       = 0,
         $_cache_constructor = 1,
-//      $_cache_dump        = 7,
+        $_cache_data        = 7,
+//      $_cache_dump        = 8,
         $_cache_private     = 2,
         $_cache_protected   = 3,
         $_cache_public      = 4,
         $_cache_prototype   = 5,
         $_cache_static      = 6,
-        
+
         // Create the length
         $_cache__length = 8,
-        
+
         // Create the cache symbols indices
         $_cache_symbols_base      = 11,
         $_cache_symbols_construct = 12,
@@ -491,7 +494,7 @@ if (typeof jT_Writable != 'boolean')
       //$_cache_symbols_protected = 9,
         $_cache_symbols_public    = 10,
         $_cache_symbols_root      = 13,
-        
+
         // Create the symbols length
         $_cache_symbols__length = 15;
 
@@ -503,7 +506,7 @@ if (typeof jT_Writable != 'boolean')
         $_constraints_default  = 1 << 1,
         $_constraints_null     = 1 << 2,
         $_constraints_suppress = 1 << 3;
-    
+
     // Set the constraints lookup flags for each native constraint
     $_constraints['array']     = $_constraints_cast | $_constraints_default | $_constraints_suppress;
     $_constraints['bool']      = $_constraints_cast | $_constraints_null    | $_constraints_suppress;
@@ -534,7 +537,7 @@ if (typeof jT_Writable != 'boolean')
         $_definition_name       = 0,// @
         $_definition_type       = 4,// @
         $_definition_value      = 1,// @
-        
+
         // Create the length
         $_definition__length = 5;
 
@@ -546,7 +549,7 @@ if (typeof jT_Writable != 'boolean')
         $_directive_instructions = 2,
         $_directive_name         = 0,
         $_directive_value        = 1,
-        
+
         // Create the length
         $_directive__length = 5;
 
@@ -555,8 +558,8 @@ if (typeof jT_Writable != 'boolean')
     // Create the injection offsets
     var $_inject_private   = 0,// @
         $_inject_protected = 1,// @
-        $_inject_prototype = 2,// @
-        $_inject_public    = 3,// @
+        $_inject_prototype = 3,// @
+        $_inject_public    = 2,// @
         $_inject_static    = 4;// @
 
     // ---------- INSTANCES ----------
@@ -611,27 +614,28 @@ if (typeof jT_Writable != 'boolean')
         $_modifiers_injection = 1 << 5, // @
       //$_modifiers_internal  = 1 << 6, // @
         $_modifiers_method    = 1 << 7, // @
-        $_modifiers_new       = 1 << 8, // @
-        $_modifiers_override  = 1 << 9, // @
-        $_modifiers_private   = 1 << 10,// @
-        $_modifiers_protected = 1 << 11,// @
-        $_modifiers_prototype = 1 << 12,// @
-        $_modifiers_public    = 1 << 13,// @
-        $_modifiers_readonly  = 1 << 14,// @
-        $_modifiers_sealed    = 1 << 15,// @
-        $_modifiers_static    = 1 << 16,// @
-        $_modifiers_virtual   = 1 << 17,// @
-        $_modifiers_visible   = 1 << 18,// @
-        
+        $_modifiers_nested    = 1 << 8, // @
+        $_modifiers_new       = 1 << 9, // @
+        $_modifiers_override  = 1 << 10,// @
+        $_modifiers_private   = 1 << 11,// @
+        $_modifiers_protected = 1 << 12,// @
+        $_modifiers_prototype = 1 << 13,// @
+        $_modifiers_public    = 1 << 14,// @
+        $_modifiers_readonly  = 1 << 15,// @
+        $_modifiers_sealed    = 1 << 16,// @
+        $_modifiers_static    = 1 << 17,// @
+        $_modifiers_virtual   = 1 << 18,// @
+        $_modifiers_visible   = 1 << 19,// @
+
         // Create the property modifier bits
-        $_modifiers_property_auto          = 1 << 19,// @
-        $_modifiers_property_get           = 1 << 20,// @
-        $_modifiers_property_get_private   = 1 << 21,// @
-        $_modifiers_property_get_protected = 1 << 22,// @
-        $_modifiers_property_set           = 1 << 23,// @
-        $_modifiers_property_set_private   = 1 << 24,// @
-        $_modifiers_property_set_protected = 1 << 25;// @
-    
+        $_modifiers_property_auto          = 1 << 20,// @
+        $_modifiers_property_get           = 1 << 21,// @
+        $_modifiers_property_get_private   = 1 << 22,// @
+        $_modifiers_property_get_protected = 1 << 23,// @
+        $_modifiers_property_set           = 1 << 24,// @
+        $_modifiers_property_set_private   = 1 << 25,// @
+        $_modifiers_property_set_protected = 1 << 26;// @
+
     // Set the modifiers in the modifiers map
     $_modifiers['abstract']  = $_modifiers_abstract;
     $_modifiers['const']     = $_modifiers_const;
@@ -667,18 +671,21 @@ if (typeof jT_Writable != 'boolean')
         $_modifiers_class_struct    = 1 << 10,// @
         $_modifiers_class_unlocked  = 1 << 11,// @
         $_modifiers_class_unsafe    = 1 << 12;// @
-    
+
     // Set the class modifiers in the class modifiers map
     $_modifiers_class['abstract']  = $_modifiers_class_abstract;
     $_modifiers_class['expando']   = $_modifiers_class_expando;
 //  $_modifiers_class['export']    = $_modifiers_class_export;
     $_modifiers_class['internal']  = $_modifiers_class_internal;
     $_modifiers_class['model']     = $_modifiers_class_model;
-    $_modifiers_class['optimized'] = $_modifiers_class_optimized;
     $_modifiers_class['primitive'] = $_modifiers_class_primitive;
     $_modifiers_class['sealed']    = $_modifiers_class_sealed;
     $_modifiers_class['struct']    = $_modifiers_class_struct;
     $_modifiers_class['unlocked']  = $_modifiers_class_unlocked;
+
+    // If the global legacy flag is not set, set the optimized class modifier in the class modifiers map
+    if (!$_legacy)
+        $_modifiers_class['optimized'] = $_modifiers_class_optimized;
 
     // ---------- .NET ----------
 
@@ -796,7 +803,7 @@ if (typeof jT_Writable != 'boolean')
 
         // Reset the class name
         $_name = '';
-        
+
         // Throw the class-formatted exception string
         throw new $__error($message + $$.format($_lang_exception_suffix_class, $name));
     };
@@ -916,6 +923,7 @@ if (typeof jT_Writable != 'boolean')
         // Create the optimized symbols
         $_symbol_class         = $_symbolBuilder(),
         $_symbol_data          = $_symbolBuilder(),
+        $_symbol_data_name     = $_symbolBuilder(),
         $_symbol_data_readonly = $_symbolBuilder(),
         $_symbol_instance      = $_symbolBuilder(),
         $_symbol_package       = $_symbolBuilder();
@@ -923,16 +931,17 @@ if (typeof jT_Writable != 'boolean')
     // ---------- FILTERS ----------
 
     // Create the filter symbol hashes
-    var $_filter_async_global = $_symbolGenerator('global'),
-        $_filter_async_model  = $_symbolGenerator('model'),
-        $_filter_async_struct = $_symbolGenerator('struct'),
-        $_filter_cast         = $_symbolGenerator('cast'),
-        $_filter_constraint   = $_symbolGenerator('constraint'),
-        $_filter_default      = $_symbolGenerator('default'),
-        $_filter_native       = $_symbolGenerator('native'),
-        $_filter_null         = $_symbolGenerator('null'),
-        $_filter_suppress     = $_symbolGenerator('suppress'),
-        $_filter_type         = $_symbolGenerator('type');
+    var $_filter_async_global    = $_symbolGenerator('global'),
+        $_filter_async_model     = $_symbolGenerator('model'),
+        $_filter_async_primitive = $_symbolGenerator('primitive'),
+        $_filter_async_struct    = $_symbolGenerator('struct'),
+        $_filter_cast            = $_symbolGenerator('cast'),
+        $_filter_constraint      = $_symbolGenerator('constraint'),
+        $_filter_default         = $_symbolGenerator('default'),
+        $_filter_native          = $_symbolGenerator('native'),
+        $_filter_null            = $_symbolGenerator('null'),
+        $_filter_suppress        = $_symbolGenerator('suppress'),
+        $_filter_type            = $_symbolGenerator('type');
 
     // ---------- PACKAGES ----------
 
@@ -940,7 +949,7 @@ if (typeof jT_Writable != 'boolean')
     var $_package_constraint = 2,
         $_package_modifiers  = 1,
         $_package_value      = 0,
-        
+
         // Create the length
         $_package__length = 3;
 
@@ -952,7 +961,7 @@ if (typeof jT_Writable != 'boolean')
         $_package_modifiers  = $__symbol();
         $_package_value      = $__symbol();
     }
-    
+
     // ########## BUILT-INS ##########
 
     // Create the base class of all classes and the base prototype of all class prototypes
@@ -977,6 +986,24 @@ if (typeof jT_Writable != 'boolean')
     // Define the "constructor" reference on the base prototype of all class prototypes
     $_data($_prototype, 'constructor', $_class);
 
+    // Define the "toJSON()" method on the base prototype of all class prototypes
+    $_data($_prototype, 'toJSON', function()
+    {
+        // If the function context is not an instance, return null
+        if (!$$_isInstance(this))
+            return null;
+
+        // Create the JSON object
+        var $json = {};
+
+        // Loop through the enumerable properties on the function context and copy each value to the JSON object
+        for (var $key in this)
+            $json[$key] = this[$key];
+
+        // Return the JSON object
+        return $json;
+    });
+
     // Define the "toString()" methods on the base class of all classes and the base prototype of all class prototypes
     $_data($_class,     'toString', $_class_toString);
     $_data($_prototype, 'toString', $_prototype_toString);
@@ -984,8 +1011,8 @@ if (typeof jT_Writable != 'boolean')
     // Set the base class of all classes prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
     $_class.prototype = $_prototype;
 
-    // Freeze the base class of all classes
-    $__freeze($_class);
+    // Prevent extensions on the base class of all classes
+    $__preventExtensions($_class);
 
     // If the global prototype lock flag was set, freeze the base prototype of all class prototypes
     if ($_protoLock)
@@ -1255,7 +1282,7 @@ if (typeof jT_Writable != 'boolean')
                 // If the extends character was provided more than once, throw an exception
                 if ($modifiers.length != 2)
                     $_exceptionFormat($_lang_$$_class_keyword_duplicate, '":"');
-                
+
                 // Get the base class name and modifiers string
                 $baseName  = $modifiers[1].trim();
                 $modifiers = $modifiers[0].trim();
@@ -1267,7 +1294,7 @@ if (typeof jT_Writable != 'boolean')
                 // If the base class name is not a valid class name, throw an exception
                 if (!$_const_regexp_class.test($baseName))
                     $_exceptionFormat($_lang_$$_class_name_invalid, $baseName);
-                
+
                 // Get the base class from the globals object
                 $base = $_globals[$baseName];
 
@@ -1353,7 +1380,6 @@ if (typeof jT_Writable != 'boolean')
             $expando   = !!($modifiers & $_modifiers_class_expando),
             $import    = !!($modifiers & $_modifiers_class_import),
             $model     = !!($modifiers & $_modifiers_class_model),
-            $optimized = !!($modifiers & $_modifiers_class_optimized),
             $primitive = !!($modifiers & $_modifiers_class_primitive),
             $sealed    = !!($modifiers & $_modifiers_class_sealed),
             $struct    = !!($modifiers & $_modifiers_class_struct);
@@ -1383,10 +1409,6 @@ if (typeof jT_Writable != 'boolean')
                 // If the struct has the unlocked modifier, throw an exception
                 if ($modifiers & $_modifiers_class_unlocked)
                     $_exceptionFormat($_lang_$$_class_conflict, $_const_keyword_structs, $_const_keyword_unlocked);
-
-                // If the struct has the optimized modifier, throw an exception
-                if ($optimized)
-                    $_exceptionFormat($_lang_$$_class_conflict, $_const_keyword_structs, $_const_keyword_optimized);
             }
 
             // If the expando modifier was provided, throw an exception
@@ -1422,12 +1444,12 @@ if (typeof jT_Writable != 'boolean')
             $internal   = -1,
             $metaclass  = null,
             $metalength = 1;
-        
+
         // Set the cache constructor
         $cache[$_cache_constructor] = $constructor;
 
-        // If the class has the import modifier or is optimized, create the dump object in the cache
-//      if ($import || $optimized)
+        // If the class has the import modifier, create the dump object in the cache
+//      if ($import)
 //          $cache[$_cache_dump] = $__create(null);
 
         // If symbols are supported
@@ -1447,7 +1469,7 @@ if (typeof jT_Writable != 'boolean')
             $cachePrototype = null,
             $cacheStatic    = null,
             $defaults       = null;
-        
+
         // If a base class was provided
         if ($base)
         {
@@ -1532,8 +1554,15 @@ if (typeof jT_Writable != 'boolean')
                                   $_const_keyword_model :
                                   $_const_keyword_class);
 
+            // If the class is primitive and the base class is not primitive, throw an exception
+            if ($primitive && !($baseModifiers & $_modifiers_class_primitive))
+                $_exceptionFormat($_lang_$$_class_inherit_nonprimitive,
+                                  $model ?
+                                  $_const_keyword_model :
+                                  $_const_keyword_class);
+
             // If the class is optimized and the base class is not optimized, throw an exception
-            if ($optimized && !($baseModifiers & $_modifiers_class_optimized))
+            if (($modifiers & $_modifiers_class_optimized) && !($baseModifiers & $_modifiers_class_optimized))
                 $_exceptionFormat($_lang_$$_class_inherit_unoptimized,
                                   $model ?
                                   $_const_keyword_model :
@@ -1666,22 +1695,22 @@ if (typeof jT_Writable != 'boolean')
 
                 // Compile the private definitions into the cache
                 for (var $key in $prototypePrivate)
-                    $_definitionsCompilerCache($cache, $abstract, $expando, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $prototypePrivate[$key], $_const_keyword_private);
+                    $_definitionsCompilerCache($cache, $abstract, $expando, $import, $model, $primitive, $sealed, $struct, $key, $prototypePrivate[$key], $_const_keyword_private);
 
                 // Compile the protected definitions into the cache
                 for (var $key in $prototypeProtected)
-                    $_definitionsCompilerCache($cache, $abstract, $expando, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $prototypeProtected[$key], $_const_keyword_protected);
+                    $_definitionsCompilerCache($cache, $abstract, $expando, $import, $model, $primitive, $sealed, $struct, $key, $prototypeProtected[$key], $_const_keyword_protected);
 
                 // Compile the public definitions into the cache
                 for (var $key in $prototypePublic)
-                    $_definitionsCompilerCache($cache, $abstract, $expando, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $prototypePublic[$key], $_const_keyword_public);
+                    $_definitionsCompilerCache($cache, $abstract, $expando, $import, $model, $primitive, $sealed, $struct, $key, $prototypePublic[$key], $_const_keyword_public);
             }
         }
 
         // If a prototype was provided, compile the definitions into the cache
         if ($prototype)
             for (var $key in $prototype)
-                $_definitionsCompilerCache($cache, $abstract, $expando, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $prototype[$key]);
+                $_definitionsCompilerCache($cache, $abstract, $expando, $import, $model, $primitive, $sealed, $struct, $key, $prototype[$key]);
 
         // If any injections arguments were provided (and the unsafe modifier was set)
         if ($modifiers & $_modifiers_class_unsafe && arguments[$argument])
@@ -1731,7 +1760,10 @@ if (typeof jT_Writable != 'boolean')
             $metainstance = new $__array($__symbol ?
                                          $metalength :
                                          $metalength + 1),
-            $overrides    = {};
+            $overrides    = {},
+            $symbols      = ($primitive || $struct) && $__symbol ?
+                            [] :
+                            null;
 
         for (var $i = 0; $i < $metalength; $i++)
         {
@@ -1740,13 +1772,13 @@ if (typeof jT_Writable != 'boolean')
                 $protected     = $metaclass[$i][$_cache_protected],
                 $protectedKeys = $__keys($protected),
                 $directives    = new $__array($privateKeys.length + $protectedKeys.length);
-            
+
             for (var $j = 0, $k = $privateKeys.length; $j < $k; $j++)
-                if ($_definitionsCompilerDirective($directives, $overrides, $defaults, $primitive, $struct, $i, $j, $private[$privateKeys[$j]]))
+                if ($_definitionsCompilerDirective($directives, $overrides, $defaults, $symbols, $primitive, $struct, $i, $j, $private[$privateKeys[$j]]))
                     $merge = $i + 1;
 
             for (var $j = 0, $k = $protectedKeys.length, $l = $privateKeys.length; $j < $k; $j++)
-                if ($_definitionsCompilerDirective($directives, $overrides, $defaults, $primitive, $struct, $i, $j + $l, $protected[$protectedKeys[$j]]))
+                if ($_definitionsCompilerDirective($directives, $overrides, $defaults, $symbols, $primitive, $struct, $i, $j + $l, $protected[$protectedKeys[$j]]))
                     $merge = $i + 1;
 
             $metainstance[$i] = $directives;
@@ -1754,13 +1786,13 @@ if (typeof jT_Writable != 'boolean')
 
         // Create the class
         var $build = $__symbol ?
-                        [] :
-                        null,
+                     [] :
+                     null,
             $class = $cache[$_cache_class] = !$__symbol ?
-                                             $_buildRuntimeMatrix($metaclass, $metainstance, $metalength, $abstract, $import, $internal, $merge, $model, $optimized, false, $struct, !!($modifiers & $_modifiers_class_unlocked)) :
+                                             $_buildRuntimeMatrix($metaclass, $metainstance, $metalength, $abstract, $import, $internal, $merge, $model, false, $struct, !!($modifiers & $_modifiers_class_unlocked)) :
                                              $struct ?
-                                             $_symbolsRuntimeStruct($metaclass, $metainstance, $build, $defaults, $constructor, $primitive) :
-                                             $_symbolsRuntimeMatrix($metaclass, $metainstance, $metalength, $build, $defaults, $abstract, $model, $primitive);
+                                             $_symbolsRuntimeStruct($metaclass, $metainstance, $build, $defaults, $constructor, $name, $primitive) :
+                                             $_symbolsRuntimeMatrix($metaclass, $metainstance, $metalength, $build, $defaults, $abstract, $model, $name, $primitive);
 
         // Get the cache prototype and static keys
         var $cachePrototypeKeys = $__keys($cachePrototype),
@@ -1786,7 +1818,7 @@ if (typeof jT_Writable != 'boolean')
 
         if ($modifiers & $_modifiers_class_internal)
             $_data($class, $_symbol_internal, $internal);
-        
+
         // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
         $class.prototype = $prototype;
 
@@ -1809,9 +1841,11 @@ if (typeof jT_Writable != 'boolean')
                                      $metainstance,
                                      $metalength,
                                      $build,
+                                     $symbols,
                                      $internal,
                                      $merge,
                                      $prototype,
+                                     $primitive,
                                      $struct,
                                      !!($modifiers & $_modifiers_class_unlocked),
                                      !($modifiers & $_modifiers_class_internal) ?
@@ -1951,7 +1985,8 @@ if (typeof jT_Writable != 'boolean')
         return '[object jTypes]';
     });
 
-    // Define the version constant
+    // Define the development and version constants
+    $_defineField('dev',     !$_minify, false);
     $_defineField('version', $_version, false);
 
     // Define the global class and prototype constants
@@ -1963,11 +1998,11 @@ if (typeof jT_Writable != 'boolean')
     $_defineField('dateMin', $__preventExtensions(new $__date($_const_date_min)), false);
 
     // Define the numeric constants
-    $_defineField('epsilon',  $_const_float_epsilon, false);
-    $_defineField('intMax',   $_const_int_max,       false);
-    $_defineField('intMin',   $_const_int_min,       false);
-    $_defineField('max',      $_const_float_max,     false);
-    $_defineField('min',      $_const_float_min,     false);
+    $_defineField('epsilon', $_const_float_epsilon, false);
+    $_defineField('intMax',  $_const_int_max,       false);
+    $_defineField('intMin',  $_const_int_min,       false);
+    $_defineField('max',     $_const_float_max,     false);
+    $_defineField('min',     $_const_float_min,     false);
 
     // ---------- SUPPORT ----------
 
@@ -2793,7 +2828,7 @@ if (typeof jT_Writable != 'boolean')
             $modifier = $accessor.substr(0, $index).trim();
             $accessor = $accessor.substr($index + 1);
         }
-        
+
         // Create the method modifiers along with the private and protected bits
         var $method    = 0,
             $private   = 0,
@@ -2807,7 +2842,6 @@ if (typeof jT_Writable != 'boolean')
             $method    = $_modifiers_property_get;
             $private   = $_modifiers_property_get_private;
             $protected = $_modifiers_property_get_protected;
-            
         }
         // If the accessor is a mutator method
         else if ($accessor == $_const_keyword_set)
@@ -2856,7 +2890,7 @@ if (typeof jT_Writable != 'boolean')
         // If no definitions were provided (and is therefore a class with the import modifier), return
         if (!$definitions)
             return 0;
-        
+
         // If the method was already defined, throw an exception
         if ($modifiers & $method)
             $_exceptionFormat($_lang_$$_property_name_duplicate, $name, $accessor);
@@ -2882,7 +2916,7 @@ if (typeof jT_Writable != 'boolean')
                 // If the property has the override modifier, throw an exception
                 if ($modifiers & $_modifiers_override)
                     $_exceptionFormat($_lang_$$_property_private_override, $name, $accessor);
-                
+
                 // Set the private modifier in the method modifiers
                 $method |= $private;
             }
@@ -2896,7 +2930,7 @@ if (typeof jT_Writable != 'boolean')
                 // If the class is a struct, throw an exception
                 if ($struct)
                     $_exceptionFormat($_lang_$$_property_access_conflict, $name, $accessor, $_const_keyword_protected, $_const_keyword_struct);
-                
+
                 // Set the protected modifier in the method modifiers
                 $method |= $protected;
             }
@@ -2923,7 +2957,7 @@ if (typeof jT_Writable != 'boolean')
         // Return the method modifiers
         return $method;
     };
-    var $_definitionsCompilerCache          = function($cache, $abstract, $expando, $import, $model, $optimized, $primitive, $sealed, $struct, $key, $value, $prepend)
+    var $_definitionsCompilerCache          = function($cache, $abstract, $expando, $import, $model, $primitive, $sealed, $struct, $key, $value, $prepend)
     {
         // Get the name and the index of the last space in the name
         var $name      = $key.trim(),
@@ -2984,18 +3018,10 @@ if (typeof jT_Writable != 'boolean')
                     'class' :
                     'method';
 
-        // If the value is a class
-        if ($type == 'class')
-        {
-            // Treat the class as a field (until nested classes are supported)
-            $type  = 'field';
-            $value = null;
-        }
-
         // If the global function lock flag is set and the value is a function, prevent extensions on the function
         if ($_funcLock && $type == 'method')
             $__preventExtensions($value);
-        
+
         // If the class does not have the import modifier (or the prototype or static modifiers were provided)
         if (!$import || $modifiers.indexOf($_const_keyword_prototype) >= 0 || $modifiers.indexOf($_const_keyword_static) >= 0)
         {
@@ -3048,13 +3074,13 @@ if (typeof jT_Writable != 'boolean')
             // Get the access and enum modifiers
             var $access = $modifiers & ($_modifiers_private | $_modifiers_protected | $_modifiers_public),
                 $enum   = $modifiers & ($_modifiers_visible | $_modifiers_hidden);
-            
+
             // If either the prototype or static modifiers were provided
             if ($modifiers & ($_modifiers_prototype | $_modifiers_static))
             {
                 // If no enum modifiers were provided, set the default enum modifier
                 if (!$enum)
-                    $modifiers |= $enum = $type == 'method' ?
+                    $modifiers |= $enum = $type == 'class' || $type == 'method' ?
                                           $_modifiers_hidden :
                                           $_modifiers_visible;
 
@@ -3112,11 +3138,19 @@ if (typeof jT_Writable != 'boolean')
                 // If the name is reserved, throw an exception
                 if ($name == 'as' || ($model || $struct) && ($name == 'clone' || $name == 'equals') || $name == 'is' || $name == 'type' || $name == '__base' || $name == '__data' || $name == '__self' || $name == '__this' || $name == '__type')
                     $_exceptionFormat($_lang_$$_name_reserved, $name);
-                
+
+                // If the value is a class and either a constraint was provided or the name is not a valid class name
+                if ($type == 'class' && ($constraint || !$_const_regexp_class.test($name)))
+                {
+                    // Reset the type string and value
+                    $type  = 'field';
+                    $value = null;
+                }
+
                 // Throw if the definition is already defined in the private or protected definitions
                 $_definitionsCompilerThrowDuplicate($cache[$_cache_private],   $name);
                 $_definitionsCompilerThrowDuplicate($cache[$_cache_protected], $name);
-                
+
                 // If no access modifiers were provided, set the private modifier in the modifiers
                 if (!$access)
                     $modifiers |= $access = $_modifiers_private;
@@ -3131,7 +3165,7 @@ if (typeof jT_Writable != 'boolean')
                 // If the const modifier was provided, throw an exception
                 if ($modifiers & $_modifiers_const)
                     $_exceptionFormat($_lang_$$_requires_or, $name, $_const_keyword_const, $_const_keyword_prototype, $_const_keyword_static);
-                
+
                 // If the abstract modifier was provided
                 if ($modifiers & $_modifiers_abstract)
                 {
@@ -3165,10 +3199,10 @@ if (typeof jT_Writable != 'boolean')
                     else if ($value === null)
                         $type = 'method';
                 }
-                
+
                 // If no enum modifiers were provided, set the default enum modifier
                 if (!$enum)
-                    $modifiers |= $enum = $type == 'method' ?
+                    $modifiers |= $enum = $type == 'class' || $type == 'method' ?
                                           $_modifiers_hidden :
                                           $_modifiers_visible;
                 // If more than one enum modifier was provided, throw an exception
@@ -3199,8 +3233,8 @@ if (typeof jT_Writable != 'boolean')
                 else if ($constraint && $constraint[0] == '~' && $constraint[$constraint.length - 1] == '!')
                     $_exceptionFormat($_lang_$$_conflict_constraint, $name, $constraint);
 
-                // If the value is not a field
-                if ($type != 'field')
+                // If the value is a method or property
+                if ($type == 'method' || $type == 'property')
                 {
                     // If the private modifier was provided along with either the abstract, override, or virtual modifiers, throw an exception
                     if ($modifiers & $_modifiers_private && $modifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual))
@@ -3293,7 +3327,7 @@ if (typeof jT_Writable != 'boolean')
                             $baseOverridable = $baseModifiers & $_modifiers_sealed ?
                                                0 :
                                                $baseModifiers & ($_modifiers_abstract | $_modifiers_override | $_modifiers_virtual);
-                        
+
                         // If the base definition is not overridable or does not match the type or access, enum, or readonly modifiers, throw an exception
                         if (!$baseOverridable || $type != $baseDefinition[$_definition_type] || $access != $baseAccess || $enum != $baseEnum || $modifiers & $_modifiers_readonly ^ $baseModifiers & $_modifiers_readonly)
                             $_exceptionFormat($_lang_$$_override_invalid, $name, $type);
@@ -3313,7 +3347,7 @@ if (typeof jT_Writable != 'boolean')
                             {
                                 // Get the property modifiers
                                 var $property = $modifiers & ($_modifiers_property_get | $_modifiers_property_get_protected | $_modifiers_property_set | $_modifiers_property_set_protected);
-                            
+
                                 // If base definition does not match the property modifiers, throw an exception
                                 if ($property != $baseProperty)
                                     $_exceptionFormat($_lang_$$_property_override_accessor, $name);
@@ -3328,7 +3362,7 @@ if (typeof jT_Writable != 'boolean')
                         // If the sealed modifier was provided, throw an exception
                         if ($modifiers & $_modifiers_sealed)
                             $_exceptionFormat($_lang_$$_requires, $name, $_const_keyword_sealed, $_const_keyword_override);
-                        
+
                         // Throw if the new modifier was improperly used (or the override modifier was required)
                         $_definitionsCompilerThrowInherit($cache[$_cache_protected], $modifiers, $name);
                     }
@@ -3349,8 +3383,15 @@ if (typeof jT_Writable != 'boolean')
                     $_definitionsCompilerThrowVirtual($modifiers, $name);
                     $_definitionsCompilerThrowInherit($cache[$_cache_protected], $modifiers, $name);
 
+                    if ($type == 'class')
+                    {
+                        // If the readonly modifier was provided, throw an exception
+                        if ($modifiers & $_modifiers_readonly)
+                            $_exceptionFormat($_lang_$$_readonly_invalid_type, $name);
+                    }
                     // Set the value as a primitive
-                    $value = $_definitionsCompilerPrimitive($value);
+                    else
+                        $value = $_definitionsCompilerPrimitive($value);
                 }
 
                 // If the access modifier is public, set the definition in the public definitions
@@ -3365,26 +3406,24 @@ if (typeof jT_Writable != 'boolean')
                 $modifiers |= $_modifiers_field;
             else if ($type == 'method')
                 $modifiers |= $_modifiers_method;
-            
+            else if ($type == 'class')
+                $modifiers |= $_modifiers_nested;
+
             // Set the definition data
             $definition[$_definition_constraint] = $constraint;
             $definition[$_definition_modifiers]  = $modifiers;
             $definition[$_definition_name]       = $name;
             $definition[$_definition_type]       = $type;
             $definition[$_definition_value]      = $value;
-            
-            // If the class is optimized, set the definition value in the dump object
-//          if ($optimized)
-//              $cache[$_cache_dump][$name] = $value;
         }
         else
         {
           //$modifiers = 0;
-            
+
             // Set the definition value in the dump object
 //          $cache[$_cache_dump][$name] = $type == 'field' ?
 //                                        $_definitionsCompilerPrimitive($value) :
-//                                        $type != 'property ' ?
+//                                        $type != 'property' ?
 //                                        $value :
 //                                        $auto ?
 //                                        $_definitionsCompilerPrimitive($value[2]) :
@@ -3436,7 +3475,7 @@ if (typeof jT_Writable != 'boolean')
         // Return true if no flags were set that are not found in the constraint bits
         return !($flags & ~$constraint);
     };
-    var $_definitionsCompilerDirective      = function($directives, $overrides, $defaults, $primitive, $struct, $i, $j, $definition)
+    var $_definitionsCompilerDirective      = function($directives, $overrides, $defaults, $symbols, $primitive, $struct, $i, $j, $definition)
     {
         // Get the definition constraint, modifiers, name, type, and value
         var $constraint = $definition[$_definition_constraint],
@@ -3457,6 +3496,10 @@ if (typeof jT_Writable != 'boolean')
                             $__symbol() :
                             null;
 
+        // If a data symbol was created and a symbols array was provided, push the data symbol into the symbols array
+        if ($symbol && $symbols)
+            $symbols.push($symbol);
+
         // If a constraint was provided and the definition is a field or auto property
         if ($constraint && $data)
         {
@@ -3468,28 +3511,25 @@ if (typeof jT_Writable != 'boolean')
                      $filter($value) :
                      null;
 
-            // If a data symbol was created
+            // If a data symbol was created, set the default value descriptor for the hidden instance data in the defaults object
             if ($symbol)
-            {
-                // Set the default value descriptor for the hidden instance data in the defaults object
                 $defaults[$symbol] = $value;
 
-                // If the filter has already been compiled
-                if ($filter[$_filter_native] || $filter[$_filter_async_global])
-                {
-                    // If the primitive flag is set and the filter is not a struct type, throw an exception
-                    if ($primitive && !$native && !$filter[$_filter_async_struct])
-                        $_exceptionFormat($_lang_$$_constraint_primitive,
-                                          $name,
-                                          $constraint,
-                                          $filter[$_filter_async_model] ?
-                                          $_const_keyword_model :
-                                          $_const_keyword_class);
-
-                    // If the filter has either the default flag or is a struct type without the nullable modifier, set the default value descriptor for the hidden instance data on the defaults object
-                    if ($filter[$_filter_default] || $filter[$_filter_async_struct] && !$filter[$_filter_null])
-                        $__defineProperty($defaults, $symbol, $_symbolsCompilerDefault($name, $symbol, $filter, {}));
-                }
+            // If the filter has already been compiled
+            if ($filter[$_filter_native] || $filter[$_filter_async_global])
+            {
+                // If the primitive flag is set and the filter is not a primitive struct type, throw an exception
+                if ($primitive && !$native && !$filter[$_filter_async_primitive] && !$filter[$_filter_async_struct])
+                    $_exceptionFormat($_lang_$$_constraint_primitive,
+                                      $name,
+                                      $constraint,
+                                      $filter[$_filter_async_model] ?
+                                      $_const_keyword_model :
+                                      $_const_keyword_class);
+                
+                // If a data symbol was created and the filter has either the default flag or is a struct type without the nullable modifier, set the default value descriptor for the hidden instance data on the defaults object
+                if ($symbol && ($filter[$_filter_default] || $filter[$_filter_async_struct] && !$filter[$_filter_null]))
+                    $__defineProperty($defaults, $symbol, $_symbolsCompilerDefault($name, $symbol, $filter, {}));
             }
         }
         // If a data symbol was created, set the default value descriptor for the hidden instance data in the defaults object
@@ -3502,7 +3542,7 @@ if (typeof jT_Writable != 'boolean')
             // If the hidden modifier was not provided, set the enumerable instruction
             if (!($modifiers & $_modifiers_hidden))
                 $instructions |= $_instructions_enumerable;
-            
+
             // If the definition is an auto property
             if ($modifiers & $_modifiers_property_auto)
             {
@@ -3518,7 +3558,7 @@ if (typeof jT_Writable != 'boolean')
                 // If the property has an accessor method, set the get accessor instruction
                 if ($value[0] != null)
                     $instructions |= $_instructions_get;
-                
+
                 // If the property has a mutator method, set the set accessor instruction
                 if ($value[1] != null)
                     $instructions |= $_instructions_set;
@@ -3590,7 +3630,7 @@ if (typeof jT_Writable != 'boolean')
             {
                 // If the definition is public
                 case $_modifiers_public:
-                    
+
                     // Set the public instruction
                     $instructions |= $_instructions_public;
 
@@ -3636,7 +3676,7 @@ if (typeof jT_Writable != 'boolean')
                             else if ($modifiers & $_modifiers_property_get_private)
                                 $instructions |= $_instructions_overridden_set;
                         }
-                        
+
                         // If the definition has a private mutator method, set the private and private set accessor instructions
                         if ($modifiers & $_modifiers_property_set_private)
                             $instructions |= $_instructions_private | $_instructions_private_set;
@@ -3658,7 +3698,7 @@ if (typeof jT_Writable != 'boolean')
                         if ($modifiers & $_modifiers_property_set && $overridden[1] == null)
                             $instructions |= $_instructions_overridden_get;
                     }
-                    
+
                     // If the definition is overridden and an inherited descriptor, extract the inherits array from the override array
                     if ($overridden != null && $overridden.length > 2)
                         $inherits = $overridden.slice(2);
@@ -3707,6 +3747,16 @@ if (typeof jT_Writable != 'boolean')
                 // If the method is not abstract, set the context instruction
                 if (!($modifiers & $_modifiers_abstract))
                     $instructions |= $_instructions_this;
+            }
+            // If the definition is a nested class
+            else if ($modifiers & $_modifiers_nested)
+            {
+                // If the visible modifier was provided, set the enumerable instruction
+                if ($modifiers & $_modifiers_visible)
+                    $instructions |= $_instructions_enumerable;
+
+                // Set the value instruction
+                $instructions |= $_instructions_value;
             }
 
             // If the definition has the override modifier
@@ -3840,7 +3890,7 @@ if (typeof jT_Writable != 'boolean')
 
       //if ($type == 'symbol')
       //    return $__symbol_valueOf__.call($value);
-        
+
         return null;
     };
     var $_definitionsCompilerProperty       = function($array, $definitions, $modifiers, $struct, $name, $object)
@@ -3971,7 +4021,7 @@ if (typeof jT_Writable != 'boolean')
             return '[object ' + $name + ']';
         };
     };
-    
+
     // Create the symbols compiler helpers
     var $_symbolsCompilerConstructor = function($construct, $data0, $base)
     {
@@ -4121,7 +4171,7 @@ if (typeof jT_Writable != 'boolean')
         // Return the descriptor
         return $descriptor;
     };
-    var $_symbolsCompilerGeneric     = function($metaclass, $metainstance, $metalength, $build, $internal, $merge, $prototype, $struct, $unlocked, $type)
+    var $_symbolsCompilerGeneric     = function($metaclass, $metainstance, $metalength, $build, $symbols, $internal, $merge, $prototype, $primitive, $struct, $unlocked, $type)
     {
         // Create the instance matrix, root instance object, names map, and overrides object
         var $instance    = new $__array($metalength + 1),
@@ -4141,7 +4191,7 @@ if (typeof jT_Writable != 'boolean')
                            $__create(null) :
                            null,
             $data3       = null;
-        
+
         for (var $i = $metalength - 1; $i >= 0; $i--)
         {
             // Get the cache, constructor, class, and private data symbol
@@ -4176,7 +4226,7 @@ if (typeof jT_Writable != 'boolean')
             // If a construct instance object was created, define the internal properties on the construct instance object
             if ($construct)
                 $_symbolsCompilerConstructor($construct, $data0, $super);
-               
+
             // Create the instances in the instance matrix
             var $instances = $instance[$i] = $struct ?
                                              [$private, $protected, $public] :
@@ -4191,7 +4241,7 @@ if (typeof jT_Writable != 'boolean')
                 // Execute the directives on the instance objects
                 for (var $j = 0, $k = $directives.length; $j < $k; $j++)
                     $_buildRuntimeDirective($instance, $i, $private, $protected, $public, $base, $directives[$j], $overrides, null, $data0, $build);
-                
+
                 // Freeze the instance objects
                 $__freeze($private);
                 $__freeze($public);
@@ -4233,7 +4283,7 @@ if (typeof jT_Writable != 'boolean')
                 var $data0      = $metaclass[$i][$_cache_symbols_private],
                     $directives = $metainstance[$i],
                     $instances  = $instance[$i];
-                    
+
                 // Get the instance objects from the instances array
                 $private   = $instances[$_instance_private];
                 $protected = $instances[$_instance_protected];
@@ -4250,7 +4300,7 @@ if (typeof jT_Writable != 'boolean')
             {
                 // Get the instances array
                 var $instances = $instance[$i];
-                    
+
                 // Get the instance objects from the instances array
                 $private   = $instances[$_instance_private];
                 $protected = $instances[$_instance_protected];
@@ -4280,7 +4330,7 @@ if (typeof jT_Writable != 'boolean')
         }
 
         // Define the root instance methods on the root instance object
-        $_symbolsCompilerRoot($this, $metaclass, $names, $type);
+        $_symbolsCompilerRoot($this, $metaclass, $names, $symbols, $primitive, $struct, $type);
 
         // Freeze the root instance object
         $__freeze($this);
@@ -4297,7 +4347,7 @@ if (typeof jT_Writable != 'boolean')
             $descriptorBase = $data3 ?
                               $_symbolsCompilerData('__base', $data3, null, {}, false, true, false) :
                               null;
-        
+
         // If the class is not unlocked or the base instance object is unique
         if (!$unlocked || $base !== $protected)
         {
@@ -4335,10 +4385,10 @@ if (typeof jT_Writable != 'boolean')
             $__defineProperty($base, '__type', $descriptorType);
         }
     };
-    var $_symbolsCompilerRoot        = function($root, $metaclass, $names, $type)
+    var $_symbolsCompilerRoot        = function($root, $metaclass, $names, $symbols, $primitive, $struct, $type)
     {
-        // Set the data descriptor on the construct instance object
-        $__defineProperty($root, 'as', { 'value': function($class)
+        // Set the as, is, and type method descriptors on the root instance object
+        $__defineProperty($root, 'as',   { 'value': function($class)
         {
             // Get the hidden instance data from the function context
             var $data = this ?
@@ -4363,9 +4413,7 @@ if (typeof jT_Writable != 'boolean')
             // Return the public instance object from the hidden instance data
             return $data[$metaclass[$index][$_cache_symbols_public]];
         } });
-
-        // Set the data descriptor on the construct instance object
-        $__defineProperty($root, 'is', { 'value': function($class)
+        $__defineProperty($root, 'is',   { 'value': function($class)
         {
             // Get the hidden instance data from the function context
             var $data = this ?
@@ -4383,8 +4431,6 @@ if (typeof jT_Writable != 'boolean')
             // Return true if an index was found in the names map for the name of the provided class
             return $names[$class[$_symbol_name]] != null;
         } });
-
-        // Set the type method descriptor on the root instance object
         $__defineProperty($root, 'type', { 'value': function()
         {
             // Get the hidden instance data from the function context
@@ -4399,6 +4445,88 @@ if (typeof jT_Writable != 'boolean')
             // Return the instance type
             return $type;
         } });
+
+        // If the class has either the primitive or the struct modifiers 
+        if ($primitive || $struct)
+        {
+            // Set the clone and equals method descriptors on the root instance object
+            $__defineProperty($root, 'clone',  { 'value': function()
+            {
+                // Get the hidden instance data from the function context
+                var $data = this ?
+                            this[$_symbol_data] :
+                            null;
+
+                // If no hidden instance data was found, throw an exception
+                if (!$data)
+                    $_exceptionFormat($_lang_$$_context_generic, 'clone()');
+
+                $_clone = true;
+
+                var $clone = $_globals[$data[$_symbol_data_name]]();
+
+                $_clone = false;
+
+                var $dataClone = $clone[$_symbol_data];
+
+                for (var $i = 0, $j = $symbols.length; $i < $j; $i++)
+                {
+                    // Get the current symbol and value
+                    var $symbol = $symbols[$i],
+                        $value  = $data[$symbol];
+
+                    $dataClone[$symbol] = $value && $value[$_symbol_instance] === $value ?
+                                          $value.clone() :
+                                          $value;
+                }
+
+                return $clone;
+            } });
+            $__defineProperty($root, 'equals', { 'value': function($instance)
+            {
+                // Get the hidden instance data from the function context
+                var $data = this ?
+                            this[$_symbol_data] :
+                            null;
+
+                // If no hidden instance data was found, throw an exception
+                if (!$data)
+                    $_exceptionFormat($_lang_$$_context_generic, 'equals()');
+
+                // If the argument instance is not an instance, return false
+                if (!$instance || $instance[$_symbol_instance] !== $instance)
+                    return false;
+
+                // Get the hidden argument instance data
+                var $dataArgument = $instance[$_symbol_data];
+
+                // If the class names of the instances are not equal, returnf alse
+                if ($data[$_symbol_data_name] != $dataArgument[$_symbol_data_name])
+                    return false;
+
+                for (var $i = 0, $j = $symbols.length; $i < $j; $i++)
+                {
+                    // Get the current symbol and values
+                    var $symbol        = $symbols[$i],
+                        $value         = $data[$symbol],
+                        $valueArgument = $dataArgument[$symbol];
+
+                    // If both values are instances (which means they are primitive structs)
+                    if ($value && $value[$_symbol_instance] === $value && $valueArgument && $valueArgument[$_symbol_instance] === $valueArgument)
+                    {
+                        // If the primitive structs are not equal, return false
+                        if (!$value.equals($valueArgument))
+                            return false;
+                    }
+                    // If the data for the current symbol is not equal, return false
+                    else if ($data[$symbol] !== $dataArgument[$symbol])
+                        return false;
+                }
+
+                // Return true
+                return true;
+            } });
+        }
     };
     var $_symbolsCompilerThis        = function($name, $symbol, $filter, $function, $arguments)
     {
@@ -4433,7 +4561,7 @@ if (typeof jT_Writable != 'boolean')
                     // If no hidden instance data was found, throw an exception
                     if (!$data)
                         $_exceptionFormat($_lang_$$_context_generic, $name + '()');
-                    
+
                     // Call the function in the context of an instance with the accessor value and return the return value with the applied constraint filter
                     return $function.call($data[$symbol], $filter($v, $name));
                 };
@@ -4449,12 +4577,12 @@ if (typeof jT_Writable != 'boolean')
                 // If no hidden instance data was found, throw an exception
                 if (!$data)
                     $_exceptionFormat($_lang_$$_context_generic, $name + '()');
-                
+
                 // Apply the function in the context of an instance with the provided arguments and return the return value with the applied constraint filter
                 return $filter($function.apply($data[$symbol], arguments), $name);
             };
         }
-        
+
         // If the function is an accessor method, return the context wrapper get accessor
         if ($arguments == 0)
             return function()
@@ -4499,14 +4627,14 @@ if (typeof jT_Writable != 'boolean')
             // If no hidden instance data was found, throw an exception
             if (!$data)
                 $_exceptionFormat($_lang_$$_context_generic, $name + '()');
-            
+
             // Apply the function in the context of an instance with the provided arguments and return the return value
             return $function.apply($data[$symbol], arguments);
         };
     };
 
     // ---------- RUNTIME ----------
-    
+
     // Create the build runtime helpers
     var $_buildRuntimeConstructor = function($constructor, $base, $private)
     {
@@ -4888,9 +5016,9 @@ if (typeof jT_Writable != 'boolean')
         // If the default or nullable flags are set, trim the last character from the type string
         if ($default || $null)
             $type = $type.substr(0, $type.length - 1);
-        
-        // If the type string starts with a capital letter or the first letter of the symbol prefix
-        if ($type[0] >= 'A' && $type[0] <= 'Z' || $name && $type[0] == $_const_prefix_symbol[0])
+
+        // If the type string starts with a capital letter or begins with the symbol prefix
+        if ($type[0] >= 'A' && $type[0] <= 'Z' || $name && $type.substr(0, $_const_prefix_symbol.length) == $_const_prefix_symbol)
         {
             // Unset the native flag
             $native = false;
@@ -4908,7 +5036,7 @@ if (typeof jT_Writable != 'boolean')
                         // If the global class was asynchronously compiled, get the global class from the filter
                         if (!$global)
                             $global = $filter[$_filter_async_global];
-                        
+
                         // Set the construct flag if the default flag is set and the class is a model or the nullable flag is not set and the class is a struct
                         $construct = $default && $filter[$_filter_async_model] || !$null && $filter[$_filter_async_struct];
                     }
@@ -4932,7 +5060,7 @@ if (typeof jT_Writable != 'boolean')
                     // If the construct flag is set, return a default instance of the class
                     if ($construct)
                         return $global();
-                    
+
                     return null;
                 };
             // Create the class constraint filter
@@ -4946,7 +5074,7 @@ if (typeof jT_Writable != 'boolean')
                         // If the global class was asynchronously compiled, get the global class from the filter
                         if (!$global)
                             $global = $filter[$_filter_async_global];
-                        
+
                         // Set the construct flag if the default flag is set and the class is a model or the nullable flag is not set and the class is a struct
                         $construct = $default && $filter[$_filter_async_model] || !$null && $filter[$_filter_async_struct];
                     }
@@ -4968,7 +5096,7 @@ if (typeof jT_Writable != 'boolean')
                     // If the construct flag is set, return a default instance of the class
                     if ($construct)
                         return $global();
-                    
+
                     return null;
                 };
 
@@ -5162,7 +5290,7 @@ if (typeof jT_Writable != 'boolean')
                         else
                             $value = $__number_valueOf__.call($value);
                     }
-                    
+
                     // If the value is not-a-number, return zero
                     if ($__isNaN($value))
                         return 0;
@@ -5330,7 +5458,7 @@ if (typeof jT_Writable != 'boolean')
                 break;
 
             case 'symbol':
-                
+
                 // If symbols are supported, create the symbol constraint filter
                 if ($__symbol)
                     $filter = function($value, $name)
@@ -5407,7 +5535,7 @@ if (typeof jT_Writable != 'boolean')
                     // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
                     if ($name && !$suppress && $_strict)
                         $_exceptionFormat($_lang_$$_constraint_invalid_value, $name, $type);
-                    
+
                     return null;
                 };
 
@@ -5475,7 +5603,7 @@ if (typeof jT_Writable != 'boolean')
     {
         // Check if these are the root instance objects
         var $root = $i == $instance.length - 1;
-        
+
         // Create the internal descriptors
         var $descriptorSelf = { 'value': $this },
             $descriptorThis = { 'value': $public },
@@ -5483,7 +5611,7 @@ if (typeof jT_Writable != 'boolean')
             $descriptorBase = !$root ?
                               { 'value': $instance[$i + 1][$_instance_base] } :
                               null;
-        
+
         // If the class is not unlocked or the base instance object is unique
         if (!$unlocked || $base !== $protected)
         {
@@ -5521,7 +5649,7 @@ if (typeof jT_Writable != 'boolean')
             $__defineProperty($base, '__type', $descriptorType);
         }
     };
-    var $_buildRuntimeMatrix      = function($metaclass, $metainstance, $metalength, $abstract, $import, $internal, $merge, $model, $optimized, $readonlys, $struct, $unlocked, $symbols)
+    var $_buildRuntimeMatrix      = function($metaclass, $metainstance, $metalength, $abstract, $import, $internal, $merge, $model, $readonlys, $struct, $unlocked, $symbols)
     {
         //if ($root)
         //{
@@ -5572,7 +5700,7 @@ if (typeof jT_Writable != 'boolean')
             // If the new operator was not used, create the self instance
             if (!$new)
                 $this = $base = $protected = $public = $__create($class.prototype);
-            
+
             // ### SELF ###
             $this.as   = function(){};
             $this.is   = function(){};
@@ -5593,7 +5721,7 @@ if (typeof jT_Writable != 'boolean')
                              $i < $merge ?
                              $__create($base) :
                              $protected;
-               
+
                 // Get the cache and create the instances in the instance matrix
                 var $cache     = $metaclass[$i],
                     $instances = $instance[$i] = [$private, $protected, $public, $base, $context];
@@ -5620,7 +5748,7 @@ if (typeof jT_Writable != 'boolean')
                 {
                     // Get the directives from the directives matrix
                     var $directives = $metainstance[$i];
-                    
+
                     // Execute the directives on the instance objects
                     for (var $j = 0, $k = $directives.length; $j < $k; $j++)
                         $_buildRuntimeDirective($instance, $i, $private, $protected, $public, $base, $directives[$j], $overrides, $readonly);
@@ -5635,13 +5763,13 @@ if (typeof jT_Writable != 'boolean')
                     // Get the directives from the directives matrix and the instances from the instance matrix
                     var $directives = $metainstance[$i];
                     var $instances  = $instance[$i];
-                    
+
                     // Get the instance objects from the instances
                     $private   = $instances[$_instance_private];
                     $protected = $instances[$_instance_protected];
                     $public    = $instances[$_instance_public];
                     $base      = $instances[$_instance_base];
-                    
+
                     // Execute the directives on the instance objects
                     for (var $j = 0, $k = $directives.length; $j < $k; $j++)
                         $_buildRuntimeDirective($instance, $i, $private, $protected, $public, $base, $directives[$j], $overrides, $readonly);
@@ -5700,7 +5828,7 @@ if (typeof jT_Writable != 'boolean')
                 return $filter($function.apply($private, arguments), $name);
             };
         }
-        
+
         // If the function is an accessor method, return the context wrapper get accessor
         if ($arguments == 0)
             return function()
@@ -5730,37 +5858,35 @@ if (typeof jT_Writable != 'boolean')
         // Loop through the build directives
         for (var $i = 0, $j = $directives.length; $i < $j; $i++)
         {
-            // Get the directive, constraint filter, name, and value (along with the global class from the globals object)
+            // Get the directive, constraint filter, name, and value
             var $directive = $directives[$i],
                 $filter    = $directive[$_directive_filter],
                 $name      = $directive[$_directive_name],
                 $value     = $directive[$_directive_value],
                 $default   = $filter[$_filter_default],
-                $null      = $filter[$_filter_null],
-                $global    = $_buildRuntimeGlobal($filter, $filter[$_filter_constraint], $filter[$_filter_type], $default, $null, $name),
-                $struct    = $filter[$_filter_async_struct];
+                $null      = $filter[$_filter_null];
+
+            // Get the global class from the globals object
+            $_buildRuntimeGlobal($filter, $filter[$_filter_constraint], $filter[$_filter_type], $default, $null, $name);
 
             // If the value is not a data symbol, continue
             if (typeof $value != 'symbol')
                 continue;
 
-            // If the primitive flag is set and the filter is not a struct type, throw an exception
-            if ($primitive && !$struct)
+            // If the primitive flag is set and the filter is not a primitive struct type, throw an exception
+            if ($primitive && !$filter[$_filter_async_primitive] && !$filter[$_filter_async_struct])
                 $_exceptionFormat($_lang_$$_constraint_primitive,
                                   $name,
-                                  $filter[$_filter_constraint],
-                                  $filter[$_filter_async_model] ?
-                                  $_const_keyword_model :
-                                  $_const_keyword_class);
+                                  $filter[$_filter_constraint]);
 
             // If the filter has either the default flag or is a struct type without the nullable modifier, set the default value descriptor for the hidden instance data on the defaults object
-            if ($default || $struct && !$null)
+            if ($default || $filter[$_filter_async_struct] && !$null)
                 $__defineProperty($defaults, $value, $_symbolsCompilerDefault($name, $value, $filter, {}));
         }
 
         return null;
     };
-    var $_symbolsRuntimeMatrix = function($metaclass, $metainstance, $metalength, $build, $defaults, $abstract, $model, $primitive)
+    var $_symbolsRuntimeMatrix = function($metaclass, $metainstance, $metalength, $build, $defaults, $abstract, $model, $name, $primitive)
     {
         // If the class is abstract, return the runtime class constructor
         if ($abstract)
@@ -5799,9 +5925,19 @@ if (typeof jT_Writable != 'boolean')
             // Create the root instance object (and set it in the hidden instance data)
             var $root = $this[$symbolRoot] = $__create($metaroot);
 
-            // Set the hidden instance data on the root instance object (and lock the instance type on it as well)
-            $root[$_symbol_data]     = $this;
-            $root[$_symbol_instance] = $root;
+            // If ECMAScript 6 symbols are not supported
+            if (!$_support.symbol)
+            {
+                // Set the instance data on the root instance object (and lock the instance type on it as well)
+                $_data($root, $_symbol_data,     $this);
+                $_data($root, $_symbol_instance, $root);
+            }
+            else
+            {
+                // Set the hidden instance data on the root instance object (and lock the instance type on it as well)
+                $root[$_symbol_data]     = $this;
+                $root[$_symbol_instance] = $root;
+            }
 
             // If the global prototype lock flag is set, freeze the root instance object
             if ($_protoLock)
@@ -5818,14 +5954,28 @@ if (typeof jT_Writable != 'boolean')
                 $private   = $this[$cache[$_cache_symbols_private]]   = $__create($directive[$_instance_private]);
               //$protected = $this[$cache[$_cache_symbols_protected]] = $__create($directive[$_instance_protected]);
                 $public    = $this[$cache[$_cache_symbols_public]]    = $__create($directive[$_instance_public]);
-                
-                // Set the hidden instance data on the private, protected, and public instance objects (and lock the instance type on them as well)
-                $private  [$_symbol_data]     = $this;
-                $private  [$_symbol_instance] = $private;
-              //$protected[$_symbol_data]     = $this;
-              //$protected[$_symbol_instance] = $protected;
-                $public   [$_symbol_data]     = $this;
-                $public   [$_symbol_instance] = $public;
+
+                // If ECMAScript 6 symbols are not supported
+                if (!$_support.symbol)
+                {
+                    // Set the instance data on the private, protected, and public instance objects (and lock the instance type on them as well)
+                    $_data($private,   $_symbol_data,     $this);
+                    $_data($private,   $_symbol_instance, $private);
+                  //$_data($protected, $_symbol_data,     $this);
+                  //$_data($protected, $_symbol_instance, $protected);
+                    $_data($public,    $_symbol_data,     $this);
+                    $_data($public,    $_symbol_instance, $public);
+                }
+                else
+                {
+                    // Set the hidden instance data on the private, protected, and public instance objects (and lock the instance type on them as well)
+                    $private  [$_symbol_data]     = $this;
+                    $private  [$_symbol_instance] = $private;
+                  //$protected[$_symbol_data]     = $this;
+                  //$protected[$_symbol_instance] = $protected;
+                    $public   [$_symbol_data]     = $this;
+                    $public   [$_symbol_instance] = $public;
+                }
 
                 // If the global prototype lock flag is set
                 if ($_protoLock)
@@ -5842,9 +5992,19 @@ if (typeof jT_Writable != 'boolean')
                     // Create the base instance object (and set it in the hidden instance data)
                     $base = $this[$cache[$_cache_symbols_base]] = $__create($directive[$_instance_base]);
 
-                    // Set the hidden instance data on the base instance object (and lock the instance type on it as well)
-                    $base[$_symbol_data]     = $this;
-                    $base[$_symbol_instance] = $base;
+                    // If ECMAScript 6 symbols are not supported
+                    if (!$_support.symbol)
+                    {
+                        // Set the instance data on the base instance object (and lock the instance type on it as well)
+                        $_data($base, $_symbol_data,     $this);
+                        $_data($base, $_symbol_instance, $base);
+                    }
+                    else
+                    {
+                        // Set the hidden instance data on the base instance object (and lock the instance type on it as well)
+                        $base[$_symbol_data]     = $this;
+                        $base[$_symbol_instance] = $base;
+                    }
 
                     // If the global prototype lock flag is set, freeze the base instance object
                     if ($_protoLock)
@@ -5868,9 +6028,19 @@ if (typeof jT_Writable != 'boolean')
                 // Create the construct instance object (and set it in the hidden instance data)
                 $construct = $this[$cache[$_cache_symbols_construct]] = $__create($metaconstruct);
 
-                // Set the hidden instance data on the construct instance object (and lock the instance type on it as well)
-                $construct[$_symbol_data]     = $this;
-                $construct[$_symbol_instance] = $construct;
+                // If ECMAScript 6 symbols are not supported
+                if (!$_support.symbol)
+                {
+                    // Set the instance data on the construct instance object (and lock the instance type on it as well)
+                    $_data($construct, $_symbol_data,     $this);
+                    $_data($construct, $_symbol_instance, $construct);
+                }
+                else
+                {
+                    // Set the hidden instance data on the construct instance object (and lock the instance type on it as well)
+                    $construct[$_symbol_data]     = $this;
+                    $construct[$_symbol_instance] = $construct;
+                }
 
                 // If the global prototype lock flag is set, freeze the construct instance object
                 if ($_protoLock)
@@ -5880,8 +6050,11 @@ if (typeof jT_Writable != 'boolean')
                 $constructor = $cache[$_cache_constructor];
             }
 
-            // If the class has a constructor and the new operator was used or the class is not a model, apply the constructor in the context of a construct instance and store its return value
-            if ($constructor && ($new || !$model))
+            // Set the type name in the hidden instance data
+            $this[$_symbol_data_name] = $name;
+
+            // If the class has a constructor and the new operator was used or the class is not a model (and the class is not being cloned), apply the constructor in the context of a construct instance and store its return value
+            if ($constructor && ($new || !$model) && !$_clone)
                 $return = $constructor.apply($construct, arguments);
 
             // Set the readonly flag in the hidden instance data
@@ -5898,7 +6071,7 @@ if (typeof jT_Writable != 'boolean')
         // Return the runtime class constructor
         return $class;
     };
-    var $_symbolsRuntimeStruct = function($metaclass, $metainstance, $build, $defaults, $constructor, $primitive)
+    var $_symbolsRuntimeStruct = function($metaclass, $metainstance, $build, $defaults, $constructor, $name, $primitive)
     {
         // Get the private, public, and root data symbols (but the private, public, and root metainstances have yet to be compiled)
         var $cache         = $metaclass[0],
@@ -5920,49 +6093,56 @@ if (typeof jT_Writable != 'boolean')
             var $new  = this instanceof $struct,
                 $this = $__create($defaults);
 
-            // If the root metainstance has not been cached, store it
+            // If the metadata has not been cached
             if (!$metaroot)
-                $metaroot = $metainstance[1];
-
-            // Create the root instance object (and set it in the hidden instance data)
-            var $root = $this[$symbolRoot] = $__create($metaroot);
-
-            // Set the hidden instance data on the root instance object (and lock the instance type on it as well)
-            $root[$_symbol_data]     = $this;
-            $root[$_symbol_instance] = $root;
-
-            // If the global prototype lock flag is set, freeze the root instance object
-            if ($_protoLock)
-                $__freeze($root);
-
-            // If the private and public metainstances have not been cached
-            if (!$metaprivate && !$metapublic)
             {
-                // Store the private and public metainstances
+                // Store the private, public, and root metainstances
+                $metaroot    = $metainstance[1];
                 $metaprivate = $metainstance[0][$_instance_private];
                 $metapublic  = $metainstance[0][$_instance_public];
             }
 
-            // Create the private and public instance objects (and set them in the hidden instance data)
-            var $private = $this[$symbolPrivate] = $__create($metaprivate);
-            var $public  = $this[$symbolPublic]  = $__create($metapublic);
+            // Create the private, public, and root instance objects (and set them in the hidden instance data)
+            var $root    = $this[$symbolRoot]    = $__create($metaroot),
+                $private = $this[$symbolPrivate] = $__create($metaprivate),
+                $public  = $this[$symbolPublic]  = $__create($metapublic);
 
-            // Set the hidden instance data on the private and public instance objects (and lock the instance type on them as well)
-            $private[$_symbol_data]     = $this;
-            $private[$_symbol_instance] = $private;
-            $public [$_symbol_data]     = $this;
-            $public [$_symbol_instance] = $public;
+            // If ECMAScript 6 symbols are not supported
+            if (!$_support.symbol)
+            {
+                // Set the instance data on the private, public, and root instance objects (and lock the instance type on them as well)
+                $_data($root,    $_symbol_data,     $this);
+                $_data($root,    $_symbol_instance, $root);
+                $_data($private, $_symbol_data,     $this);
+                $_data($private, $_symbol_instance, $private);
+                $_data($public,  $_symbol_data,     $this);
+                $_data($public,  $_symbol_instance, $public);
+            }
+            else
+            {
+                // Set the hidden instance data on the private, public, and root instance objects (and lock the instance type on them as well)
+                $root   [$_symbol_data]     = $this;
+                $root   [$_symbol_instance] = $root;
+                $private[$_symbol_data]     = $this;
+                $private[$_symbol_instance] = $private;
+                $public [$_symbol_data]     = $this;
+                $public [$_symbol_instance] = $public;
+            }
 
             // If the global prototype lock flag is set
             if ($_protoLock)
             {
-                // Freeze the private and public instance objects
+                // Freeze the private, public, and root instance objects
+                $__freeze($root);
                 $__freeze($private);
                 $__freeze($public);
             }
 
-            // If the struct has a constructor and the new operator was used, apply the constructor in the context of a private instance
-            if ($constructor && $new)
+            // Set the type name in the hidden instance data
+            $this[$_symbol_data_name] = $name;
+
+            // If the struct has a constructor and the new operator was used (and the struct is not being cloned), apply the constructor in the context of a private instance
+            if ($constructor && $new && !$_clone)
                 $constructor.apply($private, arguments);
 
             // Set the readonly flag in the hidden instance data
@@ -6308,13 +6488,13 @@ if (typeof jT_Writable != 'boolean')
                 if ($get)
                 {
                     // Create the function reference for the get accessor
-                    var $functionGet = $get;
+                    var $accessor = $get;
 
                     // Create the get accessor type constraint wrapper
                     $get = function()
                     {
                         // Call the get accessor in the given context and return its return value within the applied constraint filter
-                        return $filter($functionGet.call(this));
+                        return $filter($accessor.call(this));
                     };
                 }
 
@@ -6322,13 +6502,13 @@ if (typeof jT_Writable != 'boolean')
                 if ($set)
                 {
                     // Create the function reference for the set accessor
-                    var $functionSet = $set;
+                    var $mutator = $set;
 
                     // Create the set accessor type constraint wrapper
                     $set = function($v)
                     {
                         // Call the set accessor in the given context along with the provided argument within the applied constraint filter and return its return value
-                        return $functionSet.call(this, $filter($v));
+                        return $mutator.call(this, $filter($v));
                     };
                 }
             }
@@ -6375,7 +6555,7 @@ if (typeof jT_Writable != 'boolean')
             // Return the object
             return $object;
         }
-        
+
         // Define the data property on the object
         $__defineProperty($object, $key,
         {
@@ -6495,8 +6675,17 @@ if (typeof jT_Writable != 'boolean')
 
     // ########## SETTINGS ##########
 
-    // ---------- DEBUG ----------
-    $_defineProperty('debug', function()
+    // Define the settings properties
+    $_defineProperty('cache',  function()
+    {
+        // Return the cache flag
+        return $_cache;
+    }, function($v)
+    {
+        // Set the cache flag
+        $_cache = $$_asBoolean($v);
+    });
+    $_defineProperty('debug',  function()
     {
         // Return the debug flag
         return $_debug;
@@ -6505,8 +6694,6 @@ if (typeof jT_Writable != 'boolean')
         // Set the debug flag
         $_debug = $$_asBoolean($v);
     });
-
-    // ---------- STRICT ----------
     $_defineProperty('strict', function()
     {
         // Return the strict flag

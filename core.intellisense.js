@@ -18,6 +18,25 @@
 */
 (function(window, jTypes, undefined)
 {
+    // ########## GLOBALS ##########
+
+    // Annotate the global variables
+    intellisense.annotate(window,
+    {
+        /// <field type="Boolean">Indicates whether or not extensions are prevented on critical functions.</field>
+        'jT_FunctionLock': false,
+        /// <field type="Boolean">Indicates whether or not ECMAScript 6 features are enabled.</field>
+        'jT_Harmony': false,
+        /// <field type="Boolean">Indicates whether or not legacy mode is enabled.</field>
+        'jT_Legacy': false,
+        /// <field type="Boolean">Indicates whether or not extensions are prevented on critical prototypes and objects.</field>
+        'jT_PrototypeLock': false,
+        /// <field type="String">A shorthand variable name for the global jTypes reference.</field>
+        'jT_Shorthand': '$$',
+        /// <field type="Boolean">Indicates whether or not the global jTypes reference is writable.</field>
+        'jT_Writable': false
+    });
+
     // ########## CACHE ##########
 
     // Create the constructors object
@@ -553,12 +572,38 @@
                 $name       = $keywords.pop(),
                 $type       = 'field';
             
-            // If the value is a function or the definition is abstract and the value is null, set the type as a method
-            if (typeof $value == 'function' || $abstract && $keywords.indexOf('abstract') >= 0 && $value === null)
+            // If the value is a function, set the type as a method
+            if (typeof $value == 'function')
                 $type = 'method';
             // If the definition an auto property or the value is a simple object, set the type as a property
             else if ($auto || $value != null && typeof $value == 'object' && Object.getPrototypeOf($value) === Object.prototype)
                 $type = 'property';
+
+            // If the definition is abstract
+            if ($keywords.indexOf('abstract') >= 0)
+            {
+                // If the value is an array
+                if (Array.isArray($value))
+                {
+                    // Create the value object
+                    var $object = {};
+
+                    // Set the first method in the value object
+                    $object[$value[0]] = null;
+
+                    // If a second method was provided, set it in the value object
+                    if ($value.length > 1)
+                        $object[$value[1]] = null;
+
+                    // Reset the auto flag and set the "property" type string along with the value as the value object
+                    $auto  = false;
+                    $type  = 'property';
+                    $value = $object;
+                }
+                // If the value is null, set the type as a method
+                else if ($value === null)
+                    $type = 'method';
+            }
 
             // Create the modifier flags
             var $private   = $keywords.indexOf('private')   >= 0,
