@@ -1165,11 +1165,11 @@
     // ---------- EXPORTS ----------
 
     // Define the exported constants
-    $$.version  = jTypes.version;
     $$.__class  = $_class;
     $$.__proto  = $_prototype;
     $$.dateMax  = jTypes.dateMax;
     $$.dateMin  = jTypes.dateMin;
+    $$.dev      = jTypes.dev;
     $$.epsilon  = jTypes.epsilon;
     $$.intMax   = jTypes.intMax;
     $$.intMin   = jTypes.intMin;
@@ -1177,6 +1177,7 @@
     $$.min      = jTypes.min;
     $$.support  = jTypes.support;
     $$.toString = jTypes.toString;
+    $$.version  = jTypes.version;
 
     // Annotate the exported constants
     intellisense.annotate($$,
@@ -1189,6 +1190,8 @@
         'dateMax': jTypes.dateMax,
         /// <field type="Date">The minimum representable date in JavaScript.</field>
         'dateMin': jTypes.dateMin,
+        /// <field type="Boolean">Indicates whether or not jTypes is in development mode.</field>
+        'dev': jTypes.dev,
         /// <field type="Number">The smallest representable interval between two distinguishable numbers in JavaScript.</field>
         'epsilon': jTypes.epsilon,
         /// <field type="Number">The maximum representable integer in JavaScript.</field>
@@ -1615,6 +1618,16 @@
 
         return false;
     };
+    $$.isInfinity         = function()
+    {
+        /// <signature>
+        ///   <summary>Indicates whether or not a number has an infinite value.</summary>
+        ///   <param name="value" type="Number">A value to test if it is infinite.</param>
+        ///   <returns type="Boolean">true if value is an infinite number; otherwise, false.</returns>
+        /// </signature>
+
+        return jTypes.isInfinity.apply(jTypes, arguments);
+    };
     $$.isInternalClass    = function($object)
     {
         /// <signature>
@@ -1625,16 +1638,6 @@
 
         // Return true if the object is a class and the internal keyword is found in the class keywords
         return $$.isClass($object) && $object[$_symbol_keywords].indexOf('internal') >= 0;
-    };
-    $$.isInfinity         = function()
-    {
-        /// <signature>
-        ///   <summary>Indicates whether or not a number has an infinite value.</summary>
-        ///   <param name="value" type="Number">A value to test if it is infinite.</param>
-        ///   <returns type="Boolean">true if value is an infinite number; otherwise, false.</returns>
-        /// </signature>
-
-        return jTypes.isInfinity.apply(jTypes, arguments);
     };
     $$.isModel            = function($object)
     {
@@ -1708,6 +1711,16 @@
         // Return true if the object is a class and the optimized keyword is found in the class keywords
         return $$.isClass($object) && $object[$_symbol_keywords].indexOf('optimized') >= 0;
     };
+    $$.isPositiveInfinity = function()
+    {
+        /// <signature>
+        ///   <summary>Indicates whether or not a number has a value of positive infinity.</summary>
+        ///   <param name="value" type="Number">A value to test if it is positive infinity.</param>
+        ///   <returns type="Boolean">true if value is positive infinity; otherwise, false.</returns>
+        /// </signature>
+
+        return jTypes.isPositiveInfinity.apply(jTypes, arguments);
+    };
     $$.isPrimitiveClass   = function($object)
     {
         /// <signature>
@@ -1718,16 +1731,6 @@
 
         // Return true if the object is a class and the primitive keyword is found in the class keywords
         return $$.isClass($object) && $object[$_symbol_keywords].indexOf('primitive') >= 0;
-    };
-    $$.isPositiveInfinity = function()
-    {
-        /// <signature>
-        ///   <summary>Indicates whether or not a number has a value of positive infinity.</summary>
-        ///   <param name="value" type="Number">A value to test if it is positive infinity.</param>
-        ///   <returns type="Boolean">true if value is positive infinity; otherwise, false.</returns>
-        /// </signature>
-
-        return jTypes.isPositiveInfinity.apply(jTypes, arguments);
     };
     $$.isPrimitiveType    = function()
     {
@@ -1956,6 +1959,15 @@
     // ---------- SETTINGS ----------
 
     // Set the settings accessors on the global namespace wrapper
+    $_accessor($$, 'cache',  function()
+    {
+        // Return the cache flag
+        return jTypes.cache;
+    }, function($v)
+    {
+        // Set the cache flag
+        jTypes.cache = $v;
+    }, true);
     $_accessor($$, 'debug',  function()
     {
         // Return the debug flag
@@ -1978,10 +1990,12 @@
     // Annotate the settings accessors
     intellisense.annotate($$,
     {
+        /// <field type="Boolean">Indicates whether or not caching is enabled.</field>
+        'cache': jTypes.cache,
         /// <field type="Boolean">Indicates whether or not debugging is enabled.</field>
-        'debug': false,
+        'debug': jTypes.debug,
         /// <field type="Boolean">Indicates whether or not strict mode is enabled.</field>
-        'strict': false
+        'strict': jTypes.strict
     });
 
     // ########## CONSTRAINTS ##########

@@ -364,7 +364,7 @@
 
             return this;
         },
-        'public abstract blur': function()
+        'public virtual blur': function()
         {
             // If this element is the currently focused element
             if ($_focused === this.__self)
@@ -377,13 +377,13 @@
 
             return false;
         },
-        'public abstract dispose': function($element)
+        'public virtual dispose': function($element)
         {
             this.$_element
                 // Remove the jTypes instance from the element data
                 .removeData($$.settings.JQUERY_DATA_PREFIX);
         },
-        'public abstract focus': function()
+        'public virtual focus': function()
         {
             // If an element is currently focused and it is not this element
             if ($_focused && $_focused !== this.__self)
