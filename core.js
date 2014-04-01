@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0b674';
+        $_version = '2.2.0';
 
     // ########## LANGUAGE ##########
 
@@ -579,13 +579,14 @@
 
     // Create the definition indices
     var $_definition_constraint = 3,// @
+        $_definition_filter     = 5,
         $_definition_modifiers  = 2,// @
         $_definition_name       = 0,// @
         $_definition_type       = 4,// @
         $_definition_value      = 1,// @
 
         // Create the length
-        $_definition__length = 5;
+        $_definition__length = 6;
 
     // ---------- DIRECTIVES ----------
 
@@ -727,9 +728,8 @@
     // Create the internal variables
     var $_aliases    = null,
         $_classes    = $__create(null),
-        $_clone      = false,
+        $_clone      = {},
         $_errors     = [],
-        $_filters    = $__create(null),
         $_handle     = '',
         $_includes   = null,
         $_namespace  = null,
@@ -1091,7 +1091,7 @@
         $_filter_native     = $_symbolGenerator('native'),
         $_filter_null       = $_symbolGenerator('null'),
         $_filter_suppress   = $_symbolGenerator('suppress'),
-        
+
         // Create the class filter symbols
         $_filter_class     = $_symbolGenerator('class'),
         $_filter_model     = $_symbolGenerator('model'),
@@ -3550,9 +3550,8 @@
         // If the debug flag is set and there were new errors
         if ($_debug && $_errors.length > $errors)
         {
-            // Reset the filters and exception handle
-            $_filters = $__create(null);
-            $_handle  = '';
+            // Reset the exception handle
+            $_handle = '';
 
             // If the class is being defined in a namespace, return a failed class
             if ($_namespace != null)
@@ -3651,10 +3650,6 @@
 
         // Set the symbols on the class
         $_compilerClassSymbols($class);
-        
-        // Reset the filters and exception handle
-        $_filters = $__create(null);
-        $_handle  = '';
 
         // If a class name was provided
         if ($modifiers & $_modifiers_class_global)
@@ -3685,6 +3680,9 @@
             if ($_cache)
                 $_store($_version + '_' + $_cache + '::' + $handle, $__stringify($__date_now()));
         }
+
+        // Reset the exception handle
+        $_handle = '';
 
         // Return the class
         return $class;
@@ -3771,7 +3769,7 @@
         // Return true if no flags were set that are not found in the constraint bits
         return !($flags & ~$constraint);
     };
-    var $_compilerDirective      = function($directives, $overrides, $defaults, $sources, $primitive, $struct, $i, $j, $definition, $namespace, $aliases, $includes)
+    var $_compilerDirective      = function($directives, $overrides, $defaults, $filters, $sources, $primitive, $struct, $i, $j, $definition, $namespace, $aliases, $includes)
     {
         // Get the definition constraint, modifiers, name, and value
         var $constraint = $definition[$_definition_constraint],
@@ -3779,11 +3777,11 @@
             $name       = $definition[$_definition_name],
             $value      = $definition[$_definition_value];
 
-        // Create the directive, constraint filter, instructions, and data source
+        // Create the directive, instructions, and data source
         var $data         = $modifiers & ($_modifiers_field | $_modifiers_property_auto),
             $directive    = new $__array($_directive__length),
             $filter       = $constraint ?
-                            $_runtimeFilter($constraint, $name, $namespace, $aliases, $includes) :
+                            $definition[$_definition_filter] :
                             null,
             $inherits     = null,
             $instructions = 0,
@@ -3791,6 +3789,10 @@
             $source       = $data && $_symbolCreate ?
                             $_symbolCreate() :
                             null;
+
+        // If a constraint was provided and a constraint filter was not cached, create the constraint filter
+        if ($constraint && !$filter)
+            $filter = $definition[$_definition_filter] = $filters[$constraint] || $_runtimeFilter($constraint, $name, $namespace, $aliases, $includes);
 
         // If a data source was created and a data sources array was provided, push the data symbol into the data sources array
         if ($source && $sources)
@@ -4132,8 +4134,9 @@
     };
     var $_compilerDirectives     = function($metaclass, $metalength, $metainstance, $defaults, $sources, $primitive, $struct)
     {
-        // Create the merge index and overrides object
-        var $merge     = 0,
+        // Create the filters cache, merge index, and overrides object
+        var $filters   = $__create(null),
+            $merge     = 0,
             $overrides = {};
 
         // Loop through the metadata from derived to base
@@ -4141,27 +4144,34 @@
         {
             // Get the private and protected definitions objects from the cache and create the directives array
             var $cache         = $metaclass[$i],
+                $class         = $cache[$_cache_class],
                 $private       = $cache[$_cache_private],
                 $privateKeys   = $__keys($private),
                 $protected     = $cache[$_cache_protected],
                 $protectedKeys = $__keys($protected),
-                $aliases       = $cache[$_cache_aliases],
                 $directives    = new $__array($privateKeys.length + $protectedKeys.length),
-                $includes      = $cache[$_cache_includes],
-                $namespace     = $cache[$_cache_class][$_symbol_namespace];
+                $namespace     = $class[$_symbol_namespace],
+                $aliases       = $cache[$_cache_aliases],
+                $includes      = $cache[$_cache_includes];
+
+            // Reset the exception handle
+            $_handle = $class[$_symbol_handle];
 
             // Compile the private definitions into the directives array (and increment the merge index if the definition was overridden in the overrides object)
             for (var $j = 0, $k = $privateKeys.length; $j < $k; $j++)
-                if ($_compilerDirective($directives, $overrides, $defaults, $sources, $primitive, $struct, $i, $j, $private[$privateKeys[$j]], $namespace, $aliases, $includes) && $merge <= $i)
+                if ($_compilerDirective($directives, $overrides, $defaults, $filters, $sources, $primitive, $struct, $i, $j, $private[$privateKeys[$j]], $namespace, $aliases, $includes) && $merge <= $i)
                     $merge = $i + 1;
 
             // Compile the protected definitions into the directives array (and increment the merge index if the definition was overridden in the overrides object)
             for (var $j = 0, $k = $protectedKeys.length, $l = $privateKeys.length; $j < $k; $j++)
-                if ($_compilerDirective($directives, $overrides, $defaults, $sources, $primitive, $struct, $i, $j + $l, $protected[$protectedKeys[$j]], $namespace, $aliases, $includes) && $merge <= $i)
+                if ($_compilerDirective($directives, $overrides, $defaults, $filters, $sources, $primitive, $struct, $i, $j + $l, $protected[$protectedKeys[$j]], $namespace, $aliases, $includes) && $merge <= $i)
                     $merge = $i + 1;
 
             // Set the directives array in the metadata
             $metainstance[$i] = $directives;
+
+            // Reset the exception handle
+            $_handle = '';
         }
 
         // Return the merge index
@@ -4250,7 +4260,7 @@
 
             // Add the namespace to the namespaces collection
             $_namespaces[$modifiers] = $namespace;
-            
+
             // Set the namespace
             $_namespace = $modifiers;
         }
@@ -4286,7 +4296,7 @@
                 {
                     // Get the alias from the dependency string
                     var $alias = $dependency.substr(0, $index).trim();
-                    
+
                     // If the alias is not a valid namespace, throw an exception
                     if (!$_const_regexp_namespace.test($alias) || $_modifiers[$alias] != null || $_modifiers_class[$alias] != null || $_constraints[$alias] != null)
                         $_exceptionFormat($_lang_namespace_alias_invalid, $alias);
@@ -4404,7 +4414,7 @@
             $value      = $definition[$_definition_value],
             $descriptor = { 'enumerable': $modifiers & ($_modifiers_method | $_modifiers_nested) ?
                                           !!($modifiers & $_modifiers_visible) :
-                                           !($modifiers & $_modifiers_hidden) };
+                                          !($modifiers & $_modifiers_hidden) };
 
         // If the const modifier was provided or the value is a nested class
         if ($modifiers & ($_modifiers_const | $_modifiers_nested))
@@ -4442,7 +4452,7 @@
         // If the persist flag is not set, reset the errors array
         if (!$persist)
             $_errors = [];
-        
+
         // If more than one error is in the errors array, throw the formatted errors
         if ($errors.length > 1)
             throw new $__error($_lang_exception_generic + ' ' + $errors.length + '\n' + $errors.join('\n'));
@@ -4588,11 +4598,8 @@
             if (!$data)
                 $_exceptionFormat($_lang_conflict_generic, 'clone()');
 
-            // Set the clone flag
-            $_clone = true;
-
             // Create the cloned instance and get the cloned hidden instance data
-            var $cloneInstance = $_classes[$data[$_symbol_data_handle]](),
+            var $cloneInstance = $_classes[$data[$_symbol_data_handle]]($_clone),
                 $cloneData     = $cloneInstance[$_symbol_data];
 
             for (var $i = 0, $j = $sources.length; $i < $j; $i++)
@@ -4606,9 +4613,6 @@
                                       $value.clone() :
                                       $value;
             }
-
-            // Unset the clone flag
-            $_clone = false;
 
             // Return the cloned instance
             return $cloneData[$symbol];
@@ -4715,10 +4719,6 @@
             'enumerable':   true,
             'get':          function()
             {
-                // If the clone flag is set, return null
-                if ($_clone)
-                    return null;
-
                 // Create the default value within the applied constraint filter
                 var $value = $filter(null);
 
@@ -4886,7 +4886,7 @@
                 {
                     // Set the clone method descriptor on the protected instance object
                     $__defineProperty($protected, 'clone', $clone);
-                    
+
                     // If the base instance object is unique, set the clone method descriptor on the base instance object
                     if ($base && $base !== $protected)
                         $__defineProperty($base, 'clone', $clone);
@@ -5285,7 +5285,7 @@
                 // If the value is null, create the default value within the applied constraint filter
                 if ($value === null)
                     $value = $filter(null);
-            
+
                 // Return the value
                 return $value;
             };
@@ -5604,18 +5604,10 @@
     };
     var $_runtimeFilter    = function($constraint, $name, $namespace, $aliases, $includes)
     {
-        // Check if the constraint filter was cached
-        var $filter = $name ?
-                      $_filters[$constraint] :
-                      null;
-
-        // If the constraint filter was cached, return it
-        if ($filter)
-            return $filter;
-
         // Create the cast, default, native, nullable, and suppress flags
         var $cast     = $constraint[0] == '~',
             $default  = $constraint[$constraint.length - 1] == '!',
+            $filter   = null,
             $handle   = $constraint,
             $native   = true,
             $null     = $constraint[$constraint.length - 1] == '?',
@@ -5675,7 +5667,7 @@
                     {
                         // Cast the value as an instance of the class
                         $value = $data[$data2];
-                        
+
                         // If the cast was successful, return the value
                         if ($value)
                             return $value;
@@ -6184,10 +6176,6 @@
         $filter[$_filter_null]       = $null;
         $filter[$_filter_suppress]   = $suppress;
 
-        // If a name was provided, set the constraint filter in the constraint filters cache
-        if ($name)
-            $_filters[$constraint] = $filter;
-
         // Return the constraint filter
         return $filter;
     };
@@ -6218,128 +6206,112 @@
                           $_namespaces :
                           $_classes;
 
-        // If the handle does not start with the global namespace
-        if ($handle.substr(0, $_const_keyword_global.length + 2) != $_const_keyword_global + '::')
+        // If the handle starts with the global namespace, return the resolved global reference
+        if ($handle.substr(0, $_const_keyword_global.length + 2) == $_const_keyword_global + '::')
+            return $references[$handle.substr($_const_keyword_global.length + 2)] || null;
+
+        // Resolve the reference relative to the namespace
+        var $reference = $namespace ?
+                         $references[$namespace + '.' + $handle] :
+                         null;
+
+        // If an aliases map was provided
+        if ($aliases)
         {
-            // Resolve the reference relative to the namespace
-            var $reference = $namespace ?
-                             $references[$namespace + '.' + $handle] :
-                             null;
+            // Get the alias from the handle and the dependency from the aliases map
+            var $index      = $handle.indexOf('.'),
+                $alias      = $index >= 0 ?
+                              $handle.substr(0, $index) :
+                              $handle,
+                $dependency = $aliases[$alias];
 
-            // If an aliases map was provided
-            if ($aliases)
+            // If a dependency was found in the aliases map
+            if ($dependency)
             {
-                // Get the alias from the handle and the dependency from the aliases map
-                var $index      = $handle.indexOf('.'),
-                    $alias      = $index >= 0 ?
-                                  $handle.substr(0, $index) :
-                                  $handle,
-                    $dependency = $aliases[$alias];
-
-                // If a dependency was found in the aliases map
-                if ($dependency)
+                // If the handle is not generic and the handle directly references the alias
+                if (!$generic && $handle == $alias)
                 {
-                    // If the handle is not generic and the handle directly references the alias
-                    if (!$generic && $handle == $alias)
-                    {
-                        // If the alias is not a valid class name, throw an exception
-                        if (!$_const_regexp_class.test($alias))
-                            $_exceptionFormat($_lang_handle_alias_invalid, $namespace, $alias);
+                    // If the alias is not a valid class name, throw an exception
+                    if (!$_const_regexp_class.test($alias))
+                        $_exceptionFormat($_lang_handle_alias_invalid, $namespace, $alias);
 
-                        // If the dependency is not a valid handle, throw an exception
-                        if (!$_compilerHandle($dependency))
-                            $_exceptionFormat($_lang_handle_dependency_invalid, $namespace, $dependency);
-                    }
-
-                    // If a reference was already found relative to the namespace, throw an exception
-                    if ($reference)
-                        $_exceptionFormat($_lang_handle_alias_conflict, $namespace, $alias);
-
-                    // If the dependency does not start with the global namespace
-                    if ($dependency.substr(0, $_const_keyword_global.length + 2) != $_const_keyword_global + '::')
-                    {
-                        // If a namespace was provided, resolve the dependency reference relative to the namespace
-                        if ($namespace)
-                            $reference = $references[$index >= 0 ?
-                                                     $namespace + '.' + $dependency + '.' + $handle.substr($index + 1) :
-                                                     $namespace + '.' + $dependency];
-                    }
-                    // Remove the global namespace from the dependency
-                    else
-                        $dependency = $dependency.substr($_const_keyword_global.length + 2);
-
-                    // If a reference was not resolved, resolve the dependency reference relative to the global context
-                    if (!$reference)
-                        $reference = $references[$index >= 0 ?
-                                                 $dependency + '.' + $handle.substr($index + 1) :
-                                                 $dependency];
+                    // If the dependency is not a valid handle, throw an exception
+                    if (!$_compilerHandle($dependency))
+                        $_exceptionFormat($_lang_handle_dependency_invalid, $namespace, $dependency);
                 }
+
+                // If a reference was already found relative to the namespace, throw an exception
+                if ($reference)
+                    $_exceptionFormat($_lang_handle_alias_conflict, $namespace, $alias);
+
+                // Resolve the reference relative to the dependency
+                $reference = $_runtimeHandle($index >= 0 ?
+                                             $dependency + '.' + $handle.substr($index + 1) :
+                                             $dependency,
+                                             $generic,
+                                             $namespace);
+            }
+        }
+
+        // If a reference was resolved, return the reference
+        if ($reference)
+            return $reference;
+
+        // If the handle is not generic and an includes array was provided
+        if (!$generic && $includes)
+        {
+            // Create the reference index
+            var $index = -1;
+
+            for (var $i = 0, $j = $includes.length; $i < $j; $i++)
+            {
+                // Resolve the include reference relative to the include
+                var $include = $_runtimeHandle($includes[$i] + '.' + $handle, $generic, $namespace);
+
+                // If an include reference was not resolved, continue
+                if (!$include)
+                    continue;
+
+                // If an include reference was previously resolved, throw an exception
+                if ($reference)
+                    $_exceptionFormat($_lang_handle_include_duplicate, $handle, $includes[$i], $includes[$index]);
+
+                // Set the reference as the include reference
+                $index     = $i;
+                $reference = $include;
             }
 
             // If a reference was resolved, return the reference
             if ($reference)
                 return $reference;
+        }
 
-            // If the handle is not generic and an includes array was provided
-            if (!$generic && $includes)
+        // If a namespace was provided
+        if ($namespace)
+        {
+            // Get the index of the last dot operator in the namespace
+            var $index = $namespace.lastIndexOf('.');
+
+            // If a dot operator was found in the namespace
+            while ($index >= 0)
             {
-                // Create the reference index
-                var $index = -1;
+                // Get the parent namespace preceding the dot operator
+                var $parent = $namespace.substr(0, $index);
 
-                for (var $i = 0, $j = $includes.length; $i < $j; $i++)
-                {
-                    // Resolve the include reference relative to the include
-                    var $include = $references[$includes[$i] + '.' + $handle];
-
-                    // If an include reference was not resolved, continue
-                    if (!$include)
-                        continue;
-
-                    // If an include reference was previously resolved, throw an exception
-                    if ($reference)
-                        $_exceptionFormat($_lang_handle_include_duplicate, $handle, $includes[$i], $includes[$index]);
-
-                    // Set the reference as the include reference
-                    $index     = $i;
-                    $reference = $include;
-                }
+                // If a parent namespace was resolved, resolve the reference relative to the parent namespace
+                if ($parent)
+                    $reference = $references[$parent + '.' + $handle];
 
                 // If a reference was resolved, return the reference
                 if ($reference)
                     return $reference;
+
+                // Get the index of the previous dot operator in the namespace
+                $index = $namespace.lastIndexOf('.', $index - 1);
             }
-
-            // If a namespace was provided
-            if ($namespace)
-            {
-                // Get the index of the last dot operator in the namespace
-                var $index = $namespace.lastIndexOf('.');
-
-                // If a dot operator was found in the namespace
-                while ($index >= 0)
-                {
-                    // Get the base namespace preceding the dot operator
-                    var $namespaceBase = $namespace.substr(0, $index);
-
-                    // If a base namespace was resolved, resolve the reference relative to the base namespace
-                    if ($namespaceBase)
-                        $reference = $references[$namespaceBase + '.' + $handle];
-
-                    // If a reference was resolved, return the reference
-                    if ($reference)
-                        return $reference;
-
-                    // Get the index of the previous dot operator in the namespace
-                    $index = $namespace.lastIndexOf('.', $index - 1);
-                }
-            }
-
         }
-        // Remove the global namespace from the handle
-        else
-            $handle = $handle.substr($_const_keyword_global.length + 2);
 
-        // Return the global reference
+        // Return the resolved global reference
         return $references[$handle] || null;
     };
     var $_runtimeMatrix    = function($metaclass, $metalength, $abstract, $expando, $internal, $model, $primitive, $struct, $unlocked)
@@ -6351,7 +6323,7 @@
             $handles      = $__create(null),
             $readonlys    = false,
             $type         = $_class;
-        
+
         // Create the runtime build helper
         var $build = function()
         {
@@ -6467,7 +6439,7 @@
             // If the class is expando, set the base, protected, and public instance objects as the root instance object
             if ($expando)
                 $base = $protected = $public = $root;
-            
+
             // Loop through the metadata from base to derived
             for (var $i = $metalength - 1; $i >= 0; $i--)
             {
@@ -6556,7 +6528,7 @@
                 // Set the base constructor as the constructor
                 else
                     $constructor = $ctor;
-                
+
                 // Create the instances in the instance matrix
                 var $instances = $instance[$i] = $constructor === $ctor ?
                                                  [$private, $protected, $public, $base] :
@@ -6590,7 +6562,7 @@
 
                 // If the cache had a constructor, freeze the construct instance object
                 if ($constructor !== $ctor)
-                    $__freeze($construct)
+                    $__freeze($construct);
 
                 // Set the previous base instance as the base instance
                 $base1 = $base;
@@ -6786,9 +6758,9 @@
             // Return the runtime class constructor
             return $class;
         }
-        
+
         // Create the runtime class constructor
-        $class = function()
+        $class = function($clone)
         {
             // If the class has not been built, build the class
             if ($build)
@@ -6950,7 +6922,7 @@
             $this[$_symbol_data_readonly] = false;
 
             // If the class has a constructor and the new operator was used or the class is not a model (and the class is not being cloned), apply the constructor in the context of a construct instance and store its return value
-            if ($constructor && ($new || !$model) && !$_clone)
+            if ($constructor && ($new || !$model) && $clone !== $_clone)
                 $return = $constructor.apply($construct, arguments);
 
             // Set the readonly flag in the hidden instance data
@@ -7006,12 +6978,12 @@
             // Return true
             return true; 
         };
-        var $struct = function()
+        var $struct = function($clone)
         {
             // If the struct has not been built, build the struct
             if ($build)
                 $build();
-            
+
             // Check if the new operator was used and create the hidden instance data
             var $new  = this instanceof $struct && this[$_symbol_instance] !== this,
                 $this = $__create($defaults);
@@ -7058,7 +7030,7 @@
             $this[$_symbol_data_readonly] = false;
 
             // If the struct has a constructor and the new operator was used (and the struct is not being cloned), apply the constructor in the context of a private instance
-            if ($constructor && $new && !$_clone)
+            if ($constructor && $new && $clone !== $_clone)
                 $constructor.apply($private, arguments);
 
             // Set the readonly flag in the hidden instance data

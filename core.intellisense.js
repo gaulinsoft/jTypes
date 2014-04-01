@@ -25,14 +25,16 @@
     {
         /// <field type="Boolean">Indicates whether or not extensions are prevented on critical functions.</field>
         'jT_FunctionLock': false,
-        /// <field type="Boolean">Indicates whether or not ECMAScript 6 features are enabled.</field>
-        'jT_Harmony': false,
+        /// <field type="Boolean">Indicates whether or not ECMAScript 6 support is enabled.</field>
+        'jT_Harmony': true,
         /// <field type="Boolean">Indicates whether or not legacy mode is enabled.</field>
         'jT_Legacy': false,
         /// <field type="Boolean">Indicates whether or not extensions are prevented on critical prototypes and objects.</field>
         'jT_PrototypeLock': false,
         /// <field type="String">A shorthand variable name for the global jTypes reference.</field>
         'jT_Shorthand': '$$',
+        /// <field type="Boolean">Indicates whether or not Web Storage support is enabled.</field>
+        'jT_Storage': false,
         /// <field type="Boolean">Indicates whether or not the global jTypes reference is writable.</field>
         'jT_Writable': false
     });
@@ -40,7 +42,9 @@
     // ########## CACHE ##########
 
     // Create the constructors object
-    var $_constructors = Object.create(null);
+    var $_classes      = Object.create(null),
+        $_constructors = Object.create(null),
+        $_namespaces   = Object.create(null);
 
     // Create the items objects
     var $_itemsConstruct = Object.create(null),
@@ -53,16 +57,18 @@
     var $_thisConstruct = Object.create(null),
         $_thisPrivate   = Object.create(null),
         $_thisProtected = Object.create(null),
-        $_thisPublic    = Object.create(null),
-        $_thisStatic    = Object.create(null);
+        $_thisPublic    = Object.create(null);
 
     // ########## HELPERS ##########
 
     // Create the characters string, base class of all classes, constraints object, hashes object, and base prototype of all prototypes
-    var $_characters  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    var $_aliases     = null,
+        $_characters  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
         $_class       = function(){},
         $_constraints = Object.create(null),
         $_hashes      = Object.create(null),
+        $_includes    = null,
+        $_namespace   = null,
         $_prototype   = {};
 
     // Append the lowercase characters to the characters string
@@ -104,6 +110,144 @@
 
         // Return the object with the defined "accessor" property
         return Object.defineProperty($object, $key, $descriptor);
+    };
+    var $_compile   = function($modifiers, $dependencies, $constructor)
+    {
+        // Create the namespace object
+        var $namespace = $$;
+
+        // If any modifiers were provided
+        if ($modifiers)
+        {
+            // Trim the modifiers
+            $modifiers = $modifiers.trim();
+
+            // If the modifiers start with the namespace keyword, remove it from the modifiers
+            if ($modifiers.substr(0, 'namespace'.length + 1) == 'namespace ')
+                $modifiers = $modifiers.substr('namespace'.length + 1).trim();
+
+            // If the modifiers are not a generic handle or already being compiled, return
+            if (!$_handle($modifiers, true) || $_namespace)
+                return;
+
+            // Create the namespaces array
+            var $namespaces = $modifiers.split('.');
+
+            for (var $i = 0, $j = $namespaces.length; $i < $j; $i++)
+            {
+                // Get the current name
+                var $name = $namespaces[$i];
+
+                // If the name is not defined in the namespace
+                if (!Object.prototype.hasOwnProperty.call($namespace, $name))
+                {
+                    // Create the namespace object
+                    var $object = Object.create(null);
+
+                    // Set the namespace object on the namespace
+                    $_data($namespace, $name, $object, false, true);
+
+                    // Set the current namespace to the namespace object
+                    $namespace = $object;
+
+                    // Set the namespace metadata
+                    $_data($namespace, $_symbol_handle,    $namespaces.slice(0, $i + 1).join('.'));
+                    $_data($namespace, $_symbol_name,      $name);
+                    $_data($namespace, $_symbol_namespace, $i > 0 ? $namespaces.slice(0, $i).join('.') : '');
+                }
+                // Set the current namespace to the namespace object
+                else
+                    $namespace = $namespace[$name];
+            }
+
+            // Add the namespace to the namespaces collection
+            $_namespaces[$modifiers] = $namespace;
+
+            // Set the namespace
+            $_namespace = $modifiers;
+        }
+        // Set the global namespace
+        else
+            $_namespace = '';
+
+        // If any dependencies were provided
+        if ($dependencies && $dependencies.length)
+        {
+            // Create the aliases map and includes array
+            $_aliases  = Object.create(null);
+            $_includes = [];
+
+            for (var $i = 0, $j = $dependencies.length; $i < $j; $i++)
+            {
+                // Get the current dependency
+                var $dependency = $dependencies[$i];
+
+                // If the dependency is not a primitive string, return
+                if (typeof $dependency != 'string')
+                    return;
+
+                // If the dependency starts with the using keyword, remove it from the dependency
+                if ($dependency.substr(0, 'using'.length + 1) == 'using ')
+                    $dependency = $dependency.substr('using'.length + 1).trim();
+
+                // Get the index of the alias operator
+                var $index = $dependency.indexOf('=');
+
+                // If the dependency is an alias
+                if ($index >= 0)
+                {
+                    // Get the alias from the dependency string
+                    var $alias = $dependency.substr(0, $index).trim();
+
+                    // If the alias is not a valid namespace, return
+                    if (!/^[_a-z][_a-z0-9]*$/i.test($alias) || $_constraints[$alias] !== undefined)
+                        return;
+
+                    // Remove the alias from the dependency string
+                    $dependency = $dependency.substr($index + 1).trim();
+
+                    // If the dependency is not a generic handle or the alias is already defined in the aliases map, return
+                    if (!$_handle($dependency, true) || $_aliases[$alias])
+                        return;
+
+                    // Set the alias in the aliases map
+                    $_aliases[$alias] = $dependency;
+                }
+                else
+                {
+                    // If the dependency is not a generic handle, return
+                    if (!$_handle($dependency, true))
+                        return;
+
+                    // Push the dependency into the includes array
+                    $_includes.push($dependency);
+                }
+            }
+        }
+        else
+        {
+            // Reset the aliases map and includes array
+            $_aliases  = null;
+            $_includes = null;
+        }
+
+        // Set the namespace constructor function call context
+        intellisense.setCallContext($constructor,
+        {
+            'thisArg': $namespace,
+            'args':    [$$]
+        });
+
+        // Call the namespace constructor
+        $constructor.call($namespace, $$);
+
+        // Reset the namespace
+        $_aliases   = null;
+        $_includes  = null;
+        $_namespace = null;
+
+        // Return namespace object
+        return $namespace;
     };
     var $_data      = function($object, $key, $value, $writable, $enumerable, $configurable)
     {
@@ -158,6 +302,34 @@
         // Return the hash
         return $hash;
     };
+    var $_handle    = function($handle, $generic)
+    {
+        // If the handle starts with the global namespace, remove it from the handle
+        if ($handle.substr(0, 'global'.length + 2) == 'global::')
+            $handle = $handle.substr('global'.length + 2);
+
+        // Create the namespaces array from the handle
+        var $namespaces = $handle.split('.');
+
+        // If the handle is not generic
+        if (!$generic)
+        {
+            // Get the class name from the namespaces array
+            var $name = $namespaces.pop();
+
+            // If the class name is not valid, return false
+            if (!/^[A-Z][_a-zA-Z0-9]*$/.test($name))
+                return false;
+        }
+
+        // If any of the namespaces are not valid, return false
+        for (var $i = 0, $j = $namespaces.length; $i < $j; $i++)
+            if (!/^[_a-z][_a-z0-9]*$/i.test($namespaces[$i]))
+                return false;
+
+        // Return true
+        return true;
+    };
     var $_item      = function($name, $kind, $value, $glyph, $parent, $scope, $comments)
     {
         // Return an item object
@@ -176,6 +348,108 @@
             value:        $value
         });
     };
+    var $_resolve   = function($handle, $this, $namespace, $aliases, $includes)
+    {
+        // If the handle starts with the global namespace, return the resolved global reference
+        if ($handle.substr(0, 'global'.length + 2) == 'global::')
+            return $this[$handle.substr('global'.length + 2)] || null;
+
+        // Resolve the reference relative to the namespace
+        var $reference = $namespace ?
+                         $this[$namespace + '.' + $handle] :
+                         null;
+
+        // If an aliases map was provided
+        if ($aliases)
+        {
+            // Get the alias from the handle and the dependency from the aliases map
+            var $index      = $handle.indexOf('.'),
+                $alias      = $index >= 0 ?
+                              $handle.substr(0, $index) :
+                              $handle,
+                $dependency = $aliases[$alias];
+
+            // If a dependency was found in the aliases map
+            if ($dependency)
+            {
+                // If the handle directly references the alias
+                if ($handle == $alias)
+                {
+                    // If the alias is not a valid class name or the dependency is not a valid handle, return
+                    if (!/^[A-Z][_a-zA-Z0-9]*$/.test($alias) || !$_handle($dependency))
+                        return;
+                }
+
+                // If a reference was already found relative to the namespace, return
+                if ($reference)
+                    return;
+
+                // Resolve the reference relative to the dependency
+                $reference = $_resolve($index >= 0 ?
+                                       $dependency + '.' + $handle.substr($index + 1) :
+                                       $dependency,
+                                       $this,
+                                       $namespace);
+            }
+        }
+
+        // If a reference was resolved, return the reference
+        if ($reference)
+            return $reference;
+
+        // If an includes array was provided
+        if ($includes)
+        {
+            for (var $i = 0, $j = $includes.length; $i < $j; $i++)
+            {
+                // Resolve the include reference relative to the include
+                var $include = $_resolve($includes[$i] + '.' + $handle, $this, $namespace);
+
+                // If an include reference was not resolved, continue
+                if (!$include)
+                    continue;
+
+                // If an include reference was previously resolved, return
+                if ($reference)
+                    return;
+
+                // Set the reference as the include reference
+                $reference = $include;
+            }
+
+            // If a reference was resolved, return the reference
+            if ($reference)
+                return $reference;
+        }
+
+        // If a namespace was provided
+        if ($namespace)
+        {
+            // Get the index of the last dot operator in the namespace
+            var $index = $namespace.lastIndexOf('.');
+
+            // If a dot operator was found in the namespace
+            while ($index >= 0)
+            {
+                // Get the parent namespace preceding the dot operator
+                var $parent = $namespace.substr(0, $index);
+
+                // If a parent namespace was resolved, resolve the reference relative to the parent namespace
+                if ($parent)
+                    $reference = $this[$parent + '.' + $handle];
+
+                // If a reference was resolved, return the reference
+                if ($reference)
+                    return $reference;
+
+                // Get the index of the previous dot operator in the namespace
+                $index = $namespace.lastIndexOf('.', $index - 1);
+            }
+        }
+
+        // Return the resolved global reference
+        return $this[$handle] || null;
+    };
     var $_symbol    = function()
     {
         // If symbols are supported, return a symbol
@@ -187,13 +461,15 @@
     };
 
     // ---------- SYMBOLS ----------
-    var $_symbol_base     = $_symbol(),
-        $_symbol_class    = $_symbol(),
-        $_symbol_instance = $_symbol(),
-        $_symbol_items    = $_symbol(),
-        $_symbol_keywords = $_symbol(),
-        $_symbol_name     = $_symbol(),
-        $_symbol_type     = $_symbol();
+    var $_symbol_base      = $_symbol(),
+        $_symbol_class     = $_symbol(),
+        $_symbol_handle    = $_symbol(),
+        $_symbol_instance  = $_symbol(),
+        $_symbol_items     = $_symbol(),
+        $_symbol_keywords  = $_symbol(),
+        $_symbol_name      = $_symbol(),
+        $_symbol_namespace = $_symbol(),
+        $_symbol_type      = $_symbol();
 
     // ########## WRAPPERS ##########
 
@@ -205,46 +481,46 @@
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
         ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
         ///   <param name="constructor" type="Function">A constructor for the class.</param>
         ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
         ///   <param name="modifiers" type="String">A space-separated string of modifiers for the class.</param>
         ///   <param name="constructor" type="Function">A constructor for the class.</param>
         ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
         ///   <param name="modifiers" type="String">A space-separated string of modifiers for the class.</param>
         ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
         ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
         ///   <param name="constructor" type="Function">A constructor for the class.</param>
         ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
         ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
         ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
         ///   <param name="modifiers" type="String">A space-separated string of modifiers for the class.</param>
         ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
         ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -252,7 +528,7 @@
         ///   <param name="baseClass" type="Class">A base class which the class will inherit from.</param>
         ///   <param name="constructor" type="Function">A constructor for the class.</param>
         ///   <param name="definitions" type="Object">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -260,7 +536,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -269,7 +545,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -279,7 +555,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -288,7 +564,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -298,7 +574,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -307,7 +583,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -317,7 +593,7 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
         /// <signature>
         ///   <summary>Compiles a jTypes class.</summary>
@@ -328,15 +604,40 @@
         ///   <param name="protectedDefinitions" type="Object">A collection of protected member definitions for the class.</param>
         ///   <param name="publicDefinitions" type="Object">A collection of public member definitions for the class.</param>
         ///   <param name="definitions" type="Object" optional="true">A collection of member definitions for the class.</param>
-        ///   <returns type="Class">A compiled jTypes class if the export modifier was not provided; otherwise string.</returns>
+        ///   <returns type="Class">A compiled jTypes class.</returns>
         /// </signature>
-        
+        /// <signature>
+        ///   <summary>Compiles a jTypes namespace.</summary>
+        ///   <param name="constructor" type="Function">A constructor for the namespace.</param>
+        ///   <returns type="Object">A compiled jTypes namespace.</returns>
+        /// </signature>
+        /// <signature>
+        ///   <summary>Compiles a jTypes namespace.</summary>
+        ///   <param name="modifiers" type="String">A space-separated string of modifiers for the namespace.</param>
+        ///   <param name="constructor" type="Function">A constructor for the namespace.</param>
+        ///   <returns type="Object">A compiled jTypes namespace.</returns>
+        /// </signature>
+        /// <signature>
+        ///   <summary>Compiles a jTypes namespace.</summary>
+        ///   <param name="dependencies" type="Array">An array of dependency directives for the namespace.</param>
+        ///   <param name="constructor" type="Function">A constructor for the namespace.</param>
+        ///   <returns type="Object">A compiled jTypes namespace.</returns>
+        /// </signature>
+        /// <signature>
+        ///   <summary>Compiles a jTypes namespace.</summary>
+        ///   <param name="modifiers" type="String">A space-separated string of modifiers for the namespace.</param>
+        ///   <param name="dependencies" type="Array">An array of dependency directives for the namespace.</param>
+        ///   <param name="constructor" type="Function">A constructor for the namespace.</param>
+        ///   <returns type="Object">A compiled jTypes namespace.</returns>
+        /// </signature>
+
         // Create the initial arguments
-        var $argument    = 0,
-            $base        = null,
-            $constructor = arguments[$argument++],
-            $modifiers   = '',
-            $prototype   = null;
+        var $argument     = 0,
+            $base         = null,
+            $constructor  = arguments[$argument++],
+            $dependencies = null,
+            $modifiers    = '',
+            $prototype    = null;
 
         // If the constructor is not a simple object
         if ($constructor == null || typeof $constructor != 'object' || Object.getPrototypeOf($constructor) !== Object.prototype)
@@ -347,15 +648,33 @@
             // If the constructor is not a function
             if (typeof $constructor != 'function')
             {
-                // If the constructor is not a string, return
+                // If the constructor is not a string
                 if (typeof $constructor != 'string')
-                    return;
+                {
+                    // If the constructor is not an array, return
+                    if (!Array.isArray($constructor))
+                        return;
 
+                    // Use the first argument as the dependencies array
+                    $dependencies = $constructor;
+                }
                 // Use the first argument as the modifiers string
-                $modifiers = $constructor;
+                else
+                    $modifiers = $constructor;
 
+                // If the prototype is an array
+                if (Array.isArray($prototype))
+                {
+                    // If a dependencies array was already provided, return
+                    if ($dependencies)
+                        return;
+
+                    // Use the second argument as the dependencies array
+                    $dependencies = $prototype;
+                    $constructor  = arguments[$argument++];
+                }
                 // If the prototype is a class
-                if (typeof $prototype == 'function' && $prototype[$_symbol_class] === $prototype)
+                else if (typeof $prototype == 'function' && $prototype[$_symbol_class] === $prototype)
                 {
                     // Use the second argument as the base class
                     $base        = $prototype;
@@ -365,16 +684,22 @@
                 else
                     $constructor = $prototype;
 
-                // If the constructor is not a function or is a class
-                if (typeof $constructor != 'function' || $constructor[$_symbol_class] === $constructor)
+                // If the constructor is a function and not a class
+                if (typeof $constructor == 'function' && $constructor[$_symbol_class] !== $constructor)
+                {
+                    // If a base class was not provided and there are no more arguments, return the compiled namespace object
+                    if (!$base && $argument == arguments.length)
+                        return $_compile($modifiers, $dependencies, $constructor);
+
+                    // Use the fourth argument as the prototype
+                    $prototype = arguments[$argument++];
+                }
+                else
                 {
                     // Use the third argument as the prototype
                     $prototype   = $constructor;
                     $constructor = null;
                 }
-                // Use the fourth argument as the prototype
-                else
-                    $prototype = arguments[$argument++];
             }
             // If the constructor is a class
             else if ($constructor[$_symbol_class] === $constructor)
@@ -392,6 +717,9 @@
                 else
                     $constructor = null;
             }
+            // If a prototype argument was not provided, return the compiled namespace object
+            else if ($argument - 1 == arguments.length)
+                return $_compile($modifiers, $dependencies, $constructor);
 
             // If the prototype is not a simple object, return
             if ($prototype == null || typeof $prototype != 'object' || Object.getPrototypeOf($prototype) !== Object.prototype)
@@ -405,9 +733,9 @@
         }
 
         // Create the class names and keywords array
-        var $baseName  = '',
-            $className = '',
-            $keywords  = [];
+        var $baseHandle = '',
+            $className  = '',
+            $keywords   = [];
 
         // If a modifiers string was provided
         if ($modifiers)
@@ -418,17 +746,18 @@
             // If a base class was not provided and the modifiers string has the extends character
             if (!$base && $extends >= 0)
             {
-                // Get the base class name and the modifiers string
-                $baseName  = $modifiers.substr($extends + 1).trim();
-                $modifiers = $modifiers.substr(0, $extends).trim();
+                // Get the base class handle and modifiers string
+                $baseHandle = $modifiers.substr($extends + 1).trim();
+                $modifiers  = $modifiers.substr(0, $extends).trim();
 
-                // If the base class name is a valid class name, get the base class from the static context object
-                if (/^[A-Z][_a-zA-Z0-9]*$/.test($baseName))
-                    $base = $_thisStatic[$baseName] || null;
+                // If the base class handle is a valid class handle, resolve the base class
+                if ($_handle($baseHandle))
+                    $base = $_resolve($baseHandle, $_classes, $_namespace, $_aliases, $_includes);
 
-                // If a base class was not found in the static context object, reset the base class name
-                if (!$base)
-                    $baseName = '';
+                // Set the base class handle
+                $baseHandle = $base ?
+                              $base[$_symbol_handle] :
+                              '';
             }
 
             // Get the keywords array
@@ -450,16 +779,16 @@
         // If a base class was provided
         if ($base)
         {
-            // If a base class name was not found, get the base class name
-            if (!$baseName)
-                $baseName = $base[$_symbol_name];
+            // If a base class handle was not found, get the base class handle
+            if (!$baseHandle)
+                $baseHandle = $base[$_symbol_handle];
 
             // If the class has the struct modifier or the base class has the sealed modifier
             if ($struct || $base[$_symbol_keywords].indexOf('sealed') >= 0)
             {
                 // Reset the base class
-                $base     = null;
-                $baseName = '';
+                $base       = null;
+                $baseHandle = '';
             }
         }
 
@@ -474,16 +803,38 @@
             return Object.create(null);
         };
 
-        // If a class name was provided, set the class in the global namespace wrapper
+        // If a class name was provided
         if ($className)
-            $_data($$, $className, $class);
+        {
+            // Set the class in the namespace
+            $_data($_namespace ?
+                   $_namespaces[$_namespace] :
+                   $$,
+                   $className,
+                   $class);
+
+            // Create a custom toString() function for the prototype
+            $class.prototype.toString = function()
+            {
+                // Return the instance object string
+                return '[object ' + $className + ']';
+            };
+        }
         // Generate a random internal class name
         else
             $className = $_symbol();
 
+        // Create the class handle
+        var $classHandle = $_namespace ?
+                           $_namespace + '.' + $className :
+                           $className;
+
+        // Cache the class
+        $_classes[$classHandle] = $class;
+
         // If a constructor was provided, set it in the constructors object
         if ($constructor)
-            $_constructors[$className] = $constructor;
+            $_constructors[$classHandle] = $constructor;
 
         // Create the items arrays
         var $itemsConstruct = [],
@@ -493,11 +844,11 @@
             $itemsStatic    = [];
 
         // Cache the items arrays
-        $_itemsConstruct[$className] = $itemsConstruct;
-        $_itemsPrivate  [$className] = $itemsPrivate;
-        $_itemsProtected[$className] = $itemsProtected;
-        $_itemsPublic   [$className] = $itemsPublic;
-        $_itemsStatic   [$className] = $itemsStatic;
+        $_itemsConstruct[$classHandle] = $itemsConstruct;
+        $_itemsPrivate  [$classHandle] = $itemsPrivate;
+        $_itemsProtected[$classHandle] = $itemsProtected;
+        $_itemsPublic   [$classHandle] = $itemsPublic;
+        $_itemsStatic   [$classHandle] = $itemsStatic;
 
         // If a constructor was provided, redirect the class definition to the constructor
         if ($constructor)
@@ -508,14 +859,6 @@
                                          $base.prototype :
                                          $_prototype);
 
-        // If a class name was provided, create a custom toString() function for the prototype
-        if ($className)
-            $class.prototype.toString = function()
-            {
-                // Return the instance object string
-                return '[object ' + $className + ']';
-            };
-
         // Create the class type reference
         var $classType = !$internal ?
                          $class :
@@ -524,12 +867,14 @@
                          null;
 
         // Set the class type and hidden data on the class
-        $_data($class, $_symbol_base,     $base);
-        $_data($class, $_symbol_class,    $class);
-        $_data($class, $_symbol_items,    $itemsStatic);
-        $_data($class, $_symbol_keywords, $keywords);
-        $_data($class, $_symbol_name,     $className);
-        $_data($class, $_symbol_type,     $classType);
+        $_data($class, $_symbol_base,      $base);
+        $_data($class, $_symbol_class,     $class);
+        $_data($class, $_symbol_handle,    $classHandle);
+        $_data($class, $_symbol_items,     $itemsStatic);
+        $_data($class, $_symbol_keywords,  $keywords);
+        $_data($class, $_symbol_name,      $className);
+        $_data($class, $_symbol_namespace, $_namespace || '');
+        $_data($class, $_symbol_type,      $classType);
 
         // Create the construct, private, protected, and public contexts
         var $thisConstruct = Object.create($class.prototype),
@@ -540,13 +885,12 @@
         // If a constructor was provided, redirect the constructor context to the construct context
         if ($constructor)
             intellisense.setCallContext($constructor, { 'thisArg': $thisConstruct });
-        
+
         // Cache the context objects
-        $_thisConstruct[$className] = $thisConstruct;
-        $_thisPrivate  [$className] = $thisPrivate;
-        $_thisProtected[$className] = $thisProtected;
-        $_thisPublic   [$className] = $thisPublic;
-        $_thisStatic   [$className] = $class;
+        $_thisConstruct[$classHandle] = $thisConstruct;
+        $_thisPrivate  [$classHandle] = $thisPrivate;
+        $_thisProtected[$classHandle] = $thisProtected;
+        $_thisPublic   [$classHandle] = $thisPublic;
 
         // Set the instance type, hidden items arrays, and class type on the contexts
         $_data($thisConstruct, $_symbol_instance, $thisConstruct);
@@ -565,13 +909,21 @@
         // Create the define helper functions
         var $define          = function($key, $value)
         {
+            // Trim the key
+            $key = $key.trim();
+
             // Check if the definition is an auto property, create the keywords array, and get member name
             var $auto       = Array.isArray($value) && $value.length > 1,
                 $constraint = undefined,
-                $keywords   = $key.trim().split(' '),
-                $name       = $keywords.pop(),
+                $index      = $key.lastIndexOf(' '),
+                $keywords   = $index >= 0 ?
+                              $key.substr(0, $index).trim().split(' ') :
+                              [],
+                $name       = $index >= 0 ?
+                              $key.substr($index + 1) :
+                              $key,
                 $type       = 'field';
-            
+
             // If the value is a function, set the type as a method
             if (typeof $value == 'function')
                 $type = 'method';
@@ -615,7 +967,7 @@
             // If the definition is not a method and has either the prototype or static modifiers, set the type as a field
             if ($type != 'method' && ($prototype || $static))
                 $type = 'field';
-            
+
             // If any keywords were provided
             if ($keywords.length)
             {
@@ -626,11 +978,11 @@
                 if (!$exec)
                 {
                     // Parse the last keyword as a class constraint
-                    $exec = /^(@)?([A-Z][_a-zA-Z0-9]*)(\?|\!)?$/.exec($keywords[$keywords.length - 1]);
+                    $exec = /^(@)?((?:global::)?(?:[_a-zA-Z0-9.]+\.)?[A-Z][_a-zA-Z0-9]*)(\?|!)?$/.exec($keywords[$keywords.length - 1]);
 
-                    // If the last keyword matched a class constraint string, get the constraint from the public contexts object
-                    if ($exec)
-                        $constraint = $_thisPublic[$exec[2]];
+                    // If the last keyword matched a class constraint string and is a valid handle, resolve the constraint from the public contexts object
+                    if ($exec && $_handle($exec[2]))
+                        $constraint = $_resolve($exec[2], $_thisPublic, $_namespace, $_aliases, $_includes);
 
                     // If a public context was found in the public contexts object
                     if ($constraint)
@@ -654,7 +1006,7 @@
             // Create the masked value and descriptor
             var $mask       = $value,
                 $descriptor = null;
-            
+
             // If the definition is a property but not an auto property
             if (!$auto && $type == 'property')
             {
@@ -855,7 +1207,7 @@
 
             // If the class is a class and the instance is an instance of the class, return the public instance of the class
             if ($class && $class[$_symbol_class] === $class && this && this[$_symbol_instance] === this && this instanceof $class)
-                return $_thisPublic[$class[$_symbol_name]];
+                return $_thisPublic[$class[$_symbol_handle]];
 
             return null;
         };
@@ -896,7 +1248,7 @@
                          $struct ?
                          'GlyphGroupStruct' :
                          'GlyphGroupClass';
-        
+
         // Create the data, self reference, public, external, and internal items
         var $itemData     = $_item('__data', 'reserved', $thisPrivate),
             $itemSelf     = $_item('__self', 'reserved', $self),
@@ -953,17 +1305,17 @@
             Object.defineProperty($thisProtected, '__this', $descriptorThis);
             Object.defineProperty($thisProtected, '__type', $descriptorInternal);
         }
-        
+
         // If a base class was provided
         if ($base)
         {
             // Get the base constructor and base protected context
-            var $baseConstructor   = $_constructors [$baseName],
-                $baseThisProtected = $_thisProtected[$baseName];
+            var $baseConstructor   = $_constructors [$baseHandle],
+                $baseThisProtected = $_thisProtected[$baseHandle];
 
             // If a constructor was not provided, set the base constructor in the constructors object
             if (!$constructor)
-                $_constructors[$className] = $baseConstructor || null;
+                $_constructors[$classHandle] = $baseConstructor || null;
 
             // Create the base constructor wrapper reference
             var $baseConstructorWrapper = null;
@@ -975,7 +1327,7 @@
                 $baseConstructorWrapper = function()
                 {
                     // Return the return value of applying the base constructor in the base construct context with the provided arguments
-                    return $baseConstructor.apply($_thisConstruct[$baseName], arguments);
+                    return $baseConstructor.apply($_thisConstruct[$baseHandle], arguments);
                 };
 
                 // Redirect the base constructor wrapper definition to the base constructor
@@ -1010,8 +1362,8 @@
         }
         // If a constructor was not provided, set a null reference in the constructors object
         else if (!$constructor)
-            $_constructors[$className] = null;
-        
+            $_constructors[$classHandle] = null;
+
         // Define the self reference functions
         $definePublic('as',   'method', $as);
         $definePublic('is',   'method', $is);
@@ -1038,7 +1390,7 @@
                 ///   <param name="instance" type="Instance">An instance to compare against.</param>
                 ///   <returns type="Boolean">true if instance is equal to the provided instance; otherwise false.</returns>
                 /// </signature>
-                
+
                 return false;
             };
 
@@ -1059,7 +1411,7 @@
             });
             $_data($self, 'equals', $equals);
         }
-        
+
         // If the argument count does not match the number of arguments
         if (arguments.length != $argument)
         {
@@ -1077,7 +1429,7 @@
 
                 // Get the prototype
                 $prototype = arguments[$argument];
-                
+
                 // If the prototype is a simple object, increment the argument count
                 if ($prototype != null && typeof $prototype == 'object' && Object.getPrototypeOf($prototype) === Object.prototype)
                     $argument++;
@@ -1116,9 +1468,9 @@
         if ($base)
         {
             // Get the inherited items
-            var $inheritProtected = $_itemsProtected[$baseName],
-                $inheritPublic    = $_itemsPublic   [$baseName];
-            
+            var $inheritProtected = $_itemsProtected[$baseHandle],
+                $inheritPublic    = $_itemsPublic   [$baseHandle];
+
             // Loop through the protected inherited items
             for (var $i = 0, $j = $inheritProtected.length; $i < $j; $i++)
             {
@@ -1175,6 +1527,7 @@
     $$.intMin   = jTypes.intMin;
     $$.max      = jTypes.max;
     $$.min      = jTypes.min;
+    $$.storage  = jTypes.storage;
     $$.support  = jTypes.support;
     $$.toString = jTypes.toString;
     $$.version  = jTypes.version;
@@ -1202,6 +1555,8 @@
         'max': jTypes.max,
         /// <field type="Number">The minimum representable floating-point number in JavaScript.</field>
         'min': jTypes.min,
+        /// <field type="Object">An object containing flags indicating which JavaScript storage features are supported.</field>
+        'storage': jTypes.storage,
         /// <field type="Object">An object containing flags indicating which JavaScript features are supported.</field>
         'support': jTypes.support,
         /// <field type="String">A string containing the jTypes version number.</field>
@@ -1215,7 +1570,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is an array using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is an array.</param>
-        ///   <returns type="Boolean">true if object is an array; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is an array; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isArray.apply(jTypes, arguments);
@@ -1225,7 +1580,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a boolean using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a boolean.</param>
-        ///   <returns type="Boolean">true if object is a boolean; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a boolean; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isBool.apply(jTypes, arguments);
@@ -1235,7 +1590,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a boolean using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a boolean.</param>
-        ///   <returns type="Boolean">true if object is a boolean; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a boolean; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isBoolean.apply(jTypes, arguments);
@@ -1245,7 +1600,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes class.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes class.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a class
@@ -1256,7 +1611,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a date using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a date.</param>
-        ///   <returns type="Boolean">true if object is a date; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a date; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isDate.apply(jTypes, arguments);
@@ -1266,7 +1621,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is an error using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is an error.</param>
-        ///   <returns type="Boolean">true if object is an error; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is an error; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isError.apply(jTypes, arguments);
@@ -1276,7 +1631,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a number has a finite value.</summary>
         ///   <param name="value" type="Number">A value to test if it is finite.</param>
-        ///   <returns type="Boolean">true if value is a finite number; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if value is a finite number; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isFinite.apply(jTypes, arguments);
@@ -1286,7 +1641,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a number using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a number.</param>
-        ///   <returns type="Boolean">true if object is a number; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a number; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isFloat.apply(jTypes, arguments);
@@ -1296,7 +1651,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a function using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a function.</param>
-        ///   <returns type="Boolean">true if object is a function; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a function; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a function and not a class
@@ -1307,7 +1662,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes instance.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes instance.</param>
-        ///   <returns type="Boolean">true if object is a jTypes instance; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes instance; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is an instance
@@ -1318,7 +1673,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a number has an integer value.</summary>
         ///   <param name="value" type="Number">A value to test if it is an integer.</param>
-        ///   <returns type="Boolean">true if value is a finite number that is a representable integer in JavaScript; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if value is a finite number that is a representable integer in JavaScript; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isInt.apply(jTypes, arguments);
@@ -1328,7 +1683,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a number has an integer value.</summary>
         ///   <param name="value" type="Number">A value to test if it is an integer.</param>
-        ///   <returns type="Boolean">true if value is a finite number that is a representable integer in JavaScript; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if value is a finite number that is a representable integer in JavaScript; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isInteger.apply(jTypes, arguments);
@@ -1338,7 +1693,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a number using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a number.</param>
-        ///   <returns type="Boolean">true if object is a number; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a number; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isNumber.apply(jTypes, arguments);
@@ -1348,7 +1703,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a JavaScript primitive.</summary>
         ///   <param name="object" type="Object">An object to test if it is a JavaScript primitive.</param>
-        ///   <returns type="Boolean">true if object is either null or has a typeof in the following collection: boolean, number, string, undefined; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is either null or has a typeof in the following collection: boolean, number, string, undefined; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isPrimitive.apply(jTypes, arguments);
@@ -1358,7 +1713,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a regular expression using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a regular expression.</param>
-        ///   <returns type="Boolean">true if object is a regular expression; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a regular expression; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isRegExp.apply(jTypes, arguments);
@@ -1368,7 +1723,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a string using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a string.</param>
-        ///   <returns type="Boolean">true if object is a string; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a string; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isString.apply(jTypes, arguments);
@@ -1378,7 +1733,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a symbol using the internal [[Class]] property of the object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a symbol.</param>
-        ///   <returns type="Boolean">true if object is a symbol; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a symbol; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isSymbol.apply(jTypes, arguments);
@@ -1548,7 +1903,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes abstract class.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes abstract class.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class with the abstract modifier; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class with the abstract modifier; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a class and the abstract keyword is found in the class keywords
@@ -1559,7 +1914,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is an arguments object passed to a function.</summary>
         ///   <param name="object" type="Object">An object to test if it is an arguments object passed to a function.</param>
-        ///   <returns type="Boolean">true if object is an arguments object passed to a function; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is an arguments object passed to a function; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isArgumentsObject.apply(jTypes, arguments);
@@ -1569,7 +1924,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is an array-like object.</summary>
         ///   <param name="object" type="Object">An object to test if it is an array-like object.</param>
-        ///   <returns type="Boolean">true if object has a length property that is a finite integer greater than or equal to zero; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object has a length property that is a finite integer greater than or equal to zero; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isArrayLikeObject.apply(jTypes, arguments);
@@ -1579,7 +1934,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a "callable-type" object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a "callable-type" object.</param>
-        ///   <returns type="Boolean">true if object is a type of either class or function; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a type of either class or function; otherwise false.</returns>
         /// </signature>
 
         // If the object is a class, return true
@@ -1593,17 +1948,27 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a complex object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a complex object.</param>
-        ///   <returns type="Boolean">true if object is an object and does not have Object.prototype as its prototype; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is an object and does not have Object.prototype as its prototype; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isComplexObject.apply(jTypes, arguments);
+    };
+    $$.isExpandoClass     = function($object)
+    {
+        /// <signature>
+        ///   <summary>Indicates whether or not an object is a jTypes expando class.</summary>
+        ///   <param name="object" type="Object">An object to test if it is a jTypes expando class.</param>
+        ///   <returns type="Boolean">true if object is a jTypes class with the expando modifier; otherwise false.</returns>
+        /// </signature>
+
+        return false;
     };
     $$.isFlatObject       = function()
     {
         /// <signature>
         ///   <summary>Indicates whether or not an object is a flat object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a flat object.</param>
-        ///   <returns type="Boolean">true if object is an object and has a null prototype; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is an object and has a null prototype; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isFlatObject.apply(jTypes, arguments);
@@ -1613,7 +1978,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes imported class.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes imported class.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class that was compiled using a precompiled modifiers string; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class that was compiled using a precompiled modifiers string; otherwise false.</returns>
         /// </signature>
 
         return false;
@@ -1623,7 +1988,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a number has an infinite value.</summary>
         ///   <param name="value" type="Number">A value to test if it is infinite.</param>
-        ///   <returns type="Boolean">true if value is an infinite number; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if value is an infinite number; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isInfinity.apply(jTypes, arguments);
@@ -1633,7 +1998,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes internal class.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes internal class.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class with the internal modifier; otherwise, false./returns>
+        ///   <returns type="Boolean">true if object is a jTypes class with the internal modifier; otherwise false./returns>
         /// </signature>
 
         // Return true if the object is a class and the internal keyword is found in the class keywords
@@ -1644,7 +2009,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes model.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes model.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class with the model modifier; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class with the model modifier; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a class and the model keyword is found in the class keywords
@@ -1655,7 +2020,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a number has an undefined value.</summary>
         ///   <param name="value" type="Number">A value to test if it is an undefined value.</param>
-        ///   <returns type="Boolean">true if value is not-a-number; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if value is not-a-number; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isNaN.apply(jTypes, arguments);
@@ -1665,7 +2030,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a number has a value of negative infinity.</summary>
         ///   <param name="value" type="Number">A value to test if it is negative infinity.</param>
-        ///   <returns type="Boolean">true if value is negative infinity; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if value is negative infinity; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isNegativeInfinity.apply(jTypes, arguments);
@@ -1675,7 +2040,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a reference is a null reference.</summary>
         ///   <param name="reference">A reference to test if it is a null reference.</param>
-        ///   <returns type="Boolean">true if reference is a null reference; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if reference is a null reference; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isNull.apply(jTypes, arguments);
@@ -1685,7 +2050,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a reference is an object.</summary>
         ///   <param name="reference" type="Object">A reference to test if it is an object.</param>
-        ///   <returns type="Boolean">true if reference is neither null nor undefined; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if reference is neither null nor undefined; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isObject.apply(jTypes, arguments);
@@ -1695,7 +2060,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is an object instance.</summary>
         ///   <param name="object" type="Object">An object to test if it is an object instance.</param>
-        ///   <returns type="Boolean">true if object is an instance of Object; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is an instance of Object; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isObjectInstance.apply(jTypes, arguments);
@@ -1705,7 +2070,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes optimized class.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes optimized class.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class with the optimized modifier; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class with the optimized modifier; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a class and the optimized keyword is found in the class keywords
@@ -1716,7 +2081,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a number has a value of positive infinity.</summary>
         ///   <param name="value" type="Number">A value to test if it is positive infinity.</param>
-        ///   <returns type="Boolean">true if value is positive infinity; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if value is positive infinity; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isPositiveInfinity.apply(jTypes, arguments);
@@ -1726,7 +2091,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes primitive class.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes primitive class.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class with the primitive modifier; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class with the primitive modifier; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a class and the primitive keyword is found in the class keywords
@@ -1737,7 +2102,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a "primitive-type" object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a "primitive-type" object.</param>
-        ///   <returns type="Boolean">true if object is a type from the following collection: boolean, null, number, string, undefined; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a type from the following collection: boolean, null, number, string, undefined; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isPrimitiveType.apply(jTypes, arguments);
@@ -1747,7 +2112,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a "reference-type" object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a "reference-type" object.</param>
-        ///   <returns type="Boolean">true if object is not a type from the following collection: boolean, null, number, string, undefined; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is not a type from the following collection: boolean, null, number, string, undefined; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isReferenceType.apply(jTypes, arguments);
@@ -1757,7 +2122,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes sealed class.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes sealed class.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class with the sealed modifier; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class with the sealed modifier; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a class and the sealed keyword is found in the class keywords
@@ -1768,7 +2133,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a simple object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a simple object.</param>
-        ///   <returns type="Boolean">true if object is an object and has Object.prototype as its prototype; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is an object and has Object.prototype as its prototype; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isSimpleObject.apply(jTypes, arguments);
@@ -1778,7 +2143,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes struct.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes struct.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class with the struct modifier; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class with the struct modifier; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a class and the struct keyword is found in the class keywords
@@ -1789,7 +2154,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not a reference is an undefined reference.</summary>
         ///   <param name="reference">A reference to test if it is an undefined reference.</param>
-        ///   <returns type="Boolean">true if reference is an undefined reference; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if reference is an undefined reference; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isUndefined.apply(jTypes, arguments);
@@ -1799,7 +2164,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a jTypes unlocked class.</summary>
         ///   <param name="object" type="Object">An object to test if it is a jTypes unlocked class.</param>
-        ///   <returns type="Boolean">true if object is a jTypes class with the unlocked modifier; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a jTypes class with the unlocked modifier; otherwise false.</returns>
         /// </signature>
 
         // Return true if the object is a class and the unlocked keyword is found in the class keywords
@@ -1810,7 +2175,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a "value-type" object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a "value-type" object.</param>
-        ///   <returns type="Boolean">true if object is a type from the following collection: boolean, number, string; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a type from the following collection: boolean, number, string; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isValueType.apply(jTypes, arguments);
@@ -1820,7 +2185,7 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a global window object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a global window object.</param>
-        ///   <returns type="Boolean">true if object is a global window object; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object is a global window object; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isWindow.apply(jTypes, arguments);
@@ -1830,14 +2195,14 @@
         /// <signature>
         ///   <summary>Indicates whether or not an object is a window-like object.</summary>
         ///   <param name="object" type="Object">An object to test if it is a window-like object.</param>
-        ///   <returns type="Boolean">true if object has a window property that is a self reference; otherwise, false.</returns>
+        ///   <returns type="Boolean">true if object has a window property that is a self reference; otherwise false.</returns>
         /// </signature>
 
         return jTypes.isWindowLikeObject.apply(jTypes, arguments);
     };
 
     // ---------- HELPERS ----------
-    
+
     $$.accessor = function()
     {
         /// <signature>
@@ -1887,6 +2252,14 @@
 
         // Return the base class of the class
         return $class[$_symbol_base];
+    };
+    $$.build    = function($class)
+    {
+        /// <signature>
+        ///   <summary>Builds a jTypes class.</summary>
+        ///   <param name="class" type="Class">A class to build.</param>
+        ///   <returns type="Boolean">true if the class was built; otherwise false.</returns>
+        /// </signature>
     };
     $$.data     = function()
     {
@@ -1990,7 +2363,7 @@
     // Annotate the settings accessors
     intellisense.annotate($$,
     {
-        /// <field type="Boolean">Indicates whether or not caching is enabled.</field>
+        /// <field type="String">Indicates whether or not caching is enabled.</field>
         'cache': jTypes.cache,
         /// <field type="Boolean">Indicates whether or not debugging is enabled.</field>
         'debug': jTypes.debug,
@@ -1999,19 +2372,19 @@
     });
 
     // ########## CONSTRAINTS ##########
-    
+
     // Set the constraint values for each constraint type in the constraints object
-    $_constraints['array']     = Object.freeze([]);
+    $_constraints['array']     = Object.freeze(new Array());
     $_constraints['bool']      = false;
     $_constraints['boolean']   = false;
     $_constraints['date']      = Object.freeze(new Date(NaN));
     $_constraints['error']     = Object.freeze(new Error());
     $_constraints['float']     = NaN;
-    $_constraints['function']  = Object.freeze(function(){});
+    $_constraints['function']  = Object.freeze(new Function());
     $_constraints['int']       = 0;
     $_constraints['integer']   = 0;
     $_constraints['number']    = NaN;
-    $_constraints['object']    = Object.freeze({});
+    $_constraints['object']    = Object.freeze(new Object());
     $_constraints['primitive'] = null;
     $_constraints['regexp']    = Object.freeze(new RegExp());
     $_constraints['string']    = '';
@@ -2038,17 +2411,12 @@
 
     // ########## GLOBALS ##########
 
-    // If a global reference was found and the global writable flag is set
-    if (window && jT_Writable)
-    {
-        // If the global shorthand is set, define the shorthand
-        if (jT_Shorthand)
-            $_data(window, jT_Shorthand, $$, true, true);
+    // Define the shorthand
+    $_data(window, jT_Shorthand || '$$', $$, true);
 
-        // Define the global namespace
-        $_data(window, 'jTypes', $$, true, true);
-    }
+    // Define the global namespace
+    $_data(window, 'jTypes', $$, true);
+
     // Return the global namespace
-    else
-        return $$;
+    return $$;
 })(window, window.jTypes);

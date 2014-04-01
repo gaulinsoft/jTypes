@@ -83,6 +83,9 @@ c.radius = '4';
 console.assert(c.stroke instanceof jTypes.Color, "Circle::stroke");
 console.assert(c.radius === 0,                   "Circle::radius");
 
+console.log(JSON.stringify(c));
+//{"radius":0,"x":1,"y":3,"fill":{"red":0,"green":0,"blue":0},"stroke":{"red":0,"green":0,"blue":0}} 
+
 var r = new jTypes.Rectangle(1, 3, 12, 10);
 
 console.assert(r.x === 1,            "Rectangle::x");
@@ -117,6 +120,9 @@ r.fill = {};
 console.assert(r.fill.green === 0, "Rectangle::fill->green");
 console.assert(r.fill.red === 0,   "Rectangle::fill->red");
 
+console.log(JSON.stringify(r));
+//{"width":13,"height":11,"x":1,"y":3,"fill":{"red":0,"green":0,"blue":0},"stroke":{"red":0,"green":5,"blue":0}} 
+
 var obj = {};
 
 // jTypes.accessor(Object obj, string key, Function get, Function set [, boolean enumerable [, boolean configurable [, string constraint]]])
@@ -136,6 +142,9 @@ console.assert(obj.s.height === undefined, "Shape::height");
 console.assert(obj.s.area() === 143,       "Shape::area()");
 console.assert(obj.s.perimeter() === 48,   "Shape::perimeter()");
 
+console.log(JSON.stringify(obj.s));
+//{"x":1,"y":3,"fill":{"red":0,"green":0,"blue":0},"stroke":{"red":0,"green":5,"blue":0}}
+
 obj.s = {};
 
 console.assert(obj.s === null, "object=>Shape");
@@ -150,6 +159,9 @@ console.assert(obj.s.y === 3,              "Shape::y");
 console.assert(obj.s.radius === undefined, "Shape::radius");
 console.assert(obj.s.area() === 0,         "Shape::area()");
 console.assert(obj.s.perimeter() === 0,    "Shape::perimeter()");
+
+console.log(JSON.stringify(obj.s));
+//{"x":1,"y":3,"fill":{"red":0,"green":0,"blue":0},"stroke":{"red":0,"green":0,"blue":0}}
 
 obj.s = '';
 
