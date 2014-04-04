@@ -155,6 +155,9 @@ jTypes('namespace Drawing', function($$)
     {
         // ...
     });
+    
+    var white = new this.Color(255, 255, 255);
+    var gray  = new this.Color(128, 128, 128);
 });
 
 var white = new jTypes.Drawing.Color(255, 255, 255);
@@ -269,11 +272,11 @@ jTypes('namespace Project', ['using Color = Drawing.Color'], function($$)
 
 ### readonly
 
-...readonly members => are only writable inside the constructor and can only be used with fields and automatically implemented properties...
+...readonly members => are only writable inside the constructor (and can only be used with fields and automatically implemented properties)...
 
 ### sealed
 
-...sealed members => cannot be overridden and must be used with the override `modifier`...
+...sealed members => cannot be overridden and must be used with the `override` modifier...
 
 ### static
 
