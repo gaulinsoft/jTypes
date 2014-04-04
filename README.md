@@ -1,186 +1,301 @@
 # [jTypes](http://www.jTypes.com/): Scalable class-based JavaScript for web apps and libraries
 
-## What is jTypes?
-
-jTypes provides developers with robust type management in JavaScript to improve the maintainability and scalability of web-based application engineering. By utilizing familiar and proven design patterns from popular languages such as C++, C#, and Java, jTypes can simplify the development of web apps, libraries, and tools. Since it is not a new language, jTypes doesn't require any transcompilation to messy and unmaintainable JavaScript like other web programming languages. This makes it extremely simple and straightforward, especially for developers that are experienced with classical inheritance. Using existing and upcoming language components that are implemented across all browsers and platforms, jTypes offers an efficient and effective framework for class-based object-oriented development that can quickly and easily adapt to the "quirks" of a constantly evolving web.
+jTypes provides developers with robust type management in JavaScript to improve the maintainability and scalability of web-based applications. By utilizing familiar and proven design patterns from popular languages such as C++, C#, and Java, jTypes can simplify the development of web apps, libraries, and tools. Since it is not a new language, jTypes doesn't require any transcompilation to messy and unmaintainable JavaScript like other web programming languages. This makes it extremely simple and straightforward, especially for developers that are experienced with classical inheritance. Using existing and upcoming language components that are implemented across all browsers and platforms, jTypes offers an efficient and effective framework for class-based object-oriented development that can quickly and easily adapt to the "quirks" of a constantly evolving web.
 
 <em>jTypes allows developers to build robust, modular, and scalable applications or libraries in JavaScript using encapsulation, inheritance, and polymorphism.</em> What exactly does that mean? You know all those keywords from languages such as C++ or C# that you started missing quite badly after you transitioned to JavaScript? You know what we're talking about; all those modifiers of classical inheritance such as `virtual`, `abstract`, and `override` or `private`, `protected`, and `public` that gave you so much more control and freedom with your libraries. Well jTypes lets you use those keywords in JavaScript, so you can develop extremely powerful and robust web applications using the principals of classical inheritance.
 
 
-## What are the requirements?
+## Requirements
 
-jTypes requires ECMAScript 5, which is supported by any modern browser (MSIE 9+) or platform.
+jTypes requires ECMAScript 5, which is supported by any modern web browser (and MSIE 9+) or platform.
 
-## jTypes 2.2 Performance
-  
-![jTypes 2.2 Performance](http://content.jtypes.com/2.2.0b658.png "jTypes 2.2 Performance")
+## Contents
+- [Classes](#classes)
+    - [Fields](#fields)
+    - [Methods](#methods)
+    - [Properties](#properties)
+        - [Automatically Implemented Properties](#automatically-implemented-properties)
+    - [Constraints](#constraints)
+    - [Constraint Modifiers](#constraint-modifiers)
+        - [Nullable](#nullable-modifier)
+        - [Not-Nullable](#not-nullable-modifier)
+        - [Cast](#cast-modifier)
+        - [Suppress](#suppress-modifier)
+- [Namespaces](#namespaces)
+    - [Dependencies](#dependencies)
+        - [Includes](#includes)
+        - [Aliases](#aliases)
+- [Class Modifiers](#class-modifiers)
+    - [abstract](#abstract)
+    - [internal](#internal)
+    - [model](#model)
+    - [primitive](#primitive)
+    - [sealed](#sealed)
+    - [struct](#struct)
+    - [unlocked](#unlocked)
+- [Class Member Modifiers](#class-member-modifiers)
+    - [abstract](#abstract-1)
+    - [const](#const)
+    - [hidden](#hidden)
+    - [new](#new)
+    - [override](#override)
+    - [private](#private)
+    - [protected](#protected)
+    - [prototype](#prototype)
+    - [public](#public)
+    - [readonly](#readonly)
+    - [sealed](#sealed-1)
+    - [static](#static)
+    - [virtual](#virtual)
+    - [visible](#visible)
+
+## Classes
+
+Some text and `code` about classes...
+
+```javascript
+var Color = jTypes(function(red, green, blue)
+{
+    this.red   = red;
+    this.green = green;
+    this.blue  = blue;
+},
+{
+    'public red':   0,
+    'public green': 0,
+    'public blue':  0
+});
+
+var white = new Color(255, 255, 255);
+var gray  = new Color(128, 128, 128);
+```
+
+### Fields
+
+### Methods
+
+### Properties
+
+#### Automatically Implemented Properties
+
+### Constraints
+
+Some text and `code` about type constraints...
+
+```javascript
+var Color = jTypes(function(red, green, blue)
+{
+    this.red   = red;
+    this.green = green;
+    this.blue  = blue;
+},
+{
+    'public int red':   0,
+    'public int green': 0,
+    'public int blue':  0
+});
+
+var white = new Color(255, 255, 255);
+var gray  = new Color(128, 128, 128);
+```
+
+* array
+* boolean (or bool)
+* date
+* error
+* function
+* integer (or int)
+* number (or float)
+* object
+* primitive
+* regexp
+* string
+* symbol
+* type
+* window
+* Class/Model/Struct (starts with capital letter because it's a class name)
+
+### Constraint Modifiers
+
+#### Nullable Modifier
+
+question mark => `string?`
+
+...for primitive type constraints (boolean, integer, number, string, and Struct)
+
+#### Not-Nullable Modifier
+
+exclamation point => `array!`
+
+...for type constraints with default instances (array, date, error, function, object, regexp, and Model)
+
+#### Cast Modifier
+
+tidle => `~number`
+
+...for type constraints with conversion methods (array, boolean, date, integer, number, regexp, string)
+
+#### Suppress Modifier
+
+at-symbol => `@date`
+
+...suppresses errors when strict method is enabled (`jTypes.strict = true`)
+
+## Namespaces
+
+Some text and `code` about namespaces...
+
+```javascript
+jTypes('namespace Drawing', function($$)
+{
+    $$('Color', function(red, green, blue)
+    {
+        // ...
+    },
+    {
+        // ...
+    });
+});
+
+var white = new jTypes.Drawing.Color(255, 255, 255);
+var gray  = new jTypes.Drawing.Color(128, 128, 128);
+```
+
+### Dependencies
+
+Some text and `code` about namespace dependencies...
+
+#### Includes
+
+Some text and `code` about namespace includes...
+
+```javascript
+jTypes('namespace Project', ['using Drawing'], function($$)
+{
+    $$('Component : BaseComponent',
+    {
+        // ...
+        
+        'public Color fill':   null,
+        'public Color stroke': null
+    });
+});
+```
+
+#### Aliases
+
+Some text and `code` about namespace aliases...
+
+```javascript
+jTypes('namespace Project', ['using Color = Drawing.Color'], function($$)
+{
+    $$('Component : BaseComponent',
+    {
+        // ...
+        
+        'public Color fill':   null,
+        'public Color stroke': null
+    });
+});
+```
+
+## Class Modifiers
+
+### abstract
+
+...abstract classes => cannot be instantiated and can have abstract methods and properties...
+
+### internal
+
+...internal classes => hide their type from the type() method on all instances and the __type accessor on the public instance (and non-internal classes cannot inherit from internal classes)...
+
+### model
+
+...models have => optional constructors (new operator invokes constructor), default instances (without new operator)...
+
+### primitive
+
+...primitive classes have => primitive type constraints (for fields and automatically implemented properties), clone() and equals(obj) methods...
+
+### sealed
+
+...sealed classes => cannot be inherited...
+
+### struct
+
+...structs have => optional constructors (new operator invokes constructor), default instances (without new operator), no inheritance, clone() and equals(obj) methods...
+
+### unlocked
+
+...unlocked classes have => chainable __base instances...
+
+## Class Member Modifiers
+
+### abstract
+
+...abstract members => must be overridden in a derived class (and can only be used on methods or properties)...
+
+### const
+
+...const members => are not `[Writable]` and can only be used with the `prototype` or `static` modifiers...
+
+### hidden
+
+...hidden members => are not `[Enumerable]` (fields and properties are enumerable by default, methods are not)
+
+### new
+
+...new members => hide an inherited member (when not overriding)...
+
+### override
+
+...override members => override an inherited abstract or virtual member...
+
+### private
+
+...private members => are only accessible in the methods and properties of the class they are defined in...
+
+### protected
+
+...protected members => are only accessible in the methods and properties of the class they are defined in and the methods and properties of any derived classes...
+
+### prototype
+
+...prototype members => are defined on the prototype of the class constructor (`Class.prototype`)...
+
+### public
+
+...public members => are accessible everywhere for the class they are defined in and any derived classes as well...
+
+### readonly
+
+...readonly members => are only writable inside the constructor and can only be used with fields and automatically implemented properties...
+
+### sealed
+
+...sealed members => cannot be overridden and must be used with the override `modifier`...
+
+### static
+
+...static members => are defined on the class constructor (`Class`)...
+
+### virtual
+
+...virtual members => can be overridden in a derived class (and can only be used on methods or properties)...
+
+### visible
+
+...visible members => are `[Enumerable]` (methods are not enumerable by default, fields and properties are)
 
 ## Contribute
 
 We strongly encourage anyone who is interested in contributing to contact us through any of the various social mediums on our website ([www.jTypes.com](www.jTypes.com)).
 
-jTypes is a free open-source library developed by Gaulinsoft, a small software consulting company in Chicago, IL. We only have a few employees and spend a majority of our time working with clients on various consulting projects. This library was created internally in our free-time to simplify the development of some of our other in-house libraries which we also hope to release in the near future. Therefore, any contributions (in the form of code optimization, design ideas, unit testing, bug tracking, ect.) are greatly appreciated and really go a long way to help us out.
+jTypes is an open-source library developed by Gaulinsoft, a small software consulting company in Chicago, IL. It was created internally in our free-time to simplify the development of some of our other frameworks and libraries which we also hope to release in the near future. Therefore, any contributions are greatly appreciated and really go a long way to help us out.
 
 We hope you find jTypes to be a very useful tool in the development of your applications or libraries and we have many more great things to come, so be sure to check-in every once in a while to see what's new!
 
 
-## How to define a class
-
-In the following example, a class is compiled and the type reference is stored in the `Person` variable. A constructor is provided to take in three arguments and set the corresponding fields. Two `public` `readonly` fields are defined, and a `protected` field is defined as well. A `public` method along with a `public` `virtual` method are defined. Finally, a property with both `get` and `set` accessors is provided:
-
-```javascript
-var Person = jTypes(function(fName, lName, age)
-{
-    this.firstName = fName;
-    this.lastName  = lName;
-
-    this._age = age;
-},
-{
-    'public readonly firstName': '',
-    'public readonly lastName': '',
-
-    'protected _age': 0,
- 
-    'public getFullName': function()
-    {
-        return this.firstName + ' ' + this.lastName;
-    },
- 
-    'public virtual triggerOneYearOlder': function()
-    {
-        this._age++;
-    },
-
-    'public age':
-    {
-        'get': function()
-        {
-            return this._age;
-        },
-        'set': function(v)
-        {
-            if (v > 0)
-                this._age = v;
-        }
-    }
-});
-```
-
-## How to define a derived class
-
-In the following example, a class is derived from the `Person` class and the type reference is stored in the `Employee` variable. Four arguments are provided to the constructor, with which the first three arguments are passed into the base constructor, while the final argument is used to set a `protected` field defined in the class. A `public` method is defined as an `override` for the base `virtual` method. This method also calls the base `virtual` method. Finally, a property with only a `get` accessor is provided, which will act as if it is a read-only field:
-
-```javascript
-var Employee = jTypes(Person, function(fName, lName, age, salary)
-{
-    this.__base(fName, lName, age);
-    
-    this._salary = salary;
-},
-{
-    'protected _salary': 0,
- 
-    'public override triggerOneYearOlder': function()
-    {
-        this.__base.triggerOneYearOlder();
- 
-        this._salary *= 1.03;
-    },
- 
-    'public salary':
-    {
-        'get': function()
-        {
-            return this._salary;
-        }
-    }
-});
-```
-
-## How to instantiate, type-check, and cast instances
-
-In the following example, both classes that were previously defined will be instantiated and tested to ensure their functionality is correct based on their jTypes definitions:
-
-```javascript
-// instantiate a person object
-var p = new Person('John', 'Doe', 30);
- 
-// check that the values were set
-console.log(p.firstName);// John
-console.log(p.lastName);// Doe
-console.log(p.age);// 30
- 
-// get a protected field
-console.log(p._age);// undefined
- 
-// set a readonly field (throws in strict mode)
-p.firstName = 'Jane';
- 
-// set an invalid property value (throws if you code it)
-p.age = -40;
- 
-// check that the field and property didn't change
-console.log(p.firstName);// John
-console.log(p.age);// 30
- 
-// set a valid property value
-p.age = 40;
- 
-// check that the property did change
-console.log(p.age);// 40
- 
-// invoke a method
-console.log(p.getFullName());// John Doe
- 
-// invoke a virtual method
-p.triggerOneYearOlder();
- 
-// check that the age was incremented (by the virtual method)
-console.log(p.age);// 41
-
-// instantiate an employee object
-var e = new Employee(p.firstName, p.lastName, p.age, 75000);
- 
-// check that the inherited values were set
-console.log(e.firstName);// John
-console.log(e.lastName);// Doe
-console.log(e.age);// 41
- 
-// get an inherited protected field
-console.log(e._age);// undefined
- 
-// set an inherited readonly field
-e.firstName = 'Jane';
- 
-// check that the field didn't change
-console.log(e.firstName);// John
- 
-// get a declared field (not inherited)
-console.log(e.salary);// 75000
- 
-// cast the employee object as a person object
-e = e.as(Person);
- 
-// check the types of both person objects
-console.log(p instanceof Person);// true
-console.log(p instanceof Employee);// false
-console.log(e instanceof Person);// true
-console.log(e instanceof Employee);// true
- 
-// check that both person objects don't have the derived property
-console.log(p.salary);// undefined
-console.log(e.salary);// undefined
- 
-// invoke an overridden method
-e.triggerOneYearOlder();
- 
-// cast the person object as an employee object
-e = e.as(Employee);
- 
-// check that the age was incremented (by the base method)
-console.log(e.age);// 42
- 
-// check that the salary increased 3% (by the overridden method)
-console.log(e.salary);// 77250
-```
+## Performance
+  
+![jTypes 2.2 Performance](http://content.jtypes.com/2.2.0b658.png "jTypes 2.2 Performance")
