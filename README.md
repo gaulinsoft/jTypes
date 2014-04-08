@@ -143,7 +143,13 @@ at-symbol => `@date`
 
 ## Namespaces
 
-Some text and `code` about namespaces...
+Namespaces help organize applications and libraries by controlling the scope of classes. These scopes are created by providing the jTypes compiler with a callback function in the following format:
+
+```
+jTypes([String modifiers,] [Array dependencies,] Function callback(jTypes))
+```
+
+This callback function is invoked in the context of a namespace. During this time, calls to the jTypes compiler will be within the scope of the namespace.
 
 ```javascript
 jTypes('namespace Drawing', function($$)
@@ -159,14 +165,16 @@ jTypes('namespace Drawing', function($$)
     var white = new this.Color(255, 255, 255);
     var gray  = new this.Color(128, 128, 128);
 });
+```
 
+```javascript
 var white = new jTypes.Drawing.Color(255, 255, 255);
 var gray  = new jTypes.Drawing.Color(128, 128, 128);
 ```
 
 ### Dependencies
 
-Some text and `code` about namespace dependencies...
+These scopes can also declare a collection of dependencies to prevent the need to always specify fully qualified names.
 
 #### Includes
 
@@ -289,6 +297,36 @@ jTypes('namespace Project', ['using Color = Drawing.Color'], function($$)
 ### visible
 
 ...visible members => are `[Enumerable]` (methods are not enumerable by default, fields and properties are)
+
+## Global Settings
+
+### jT_FunctionLock
+
+default: `false`
+
+### jT_Harmony
+
+default: `true`
+
+### jT_Legacy
+
+default: `false`
+
+### jT_PrototypeLock
+
+default: `false`
+
+### jT_Shorthand
+
+default: `true`
+
+### jT_Storage
+
+default: `false`
+
+### jT_Writable
+
+default: `false`
 
 ## Contribute
 
