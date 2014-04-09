@@ -143,18 +143,21 @@ at-symbol => `@date`
 
 ## Namespaces
 
-Namespaces help organize applications and libraries by controlling the scope of classes. These scopes are created by providing the jTypes compiler with a callback function in the following format:
+Namespaces help organize applications and libraries by controlling the scope of classes. They are created by providing the jTypes compiler with a callback function in the following format:
 
 ```
-jTypes([String modifiers,] [Array dependencies,] Function callback(jTypes))
+Object jTypes([String modifiers,] [Array dependencies,] Function callback(jTypes))
 ```
 
-This callback function is invoked in the context of a namespace. During this time, calls to the jTypes compiler will be within the scope of the namespace.
+This callback is invoked in the context of a namespace object. Using the provided argument, calls to the compiler will also be within the scope of the namespace.
 
+_If a modifiers string is not provided, the callback is invoked in the context of the global namespace._
+
+In the following example, a struct `Color` is compiled in the scope of the `System.Drawing` namespace:
 ```javascript
-jTypes('namespace Drawing', function($$)
+jTypes('namespace System.Drawing', function($$)
 {
-    $$('Color', function(red, green, blue)
+    $$('struct Color', function(r, g, b, a)
     {
         // ...
     },
@@ -162,53 +165,100 @@ jTypes('namespace Drawing', function($$)
         // ...
     });
     
-    var white = new this.Color(255, 255, 255);
-    var gray  = new this.Color(128, 128, 128);
+    var gray = new this.Color(128, 128, 128);
 });
 ```
 
+_The namespace modifier in the modifiers string is optional and can be provided for readability._
+
+Since this callback is invoked in the context of the namespace, the struct can be instantiated using `this.Color` in the scope of the callback function. Other scopes can instantiate this struct using the fully qualified reference from the global namespace:
+
 ```javascript
-var white = new jTypes.Drawing.Color(255, 255, 255);
-var gray  = new jTypes.Drawing.Color(128, 128, 128);
+var gray = new jTypes.System.Drawing.Color(128, 128, 128);
 ```
+
+These scopes also allow base classes and type constraints to be resolved from either the current or parent namespaces without requiring a fully qualified name. In the next example, an abstract class `Shape` is compiled in the scope of the `System.Drawing.Drawing2D` namespace:
+
+```javascript
+jTypes('namespace System.Drawing.Drawing2D', function($$)
+{
+    $$('abstract Shape',
+    {
+        'public virtual Color fill':   ['get', 'set'],
+        'public virtual Color stroke': ['get', 'set'],
+        
+        // ...
+    });
+});
+```
+
+When building the `Shape` class, the type constraint `Color` on the automatically implemented properties can be resolved without using the fully qualified name.
 
 ### Dependencies
 
-These scopes can also declare a collection of dependencies to prevent the need to always specify fully qualified names.
+If a base class or type constraint cannot be resolved from either the current or parent namespaces, a dependencies array can prevent the need to specify a namespace or fully qualified name. This array of dependency strings can contain two types of declarations; a namespace include or alias definition.
+
+_The using modifier in the following dependency strings are optional and can be provided for readability._
 
 #### Includes
 
-Some text and `code` about namespace includes...
+Namespace includes allow identifiers in a namespace to be resolved without having to specify the namespace. The following example includes the `System.Drawing` namespace in the scope of the callback function:
 
 ```javascript
-jTypes('namespace Project', ['using Drawing'], function($$)
+jTypes('namespace System.Forms',
+[
+    'using System.Drawing',
+    
+    // ...
+],
+function($$)
 {
-    $$('Component : BaseComponent',
+    $$('Textbox : Control', function()
     {
         // ...
+    },
+    {
+        'public virtual Color background': ['get', 'set'],
+        'public virtual Color border':     ['get', 'set'],
         
-        'public Color fill':   null,
-        'public Color stroke': null
+        // ...
     });
 });
 ```
+
+Since the `System.Drawing` namespace is included in the scope, the type constraint `Color` on the automatically implemented properties can be resolved without using `Drawing.Color` or the fully qualified name `System.Drawing.Color`.
+
+_If a base class or type constraint is ambiguous between namespace includes, then the name must be uniquely qualified._
 
 #### Aliases
 
-Some text and `code` about namespace aliases...
+Alias definitions make it easier to qualify an identifier for a class or namespace. The next example creates the alias `Color` for the fully qualified name `System.Drawing.Color`:
 
 ```javascript
-jTypes('namespace Project', ['using Color = Drawing.Color'], function($$)
+jTypes('namespace System.Forms',
+[
+    'using Color = System.Drawing.Color',
+    
+    // ...
+],
+function($$)
 {
-    $$('Component : BaseComponent',
+    $$('Textbox : Control', function()
     {
         // ...
+    },
+    {
+        'public virtual Color background': ['get', 'set'],
+        'public virtual Color border':     ['get', 'set'],
         
-        'public Color fill':   null,
-        'public Color stroke': null
+        // ...
     });
 });
 ```
+
+Because this alias is defined in the scope of the callback function, the type constraint `Color` on the automatically implemented properties can be resolved. The fully qualified name on the right side of the alias definition can also be `Drawing.Color` since `System.Forms` is a child namespace of `System`.
+
+_Aliases cannot hide a name already defined in the current namespace._
 
 ## Class Modifiers
 
