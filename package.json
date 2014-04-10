@@ -4,10 +4,10 @@
     "description" : "Scalable class-based JavaScript.",
     "keywords"    : ["jtypes", "class", "inheritance", "type", "management", "namespace", "private", "protected", "public", "abstract", "override", "virtual", "readonly"],
     "homepage"    : "http://www.jtypes.com/",
-    "bugs"        : "http://www.github.com/gaulinsoft/jtypes/issues",
+    "bugs"        : "http://github.com/gaulinsoft/jtypes/issues",
     "license"     : "Apache-2.0",
     "author"      : "Nick Gaulin <contact@gaulinsoft.com>",
-    "files"       : ["core.js", "core.min.js", "LICENSE"],
-    "main"        : "core.min",
+    "files"       : ["core.js", "core.intellisense.js", "core.min.js", "LICENSE"],
+    "main"        : "core",
     "repository"  : {"type": "git", "url": "http://github.com/gaulinsoft/jtypes.git"}
 }
