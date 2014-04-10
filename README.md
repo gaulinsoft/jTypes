@@ -184,15 +184,15 @@ jTypes('namespace System.Drawing.Drawing2D', function($$)
 {
     $$('abstract Shape',
     {
-        'public virtual Color fill':   ['get', 'set'],
-        'public virtual Color stroke': ['get', 'set'],
+        'public Color fill':   null,
+        'public Color stroke': null,
         
         // ...
     });
 });
 ```
 
-When building the `Shape` class, the type constraint `Color` on the automatically implemented properties can be resolved without using the fully qualified name.
+When building the `Shape` class, the type constraint `Color` on the fields can be resolved without using the fully qualified name because the struct is defined in a parent namespace.
 
 ### Dependencies
 
@@ -226,7 +226,7 @@ function($$)
 });
 ```
 
-Since the `System.Drawing` namespace is included in the scope, the type constraint `Color` on the automatically implemented properties can be resolved without using `Drawing.Color` or the fully qualified name `System.Drawing.Color`.
+Since the `System.Drawing` namespace is included in the scope, the type constraint `Color` on the automatically implemented properties can be resolved without using `Drawing.Color` or `System.Drawing.Color`.
 
 _If a base class or type constraint is ambiguous between namespace includes, then the name must be uniquely qualified._
 
