@@ -78,7 +78,7 @@ var gray  = new Color(128, 128, 128);
 
 #### Automatically Implemented Properties
 
-### Constraints
+## Constraints
 
 Some text and `code` about type constraints...
 
@@ -115,27 +115,214 @@ var gray  = new Color(128, 128, 128);
 * window
 * Class/Model/Struct (starts with capital letter because it's a class name)
 
-### Constraint Modifiers
+### Primitive Constraints
 
-#### Nullable Modifier
+Primitive constraints use the primitive values `false`, `0`, `NaN`, `""`, and `Symbol()` for default or invalid values instead of null references. Consequently, these values can be directly accessed without any reference checking because they always provide a primitive value that is neither `undefined` nor `null`:
 
-question mark => `string?`
+* `boolean` (`bool`)
+* `integer` (`int`)
+* `number` (`float`)
+* `string`
+* `symbol`
 
-...for primitive type constraints (boolean, integer, number, string, and Struct)
+These constraints prevent values from being cross referenced because they implicitly convert wrapper objects such as `new Number(...)` to its primitive value. The following example compiles a struct `Color` using the type constraint `int` on the public fields:
 
-#### Not-Nullable Modifier
+```javascript
+jTypes('struct Color', function(red, green, blue)
+{
+    // ...
+},
+{
+    'public int red':   0,
+    'public int green': 0,
+    'public int blue':  0,
+ 
+    // ...
+});
+ 
+var green = jTypes.Color();
+ 
+green.red   = '255';
+green.green = 128.3;
+green.blue  = null;
+ 
+console.assert(green.red   === 0,   'Color.red');
+console.assert(green.green === 128, 'Color.green');
+console.assert(green.blue  === 0,   'Color.blue');
+```
 
-exclamation point => `array!`
+Since the values `'255'` and `null` do not have a `typeof` that is equal to `'number'`, the fields `green.red` and `green.blue` are assigned the default value of `0`. However, `green.green` is assigned a truncated value because `128.3` is a primitive number.
 
-...for type constraints with default instances (array, date, error, function, object, regexp, and Model)
+### Struct Constraints
 
-#### Cast Modifier
+Struct constraints use default instances for default or invalid values instead of null references. These values can also be directly accessed without any reference checking because they always provide a default instance:
 
-tidle => `~number`
+* `Struct`
 
-...for type constraints with conversion methods (array, boolean, date, integer, number, regexp, string)
+The following example compiles the class `Element` using the type constraint `Color` on the public fields:
 
-#### Suppress Modifier
+```javascript
+jTypes('Element', function()
+{
+    // ...
+},
+{
+    'public Color background': null,
+    'public Color foreground': null,
+ 
+    // ...
+});
+
+var element = new jTypes.Element();
+
+// ...
+ 
+var background = '#' + element.background.red.toString(16) + element.background.green.toString(16) + element.background.blue.toString(16),
+    foreground = '#' + element.foreground.red.toString(16) + element.foreground.green.toString(16) + element.foreground.blue.toString(16);
+```
+
+The values of `element.background` and `element.foreground` in the previous example can be directly accessed without any reference checking because they always provide a `Color` struct.
+
+> Because default and invalid values of fields and automatically implemented properties are still internally stored as null references, default struct instances are not instantiated until the value is accessed.
+
+### Operators
+
+#### Nullable Operator
+
+The `?` nullable operator defaults primitive constraints and structs to null references for invalid values. It can be postfixed to the following constraints:
+
+* `boolean?` (`bool?`)
+* `integer?` (`int?`)
+* `number?` (`float?`)
+* `string?`
+* `Struct?`
+* `symbol?`
+
+This allows primitive constraints to comply with primitive data types that may not contain a value, and structs to replicate the behavior of models. The following example compiles an abstract class `Shape` with the `?` operator postfixed to the type constraint `Color`:
+
+```javascript
+jTypes('abstract Shape',
+{
+    'protected Color? _fill':   null,
+    'protected Color? _stroke': null,
+
+    // ...
+ 
+    'public abstract string toString': null
+});
+```
+
+Since the protected fields default to null values, any derived implementation of the `Shape` class must check their values for null references. The next example compiles a class `Polygon` with a non-primitive type constraint `array` on another protected field:
+
+```javascript
+jTypes('Polygon : Shape', function()
+{
+    // ...
+},
+{
+    'protected array _points': null,
+
+    // ...
+ 
+    'public override string toString': function()
+    {
+        var attributes = "";
+ 
+        if (this._points)
+            attributes += 'points="' + this._points.join(' ') + '" ';
+ 
+        // ...
+ 
+        if (this._stroke)
+            attributes += 'stroke="' + this._stroke + '" ';
+ 
+        return '<polygon ' + attributes + '/>';
+    }
+});
+```
+
+Because the inherited field `this._stroke` from the previous example is nullable, it must first be checked for a null reference before being concatenated in the `toString()` method, which is also the case with `this._points` and calling the `join()` method.
+
+#### Not-Nullable Operator
+
+The `!` not-nullable operator prevents built-in constraints with default instances from using null references. Because primitive constraints only default to null values when the nullable operator is present, the not-nullable operator can be postfixed to the following non-primitive constraints:
+
+* `array!`
+* `date!`
+* `error!`
+* `function!`
+* `Model!`
+* `object!`
+* `regexp!`
+
+This operator can be postfixed to models due to the fact that models do not call the constructor unless the `new` operator is present. The example below compiles a class `Queue` with the `!` operator postfixed to the type constraint `array`:
+
+```javascript
+jTypes('Queue', function()
+{
+    // ...
+},
+{
+    'protected array! _queue': null,
+
+    // ...
+
+    'public dequeue': function()
+    {
+        return this._queue.shift();
+    }
+});
+```
+
+Since the operator uses default instances for invalid values instead of null references, the `dequeue()` method in the previous example can safely call the `shift()` method without checking the protected field for a null reference.
+
+> Because default and invalid values of fields and automatically implemented properties are still internally stored as null references, default model instances are not instantiated until the value is accessed.
+
+#### Coerce Operator
+
+The `~` coerce operator performs implicit conversions for built-in types. It can be prefixed to the following constraints:
+
+* `~array`
+* `~boolean` (`~bool`)
+* `~date`
+* `~integer` (`~int`)
+* `~number` (`~float`)
+* `~regexp`
+* `~string`
+
+This operator converts values using global casting methods such as `$$.asArray(...)` or `$$.asString(...)`. It does not alter the default value of fields and automatically implemented properties for non-primitive constraints. The following example compiles a struct `Color` with the `~` operator prefixed to the `int` type constraints:
+
+```javascript
+jTypes('struct Color', function(red, green, blue)
+{
+    // ...
+},
+{
+    'public ~int red':   0,
+    'public ~int green': 0,
+    'public ~int blue':  0,
+
+    // ...
+});
+
+var orange = jTypes.Color();
+
+orange.red   = '255';
+orange.green = '0xA5';
+orange.blue  = null;
+
+console.assert(orange.red   === 255, 'Color.red');
+console.assert(orange.green === 165, 'Color.green');
+console.assert(orange.blue  === 0,   'Color.blue');
+```
+
+Since none of the values being assigned to the fields in the previous example are primitive numbers, the `$$.asInt(...)` casting method will be used to coerce the values. To alter the default value of fields and automatically implemented properties for non-primitive constraints, the `~` and `!` operators can be prefixed and postfixed:
+
+* `~array!`
+* `~date!`
+* `~regexp!`
+
+#### Suppress Operator
 
 at-symbol => `@date`
 
