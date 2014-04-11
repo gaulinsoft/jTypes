@@ -14,13 +14,15 @@ jTypes requires ECMAScript 5, which is supported by any modern web browser (and 
     - [Fields](#fields)
     - [Methods](#methods)
     - [Properties](#properties)
-        - [Automatically Implemented Properties](#automatically-implemented-properties)
-    - [Constraints](#constraints)
-    - [Constraint Modifiers](#constraint-modifiers)
-        - [Nullable](#nullable-modifier)
-        - [Not-Nullable](#not-nullable-modifier)
-        - [Cast](#cast-modifier)
-        - [Suppress](#suppress-modifier)
+        - [Automatic Properties](#automatically-implemented-properties)
+- [Constraints](#constraints)
+    - [Primitives](#primitive-constraints)
+    - [Structs](#struct-constraints)
+    - [Operators](#operators)
+        - [Nullable](#nullable-operator)
+        - [Not-Nullable](#not-nullable-operator)
+        - [Coerce](#coerce-operator)
+        - [Suppress](#suppress-operator)
 - [Namespaces](#namespaces)
     - [Dependencies](#dependencies)
         - [Includes](#includes)
@@ -338,30 +340,30 @@ Object jTypes([String modifiers,] [Array dependencies,] Function callback(jTypes
 
 This callback is invoked in the context of a namespace object. Using the provided argument, calls to the compiler will also be within the scope of the namespace.
 
-_If a modifiers string is not provided, the callback is invoked in the context of the global namespace._
+> If a modifiers string is not provided, the callback is invoked in the context of the global namespace.
 
 In the following example, a struct `Color` is compiled in the scope of the `System.Drawing` namespace:
 ```javascript
 jTypes('namespace System.Drawing', function($$)
 {
-    $$('struct Color', function(r, g, b, a)
+    $$('struct Color', function(red, green, blue)
     {
         // ...
     },
     {
         // ...
     });
-    
+ 
     var gray = new this.Color(128, 128, 128);
 });
 ```
 
-_The namespace modifier in the modifiers string is optional and can be provided for readability._
+> The namespace modifier in the modifiers string is optional and can be provided for readability.
 
 Since this callback is invoked in the context of the namespace, the struct can be instantiated using `this.Color` in the scope of the callback function. Other scopes can instantiate this struct using the fully qualified reference from the global namespace:
 
 ```javascript
-var gray = new jTypes.System.Drawing.Color(128, 128, 128);
+var white = new jTypes.System.Drawing.Color(255, 255, 255);
 ```
 
 These scopes also allow base classes and type constraints to be resolved from either the current or parent namespaces without requiring a fully qualified name. In the next example, an abstract class `Shape` is compiled in the scope of the `System.Drawing.Drawing2D` namespace:
@@ -371,31 +373,67 @@ jTypes('namespace System.Drawing.Drawing2D', function($$)
 {
     $$('abstract Shape',
     {
-        'public Color fill':   null,
-        'public Color stroke': null,
-        
+        'protected Color _fill':   null,
+        'protected Color _stroke': null,
+ 
         // ...
     });
 });
 ```
 
-When building the `Shape` class, the type constraint `Color` on the fields can be resolved without using the fully qualified name because the struct is defined in a parent namespace.
+The type constraint `Color` on the fields of the `Shape` class can be resolved without using the fully qualified name because the struct is defined in a parent namespace. If a class `Rectangle` is compiled in the same namespace as outlined in the example below, it can also reference the `Shape` class without using the fully qualified name:
+
+```javascript
+jTypes('namespace System.Drawing.Drawing2D',
+[
+    // ...
+],
+function($$)
+{
+    $$('Rectangle : Shape', function()
+    {
+        // ...
+    },
+    {
+        // ...
+    });
+});
+```
+
+While the `Rectangle` class is compiled in a separate callback function with its own unique scope and dependencies, the `Shape` class can still be referenced because it is already defined in the `System.Drawing.Drawing2D` namespace.
 
 ### Dependencies
 
-If a base class or type constraint cannot be resolved from either the current or parent namespaces, a dependencies array can prevent the need to specify a namespace or fully qualified name. This array of dependency strings can contain two types of declarations; a namespace include or alias definition.
-
-_The using modifier in the following dependency strings are optional and can be provided for readability._
-
-#### Includes
-
-Namespace includes allow identifiers in a namespace to be resolved without having to specify the namespace. The following example includes the `System.Drawing` namespace in the scope of the callback function:
+If a base class or type constraint cannot be resolved from either the current or parent namespaces, a dependencies array can prevent the need to specify a namespace or fully qualified name. The following example compiles an abstract class `Control` in the `System.Forms` namespace using an array of dependency strings:
 
 ```javascript
 jTypes('namespace System.Forms',
 [
     'using System.Drawing',
-    
+    'using System.Drawing.Drawing2D',
+
+    // ...
+],
+function($$)
+{
+    $$('abstract Control',
+    {
+        // ...
+    });
+});
+```
+
+This array of dependency strings can contain two types of declarations; alias definitions and namespace includes. Alias definitions contain the `=` assignment operator, while namespace includes do not.
+
+#### Includes
+
+Namespace includes allow identifiers in a namespace to be resolved without having to specify the namespace. The example below includes the `System.Drawing` namespace in the scope of the callback function:
+
+```javascript
+jTypes('namespace System.Forms',
+[
+    'using System.Drawing',
+ 
     // ...
 ],
 function($$)
@@ -407,7 +445,7 @@ function($$)
     {
         'public virtual Color background': ['get', 'set'],
         'public virtual Color border':     ['get', 'set'],
-        
+ 
         // ...
     });
 });
@@ -415,7 +453,7 @@ function($$)
 
 Since the `System.Drawing` namespace is included in the scope, the type constraint `Color` on the automatically implemented properties can be resolved without using `Drawing.Color` or `System.Drawing.Color`.
 
-_If a base class or type constraint is ambiguous between namespace includes, then the name must be uniquely qualified._
+> If a base class or type constraint is ambiguous between namespace includes, then it must be uniquely qualified.
 
 #### Aliases
 
@@ -425,7 +463,7 @@ Alias definitions make it easier to qualify an identifier for a class or namespa
 jTypes('namespace System.Forms',
 [
     'using Color = System.Drawing.Color',
-    
+ 
     // ...
 ],
 function($$)
@@ -437,15 +475,41 @@ function($$)
     {
         'public virtual Color background': ['get', 'set'],
         'public virtual Color border':     ['get', 'set'],
-        
+ 
         // ...
     });
 });
 ```
 
-Because this alias is defined in the scope of the callback function, the type constraint `Color` on the automatically implemented properties can be resolved. The fully qualified name on the right side of the alias definition can also be `Drawing.Color` since `System.Forms` is a child namespace of `System`.
+Because this alias is defined in the scope of the callback function, the type constraint `Color` on the automatically implemented properties can be resolved. The fully qualified name on the right side of the alias definition can also be `Drawing.Color` due to the fact that `System.Forms` is a child namespace of `System`.
 
-_Aliases cannot hide a name already defined in the current namespace._
+> Aliases cannot hide a class already defined in the current namespace.
+
+When there are conflicting names, aliases can be referenced directly using the `::` operator. The following example uses the namespace alias qualifier to directly reference an alias in the type constraints on the automatically implemented properties:
+
+```javascript
+jTypes('namespace System.Forms',
+[
+    'using Drawing = global::System.Drawing',
+ 
+    // ...
+],
+function($$)
+{
+    $$('Textbox : global::System.Forms.Control', function()
+    {
+        // ...
+    },
+    {
+        'public virtual Drawing::Color background': ['get', 'set'],
+        'public virtual Drawing::Color border':     ['get', 'set'],
+ 
+        // ...
+    });
+});
+```
+
+The right side of an alias definition must be a namespace to use it with the `::` operator. The `global::` namespace alias qualifier is reserved for the global namespace. This allows base classes and type constraints to be referenced using globally qualified names.
 
 ## Class Modifiers
 
