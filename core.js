@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                                jTypes 2.2.0
+//                                jTypes 2.2.1
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2014 Gaulinsoft Corporation
@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.0';
+        $_version = '2.2.1b709';
 
     // ########## LANGUAGE ##########
 
@@ -86,6 +86,7 @@
         $_lang_handle_alias_invalid        = 'namespace "{0}" contains an invalid class alias "{1}".',
         $_lang_handle_dependency_invalid   = 'namespace "{0}" contains an invalid class dependency "{1}".',
         $_lang_handle_include_duplicate    = '"{0}" is an ambiguous reference between "{1}.{0}" and "{2}.{0}".',
+        $_lang_handle_qualifier_invalid    = 'namespace "{0}" does not have the "{1}" alias.',
         $_lang_keyword_duplicate           = '"{0}" cannot have a duplicate {1} modifier.',
         $_lang_keyword_invalid             = '"{0}" has an invalid modifier "{1}".',
         $_lang_name_duplicate              = '"{0}" cannot have more than one {1}definition.',
@@ -138,13 +139,13 @@
     // Create the internal flags
     var $_cache     = '',
         $_debug     = !$_minify,
-        $_funcLock  = !!global['jT_FunctionLock'],
-        $_harmony   = typeof global['jT_Harmony'] != 'boolean' || !!global['jT_Harmony'],
-        $_legacy    = !!global['jT_Legacy'],
-        $_protoLock = !!global['jT_PrototypeLock'],
-        $_storage   = typeof global['jT_Storage'] == 'boolean' && global['jT_Storage'] ?
-                      {} :
-                      null,
+        $_element   = global['HTMLElement'] || null,
+        $_funcLock  = global['jT_FunctionLock'] === true,
+        $_harmony   = global['jT_Harmony'] !== false,
+        $_jquery    = typeof global['jQuery'] == 'function' ? global['jQuery'] : null,
+        $_legacy    = global['jT_Legacy'] === true,
+        $_protoLock = global['jT_PrototypeLock'] === true,
+        $_storage   = global['jT_Storage'] === true ? {} : null,
         $_strict    = false;
 
     // ########## NATIVE CODE ##########
@@ -503,7 +504,7 @@
         $_const_regexp_cache             = /^[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/i,
         $_const_regexp_class             = /^[A-Z][_a-zA-Z0-9]*$/,
         $_const_regexp_constraint        = /^(~|@)?([a-z]+(?:-[a-z]+)?)(\?|!)?$/,
-        $_const_regexp_constraint_handle = /^(@)?((?:global::)?(?:[_a-zA-Z0-9.]+\.)?[A-Z][_a-zA-Z0-9]*)(\?|!)?$/,
+        $_const_regexp_constraint_handle = /^(@)?((?:[_a-zA-Z][_a-zA-Z0-9]*::)?(?:[_a-zA-Z0-9.]+\.)?[A-Z][_a-zA-Z0-9]*)(\?|!)?$/,
         $_const_regexp_instance          = /^[_$a-z][_$a-z0-9]*$/i,
         $_const_regexp_namespace         = /^[_a-z][_a-z0-9]*$/i,
         $_const_regexp_number            = /^[-+]?(?:[0-9]*\.)?[0-9]+(?:e[-+]?[0-9]+)?$/i,
@@ -571,7 +572,15 @@
     $_constraints['type']      =                  0 |                     0 | $_constraints_suppress;
     $_constraints['window']    =                  0 |                     0 | $_constraints_suppress;
 
-    // If the harmony flag is set, set the native symbol constraint flags in the constraints lookup
+    // If the element flag is set, set the native element constraint flag
+    if ($_element)
+        $_constraints['element'] = $_constraints_suppress;
+
+    // If the jQuery flag is set, set the native jQuery constraint flags
+    if ($_jquery)
+        $_constraints['jquery'] = $_constraints_default | $_constraints_suppress;
+
+    // If the harmony flag is set, set the native symbol constraint flags
     if ($_harmony)
         $_constraints['symbol'] = $_constraints_null | $_constraints_suppress;
 
@@ -2895,7 +2904,7 @@
                     {
                         // If a constraint was not provided, set the "primitive" constraint
                         if (!$constraint)
-                            $constraint = 'primitive';
+                            $constraint = $_const_keyword_primitive;
                         // If the constraint is not a primitive constraint, throw an exception
                         else if (!$_compilerConstraint($constraint, false, true))
                             $_exceptionFormat($_lang_constraint_primitive,
@@ -3295,10 +3304,6 @@
                 // If the struct has the unlocked modifier, throw an exception
                 if ($modifiers & $_modifiers_class_unlocked)
                     $_exceptionFormat($_lang_class_conflict, $_const_keyword_structs, $_const_keyword_unlocked);
-
-                // If the struct has the optimized modifier, throw an exception
-                if ($modifiers & $_modifiers_class_optimized)
-                    $_exceptionFormat($_lang_class_conflict, $_const_keyword_structs, $_const_keyword_optimized);
             }
 
             // If the expando modifier was provided, throw an exception
@@ -3612,7 +3617,7 @@
         var $class = $cache[$_cache_class] = !$_symbolCreate ?
                                              $_runtimeMatrix($metaclass, $metalength, $abstract, !!($modifiers & $_modifiers_class_expando), $internal, $model, $primitive, $struct, !!($modifiers & $_modifiers_class_unlocked)) :
                                              $struct ?
-                                             $_runtimeSymbolsStruct($metaclass, $handle, $name, $constructor, $defaults) :
+                                             $_runtimeSymbolsStruct($metaclass, $handle, $name, $constructor, $defaults, !!($modifiers & $_modifiers_class_optimized)) :
                                              $_runtimeSymbolsMatrix($metaclass, $metalength, $handle, $name, $defaults, $abstract, $model, !!($modifiers & $_modifiers_class_optimized));
 
         // Execute the static definitions on the class
@@ -3749,7 +3754,7 @@
             return false;
 
         // If the primitive flag is set, the constraint does not support the null flag, and it is not the "primitive" constraint string, return false
-        if ($primitive && !($constraint & $_constraints_null) && $exec[2] != 'primitive')
+        if ($primitive && !($constraint & $_constraints_null) && $exec[2] != $_const_keyword_primitive)
             return false;
 
         // If the cast modifier was provided, set the cast flag in the flags
@@ -4179,9 +4184,19 @@
     };
     var $_compilerHandle         = function($handle, $generic)
     {
-        // If the handle starts with the global namespace, remove it from the handle
-        if ($handle.substr(0, $_const_keyword_global.length + 2) == $_const_keyword_global + '::')
-            $handle = $handle.substr($_const_keyword_global.length + 2);
+        // If the handle starts with the namespace alias qualifier
+        if ($handle.indexOf('::') >= 0)
+        {
+            // Create the handles array from the handle
+            $handle = $handle.split('::');
+
+            // If the handles array has more than one alias qualifier or the qualifier is invalid, return false
+            if ($handle.length != 2 || !$_const_regexp_namespace.test($handle[0]))
+                return false;
+
+            // Set the handle succeeding the alias qualifier as the handle
+            $handle = $handle[1];
+        }
 
         // Create the namespaces array from the handle
         var $namespaces = $handle.split('.');
@@ -4298,7 +4313,7 @@
                     var $alias = $dependency.substr(0, $index).trim();
 
                     // If the alias is not a valid namespace, throw an exception
-                    if (!$_const_regexp_namespace.test($alias) || $_modifiers[$alias] != null || $_modifiers_class[$alias] != null || $_constraints[$alias] != null)
+                    if (!$_const_regexp_namespace.test($alias) || $_modifiers[$alias] != null || $_modifiers_class[$alias] != null || $_constraints[$alias] != null || $alias == $_const_keyword_global)
                         $_exceptionFormat($_lang_namespace_alias_invalid, $alias);
 
                     // Remove the alias from the dependency string
@@ -4333,13 +4348,17 @@
             $_includes = null;
         }
 
-        // Call the namespace constructor
-        $constructor.call($namespace, $$);
+        // Call the constructor in the context of the namespace with the compiler argument and store its return value
+        var $return = $constructor.call($namespace, $$);
 
         // Reset the namespace
         $_aliases   = null;
         $_includes  = null;
         $_namespace = null;
+
+        // If the constructor did not return undefined, return the return value
+        if ($return !== undefined)
+            return $return;
 
         // Return namespace object
         return $namespace;
@@ -5807,6 +5826,28 @@
 
                 break;
 
+            case 'element':
+
+                // If the element flag is not set, break
+                if (!$_element)
+                    break;
+
+                // Create the element constraint filter
+                $filter = function($value, $name)
+                {
+                    // If the value is either null or an instance of HTMLElement, return it
+                    if ($value === null || $value instanceof $_element)
+                        return $value;
+
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_filter_value, $name, $handle);
+
+                    return null;
+                };
+
+                break;
+
             case 'error':
 
                 // Create the error constraint filter
@@ -5926,6 +5967,32 @@
 
                     // Return the value as an integer (rounded towards zero)
                     return $__floor($value);
+                };
+
+                break;
+
+            case 'jquery':
+
+                // If the jQuery flag is not set, break
+                if (!$_jquery)
+                    break;
+
+                // Create the jQuery constraint filter
+                $filter = function($value, $name)
+                {
+                    // If the value is either null or an instance of jQuery, return it
+                    if ($value === null || $value instanceof $_jquery)
+                        return $value;
+
+                    // If the default flag is set, return an empty jQuery object
+                    if ($default)
+                        return $_jquery();
+
+                    // If a name was provided and the suppress flag is not set (along with strict mode being enabled), throw an exception
+                    if ($name && !$suppress && $_strict)
+                        $_exceptionFormat($_lang_filter_value, $name, $handle);
+
+                    return null;
                 };
 
                 break;
@@ -6206,9 +6273,28 @@
                           $_namespaces :
                           $_classes;
 
-        // If the handle starts with the global namespace, return the resolved global reference
-        if ($handle.substr(0, $_const_keyword_global.length + 2) == $_const_keyword_global + '::')
-            return $references[$handle.substr($_const_keyword_global.length + 2)] || null;
+        // If the handle starts with the namespace alias qualifier
+        if ($handle.indexOf('::') >= 0)
+        {
+            // Create the handles array from the handle
+            $handle = $handle.split('::');
+
+            // If the alias qualifier is the global alias, return the resolved global reference
+            if ($handle[0] == $_const_keyword_global)
+                return $references[$handle[1]] || null;
+
+            // Get the dependency from the aliases map
+            var $dependency = $aliases ?
+                              $aliases[$handle[0]] :
+                              null;
+
+            // If the dependency was not found, throw an exception
+            if (!$dependency)
+                $_exceptionFormat($_lang_handle_qualifier_invalid, $namespace, $handle[0]);
+
+            // Return the resolved reference relative to the dependency
+            return $_runtimeHandle($dependency + '.' + $handle[1], $generic, $namespace);
+        }
 
         // Resolve the reference relative to the namespace
         var $reference = $namespace ?
@@ -6942,13 +7028,12 @@
         // Return the runtime class constructor
         return $class;
     };
-    var $_runtimeSymbolsStruct = function($metaclass, $handle, $name, $constructor, $defaults)
+    var $_runtimeSymbolsStruct = function($metaclass, $handle, $name, $constructor, $defaults, $optimized)
     {
-        // Get the private, public, and root data symbols (but the private, public, and root metainstances have yet to be built)
+        // Get the private, public, and root data symbols (but the private and public metainstances have yet to be built)
         var $cache          = $metaclass[0],
             $metaprivate    = null,
             $metapublic     = null,
-            $metaroot       = null,
             $symbolsprivate = $cache[$_cache_symbols_private],
             $symbolspublic  = $cache[$_cache_symbols_public],
             $symbolsroot    = $cache[$_cache_symbols_root];
@@ -6971,7 +7056,7 @@
                 $merge        = $_compilerDirectives($metaclass, 1, $metainstance, $defaults, $sources, $primitive, true);
 
             // Compile the symbols metadata
-            $metaroot    = $_compilerSymbolsDirectives($metaclass, 1, $metainstance, $defaults, $struct.prototype, $sources, $struct[$_symbol_internal], $merge, false, $primitive, true, !!($modifiers & $_modifiers_class_unlocked));
+            $metaroot    = $_compilerSymbolsDirectives($metaclass, 1, $metainstance, $defaults, $struct.prototype, $sources, $struct[$_symbol_internal], $merge, $optimized, $primitive, true, !!($modifiers & $_modifiers_class_unlocked));
             $metaprivate = $metainstance[0][$_instance_private];
             $metapublic  = $metainstance[0][$_instance_public];
 
@@ -6988,40 +7073,51 @@
             var $new  = this instanceof $struct && this[$_symbol_instance] !== this,
                 $this = $__create($defaults);
 
-            // Create the private, public, and root instance objects (and set them in the hidden instance data)
-            var $root    = $this[$symbolsroot]    = $__create($metaroot),
-                $private = $this[$symbolsprivate] = $__create($metaprivate),
-                $public  = $this[$symbolspublic]  = $__create($metapublic);
+            // Create the private and public instance objects (and set them in the hidden instance data)
+            var $private = $this[$symbolsprivate] = !$optimized || $constructor && $new ?
+                                                    $__create($metaprivate) :
+                                                    null,
+                $public  = $this[$symbolspublic]  = $this[$symbolsroot] = $__create($metapublic);
 
             // If ECMAScript 6 symbols are not supported
             if (!$__symbol)
             {
-                // Set the instance data on the private, public, and root instance objects (and lock the instance type on them)
-                $_data($root,    $_symbol_data,     $this);
-                $_data($root,    $_symbol_instance, $root);
-                $_data($private, $_symbol_data,     $this);
-                $_data($private, $_symbol_instance, $private);
-                $_data($public,  $_symbol_data,     $this);
-                $_data($public,  $_symbol_instance, $public);
+                // Set the instance data on the public instance object (and lock the instance type on it)
+                $_data($public, $_symbol_data,     $this);
+                $_data($public, $_symbol_instance, $public);
+
+                // If a private instance object was created
+                if ($private)
+                {
+                    // Set the instance data on the private instance object (and lock the instance type on it)
+                    $_data($private, $_symbol_data,     $this);
+                    $_data($private, $_symbol_instance, $private);
+                }
             }
             else
             {
-                // Set the hidden instance data on the private, public, and root instance objects (and lock the instance type on them)
-                $root   [$_symbol_data]     = $this;
-                $root   [$_symbol_instance] = $root;
-                $private[$_symbol_data]     = $this;
-                $private[$_symbol_instance] = $private;
-                $public [$_symbol_data]     = $this;
-                $public [$_symbol_instance] = $public;
+                // Set the hidden instance data on the public instance object (and lock the instance type on it)
+                $public[$_symbol_data]     = $this;
+                $public[$_symbol_instance] = $public;
+
+                // If a private instance object was created
+                if ($private)
+                {
+                    // Set the hidden instance data on the private instance object (and lock the instance type on it)
+                    $private[$_symbol_data]     = $this;
+                    $private[$_symbol_instance] = $private;
+                }
             }
 
             // If the global prototype lock flag is set
             if ($_protoLock)
             {
-                // Freeze the private, public, and root instance objects
-                $__freeze($root);
-                $__freeze($private);
+                // Freeze the public instance object
                 $__freeze($public);
+
+                // If a private instance object was created, freeze the private instance object
+                if ($private)
+                    $__freeze($private);
             }
 
             // Set the type handle and name in the hidden instance data
