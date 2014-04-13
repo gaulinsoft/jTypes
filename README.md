@@ -82,40 +82,71 @@ var gray  = new Color(128, 128, 128);
 
 ## Constraints
 
-Some text and `code` about type constraints...
+Type constraints restrict values to simplify the implementation and maintainence of classes. If a value is not of the respective type of the constraint, it is treated as a null reference instead:
+
+* `array`
+* `Class`
+* `date`
+* `element` (2.2.1)
+* `error`
+* `function`
+* `jquery` (2.2.1)
+* `object`
+* `primitive`
+* `regexp`
+* `type`
+* `window`
+
+
+The type constraint `object` strictly checks for invalid values using a `$$.type(...)` that is equal to `'object'`, while `primitive` checks for invalid values using the `$$.isPrimitive(...)` method, and `type` checks for invalid values using the `$$.isClass(...)` method. The following example compiles a class `Queue` with the type constraint `array` on a protected field:
 
 ```javascript
-var Color = jTypes(function(red, green, blue)
+jTypes('Queue', function()
 {
-    this.red   = red;
-    this.green = green;
-    this.blue  = blue;
+    // ...
 },
 {
-    'public int red':   0,
-    'public int green': 0,
-    'public int blue':  0
-});
+    'protected array _queue': null,
 
-var white = new Color(255, 255, 255);
-var gray  = new Color(128, 128, 128);
+    // ...
+
+    'public dequeue': function()
+    {
+        if (this._queue)
+            return this._queue.shift();
+    }
+});
 ```
 
-* array
-* boolean (or bool)
-* date
-* error
-* function
-* integer (or int)
-* number (or float)
-* object
-* primitive
-* regexp
-* string
-* symbol
-* type
-* window
-* Class/Model/Struct (starts with capital letter because it's a class name)
+If the protected field is checked for a null reference in the `dequeue()` method, it is guaranteed to have a `$$.type(...)` equal to `'array'` and can safely call the `shift()` method. If a class has its name defined in the modifiers string as in the previous example, it can also be used as a constraint:
+
+```javascript
+jTypes('Element', function()
+{
+    // ...
+},
+{
+    'public Queue animations': null,
+
+    // ...
+});
+ 
+var element = new jTypes.Element();
+ 
+// ...
+ 
+while (element.animations)
+{
+    var animation = element.animations.dequeue();
+ 
+    if (!animation)
+        break;
+ 
+    // ...
+}
+```
+
+Because the `animations` field is restricted using the type constraint, it is guaranteed to be of the type `Queue` and can safely call the `dequeue()` method.
 
 ### Primitive Constraints
 
