@@ -5,7 +5,7 @@ jTypes provides developers with robust type management in JavaScript to improve 
 ## Contents
 - [Requirements](#requirements)
 - [Setup](#setup)
-    - [Intellisense](#intellisense)
+    - [IntelliSense](#intellisense)
 - [Classes](#classes)
     - [Fields](#fields)
     - [Methods](#methods)
@@ -50,7 +50,20 @@ jTypes provides developers with robust type management in JavaScript to improve 
 
 ## Requirements
 
-jTypes requires ECMAScript 5, which is supported by any modern platform or web browser (and Internet Explorer 9+).
+jTypes requires ECMAScript 5, which is supported by any modern platform or browser. This includes the following desktop and mobile browser versions:
+
+* Internet Explorer 9
+* Firefox 4
+* Chrome 13
+* Safari 5.1
+* Opera 11.6
+* IE Mobile 9
+* Android 3
+* iOS Safari 5
+* Opera Mobile 11.5
+* Blackberry 7
+
+> IE Mobile 9 was released with the Windows Phone 7.5 update, also known as Mango; iOS 5 was released for the iPhone 3GS, iPhone 4, iPhone 4S, iPod Touch (3rd/4th gen), iPad, and iPad 2.
 
 ## Setup
 
@@ -68,9 +81,9 @@ npm install jtypes
 
 > Enabling ECMAScript 6 features with the --harmony flag is recommended for jTypes 2.2 when using preview release 0.11.0 or higher.
 
-### Intellisense
+### IntelliSense
 
-The `core.intellisense.js` file can also be included in Visual Studio 2012 to add support for jTypes Intellisensing:
+The `core.intellisense.js` file can also be included in Visual Studio 2012 to add support for Intellisense with jTypes:
 
 ![jTypes Intellisense](http://content.jtypes.com/intellisense.png "jTypes Intellisense")
 
