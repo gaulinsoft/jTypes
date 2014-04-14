@@ -3,9 +3,9 @@
 jTypes provides developers with robust type management in JavaScript to improve the maintainability and scalability of web-based applications. By utilizing familiar and proven design patterns from popular languages such as C++, C#, and Java, jTypes can simplify the development of web apps, libraries, and tools. Since it is not a new language, jTypes doesn't require any transcompilation to messy and unmaintainable JavaScript like other web programming languages. This makes it extremely simple and straightforward, especially for developers that are experienced with classical inheritance. Using existing and upcoming language components that are implemented across all browsers and platforms, jTypes offers an efficient and effective framework for class-based object-oriented development that can quickly and easily adapt to the "quirks" of a constantly evolving web.
 
 ## Contents
+- [Requirements](#requirements)
 - [Setup](#setup)
     - [Intellisense](#intellisense)
-- [Requirements](#requirements)
 - [Classes](#classes)
     - [Fields](#fields)
     - [Methods](#methods)
@@ -48,6 +48,10 @@ jTypes provides developers with robust type management in JavaScript to improve 
     - [virtual](#virtual)
     - [visible](#visible)
 
+## Requirements
+
+jTypes requires ECMAScript 5, which is supported by any modern platform or web browser (and Internet Explorer 9+).
+
 ## Setup
 
 Include the `core.js` or `core.min.js` files for each release in your application using the jTypes CDN:
@@ -71,10 +75,6 @@ The `core.intellisense.js` file can also be included in Visual Studio 2012 to ad
 ![jTypes Intellisense](http://content.jtypes.com/intellisense.png "jTypes Intellisense")
 
 > This file is also available in the .zip downloads on our website.
-
-## Requirements
-
-jTypes requires ECMAScript 5, which is supported by any modern platform or web browser (and Internet Explorer 9+).
 
 ## Classes
 
@@ -604,6 +604,8 @@ function($$)
 ```
 
 The right side of an alias definition must be a namespace to use it with the `::` operator. The `global::` namespace alias qualifier is reserved for the global namespace. This allows base classes and type constraints to be referenced using globally qualified names.
+
+# _// ########## TEMP ##########_
 
 ## Class Modifiers
 
