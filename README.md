@@ -23,6 +23,7 @@ jTypes requires ECMAScript 5, which is supported by any modern web browser (and 
         - [Not-Nullable](#not-nullable-operator)
         - [Coerce](#coerce-operator)
         - [Suppress](#suppress-operator)
+    - [Strict Constraints](#strict-constraints)
 - [Namespaces](#namespaces)
     - [Dependencies](#dependencies)
         - [Includes](#includes)
@@ -53,23 +54,21 @@ jTypes requires ECMAScript 5, which is supported by any modern web browser (and 
 
 ## Classes
 
-Some text and `code` about classes...
+Classes help organize applications and libraries by promoting the reuse of code and facilitating the ease of maintainence. They are created by providing the jTypes compiler with a definitions object in the following format:
+
+```
+Class jTypes([String modifiers,] [Class base,] [Function constructor,] Object definitions)
+```
+
+This definitions object is a template for creating objects. It provides initial primitive values for fields and function references for methods and properties. The following example compiles a class `Color` with three public fields:
 
 ```javascript
-var Color = jTypes(function(red, green, blue)
-{
-    this.red   = red;
-    this.green = green;
-    this.blue  = blue;
-},
+var Color = jTypes(
 {
     'public red':   0,
     'public green': 0,
     'public blue':  0
 });
-
-var white = new Color(255, 255, 255);
-var gray  = new Color(128, 128, 128);
 ```
 
 ### Fields
@@ -359,7 +358,11 @@ Since none of the values being assigned to the fields in the previous example ar
 
 at-symbol => `@date`
 
-...suppresses errors when strict method is enabled (`jTypes.strict = true`)
+...suppresses errors when `jTypes.strict = true`
+
+### Strict Constraints
+
+...requires `jTypes.strict = true` to enable, throws errors when a value is set that does not match the type of the constraint or !== `null` (which cannot be applied to constraints with the coerce modifier)
 
 ## Namespaces
 
