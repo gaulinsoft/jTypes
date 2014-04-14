@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.1b709';
+        $_version = '2.2.1b716';
 
     // ########## LANGUAGE ##########
 
@@ -1008,11 +1008,19 @@
         // Get the handle
         var $handle = $_handle || $_namespace;
 
+        // Create the arguments array
+        $_arguments = $handle ?
+                      [$handle] :
+                      null;
+
         // Append the space and exception suffix to the error message
         $message += ' ';
         $message += $handle ?
-                    $$.format($_lang_exception_suffix_handle, $handle) :
+                    $_lang_exception_suffix_handle.replace($_const_format_search, $_format) :
                     $_lang_exception_suffix;
+
+        // Reset the arguments reference
+        $_arguments = null;
 
         // If the debug flag is not set, reset the handle
         if (!$_debug)
@@ -1035,13 +1043,35 @@
         for (var $i = 0, $j = $types.length; $i < $j; $i++)
             $types[$i] = $$_type($arguments[$i]);
 
-        // Throw the formatted arguments exception string
-        throw new $__error($$.format($_lang_exception_arguments, $name, $types.join(', ')) + ' ' + $_lang_exception_suffix);
+        // Create the arguments array
+        $_arguments = [$name, $types.join(', ')];
+
+        // Create the formatted exception string
+        var $string = $_lang_exception_arguments.replace($_const_format_search, $_format);
+
+        // Reset the arguments reference
+        $_arguments = null;
+
+        // Throw the arguments exception string
+        throw new $__error($string + ' ' + $_lang_exception_suffix);
     };
-    var $_exceptionFormat    = function()
+    var $_exceptionFormat    = function($message)
     {
-        // Throw the formatted exception string
-        $_exception($$.format.apply($$, arguments));
+        // Create the arguments array
+        $_arguments = new $__array(arguments.length - 1);
+
+        // Copy each argument as a string into the arguments array
+        for (var $i = 0, $j = $_arguments.length; $i < $j; $i++)
+            $_arguments[$i] = $$_asString(arguments[$i + 1]);
+
+        // Format the exception string
+        $message = $message.replace($_const_format_search, $_format);
+
+        // Reset the arguments reference
+        $_arguments = null;
+
+        // Throw the exception string
+        $_exception($message);
     };
 
     // ########## SYMBOLS ##########
