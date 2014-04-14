@@ -83,7 +83,7 @@ npm install jtypes
 
 ### IntelliSense
 
-The `core.intellisense.js` file can also be included in Visual Studio 2012 to add support for Intellisense with jTypes:
+The `core.intellisense.js` file can also be included in Visual Studio 2012 to add support for IntelliSense with jTypes:
 
 ![jTypes Intellisense](http://content.jtypes.com/intellisense.png "jTypes Intellisense")
 
@@ -123,6 +123,84 @@ console.assert(jTypes.isSimpleObject(color.blue), 'Color.blue');
 ```
 
 If an instance of the `Color` class is instantiated, the fields will have their default primitive values. This is demonstrated by the `assert()` calls in the previous example. These fields can then be assigned any type of reference upon instantiation such as arrays, dates, functions, or objects.
+
+### Constructors
+
+```javascript
+jTypes('Color', function(red, green, blue)
+{
+    this.red   = red;
+    this.green = green;
+    this.blue  = blue;
+},
+{
+    // ...
+});
+
+var gray = new jTypes.Color(128, 128, 128);
+```
+
+### Fields
+
+```javascript
+jTypes('Color', function(red, green, blue)
+{
+    // ...
+},
+{
+    'public readonly red':   0,
+    'public readonly green': 0,
+    'public readonly blue':  0
+});
+
+var gray = new jTypes.Color(128, 128, 128);
+
+//gray.red = null; (throws)
+```
+
+### Properties
+
+```javascript
+jTypes('Color', function(red, green, blue)
+{
+    this._red   = red;
+    this._green = green;
+    this._blue  = blue;
+},
+{
+    'private _red':   0,
+    'private _green': 0,
+    'private _blue':  0,
+    
+    'public red':   { 'get': function(){ return this._red   }, 'protected set': function(v){ this._red   = v } },
+    'public green': { 'get': function(){ return this._green }, 'protected set': function(v){ this._green = v } },
+    'public blue':  { 'get': function(){ return this._blue  }, 'protected set': function(v){ this._blue  = v } }
+});
+
+var gray = new jTypes.Color(128, 128, 128);
+
+//gray.red = null; (throws)
+```
+
+#### Automatically Implemented Properties
+
+```javascript
+jTypes('Color', function(red, green, blue)
+{
+    // ...
+},
+{
+    'public red':   ['get', 'protected set'],
+    'public green': ['get', 'protected set'],
+    'public blue':  ['get', 'protected set']
+});
+
+var gray = new jTypes.Color(128, 128, 128);
+
+//gray.red = null; (throws)
+```
+
+### Inheritance
 
 ```javascript
 var AlphaColor = jTypes('sealed', Color,
