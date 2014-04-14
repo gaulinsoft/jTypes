@@ -54,7 +54,7 @@ jTypes requires ECMAScript 5, which is supported by any modern platform or web b
 
 ## Setup
 
-Include the `core.js` or `core.min.js` files for each release in your application using the jTypes CDN:
+Include the `core.js` or `core.min.js` files in your application using the jTypes CDN:
 
 ```html
 <script type="text/javascript" src="http://cdn.jtypes.com/jtypes-2.2.0.min.js"></script>
