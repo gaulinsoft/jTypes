@@ -200,7 +200,7 @@
                     var $alias = $dependency.substr(0, $index).trim();
 
                     // If the alias is not a valid namespace, return
-                    if (!/^[_a-z][_a-z0-9]*$/i.test($alias) || $_constraints[$alias] !== undefined)
+                    if (!/^[_a-z][_a-z0-9]*$/i.test($alias) || $_constraints[$alias] !== undefined || $alias == 'global')
                         return;
 
                     // Remove the alias from the dependency string
@@ -238,13 +238,17 @@
             'args':    [$$]
         });
 
-        // Call the namespace constructor
-        $constructor.call($namespace, $$);
+        // Call the constructor in the context of the namespace with the compiler argument and store its return value
+        var $return = $constructor.call($namespace, $$);
 
         // Reset the namespace
         $_aliases   = null;
         $_includes  = null;
         $_namespace = null;
+
+        // If the constructor did not return undefined, return the return value
+        if ($return !== undefined)
+            return $return;
 
         // Return namespace object
         return $namespace;
@@ -304,9 +308,19 @@
     };
     var $_handle    = function($handle, $generic)
     {
-        // If the handle starts with the global namespace, remove it from the handle
-        if ($handle.substr(0, 'global'.length + 2) == 'global::')
-            $handle = $handle.substr('global'.length + 2);
+        // If the handle starts with the namespace alias qualifier
+        if ($handle.indexOf('::') >= 0)
+        {
+            // Create the handles array from the handle
+            $handle = $handle.split('::');
+
+            // If the handles array has more than one alias qualifier or the qualifier is invalid, return false
+            if ($handle.length != 2 || !/^[_a-z][_a-z0-9]*$/i.test($handle[0]))
+                return false;
+
+            // Set the handle succeeding the alias qualifier as the handle
+            $handle = $handle[1];
+        }
 
         // Create the namespaces array from the handle
         var $namespaces = $handle.split('.');
@@ -350,14 +364,33 @@
     };
     var $_resolve   = function($handle, $this, $namespace, $aliases, $includes)
     {
-        // If the handle starts with the global namespace, return the resolved global reference
-        if ($handle.substr(0, 'global'.length + 2) == 'global::')
-            return $this[$handle.substr('global'.length + 2)] || null;
-
         // Resolve the reference relative to the namespace
         var $reference = $namespace ?
                          $this[$namespace + '.' + $handle] :
                          null;
+
+        // If the handle starts with the namespace alias qualifier
+        if ($handle.indexOf('::') >= 0)
+        {
+            // Create the handles array from the handle
+            $handle = $handle.split('::');
+
+            // If the alias qualifier is the global alias, return the resolved global reference
+            if ($handle[0] == 'global')
+                return $this[$handle[1]] || null;
+
+            // Get the dependency from the aliases map
+            var $dependency = $aliases ?
+                              $aliases[$handle[0]] :
+                              null;
+
+            // If the dependency was not found, return
+            if (!$dependency)
+                return;
+
+            // Return the resolved reference relative to the dependency
+            return $_resolve($dependency + '.' + $handle[1], $this, $namespace);
+        }
 
         // If an aliases map was provided
         if ($aliases)
@@ -978,7 +1011,7 @@
                 if (!$exec)
                 {
                     // Parse the last keyword as a class constraint
-                    $exec = /^(@)?((?:global::)?(?:[_a-zA-Z0-9.]+\.)?[A-Z][_a-zA-Z0-9]*)(\?|!)?$/.exec($keywords[$keywords.length - 1]);
+                    $exec = /^(@)?((?:[_a-zA-Z][_a-zA-Z0-9]*::)?(?:[_a-zA-Z0-9.]+\.)?[A-Z][_a-zA-Z0-9]*)(\?|!)?$/.exec($keywords[$keywords.length - 1]);
 
                     // If the last keyword matched a class constraint string and is a valid handle, resolve the constraint from the public contexts object
                     if ($exec && $_handle($exec[2]))
@@ -2378,6 +2411,7 @@
     $_constraints['bool']      = false;
     $_constraints['boolean']   = false;
     $_constraints['date']      = Object.freeze(new Date(NaN));
+    $_constraints['element']   = Object.freeze(Object.create(HTMLElement.prototype));
     $_constraints['error']     = Object.freeze(new Error());
     $_constraints['float']     = NaN;
     $_constraints['function']  = Object.freeze(new Function());
@@ -2395,6 +2429,10 @@
     if (typeof Symbol == 'function')
         $_constraints['symbol'] = Symbol();
 
+    // If jQuery is supported, set the jquery constraint value in the constraints object
+    if (typeof jQuery == 'function')
+        $_constraints['jquery'] = Object.freeze(jQuery());
+
     // ########## COMPLETIONS ##########
 
     // Add the statement completion event listener
@@ -2411,8 +2449,9 @@
 
     // ########## GLOBALS ##########
 
-    // Define the shorthand
-    $_data(window, jT_Shorthand || '$$', $$, true);
+    // If the global shorthand flag is set, define the shorthand
+    if (typeof jT_Shorthand != 'boolean' || jT_Shorthand)
+        $_data(window, typeof jT_Shorthand == 'string' ? jT_Shorthand : '$$', $$, true);
 
     // Define the global namespace
     $_data(window, 'jTypes', $$, true);
