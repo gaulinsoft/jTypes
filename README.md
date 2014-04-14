@@ -60,7 +60,7 @@ Classes help organize applications and libraries by promoting the reuse of code 
 Class jTypes([String modifiers,] [Class base,] [Function constructor,] Object definitions)
 ```
 
-This definitions object is a template for creating objects. It provides initial primitive values for fields and function references for methods and properties. The following example compiles a class `Color` and defines three public fields with initial primitive values of `0`:
+This definitions object is a template for creating objects. It provides initial primitive values for fields, and function references for methods and properties. The following example compiles a class `Color` and defines three public fields with initial primitive values of `0`:
 
 ```javascript
 var Color = jTypes(
@@ -587,6 +587,10 @@ The right side of an alias definition must be a namespace to use it with the `::
 
 ...abstract classes => cannot be instantiated and can have abstract methods and properties...
 
+### expando
+
+...expando classes => inject the `__self` object into the root of prototype chain of the instance matrix (and it is only available in legacy mode)...
+
 ### internal
 
 ...internal classes => hide their type from the type() method on all instances and the __type accessor on the public instance (and non-internal classes cannot inherit from internal classes)...
@@ -594,6 +598,10 @@ The right side of an alias definition must be a namespace to use it with the `::
 ### model
 
 ...models have => optional constructors (new operator invokes constructor), default instances (without new operator)...
+
+### optimized
+
+...optimized classes => dynamically create instance objects (and it is not available in legacy mode)...
 
 ### primitive
 
