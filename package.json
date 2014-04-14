@@ -2,7 +2,7 @@
     "name"        : "jtypes",
     "version"     : "2.2.1",
     "description" : "Scalable class-based JavaScript.",
-    "keywords"    : ["jtypes", "class", "inheritance", "type", "management", "namespace", "private", "protected", "public", "abstract", "override", "virtual", "readonly"],
+    "keywords"    : ["jtypes", "class", "inheritance", "type", "management", "reflection", "namespace", "private", "protected", "public", "abstract", "override", "virtual", "readonly"],
     "homepage"    : "http://www.jtypes.com/",
     "bugs"        : "http://github.com/gaulinsoft/jtypes/issues",
     "license"     : "Apache-2.0",
