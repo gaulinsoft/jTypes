@@ -84,7 +84,7 @@ Classes help organize applications and libraries by promoting the reuse of code 
 Class jTypes([String modifiers,] [Class base,] [Function constructor,] Object definitions)
 ```
 
-This definitions object is a template for creating objects. It provides initial primitive values for fields, and function references for methods and properties. The following example compiles a class `Color` and defines three public fields with initial primitive values of `0`:
+This definitions object is a template for creating instance objects. It provides initial primitive values for fields, and function references for methods and properties. These default field values must be primitives such as booleans, numbers, strings, or symbols; otherwise the compiler will use a default value of `null`. The following example compiles a class `Color` and defines the initial primitive values of three public fields:
 
 ```javascript
 var Color = jTypes(
@@ -109,7 +109,7 @@ console.assert(jTypes.isDate(color.green),        'Color.green');
 console.assert(jTypes.isSimpleObject(color.blue), 'Color.blue');
 ```
 
-If an instance of the `Color` class is instantiated, the fields will have their initial primitive values. This is demonstrated by the `assert()` calls in the previous example. These fields can then be assigned any type of reference such as arrays, dates, or objects upon instantiation.
+If an instance of the `Color` class is instantiated, the fields will have their default primitive values. This is demonstrated by the `assert()` calls in the previous example. These fields can then be assigned any type of reference upon instantiation such as arrays, dates, functions, or objects.
 
 ```javascript
 var AlphaColor = jTypes('sealed', Color,
