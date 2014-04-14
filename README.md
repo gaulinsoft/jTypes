@@ -60,7 +60,7 @@ Classes help organize applications and libraries by promoting the reuse of code 
 Class jTypes([String modifiers,] [Class base,] [Function constructor,] Object definitions)
 ```
 
-This definitions object is a template for creating objects. It provides initial primitive values for fields and function references for methods and properties. The following example compiles a class `Color` with three public fields:
+This definitions object is a template for creating objects. It provides initial primitive values for fields and function references for methods and properties. The following example compiles a class `Color` and defines three public fields with initial primitive values of `0`:
 
 ```javascript
 var Color = jTypes(
@@ -69,15 +69,51 @@ var Color = jTypes(
     'public green': 0,
     'public blue':  0
 });
+
+var color = new Color();
+
+console.assert(color.red   === 0, 'Color.red');
+console.assert(color.green === 0, 'Color.green');
+console.assert(color.blue  === 0, 'Color.blue');
+
+color.red   = [];
+color.green = new Date();
+color.blue  = {};
+
+console.assert(jTypes.isArray(color.red),         'Color.red');
+console.assert(jTypes.isDate(color.green),        'Color.green');
+console.assert(jTypes.isSimpleObject(color.blue), 'Color.blue');
 ```
 
-### Fields
+If an instance of the `Color` class is instantiated, the fields will have their initial primitive values. This is demonstrated by the `assert()` calls in the previous example. These fields can then be assigned any type of reference such as arrays, dates, or objects upon instantiation.
 
-### Methods
+```javascript
+var AlphaColor = jTypes('sealed', Color,
+{
+    'public opacity': 0
+});
 
-### Properties
+var color = new AlphaColor();
 
-#### Automatically Implemented Properties
+// ...
+```
+
+In the next example, the `Color` class is compiled without referencing the return value of the compiler:
+
+```javascript
+jTypes('Color',
+{
+    'public red':   0,
+    'public green': 0,
+    'public blue':  0
+});
+
+var color = new jTypes.Color();
+
+// ...
+```
+
+The `modifiers` argument of the jTypes compiler accepts a space-separated string of keywords. However, if the final keyword in the modifiers string starts with a capital letter, it will be treated as a class name and be globally defined in the jTypes namespace.
 
 ## Constraints
 
