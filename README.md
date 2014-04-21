@@ -835,3 +835,5 @@ We strongly encourage anyone who is interested in contributing to contact us thr
 jTypes is an open-source library developed by Gaulinsoft, a small software consulting company in Chicago, IL. It was created internally in our free-time to simplify the development of some of our other frameworks and libraries which we also hope to release in the near future. Therefore, any contributions are greatly appreciated and really go a long way to help us out.
 
 We hope you find jTypes to be a very useful tool in the development of your applications or libraries and we have many more great things to come, so be sure to check-in every once in a while to see what's new!
+
+![jTypes](http://content.jtypes.com/shared/opengraph.png)
