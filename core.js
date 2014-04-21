@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                                jTypes 2.2.1
+//                                jTypes 2.2.2
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2014 Gaulinsoft Corporation
@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.1';
+        $_version = '2.2.2b730';
 
     // ########## LANGUAGE ##########
 
@@ -4769,7 +4769,7 @@
             'get':          function()
             {
                 // Create the default value within the applied constraint filter
-                var $value = $filter(null);
+                var $value = $filter();
 
                 // Define the writable value on the hidden instance data
                 $__defineProperty(this, $symbol,
@@ -5333,7 +5333,7 @@
             {
                 // If the value is null, create the default value within the applied constraint filter
                 if ($value === null)
-                    $value = $filter(null);
+                    $value = $filter();
 
                 // Return the value
                 return $value;
@@ -5778,7 +5778,7 @@
                 $filter = function($value, $name)
                 {
                     // If the value is either null or an array, return it
-                    if ($value === null && !$cast || $__array_isArray($value))
+                    if (!$default && !$cast && $value === null || $__array_isArray($value))
                         return $value;
 
                     // If the cast flag is set, return the value cast as an array
@@ -5836,7 +5836,7 @@
                 $filter = function($value, $name)
                 {
                     // If the value is either null or a date object, return it
-                    if ($value === null && !$cast || $$_type($value) == 'date')
+                    if (!$default && !$cast && $value === null || $$_type($value) == 'date')
                         return $value;
 
                     // If the cast flag is set, return the value cast as a date
@@ -5884,7 +5884,7 @@
                 $filter = function($value, $name)
                 {
                     // If the value is either null or an error object, return it
-                    if ($value === null || $$_type($value) == 'error')
+                    if (!$default && $value === null || $$_type($value) == 'error')
                         return $value;
 
                     // If the default flag is set, return an empty error object
@@ -5907,7 +5907,7 @@
                     $filter = function($value, $name)
                     {
                         // If the value is either null or a function (and not a class), return it
-                        if ($value === null || typeof $value == 'function' && $value[$_symbol_class] !== $value)
+                        if (!$default && $value === null || typeof $value == 'function' && $value[$_symbol_class] !== $value)
                             return $value;
 
                         // If the default flag is set, return an empty function
@@ -5928,7 +5928,7 @@
                     $filter = function($value, $name)
                     {
                         // If the value is either null or a function (and not a class), return it
-                        if ($value === null || typeof $value == 'function' && (!$value[$_symbol_lock] || !$_unlockSymbolsClass($value)))
+                        if (!$default && $value === null || typeof $value == 'function' && (!$value[$_symbol_lock] || !$_unlockSymbolsClass($value)))
                             return $value;
 
                         // If the default flag is set, return an empty function
@@ -6011,7 +6011,7 @@
                 $filter = function($value, $name)
                 {
                     // If the value is either null or an instance of jQuery, return it
-                    if ($value === null || $value instanceof $_jquery)
+                    if (!$default && $value === null || $value instanceof $_jquery)
                         return $value;
 
                     // If the default flag is set, return an empty jQuery object
@@ -6065,7 +6065,7 @@
                 $filter = function($value, $name)
                 {
                     // If the value is either null or an object, return it
-                    if ($value === null || $$_type($value) == 'object')
+                    if (!$default && $value === null || $$_type($value) == 'object')
                         return $value;
 
                     // If the default flag is set, return an empty object
@@ -6120,7 +6120,7 @@
                 $filter = function($value, $name)
                 {
                     // If the value is either null or a regexp object, return it
-                    if ($value === null && !$cast || $$_type($value) == 'regexp')
+                    if (!$default && !$cast && $value === null || $$_type($value) == 'regexp')
                         return $value;
 
                     // If the cast flag is set, return the value cast as a regular expression
