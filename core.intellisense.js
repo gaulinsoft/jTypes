@@ -1260,7 +1260,7 @@
             /// </signature>
 
             // Return true if the class is a class and the instance is an instance of the class
-            return $class && $class[$_symbol_class] === $class && this && this[$_symbol_instance] === this && this instanceof $class;
+            return $class && $class[$_symbol_class] === $class && this && this[$_symbol_instance] === this && this[$_symbol_type] === $_classes[$class[$_symbol_handle]];
         };
         var $type = function()
         {
