@@ -67,7 +67,7 @@ jTypes requires ECMAScript 5, which is supported by any modern platform or brows
 
 ## Setup
 
-Include the `core.js` or `core.min.js` files in your application using the jTypes CDN:
+Include the `core.js` or `core.min.js` file in your application using the jTypes CDN:
 
 ```html
 <script type="text/javascript" src="http://cdn.jtypes.com/jtypes-2.2.0.min.js"></script>
@@ -83,9 +83,9 @@ npm install jtypes
 
 ### IntelliSense
 
-The `core.intellisense.js` file can also be included in Visual Studio 2012 to add support for IntelliSense with jTypes:
+The `core.intellisense.js` file can  be included in Visual Studio 2012 to add support for IntelliSense with jTypes:
 
-![jTypes Intellisense](http://content.jtypes.com/intellisense.png "jTypes Intellisense")
+![jTypes IntelliSense](http://content.jtypes.com/intellisense.png "jTypes IntelliSense")
 
 > This file is also available in the .zip downloads on our website.
 
@@ -434,6 +434,7 @@ The `!` not-nullable operator prevents built-in constraints with default instanc
 * `date!`
 * `error!`
 * `function!`
+* `jquery!` (2.2.1)
 * `Model!`
 * `object!`
 * `regexp!`
