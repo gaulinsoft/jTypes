@@ -238,17 +238,13 @@
             'args':    [$$]
         });
 
-        // Call the constructor in the context of the namespace with the compiler argument and store its return value
-        var $return = $constructor.call($namespace, $$);
+        // Call the namespace constructor
+        $constructor.call($namespace, $$);
 
         // Reset the namespace
         $_aliases   = null;
         $_includes  = null;
         $_namespace = null;
-
-        // If the constructor did not return undefined, return the return value
-        if ($return !== undefined)
-            return $return;
 
         // Return namespace object
         return $namespace;
@@ -942,6 +938,10 @@
         // Create the define helper functions
         var $define          = function($key, $value)
         {
+            // If the value is undefined, return
+            if ($value === undefined)
+                return;
+
             // Trim the key
             $key = $key.trim();
 
