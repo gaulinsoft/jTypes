@@ -1238,9 +1238,16 @@
             ///   <returns type="Instance">instance casted as class if it is an instance of class; otherwise null.</returns>
             /// </signature>
 
-            // If the class is a class and the instance is an instance of the class, return the public instance of the class
-            if ($class && $class[$_symbol_class] === $class && this && this[$_symbol_instance] === this && this instanceof $class)
-                return $_thisPublic[$class[$_symbol_handle]];
+            // If the class is not a class or the instance is not an instance, return null
+            if (!$class || $class[$_symbol_class] !== $class || !this || this[$_symbol_instance] !== this)
+                return null;
+
+            // Get the class handle
+            var $handle = $class[$_symbol_handle];
+
+            // If the instance is an instance of the class, return the public instance of the class
+            if (this[$_symbol_type] === $_classes[$handle])
+                return $_thisPublic[$handle];
 
             return null;
         };
