@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.1b716';
+        $_version = '2.2.1';
 
     // ########## LANGUAGE ##########
 
@@ -2631,6 +2631,10 @@
     };
     var $_compilerCache          = function($cache, $abstract, $import, $model, $primitive, $sealed, $struct, $key, $value, $prepend)
     {
+        // If the value is undefined, return
+        if ($value === undefined)
+            return;
+
         // Get the name and the index of the last space in the name
         var $name      = $key.trim(),
             $index     = $name.lastIndexOf(' '),
@@ -4378,17 +4382,13 @@
             $_includes = null;
         }
 
-        // Call the constructor in the context of the namespace with the compiler argument and store its return value
-        var $return = $constructor.call($namespace, $$);
+        // Call the namespace constructor
+        $constructor.call($namespace, $$);
 
         // Reset the namespace
         $_aliases   = null;
         $_includes  = null;
         $_namespace = null;
-
-        // If the constructor did not return undefined, return the return value
-        if ($return !== undefined)
-            return $return;
 
         // Return namespace object
         return $namespace;
