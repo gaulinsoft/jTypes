@@ -1291,7 +1291,7 @@
 
         // Create the data, self reference, public, external, and internal items
         var $itemData     = $_item('__data', 'reserved', $thisPrivate),
-            $itemSelf     = $_item('__self', 'reserved', $self),
+            $itemSelf     = $_item('__self', 'reserved', $struct ? $thisPublic : $self),
             $itemThis     = $_item('__this', 'reserved', $thisPublic),
             $itemExternal = $_item('__type', 'reserved', !$internal ? $class : null, $typeGlyph),
             $itemInternal = $_item('__type', 'reserved', $class, $typeGlyph);
