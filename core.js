@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.2b736';
+        $_version = '2.2.2b737';
 
     // ########## LANGUAGE ##########
 
@@ -6929,7 +6929,9 @@
                 $merge        = $_compilerDirectives($metaclass, 1, $metainstance, $defaults, $sources, $primitive, true);
 
             // Compile the symbols metadata
-            $metaroot    = $_compilerSymbolsDirectives($metaclass, 1, $metainstance, $defaults, $struct.prototype, $sources, $struct[$_symbol_internal], $merge, $optimized, $primitive, true, !!($modifiers & $_modifiers_class_unlocked));
+            $_compilerSymbolsDirectives($metaclass, 1, $metainstance, $defaults, $struct.prototype, $sources, $struct[$_symbol_internal], $merge, $optimized, $primitive, true, !!($modifiers & $_modifiers_class_unlocked));
+            
+            // Cache the private and public metainstances
             $metaprivate = $metainstance[0][$_instance_private];
             $metapublic  = $metainstance[0][$_instance_public];
 
