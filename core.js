@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.2b737';
+        $_version = '2.2.2b738';
 
     // ########## LANGUAGE ##########
 
@@ -4637,8 +4637,8 @@
     // Create the symbols compiler helpers
     var $_compilerSymbolsClone      = function($symbol, $sources, $primitive)
     {
-        // Return the clone method descriptor
-        return { 'value': function()
+        // Return the clone function
+        return function()
         {
             // Get the hidden instance data from the function context
             var $data = this ? this[$_symbol_data] : null;
@@ -4665,7 +4665,7 @@
 
             // Return the cloned instance
             return $cloneData[$symbol];
-        } };
+        };
     };
     var $_compilerSymbolsData       = function($name, $symbol, $filter, $descriptor, $auto, $readonly, $constant)
     {
@@ -4928,7 +4928,7 @@
             if ($primitive || $struct)
             {
                 // Create the clone method descriptor
-                var $clone = $_compilerSymbolsClone($data2, $sources, $primitive);
+                var $clone = { 'value': $_compilerSymbolsClone($data2, $sources, $primitive) };
 
                 // Set the clone method descriptor on the public instance object
                 $__defineProperty($public, 'clone', $clone);
@@ -5168,7 +5168,7 @@
         if ($primitive || $struct)
         {
             // Set the clone and equals method descriptors on the root instance object
-            $__defineProperty($root, 'clone', $_compilerSymbolsClone($metaclass[0][$_cache_symbols_root], $sources, $primitive));
+            $__defineProperty($root, 'clone',  { 'value': $_compilerSymbolsClone($metaclass[0][$_cache_symbols_root], $sources, $primitive) });
             $__defineProperty($root, 'equals', { 'value': function($instance)
             {
                 // Get the hidden instance data from the function context
@@ -6930,7 +6930,7 @@
 
             // Compile the symbols metadata
             $_compilerSymbolsDirectives($metaclass, 1, $metainstance, $defaults, $struct.prototype, $sources, $struct[$_symbol_internal], $merge, $optimized, $primitive, true, !!($modifiers & $_modifiers_class_unlocked));
-            
+
             // Cache the private and public metainstances
             $metaprivate = $metainstance[0][$_instance_private];
             $metapublic  = $metainstance[0][$_instance_public];
