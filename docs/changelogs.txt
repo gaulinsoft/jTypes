@@ -1,0 +1,21 @@
+﻿// ########## 2.2.2 ##########
+
+* Fixed: Not-nullable operator properly handles default values
+	- Applies to uninitialized fields and automatically implemented properties
+* Fixed: Type constraint handlers are shared between classes
+	- Previous version only shared handlers between definitions in the same class
+* Fixed: Removed global prototype reference leak when building structs
+	- Struct optimization introduced this issue in the previous version
+
+// ########## 2.2.1 ##########
+
+* Fixed: Compiler ignores class definitions with an `undefined` value
+* Fixed: `::` namespace qualifier supports aliases
+	- Only the `global::` qualifier was available in the previous version
+* Fixed: Restricted the `global` alias from being defined
+* Added: Built-in type constraints `element` and `jquery`
+	- jQuery must be included before jTypes to support the `jquery` constraint
+	- Browser DOM elements must be an `instanceof HTMLElement` to support the `element` constraint
+* Added: Structs now support the `optimized` modifier
+* Fixed: `jT_FunctionLock`, `jT_Legacy`, and `jT_PrototypeLock` globals have restrictive defaults
+	- Previous version did not fallback to default values when settings were not primitive booleans
