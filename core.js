@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.2b738';
+        $_version = '2.2.2b746';
 
     // ########## LANGUAGE ##########
 
@@ -137,7 +137,8 @@
         global = {};
 
     // Create the internal flags
-    var $_cache     = '',
+    var $_arrays    = global['jT_TypedArrays'] === true,
+        $_cache     = '',
         $_debug     = !$_minify,
         $_element   = global['HTMLElement'] || null,
         $_funcLock  = global['jT_FunctionLock'] === true,
@@ -503,13 +504,14 @@
         $_const_prefix_symbol            = '$jT_',
         $_const_regexp_cache             = /^[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/i,
         $_const_regexp_class             = /^[A-Z][_a-zA-Z0-9]*$/,
-        $_const_regexp_constraint        = /^(~|@)?([a-z]+(?:-[a-z]+)?)(\?|!)?$/,
+        $_const_regexp_constraint        = /^(~|@)?([a-z]+(?:-[a-z]+)?(?:[0-9]*\[\])?)(\?|!)?$/,
         $_const_regexp_constraint_handle = /^(@)?((?:[_a-zA-Z][_a-zA-Z0-9]*::)?(?:[_a-zA-Z0-9.]+\.)?[A-Z][_a-zA-Z0-9]*)(\?|!)?$/,
         $_const_regexp_instance          = /^[_$a-z][_$a-z0-9]*$/i,
         $_const_regexp_namespace         = /^[_a-z][_a-z0-9]*$/i,
         $_const_regexp_number            = /^[-+]?(?:[0-9]*\.)?[0-9]+(?:e[-+]?[0-9]+)?$/i,
         $_const_regexp_number_hex        = /^[-+]?0x[0-9a-f]+$/i,
         $_const_regexp_regexp            = /^\/([^\r\n]+)\/([gimy]{0,4})$/,
+        $_const_typed_arrays             = 'float32 float64 uint32 int32 uint16 int16 uint8 int8'.split(' '),
         $_const_types                    = 'Array Boolean Date Error Function Number RegExp String'.split(' '),
         $_const_types_window             = 'global Window DOMWindow'.split(' ');
 
@@ -583,6 +585,11 @@
     // If the harmony flag is set, set the native symbol constraint flags
     if ($_harmony)
         $_constraints['symbol'] = $_constraints_null | $_constraints_suppress;
+
+    // If the typed arrays flag is set, set the native typed arrays constraint flags
+    if ($_arrays)
+        for (var $i = 0, $j = $_const_typed_arrays.length; $i < $j; $i++)
+            $_constraints[$_const_typed_arrays[$i] + '[]'] = $_constraints_suppress;
 
     // ---------- DEFINITIONS ----------
 
@@ -5955,6 +5962,9 @@
             // ---------- WINDOW ----------
             else if ($handle == 'window')
                 $filter = $_runtimeFilterBuiltIn($handle, null, $suppress, 'window');
+            // ---------- TYPED ARRAY ----------
+            else if ($handle.length > 2 && $handle[$handle.length - 2] == '[' && $handle[$handle.length - 1] == ']' && $_constraints[$handle])
+                $filter = $_runtimeFilterTypedArray($handle.substr(0, $handle.length - 2), null, $suppress);
 
             // If no constraint filter was created, throw an exception
             if (!$filter)
@@ -6086,6 +6096,29 @@
 
             // Return the default primitive value
             return $default;
+        };
+    };
+    var $_runtimeFilterTypedArray = function($handle, $default, $suppress)
+    {
+        // Create the typed array type string
+        var $type = '[object ' + $handle[0].toUpperCase() + $handle.substr(1) + 'Array]';
+
+        // Return the typed value constraint filter
+        return function($value, $name)
+        {
+            // If the value is either null or a typed array, return it
+            if (!$default && $value === null || $__toString__.call($value) == $type)
+                return $value;
+
+            // If a name was provided, strict mode is enabled, and the suppress flag is not set when there is an invalid value, throw an exception
+            if ($name && $_strict && !$suppress && $value !== null)
+                $_exceptionFormat($_lang_filter_value, $name, $handle + '[]');
+
+            // If the default flag is set, return a default instance
+            if ($default)
+                return $default();
+
+            return null;
         };
     };
     var $_runtimeFlag             = function()
