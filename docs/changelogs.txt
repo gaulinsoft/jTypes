@@ -6,6 +6,9 @@
 	- Previous version only shared handlers between definitions in the same class
 * Fixed: Removed global prototype reference leak when building structs
 	- Struct optimization introduced this issue in the previous version
+* Added: Built-in type constraints for ECMAScript 5.1 Typed Arrays
+	- `float32[]`, `float64[]`, `uint32[]`, `int32[]`, `uint16[]`, `int16[]`, `uint8[]`, `int8[]`
+	- Requires the global `jT_TypedArrays` flag to be set (and Internet Explorer 10+)
 
 // ########## 2.2.1 ##########
 
