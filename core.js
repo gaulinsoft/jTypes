@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.2b746';
+        $_version = '2.2.2';
 
     // ########## LANGUAGE ##########
 
@@ -5707,7 +5707,6 @@
             var $modifiers = $class[$_symbol_modifiers],
                 $model     = !!($modifiers & $_modifiers_class_model),
                 $struct    = !!($modifiers & $_modifiers_class_struct),
-                $construct = $default || $struct && !$null,
                 $data2     = $_symbolCreate ?
                              $class[$_symbol_metaclass][0][$_cache_symbols_public] :
                              null;
