@@ -1,9 +1,9 @@
 ﻿// ########## 2.2.2 ##########
 
-* Fixed: Not-nullable operator properly handles default values
-	- Applies to uninitialized fields and automatically implemented properties
+* Fixed: `!` not-nullable operator properly handles default values
+	- Applies to uninitialized fields and auto properties
 * Fixed: Type constraint handlers are shared between classes
-	- Previous version only shared handlers between definitions in the same class
+	- Previous version only shared handlers with definitions in the same class
 * Fixed: Removed global prototype reference leak when building structs
 	- Struct optimization introduced this issue in the previous version
 * Added: Built-in type constraints for ECMAScript 5.1 Typed Arrays
