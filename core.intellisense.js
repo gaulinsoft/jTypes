@@ -35,6 +35,8 @@
         'jT_Shorthand': '$$',
         /// <field type="Boolean">Indicates whether or not Web Storage support is enabled.</field>
         'jT_Storage': false,
+        /// <field type="Boolean">Indicates whether or not ECMAScript 5.1 Typed Arrays support is enabled.</field>
+        'jT_TypedArrays': false,
         /// <field type="Boolean">Indicates whether or not the global jTypes reference is writable.</field>
         'jT_Writable': false
     });
@@ -1005,7 +1007,7 @@
             if ($keywords.length)
             {
                 // Parse the last keyword as a constraint
-                var $exec = /^(~|@)?([a-z]+(?:\-[a-z]+)?)(\?|\!)?$/.exec($keywords[$keywords.length - 1]);
+                var $exec = /^(~|@)?([a-z]+(?:\-[a-z]+)?(?:[0-9]*\[\]))(\?|\!)?$/.exec($keywords[$keywords.length - 1]);
 
                 // If the last keyword did not match a constraint string
                 if (!$exec)
@@ -2439,6 +2441,20 @@
     // If jQuery is supported, set the jquery constraint value in the constraints object
     if (typeof jQuery == 'function')
         $_constraints['jquery'] = Object.freeze(jQuery());
+
+    // If typed arrays are supported
+    if (typeof ArrayBuffer == 'function')
+    {
+        // Set the typed arrays constraint values in the constraints object
+        $_constraints['float32[]'] = Object.freeze(new Float32Array(0));
+        $_constraints['float64[]'] = Object.freeze(new Float64Array(0));
+        $_constraints['uint32[]']  = Object.freeze(new Uint32Array(0));
+        $_constraints['int32[]']   = Object.freeze(new Int32Array(0));
+        $_constraints['uint16[]']  = Object.freeze(new Uint16Array(0));
+        $_constraints['int16[]']   = Object.freeze(new Int16Array(0));
+        $_constraints['uint8[]']   = Object.freeze(new Uint8Array(0));
+        $_constraints['int8[]']    = Object.freeze(new Int8Array(0));
+    }
 
     // ########## COMPLETIONS ##########
 
