@@ -85,7 +85,7 @@ npm install jtypes
 
 The `core.intellisense.js` file can  be included in Visual Studio 2012 to add support for IntelliSense with jTypes:
 
-![jTypes IntelliSense](http://content.jtypes.com/intellisense.png "jTypes IntelliSense")
+![jTypes IntelliSense](http://cdn.gaulinsoft.com/jtypes/intellisense.png "jTypes IntelliSense")
 
 > This file is also available in the .zip downloads on our website.
 
@@ -827,7 +827,7 @@ default: `false`
 
 ## Performance
 
-![jTypes 2.2 Performance](http://content.jtypes.com/2.2.0b658.png "jTypes 2.2 Performance")
+![jTypes 2.2 Performance](http://cdn.gaulinsoft.com/2.2.0b658.png "jTypes 2.2 Performance")
 
 ## Contribute
 
@@ -837,4 +837,4 @@ jTypes is an open-source library developed by Gaulinsoft, a small software consu
 
 We hope you find jTypes to be a very useful tool in the development of your applications or libraries and we have many more great things to come, so be sure to check-in every once in a while to see what's new!
 
-![jTypes](http://content.jtypes.com/shared/opengraph.png)
+![jTypes](http://cdn.gaulinsoft.com/jtypes/opengraph.png)
