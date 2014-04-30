@@ -1007,7 +1007,7 @@
             if ($keywords.length)
             {
                 // Parse the last keyword as a constraint
-                var $exec = /^(~|@)?([a-z]+(?:\-[a-z]+)?(?:[0-9]*\[\]))(\?|\!)?$/.exec($keywords[$keywords.length - 1]);
+                var $exec = /^(~|@)?([a-z]+(?:\-[a-z]+)?(?:[0-9]*\[\])?)(\?|\!)?$/.exec($keywords[$keywords.length - 1]);
 
                 // If the last keyword did not match a constraint string
                 if (!$exec)
