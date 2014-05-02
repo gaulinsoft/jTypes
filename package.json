@@ -1,6 +1,6 @@
 {
     "name"        : "jtypes",
-    "version"     : "2.2.2",
+    "version"     : "2.2.3",
     "description" : "Scalable class-based JavaScript.",
     "keywords"    : ["jtypes", "class", "inheritance", "type", "management", "reflection", "namespace", "private", "protected", "public", "abstract", "override", "virtual", "readonly", "classical inheritance", "access control", "access modifiers", "encapsulation", "polymorphism"],
     "homepage"    : "http://www.jtypes.com/",
