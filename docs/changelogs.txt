@@ -1,4 +1,9 @@
-﻿// ########## 2.2.2 ##########
+﻿// ########## 2.2.3 ##########
+
+* Fixed: `instance.type()` returns appropriate class reference for non-internal classes
+	- Does not apply to legacy mode where `jT_Legacy = true`
+
+// ########## 2.2.2 ##########
 
 * Fixed: `!` not-nullable operator properly handles default values
 	- Applies to uninitialized fields and auto properties
