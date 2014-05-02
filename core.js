@@ -1,5 +1,5 @@
 ﻿/*! ------------------------------------------------------------------------
-//                                jTypes 2.2.2
+//                                jTypes 2.2.3
 //  ------------------------------------------------------------------------
 //
 //                   Copyright 2014 Gaulinsoft Corporation
@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.2';
+        $_version = '2.2.3b763';
 
     // ########## LANGUAGE ##########
 
@@ -3658,8 +3658,8 @@
         var $class = $cache[$_cache_class] = !$_symbolCreate ?
                                              $_runtimeMatrix($metaclass, $metalength, $abstract, !!($modifiers & $_modifiers_class_expando), $internal, $model, $primitive, $struct, !!($modifiers & $_modifiers_class_unlocked)) :
                                              $struct ?
-                                             $_runtimeSymbolsStruct($metaclass, $handle, $name, $constructor, $defaults, !!($modifiers & $_modifiers_class_optimized)) :
-                                             $_runtimeSymbolsMatrix($metaclass, $metalength, $handle, $name, $defaults, $abstract, $model, !!($modifiers & $_modifiers_class_optimized));
+                                             $_runtimeSymbolsStruct($metaclass, $handle, $name, $constructor, $defaults, $internal, !!($modifiers & $_modifiers_class_optimized)) :
+                                             $_runtimeSymbolsMatrix($metaclass, $metalength, $handle, $name, $defaults, $abstract, $internal, $model, !!($modifiers & $_modifiers_class_optimized));
 
         // Execute the static definitions on the class
         for (var $i = 0, $j = $cacheStaticKeys.length; $i < $j; $i++)
@@ -3667,14 +3667,11 @@
 
         // Set the class metadata
         $_data($class, $_symbol_handle,    $handle);
+        $_data($class, $_symbol_internal,  $internal);
         $_data($class, $_symbol_metaclass, $_symbolCreate ? $metaclass : $_lock($metaclass));
         $_data($class, $_symbol_modifiers, $modifiers);
         $_data($class, $_symbol_name,      $name);
         $_data($class, $_symbol_namespace, $_namespace || '');
-
-        // If the class is internal, set the internal index metadata on the class
-        if ($modifiers & $_modifiers_class_internal)
-            $_data($class, $_symbol_internal, $internal);
 
         // Set the class prototype initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
         $class.prototype = $prototype;
@@ -6696,7 +6693,7 @@
         };
 
     // Create the symbols runtime helpers
-    var $_runtimeSymbolsMatrix = function($metaclass, $metalength, $handle, $name, $defaults, $abstract, $model, $optimized)
+    var $_runtimeSymbolsMatrix = function($metaclass, $metalength, $handle, $name, $defaults, $abstract, $internal, $model, $optimized)
     {
         // Create the metadata array and get the root data symbol (but the root metainstance has yet to be built)
         var $class        = null,
@@ -6723,7 +6720,7 @@
                 $merge     = $_compilerDirectives($metaclass, $metalength, $metainstance, $defaults, $sources, $primitive, false);
 
             // Compile the symbols metadata
-            $metaroot = $_compilerSymbolsDirectives($metaclass, $metalength, $metainstance, $defaults, $class.prototype, $sources, $class[$_symbol_internal], $merge, $optimized, $primitive, false, !!($modifiers & $_modifiers_class_unlocked));
+            $metaroot = $_compilerSymbolsDirectives($metaclass, $metalength, $metainstance, $defaults, $class.prototype, $sources, $internal, $merge, $optimized, $primitive, false, !!($modifiers & $_modifiers_class_unlocked));
 
             // Return true
             return true; 
@@ -6933,7 +6930,7 @@
         // Return the runtime class constructor
         return $class;
     };
-    var $_runtimeSymbolsStruct = function($metaclass, $handle, $name, $constructor, $defaults, $optimized)
+    var $_runtimeSymbolsStruct = function($metaclass, $handle, $name, $constructor, $defaults, $internal, $optimized)
     {
         // Get the private, public, and root data symbols (but the private and public metainstances have yet to be built)
         var $cache          = $metaclass[0],
@@ -6961,7 +6958,7 @@
                 $merge        = $_compilerDirectives($metaclass, 1, $metainstance, $defaults, $sources, $primitive, true);
 
             // Compile the symbols metadata
-            $_compilerSymbolsDirectives($metaclass, 1, $metainstance, $defaults, $struct.prototype, $sources, $struct[$_symbol_internal], $merge, $optimized, $primitive, true, !!($modifiers & $_modifiers_class_unlocked));
+            $_compilerSymbolsDirectives($metaclass, 1, $metainstance, $defaults, $struct.prototype, $sources, $internal, $merge, $optimized, $primitive, true, !!($modifiers & $_modifiers_class_unlocked));
 
             // Cache the private and public metainstances
             $metaprivate = $metainstance[0][$_instance_private];
