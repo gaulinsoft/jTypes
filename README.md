@@ -827,7 +827,7 @@ default: `false`
 
 ## Performance
 
-![jTypes 2.2 Performance](http://cdn.gaulinsoft.com/2.2.0b658.png "jTypes 2.2 Performance")
+![jTypes 2.2 Performance](http://cdn.gaulinsoft.com/jtypes/2.2.0b658.png "jTypes 2.2 Performance")
 
 ## Contribute
 
