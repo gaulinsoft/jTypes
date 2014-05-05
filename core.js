@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.3b763';
+        $_version = '2.2.3b773';
 
     // ########## LANGUAGE ##########
 
@@ -103,9 +103,6 @@
         $_lang_override_constraint         = '"{0}" must have the "{1}" type constraint to override.',
         $_lang_override_invalid            = '"{0}" has no suitable {1} to override.',
         $_lang_override_required           = '"{0}" must implement the inherited abstract {1} with the override modifier.',
-        $_lang_package_constraint          = '"{0}" has an invalid type constraint "{1}".',
-        $_lang_package_modifiers           = '"{0}" cannot have modifiers because it is a packaged definition.',
-        $_lang_package_separated           = '"{0}" cannot be a packaged definition because it is defined in a {1} definitions object.',
         $_lang_property_access_accessor    = '"{0}" must have both accessors to have an access modifier on the {1} accessor.',
         $_lang_property_access_conflict    = '"{0}" cannot have the {2} modifier on the {1} accessor in a {3}.',
         $_lang_property_access_duplicate   = '"{0}" cannot have access modifiers on both accessors.',
@@ -756,8 +753,7 @@
 
     // Create the internal lock references
     var $_lock_class     = null,
-        $_lock_instances = null,
-        $_lock_package   = null;
+        $_lock_instances = null;
 
     // ########## HELPERS ##########
 
@@ -1125,8 +1121,7 @@
         $_symbol_data_handle   = $_symbolGenerator(),
         $_symbol_data_name     = $_symbolGenerator(),
         $_symbol_data_readonly = $_symbolGenerator(),
-        $_symbol_instance      = $_symbolGenerator(),
-        $_symbol_package       = $_symbolGenerator();
+        $_symbol_instance      = $_symbolGenerator();
 
     // ---------- FILTERS ----------
 
@@ -1143,25 +1138,6 @@
         $_filter_model     = $_symbolGenerator('model'),
         $_filter_primitive = $_symbolGenerator('primitive'),
         $_filter_struct    = $_symbolGenerator('struct');
-
-    // ---------- PACKAGES ----------
-
-    // Create the package indices
-    var $_package_constraint = 2,
-        $_package_modifiers  = 1,
-        $_package_value      = 0,
-
-        // Create the length
-        $_package__length = 3;
-
-    // If symbols are supported
-    if ($_symbolCreate)
-    {
-        // Create the package symbols
-        $_package_constraint = $_symbolCreate();
-        $_package_modifiers  = $_symbolCreate();
-        $_package_value      = $_symbolCreate();
-    }
 
     // ########## BUILT-INS ##########
 
@@ -1244,15 +1220,6 @@
         if ($construct)
             $__defineProperty($construct, $_symbol_lock, $descriptor);
     };
-    var $_lockSymbolsPackage  = function($package)
-    {
-        // Define the lock function on the package
-        $__defineProperty($package, $_symbol_lock, { 'value': function()
-        {
-            // Set the internal lock reference to the package
-            $_lock_package = $package;
-        } });
-    };
 
     // Create the unlock symbols helper functions
     var $_unlockSymbolsClass    = function($class)
@@ -1299,28 +1266,6 @@
         // Return true if the instance matches either the private, protected, public, base, or construct instances
         return $instance === $_lock_instances[$_instance_private] || $instance === $_lock_instances[$_instance_protected] || $instance === $_lock_instances[$_instance_public] || $instance === $_lock_instances[$_instance_base] || $instance === $_lock_instances[$_instance_construct];
     };
-    var $_unlockSymbolsPackage  = function($package)
-    {
-        // Get the package lock
-        var $lock = $package[$_symbol_lock];
-
-        // If the lock is not a function, return false
-        if (typeof $lock != 'function')
-            return false;
-
-        // Reset the package lock reference
-        $_lock_package = null;
-
-        // Call the lock function
-        $lock();
-
-        // If the package lock reference was not set, return false
-        if (!$_lock_package)
-            return false;
-
-        // Return true if the package matches the package lock reference
-        return $package === $_lock_package;
-    };
 
     // If symbols are supported
     if ($_symbolCreate)
@@ -1335,11 +1280,6 @@
         {
             // Return true if the instance symbol is set on the instance
             return $instance[$_symbol_instance] === $instance;
-        };
-        $_unlockSymbolsPackage  = function($package)
-        {
-            // Return true if the package symbol is set on the package
-            return $package[$_symbol_package] === $package;
         };
     }
 
@@ -1541,114 +1481,6 @@
         })
         // If the window reference is not frozen, use the window reference as the global reference
         (!$__isFrozen($_window) ? $_window : global);
-
-    // ########## PACKAGES ##########
-
-    // Iterate the package types
-    'private protected public prototype static'.split(' ').forEach(function($type)
-    {
-        // Create the package method
-        var $method = function()
-        {
-            // Create the package
-            var $package = $_symbolCreate ?
-                           {} :
-                           new $__array($_package__length);
-
-            switch (arguments.length)
-            {
-                case 1:
-
-                    // Set the package data
-                    $package[$_package_modifiers]  = $type;
-                    $package[$_package_constraint] = '';
-                    $package[$_package_value]      = arguments[0];
-
-                    break;
-
-                case 2:
-
-                    // Get the modifiers string
-                    var $modifiers = arguments[0];
-
-                    // If the modifiers string is not a string primitive, throw an exception
-                    if (typeof $modifiers != 'string')
-                        $_exceptionArguments($type, arguments);
-
-                    // Trim the modifiers
-                    $modifiers = $modifiers.trim();
-
-                    // Set the package data
-                    $package[$_package_modifiers]  = $modifiers ?
-                                                     $type + ' ' + $modifiers :
-                                                     $type;
-                    $package[$_package_constraint] = '';
-                    $package[$_package_value]      = arguments[1];
-
-                    break;
-
-                case 3:
-
-                    // Get the modifiers string and type constraint
-                    var $modifiers  = arguments[0],
-                        $constraint = arguments[1];
-
-                    // If the modifiers string is not a string primitive, throw an exception
-                    if (typeof $modifiers != 'string')
-                        $_exceptionArguments($type, arguments);
-
-                    // Trim the modifiers
-                    $modifiers = $modifiers.trim();
-
-                    // If the constraint is a string primitive, trim it
-                    if (typeof $constraint == 'string')
-                        $constraint = $constraint.trim();
-                    // If the constraint is not a class, throw an exception
-                    else// if (typeof $constraint != 'function' || !$_unlockSymbolsClass($constraint))
-                        $_exceptionArguments($type, arguments);
-
-                    // Set the package data
-                    $package[$_package_modifiers]  = $modifiers ?
-                                                     $type + ' ' + $modifiers :
-                                                     $type;
-                    $package[$_package_constraint] = $constraint;
-                    $package[$_package_value]      = arguments[2];
-
-                    break;
-
-                default:
-
-                    // Throw an exception
-                    $_exceptionArguments($type, arguments);
-            }
-
-            // If symbols are not supported
-            if (!$_symbolCreate)
-            {
-                // Create the package lock
-                $package = $_lock($package);
-
-                // Lock the package type
-                $_lockSymbolsPackage($package);
-            }
-            // If ECMAScript 6 symbols are supported, set the package symbol on the package
-            else if ($__symbol)
-                $package[$_symbol_package] = $package;
-            // Set the package type on the package
-            else
-                $_data($package, $_symbol_package, $package);
-
-            // Return package
-            return $package;
-        };
-
-        // If the package type is "prototype", set the package method initially with the "writable" flag (due to some weird WebKit bug involving the internal [[Class]] attribute)
-        if ($type == 'prototype')
-            $$.prototype = $method;
-
-        // Define the package method
-        $_defineMethod($type, $method);
-    });
 
     // ########## EXPORTS ##########
 
@@ -2662,37 +2494,9 @@
         else if ($prepend)
             $modifiers = $prepend;
 
-        // Create the constraint and check if the value is a package
-        var $constraint = '',
-            $package    = $value != null && typeof $value == 'object' && $_unlockSymbolsPackage($value);
-
-        // If the value is a package
-        if ($package)
-        {
-            // If the definition is from a separated prototype, throw an exception
-            if ($prepend)
-                $_exceptionFormat($_lang_package_separated, $name, $prepend);
-
-            // If any modifiers were provided, throw an exception
-            if ($modifiers)
-                $_exceptionFormat($_lang_package_modifiers, $name);
-
-            // If symbols are not supported, unlock the package
-            if (!$_symbolCreate)
-                $value = $value($_lock);
-
-            // Extract the package data
-            $constraint = $value[$_package_constraint];
-            $modifiers  = $value[$_package_modifiers];
-            $value      = $value[$_package_value];
-
-            // If a constraint was provided and it is not valid, throw an exception
-            if ($constraint && !$_compilerConstraint($constraint))
-                $_exceptionFormat($_lang_package_constraint, $name, $constraint);
-        }
-
         // Check if the value is an auto property and create the type string
         var $auto       = $__array_isArray($value) && $value.length > 1,
+            $constraint = '',
             $definition = null,
             $type       = $auto || $value != null && typeof $value == 'object' && $__getPrototypeOf($value) === $__objectProto__ && $__getOwnPropertyNames($value).length > 0 ?
                           $_const_keyword_property :
@@ -2762,8 +2566,8 @@
                 }
                 else
                 {
-                    // If the value is a package, the keyword is not the last keyword, or the keyword is not a valid constraint, throw an exception
-                    if ($package || $i != $j - 1 || !$_compilerConstraint($keyword))
+                    // If the keyword is not the last keyword or it is not a valid constraint, throw an exception
+                    if ($i != $j - 1 || !$_compilerConstraint($keyword))
                         $_exceptionFormat($_lang_keyword_invalid, $name, $keyword);
 
                     // Set the keyword as the constraint
