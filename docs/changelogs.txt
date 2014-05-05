@@ -2,6 +2,8 @@
 
 * Fixed: `instance.type()` returns appropriate class reference for non-internal classes
 	- Does not apply to legacy mode where `jT_Legacy = true`
+* Removed: Deprecated helper functions for packaged definitions
+	- Includes `.private()`, `.protected()`, `.public()`, `.prototype()`, and `.static()`
 
 // ########## 2.2.2 ##########
 
