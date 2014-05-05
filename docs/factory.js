@@ -6,15 +6,15 @@
 
 var MyFactory = jTypes.metaclass(
 {
-    abstract  : false,
-    base      : null,
-    internal  : false,
-    model     : false,
-    optimized : false,
-    primitive : false,
-    sealed    : false,
-    struct    : false,
-    unlocked  : false
+    'abstract'  : false,
+    'base'      : null,
+    'internal'  : false,
+    'model'     : false,
+    'optimized' : false,
+    'primitive' : false,
+    'sealed'    : false,
+    'struct'    : false,
+    'unlocked'  : false
 });
 
 // factory settings (could be passed into constructor as previously shown, which is useful for chaining)
@@ -35,10 +35,10 @@ MyFactory.private('field',        'array', null)
          .private('anotherfield', 'int?',  0)
          .private('yetanotherfield',
          {
-             constraint : 'string',
-             name       : 'yetanotherfield',
-             readonly   : true,
-             value      : 'default'
+             'constraint' : 'string',
+             'name'       : 'yetanotherfield',
+             'readonly'   : true,
+             'value'      : 'default'
          });
 
 MyFactory.public('method', function()
@@ -48,12 +48,12 @@ MyFactory.public('method', function()
 
 MyFactory.protected('anothermethod',
 {
-    name    : 'anothermethod',
-    value   : function()
+    'name'    : 'anothermethod',
+    'value'   : function()
     {
         // ...
     },
-    virtual : true
+    'virtual' : true
 });
 
 MyFactory.method('yetanothermethod', function()
@@ -63,12 +63,13 @@ MyFactory.method('yetanothermethod', function()
 
 MyFactory.public('property',
 {
-    name    : 'property',
-    get     : function()
+    'name'     : 'property',
+    'get'      : function()
     {
         // ...
     },
-    set     : function()
+    'protected': 'set',
+    'set'      : function()
     {
         // ...
     }
@@ -86,9 +87,9 @@ function()
 var MyClass = MyFactory.compile();// only base class handle is resolved
 var MyClass = MyFactory.build();  // all handles are resolved (class/model/struct constraints)
 
+var myinstance = new MyClass();// instantiate class
+
 // Factories could use dependency trees to serialize all classes referenced in the metadata (which can then be deserialized by the client)
 
 var MyPackage = jTypes.serialize(MyFactory);  // node.js serializes (or jTypes.serialize() could serialize the global namespace or specific subnamespaces instead of just a factory)
 var MyClass   = jTypes.deserialize(MyPackage);// then the client deserializes
-
-var myinstance = new MyClass();// instantiate class
