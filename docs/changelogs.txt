@@ -7,6 +7,7 @@
 * Fixed: `.accessor()` properly handles invalid modifiers on native type constraints
 * Updated: Type constraint handlers initialize default values without the `new` operator
 	- Only applies to non-primitive constraints for native types (except for `Date` which requires the `new` operator)
+* Fixed: `.format()` properly handles invalid indexes when no alignment is present
 
 // ########## 2.2.2 ##########
 
