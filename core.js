@@ -804,7 +804,7 @@
 
         // If an even number of opening-braces was provided, the argument index exceeded the number of arguments, or the alignment length is out of range, return the match (with the escaped opening-braces)
         if ($braces % 2 == 0 || $index >= $_arguments.length || $alignment > $_const_int_max || $alignment < $_const_int_min)
-            return $1.substr($braces / 2) + $2 + $3 + '}';
+            return $1.substr($braces / 2) + $2 + ($3 || '') + '}';
 
         // Get the argument string for the argument index
         var $argument = $_arguments[$index];
@@ -7065,7 +7065,7 @@
         {
             // If the constraint is not valid, throw an exception
             if (!$_compilerConstraint($constraint))
-                $_exceptionFormat($_lang_filter_invalid_generic, $constraint);
+                $_exceptionFormat($_lang_filter_invalid_generic, null, $constraint);
 
             // Create the constraint filter
             var $filter = $_runtimeFilter($constraint);
