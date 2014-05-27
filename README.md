@@ -70,7 +70,7 @@ jTypes requires ECMAScript 5, which is supported by any modern platform or brows
 Include the `core.js` or `core.min.js` file in your application using the jTypes CDN:
 
 ```html
-<script type="text/javascript" src="http://cdn.jtypes.com/jtypes-2.2.2.min.js"></script>
+<script type="text/javascript" src="http://cdn.jtypes.com/jtypes-2.2.3.min.js"></script>
 ```
 
 Install the jTypes module in Node.js using npm:
