@@ -27,7 +27,7 @@
 
     // Create the build minify flag and version number
     var $_minify  = false,
-        $_version = '2.2.3b773';
+        $_version = '2.2.3';
 
     // ########## LANGUAGE ##########
 
@@ -787,6 +787,11 @@
             'value':        $value,
             'writable':     !!$writable
         });
+    };
+    var $_date      = function()
+    {
+        // Return an NaN date object
+        return new $__date($__NaN__);
     };
     var $_format    = function($0, $1, $2, $3, $4)
     {
@@ -2981,8 +2986,8 @@
             $definition[$_definition_value] = $value;
 
             // If the constraint is a class, set the imported definition constraint
-            if (typeof $constraint == 'function')
-                $definition[$_definition_constraint] = $constraint;
+          //if (typeof $constraint == 'function')
+          //    $definition[$_definition_constraint] = $constraint;
         }
     };
     var $_compilerClass          = function($modifiers, $base, $constructor, $prototype, $prototypePrivate, $prototypeProtected, $prototypePublic)
@@ -5570,201 +5575,42 @@
         // If no constraint filter was created
         if (!$filter)
         {
-            // ---------- ARRAY ----------
-            if ($handle == 'array')
-                $filter = $_runtimeFilterBuiltIn($handle,
-                                                 $default ?
-                                                 function()
-                                                 {
-                                                     // Return an empty array
-                                                     return [];
-                                                 } :
-                                                 null,
-                                                 $suppress,
-                                                 'array',
-                                                 $cast ?
-                                                 $$_asArray :
-                                                 null);
-            // ---------- BOOLEAN ----------
-            else if ($handle == 'boolean' || $handle == 'bool')
-                $filter = $_runtimeFilterPrimitive($handle, false, $suppress, 'boolean', $cast ? $$_asBoolean : null, $null, $__boolean_valueOf__);
-            // ---------- DATE ----------
-            else if ($handle == 'date')
-                $filter = $_runtimeFilterBuiltIn($handle,
-                                                 $default ?
-                                                 function()
-                                                 {
-                                                     // Return an empty date object
-                                                     return new $__date($__NaN__);
-                                                 } :
-                                                 null,
-                                                 $suppress,
-                                                 'date',
-                                                 $cast ?
-                                                 $$_asDate :
-                                                 null);
-            // ---------- ELEMENT ----------
-            else if ($handle == 'element' && $_element)
-                $filter = $_runtimeFilterInstanceOf($handle, null, $suppress, $_element);
-            // ---------- ERROR ----------
-            else if ($handle == 'error')
-                $filter = $_runtimeFilterBuiltIn($handle,
-                                                 $default ?
-                                                 function()
-                                                 {
-                                                     // Return an empty error object
-                                                     return new $__error();
-                                                 } :
-                                                 null,
-                                                 $suppress,
-                                                 'error');
-            // ---------- FUNCTION ----------
-            else if ($handle == 'function')
-                $filter = $_runtimeFilterBuiltIn($handle,
-                                                 $default ?
-                                                 function()
-                                                 {
-                                                     // Return an empty function object
-                                                     return new $__function();
-                                                 } :
-                                                 null,
-                                                 $suppress,
-                                                 'function');
-            // ---------- INTEGER ----------
-            else if ($handle == 'integer' || $handle == 'int')
-                $filter = function($value, $name)
-                {
-                    // If the value is not a primitive number
-                    if (typeof $value != 'number')
-                    {
-                        // If the value is not a number object
-                        if ($$_type($value) != 'number')
-                        {
-                            // If the cast flag is set, return the value cast as an integer
-                            if ($cast)
-                                return $$_asInteger($value);
-
-                            // If a name was provided, strict mode is enabled, and the suppress flag is not set when there is an invalid value, throw an exception
-                            if ($name && $_strict && !$suppress && (!$null || $value !== null))
-                                $_exceptionFormat($_lang_filter_value, $name, $handle);
-
-                            // If the nullable flag is set, return null
-                            if ($null)
-                                return null;
-
-                            // Return zero
-                            return 0;
-                        }
-                        // Get the primitive value of the object
-                        else
-                            $value = $__number_valueOf__.call($value);
-                    }
-
-                    // If the value is not-a-number, return zero
-                    if ($__isNaN($value))
-                        return 0;
-
-                    // If the value is greater than the maximum integer, return the maximum representable integer
-                    if ($value > $_const_int_max)
-                        return $_const_int_max;
-
-                    // If the value is less than the minimum integer, return the maximum representable integer
-                    if ($value < $_const_int_min)
-                        return $_const_int_min;
-
-                    // If the value is less than zero, return the value as an integer (rounded towards zero)
-                    if ($value < 0)
-                        return $__ceil($value);
-
-                    // Return the value as an integer (rounded towards zero)
-                    return $__floor($value);
-                };
-            // ---------- JQUERY ----------
-            else if ($handle == 'jquery' && $_jquery)
-                $filter = $_runtimeFilterInstanceOf($handle,
-                                                    function()
-                                                    {
-                                                        // Return an empty jQuery object
-                                                        return new $_jquery();
-                                                    },
-                                                    $suppress,
-                                                    $_jquery);
-            // ---------- NUMBER ----------
+            // ---------- PRIMITIVES ----------
+            if ($handle == 'boolean' || $handle == 'bool')
+                $filter = $_runtimeFilterPrimitive($handle, false,    $suppress, 'boolean', $cast ? $$_asBoolean : null, $null, $__boolean_valueOf__);
             else if ($handle == 'number' || $handle == 'float')
-                $filter = $_runtimeFilterPrimitive($handle, $__NaN__, $suppress, 'number', $cast ? $$_asNumber : null, $null, $__number_valueOf__);
-            // ---------- OBJECT ----------
-            else if ($handle == 'object')
-                $filter = $_runtimeFilterBuiltIn($handle,
-                                                 $default ?
-                                                 function()
-                                                 {
-                                                     // Return an empty object
-                                                     return {};
-                                                 } :
-                                                 null,
-                                                 $suppress,
-                                                 'object');
-            // ---------- PRIMITIVE ----------
-            else if ($handle == 'primitive')
-                $filter = function($value, $name)
-                {
-                    // If the value is a primitive, return it
-                    if ($$_isPrimitive($value))
-                        return $value;
-
-                    // Get the value type
-                    var $type = $_types[$__toString__.call($value)] || 'object';
-
-                    // If the value is a boolean, return the primitive value of the boolean
-                    if ($type == 'boolean')
-                        return $__boolean_valueOf__.call($value);
-
-                    // If the value is a number, return the primitive value of the number
-                    if ($type == 'number')
-                        return $__number_valueOf__.call($value);
-
-                    // If the value is a string, return the primitive value of the string
-                    if ($type == 'string')
-                        return $__string_valueOf__.call($value);
-
-                    // If a name was provided, strict mode is enabled, and the suppress flag is not set, throw an exception
-                    if ($name && $_strict && !$suppress)
-                        $_exceptionFormat($_lang_filter_value, $name, $handle);
-
-                    return null;
-                };
-            // ---------- REGEXP ----------
-            else if ($handle == 'regexp')
-                $filter = $_runtimeFilterBuiltIn($handle,
-                                                 $default ?
-                                                 function()
-                                                 {
-                                                     // Return an empty regexp object
-                                                     return new $__regexp();
-                                                 } :
-                                                 null,
-                                                 $suppress,
-                                                 'regexp',
-                                                 $cast ?
-                                                 $$_asRegExp :
-                                                 null);
-            // ---------- STRING ----------
+                $filter = $_runtimeFilterPrimitive($handle, $__NaN__, $suppress, 'number',  $cast ? $$_asNumber  : null, $null, $__number_valueOf__);
             else if ($handle == 'string')
-                $filter = $_runtimeFilterPrimitive($handle, '', $suppress, 'string', $cast ? $$_asString : null, $null, $__string_valueOf__);
-            // ---------- SYMBOL ----------
+                $filter = $_runtimeFilterPrimitive($handle, '',       $suppress, 'string',  $cast ? $$_asString  : null, $null, $__string_valueOf__);
             else if ($handle == 'symbol')
                 $filter = $__symbol ?
                           $_runtimeFilterPrimitive($handle, null, $suppress, 'symbol', null, $null) :
                           new $__function();
-            // ---------- TYPE ----------
+            // ---------- BUILT-INS ----------
+            else if ($handle == 'array')
+                $filter = $_runtimeFilterBuiltIn($handle, $default ? $__array    : null, $suppress, 'array',  $cast ? $$_asArray : null);
+            else if ($handle == 'date')
+                $filter = $_runtimeFilterBuiltIn($handle, $default ? $_date      : null, $suppress, 'date',   $cast ? $$_asDate : null);
+            else if ($handle == 'error')
+                $filter = $_runtimeFilterBuiltIn($handle, $default ? $__error    : null, $suppress, 'error');
+            else if ($handle == 'function')
+                $filter = $_runtimeFilterBuiltIn($handle, $default ? $__function : null, $suppress, 'function');
+            else if ($handle == 'object')
+                $filter = $_runtimeFilterBuiltIn($handle, $default ? $__object   : null, $suppress, 'object');
+            else if ($handle == 'regexp')
+                $filter = $_runtimeFilterBuiltIn($handle, $default ? $__regexp   : null, $suppress, 'regexp', $cast ? $$_asRegExp : null);
             else if ($handle == 'type')
                 $filter = $_runtimeFilterBuiltIn($handle, null, $suppress, 'class');
-            // ---------- WINDOW ----------
             else if ($handle == 'window')
                 $filter = $_runtimeFilterBuiltIn($handle, null, $suppress, 'window');
-            // ---------- TYPED ARRAY ----------
-            else if ($handle.length > 2 && $handle[$handle.length - 2] == '[' && $handle[$handle.length - 1] == ']' && $_constraints[$handle])
-                $filter = $_runtimeFilterTypedArray($handle.substr(0, $handle.length - 2), null, $suppress);
+            // ---------- INSTANCE OF ----------
+            else if ($handle == 'element' && $_element)
+                $filter = $_runtimeFilterInstanceOf($handle, null, $suppress, $_element);
+            else if ($handle == 'jquery' && $_jquery)
+                $filter = $_runtimeFilterInstanceOf($handle, $_jquery, $suppress, $_jquery);
+            // ---------- CUSTOM ----------
+            else
+                $filter = $_runtimeFilterCustom($handle, $default, $suppress, $cast, $null);
 
             // If no constraint filter was created, throw an exception
             if (!$filter)
@@ -5785,11 +5631,6 @@
 
         // Store the filter in the cached filters
         $_filters[$constraint] = $filter;
-
-        // Remove the aliases, includes, and namespace references
-        $aliases   = null;
-        $includes  = null;
-        $namespace = null;
 
         // Return the constraint filter
         return $filter;
@@ -5845,6 +5686,92 @@
             return null;
         };
     };
+    var $_runtimeFilterCustom     = function($handle, $default, $suppress, $cast, $null)
+    {
+        // ---------- INTEGER ----------
+        if ($handle == 'integer' || $handle == 'int')
+            return function($value, $name)
+            {
+                // If the value is not a primitive number
+                if (typeof $value != 'number')
+                {
+                    // If the value is not a number object
+                    if ($$_type($value) != 'number')
+                    {
+                        // If the cast flag is set, return the value cast as an integer
+                        if ($cast)
+                            return $$_asInteger($value);
+
+                        // If a name was provided, strict mode is enabled, and the suppress flag is not set when there is an invalid value, throw an exception
+                        if ($name && $_strict && !$suppress && (!$null || $value !== null))
+                            $_exceptionFormat($_lang_filter_value, $name, $handle);
+
+                        // If the nullable flag is set, return null
+                        if ($null)
+                            return null;
+
+                        // Return zero
+                        return 0;
+                    }
+                    // Get the primitive value of the object
+                    else
+                        $value = $__number_valueOf__.call($value);
+                }
+
+                // If the value is not-a-number, return zero
+                if ($__isNaN($value))
+                    return 0;
+
+                // If the value is greater than the maximum integer, return the maximum representable integer
+                if ($value > $_const_int_max)
+                    return $_const_int_max;
+
+                // If the value is less than the minimum integer, return the maximum representable integer
+                if ($value < $_const_int_min)
+                    return $_const_int_min;
+
+                // If the value is less than zero, return the value as an integer (rounded towards zero)
+                if ($value < 0)
+                    return $__ceil($value);
+
+                // Return the value as an integer (rounded towards zero)
+                return $__floor($value);
+            };
+        // ---------- PRIMITIVE ----------
+        else if ($handle == 'primitive')
+            return function($value, $name)
+            {
+                // If the value is a primitive, return it
+                if ($$_isPrimitive($value))
+                    return $value;
+
+                // Get the value type
+                var $type = $_types[$__toString__.call($value)] || 'object';
+
+                // If the value is a boolean, return the primitive value of the boolean
+                if ($type == 'boolean')
+                    return $__boolean_valueOf__.call($value);
+
+                // If the value is a number, return the primitive value of the number
+                if ($type == 'number')
+                    return $__number_valueOf__.call($value);
+
+                // If the value is a string, return the primitive value of the string
+                if ($type == 'string')
+                    return $__string_valueOf__.call($value);
+
+                // If a name was provided, strict mode is enabled, and the suppress flag is not set, throw an exception
+                if ($name && $_strict && !$suppress)
+                    $_exceptionFormat($_lang_filter_value, $name, $handle);
+
+                return null;
+            };
+        // ---------- TYPED ARRAY ----------
+        else if ($handle.length > 2 && $handle[$handle.length - 2] == '[' && $handle[$handle.length - 1] == ']' && $_constraints[$handle])
+            return $_runtimeFilterInternal($handle, null, $suppress, '[object ' + $handle[0].toUpperCase() + $handle.substr(1, $handle.length - 3) + 'Array]');
+
+        return null;
+    };
     var $_runtimeFilterInstanceOf = function($handle, $default, $suppress, $type)
     {
         // Return the instanceof constraint filter
@@ -5852,6 +5779,26 @@
         {
             // If the value is either null or an instance of jQuery, return it
             if (!$default && $value === null || $value instanceof $type)
+                return $value;
+
+            // If a name was provided, strict mode is enabled, and the suppress flag is not set when there is an invalid value, throw an exception
+            if ($name && $_strict && !$suppress && $value !== null)
+                $_exceptionFormat($_lang_filter_value, $name, $handle);
+
+            // If the default flag is set, return a default instance
+            if ($default)
+                return $default();
+
+            return null;
+        };
+    };
+    var $_runtimeFilterInternal   = function($handle, $default, $suppress, $type)
+    {
+        // Return the internal constraint filter
+        return function($value, $name)
+        {
+            // If the value is either null or the internal type, return it
+            if (!$default && $value === null || $__toString__.call($value) == $type)
                 return $value;
 
             // If a name was provided, strict mode is enabled, and the suppress flag is not set when there is an invalid value, throw an exception
@@ -5896,29 +5843,6 @@
 
             // Return the default primitive value
             return $default;
-        };
-    };
-    var $_runtimeFilterTypedArray = function($handle, $default, $suppress)
-    {
-        // Create the typed array type string
-        var $type = '[object ' + $handle[0].toUpperCase() + $handle.substr(1) + 'Array]';
-
-        // Return the typed value constraint filter
-        return function($value, $name)
-        {
-            // If the value is either null or a typed array, return it
-            if (!$default && $value === null || $__toString__.call($value) == $type)
-                return $value;
-
-            // If a name was provided, strict mode is enabled, and the suppress flag is not set when there is an invalid value, throw an exception
-            if ($name && $_strict && !$suppress && $value !== null)
-                $_exceptionFormat($_lang_filter_value, $name, $handle + '[]');
-
-            // If the default flag is set, return a default instance
-            if ($default)
-                return $default();
-
-            return null;
         };
     };
     var $_runtimeFlag             = function()
@@ -7139,6 +7063,10 @@
         // If a type constraint was provided
         if ($constraint)
         {
+            // If the constraint is not valid, throw an exception
+            if (!$_compilerConstraint($constraint))
+                $_exceptionFormat($_lang_filter_invalid_generic, $constraint);
+
             // Create the constraint filter
             var $filter = $_runtimeFilter($constraint);
 
