@@ -514,11 +514,11 @@ Since none of the values being assigned to the fields in the previous example ar
 
 at-symbol => `@date`
 
-...suppresses errors when `jTypes.strict = true`
+suppresses errors when `jTypes.strict = true`
 
 ### Strict Constraints
 
-...requires `jTypes.strict = true` to enable, throws errors when a value is set that does not match the type of the constraint or !== `null` (which cannot be applied to constraints with the coerce modifier)
+require `jTypes.strict = true`, throw errors when a value is set that does not match the type of the constraint or !== `null` (which cannot be applied to constraints with the coerce modifier)
 
 ## Namespaces
 
@@ -705,97 +705,97 @@ The right side of an alias definition must be a namespace to use it with the `::
 
 ### abstract
 
-...abstract classes => cannot be instantiated and can have abstract methods and properties...
+abstract classes: cannot be instantiated and can have abstract methods and properties
 
 ### expando
 
-...expando classes => inject the `__self` object into the root of prototype chain of the instance matrix (and it is only available in legacy mode)...
+expando classes: inject the `__self` object into the root of prototype chain of the instance matrix (and it is only available in legacy mode)
 
 ### internal
 
-...internal classes => hide their type from the type() method on all instances and the __type accessor on the public instance (and non-internal classes cannot inherit from internal classes)...
+internal classes: hide their type from the type() method on all instances and the __type accessor on the public instance (and non-internal classes cannot inherit from internal classes)
 
 ### model
 
-...models have => optional constructors (new operator invokes constructor), default instances (without new operator)...
+models: have optional constructors (new operator invokes constructor), default instances (without new operator)
 
 ### optimized
 
-...optimized classes => dynamically create instance objects (and it is not available in legacy mode)...
+optimized classes: dynamically create instance objects (and it is not available in legacy mode)
 
 ### primitive
 
-...primitive classes have => primitive type constraints (for fields and automatically implemented properties), clone() and equals(obj) methods...
+primitive classes: have primitive type constraints (for fields and automatically implemented properties), clone() and equals(obj) methods
 
 ### sealed
 
-...sealed classes => cannot be inherited...
+sealed classes: cannot be inherited
 
 ### struct
 
-...structs have => optional constructors (new operator invokes constructor), default instances (without new operator), no inheritance, clone() and equals(obj) methods...
+structs: have optional constructors (new operator invokes constructor), default instances (without new operator), no inheritance, clone() and equals(obj) methods
 
 ### unlocked
 
-...unlocked classes have => chainable __base instances...
+unlocked classes: have chainable __base instances
 
 ## Class Member Modifiers
 
 ### abstract
 
-...abstract members => must be overridden in a derived class (and can only be used on methods or properties)...
+abstract members: must be overridden in a derived class (and can only be used on methods or properties)
 
 ### const
 
-...const members => are not `[Writable]` and can only be used with the `prototype` or `static` modifiers...
+const members: are not `[Writable]` and can only be used with the `prototype` or `static` modifiers
 
 ### hidden
 
-...hidden members => are not `[Enumerable]` (fields and properties are enumerable by default, methods are not)
+hidden members: are not `[Enumerable]` (fields and properties are enumerable by default, methods are not)
 
 ### new
 
-...new members => hide an inherited member (when not overriding)...
+new members: hide an inherited member (when not overriding)
 
 ### override
 
-...override members => override an inherited abstract or virtual member...
+override members: override an inherited abstract or virtual member
 
 ### private
 
-...private members => are only accessible in the methods and properties of the class they are defined in...
+private members: are only accessible in the methods and properties of the class they are defined in
 
 ### protected
 
-...protected members => are only accessible in the methods and properties of the class they are defined in and the methods and properties of any derived classes...
+protected members: are only accessible in the methods and properties of the class they are defined in and the methods and properties of any derived classes
 
 ### prototype
 
-...prototype members => are defined on the prototype of the class constructor (`Class.prototype`)...
+prototype members: are defined on the prototype of the class constructor (`Class.prototype`)
 
 ### public
 
-...public members => are accessible everywhere for the class they are defined in and any derived classes as well...
+public members: are accessible everywhere for the class they are defined in and any derived classes as well
 
 ### readonly
 
-...readonly members => are only writable inside the constructor (and can only be used with fields and automatically implemented properties)...
+readonly members: are only writable inside the constructor (and can only be used with fields and automatically implemented properties)
 
 ### sealed
 
-...sealed members => cannot be overridden and must be used with the `override` modifier...
+sealed members: cannot be overridden and must be used with the `override` modifier
 
 ### static
 
-...static members => are defined on the class constructor (`Class`)...
+static members: are defined on the class constructor (`Class`)
 
 ### virtual
 
-...virtual members => can be overridden in a derived class (and can only be used on methods or properties)...
+virtual members: can be overridden in a derived class (and can only be used on methods or properties)
 
 ### visible
 
-...visible members => are `[Enumerable]` (methods are not enumerable by default, fields and properties are)
+visible members: are `[Enumerable]` (methods are not enumerable by default, fields and properties are)
 
 ## Global Settings
 
@@ -839,7 +839,7 @@ default: `false`
     * DOM Binders
 * Dynamic Namespaces
 * Internal Methods and Accessors
-* Custom Constraint Strings
+* Custom Constraint Handlers
 * Argument Type Constraints (Methods)
 * Factories
 * Partial Classes
