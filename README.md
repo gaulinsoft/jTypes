@@ -1,6 +1,12 @@
 # [jTypes](http://www.jTypes.com/): Scalable class-based JavaScript for web apps and libraries
 
-jTypes provides developers with robust type management in JavaScript to improve the maintainability and scalability of web-based applications. By utilizing familiar and proven design patterns from popular languages such as C++, C#, and Java, jTypes can simplify the development of web apps, libraries, and tools. Since it is not a new language, jTypes doesn't require any transcompilation to messy and unmaintainable JavaScript like other web programming languages. This makes it extremely simple and straightforward, especially for developers that are experienced with classical inheritance. Using existing and upcoming language components that are implemented across all browsers and platforms, jTypes offers an efficient and effective framework for class-based object-oriented development that can quickly and easily adapt to the "quirks" of a constantly evolving web.
+jTypes provides developers with robust type management in JavaScript to improve the maintainability and scalability of web-based applications.
+By utilizing familiar and proven design patterns from popular languages such as C++, C#, and Java, jTypes can simplify the development of web apps, libraries, and tools.
+Since it is not a new language, jTypes doesn't require any transcompilation to messy and unmaintainable JavaScript like other web programming languages.
+This makes it extremely simple and straightforward, especially for developers that are experienced with classical inheritance.
+Using existing and upcoming language components that are implemented across all browsers and platforms, jTypes offers an efficient and effective framework for class-based object-oriented development that can quickly and easily adapt to the "quirks" of a constantly evolving web.
+
+*Coming Soon:* [Precompiling Class Definitions](#precompiling-fusion-integration)
 
 ## Contents
 - [Requirements](#requirements)
@@ -853,7 +859,7 @@ default: `false`
 
 jTypes will soon provide support for precompiling static class definitions using our fusion language framework currently under development.
 The lexer-parser utilities of fusion will be used to build an abstract syntax tree for each static class definition in a `.jt` file and transpile them into a `.js` file.
-Any classes with inline string and object literals will be transpiled into a jTypes class that requires _no compiling at runtime_.
+Any classes with inline strings, functions, and object literals will be transpiled into a jTypes class that requires _no compiling at runtime_.
 This will provide developers with the ability to utilize dynamic runtime class definitions for rapid prototyping and precompiled static class definitions for efficiency.
 It not only offers the best of both worlds, but allows your class definitions to be interchangeable between the two.
 
