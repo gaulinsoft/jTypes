@@ -829,6 +829,15 @@ default: `false`
 
 ![jTypes 2.2 Performance](http://cdn.gaulinsoft.com/jtypes/2.2.0b658.png "jTypes 2.2 Performance")
 
+## Futures
+
+* Generics
+* Interfaces
+* Custom Type Constraints
+* Dynamic Namespaces
+* Factories
+* Metaprogramming
+
 ## Contribute
 
 We strongly encourage anyone who is interested in contributing to contact us through any of the various social mediums on our website ([www.jTypes.com](www.jTypes.com)).
