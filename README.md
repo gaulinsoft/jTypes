@@ -849,11 +849,12 @@ default: `false`
 * Custom Constraint Handlers
 * Argument Type Constraints (Methods)
 * Factories
+* Indexers *
 * Partial Classes
-* Indexers (Proxies) *
+* Observable Classes *
 * Reflection (Introspection)
 
-> \* Requires ECMAScript 6
+> \* Requires ECMAScript 6 Proxies
 
 #### Precompiling (fusion Integration)
 
