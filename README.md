@@ -846,7 +846,7 @@ default: `false`
 * Indexers (Proxies) *
 * Reflection
 
-> * Requires ECMAScript 6
+> \* Requires ECMAScript 6
 
 ## Contribute
 
