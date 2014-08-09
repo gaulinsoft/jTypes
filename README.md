@@ -47,6 +47,10 @@ jTypes provides developers with robust type management in JavaScript to improve 
     - [static](#static)
     - [virtual](#virtual)
     - [visible](#visible)
+- [Global Settings](#global-settings)
+- [Performance](#performance)
+- [Futures](#futures)
+- [Contribute](#contribute)
 
 ## Requirements
 
@@ -697,8 +701,6 @@ function($$)
 
 The right side of an alias definition must be a namespace to use it with the `::` operator. The `global::` namespace alias qualifier is reserved for the global namespace. This allows base classes and type constraints to be referenced using globally qualified names.
 
-# _// ########## TEMP ##########_
-
 ## Class Modifiers
 
 ### abstract
@@ -833,10 +835,18 @@ default: `false`
 
 * Generics
 * Interfaces
-* Custom Type Constraints
+* Events (Prioritized Queues)
+    * DOM Binders
 * Dynamic Namespaces
+* Internal Methods and Accessors
+* Custom Constraint Strings
+* Argument Type Constraints (Methods)
 * Factories
-* Metaprogramming
+* Partial Classes
+* Indexers (Proxies) *
+* Reflection
+
+> * Requires ECMAScript 6
 
 ## Contribute
 
@@ -845,5 +855,7 @@ We strongly encourage anyone who is interested in contributing to contact us thr
 jTypes is an open-source library developed by Gaulinsoft, a small software consulting company in Chicago, IL. It was created internally in our free-time to simplify the development of some of our other frameworks and libraries which we also hope to release in the near future. Therefore, any contributions are greatly appreciated and really go a long way to help us out.
 
 We hope you find jTypes to be a very useful tool in the development of your applications or libraries and we have many more great things to come, so be sure to check-in every once in a while to see what's new!
+
+## Media
 
 ![jTypes](http://cdn.gaulinsoft.com/jtypes/opengraph.png)
