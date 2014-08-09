@@ -851,7 +851,7 @@ default: `false`
 * Factories
 * Partial Classes
 * Indexers (Proxies) *
-* Reflection
+* Reflection (Introspection)
 
 > \* Requires ECMAScript 6
 
