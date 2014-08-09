@@ -50,6 +50,7 @@ jTypes provides developers with robust type management in JavaScript to improve 
 - [Global Settings](#global-settings)
 - [Performance](#performance)
 - [Futures](#futures)
+    - [Precompiling](#precompiling-fusion-integration)
 - [Contribute](#contribute)
 
 ## Requirements
@@ -836,7 +837,7 @@ default: `false`
 * Generics
 * Interfaces
 * Events (Prioritized Queues)
-    * DOM Binders
+    * DOM Event Binders
 * Dynamic Namespaces
 * Internal Methods and Accessors
 * Custom Constraint Handlers
@@ -847,6 +848,16 @@ default: `false`
 * Reflection
 
 > \* Requires ECMAScript 6
+
+#### Precompiling (fusion Integration)
+
+jTypes will soon provide support for precompiling static class definitions using our ![fusion](https://github.com/gaulinsoft/fusion) language framework currently under development.
+The lexer-parser utilities of fusion will be used to build an abstract syntax tree for each static class definition in a `.jt` file and transpile them into a `.js` file.
+Any classes with inline string and object literals will be transpiled into a jTypes class that requires _no compiling at runtime_.
+This will provide developers with the ability to utilize dynamic runtime class definitions for rapid prototyping and precompiled static class definitions for efficiency.
+It not only offers the best of both worlds, but allows your class definitions to be interchangeable between the two.
+
+> The fusion language superset can also be combined with jTypes in `.fjt` files to allow for inline HTML and CSS in class definitions. 
 
 ## Contribute
 
