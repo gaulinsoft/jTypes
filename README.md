@@ -78,10 +78,10 @@ jTypes requires ECMAScript 5, which is supported by any modern platform or brows
 
 ## Setup
 
-Include the `core.js` or `core.min.js` file in your application using the jTypes CDN:
+Include the `core.js` or `core.min.js` file in your application:
 
 ```html
-<script type="text/javascript" src="http://cdn.jtypes.com/jtypes-2.2.3.min.js"></script>
+<script type="text/javascript" src="jtypes-2.2.3.min.js"></script>
 ```
 
 Install the jTypes module in Node.js using npm:
@@ -96,7 +96,7 @@ npm install jtypes
 
 The `core.intellisense.js` file can  be included in Visual Studio 2012 to add support for IntelliSense with jTypes:
 
-![jTypes IntelliSense](http://cdn.gaulinsoft.com/jtypes/intellisense.png "jTypes IntelliSense")
+![jTypes IntelliSense](https://i.imgur.com/hVlfksH.png "jTypes IntelliSense")
 
 > This file is also available in the .zip downloads on our website.
 
@@ -836,7 +836,7 @@ default: `false`
 
 ## Performance
 
-![jTypes 2.2 Performance](http://cdn.gaulinsoft.com/jtypes/2.2.0b658.png "jTypes 2.2 Performance")
+![jTypes 2.2 Performance](https://i.imgur.com/2ksprkV.png "jTypes 2.2 Performance")
 
 ## Futures
 
@@ -866,16 +866,8 @@ It not only offers the best of both worlds, but allows your class definitions to
 
 https://github.com/gaulinsoft/fusion
 
-> The fusion language superset can also be combined with jTypes in `.fjt` files to allow for inline HTML and CSS in class definitions. 
-
-## Contribute
-
-We strongly encourage anyone who is interested in contributing to contact us through any of the various social mediums on our website ([www.jTypes.com](www.jTypes.com)).
-
-jTypes is an open-source library developed by Gaulinsoft, a small software consulting company in Chicago, IL. It was created internally in our free-time to simplify the development of some of our other frameworks and libraries which we also hope to release in the near future. Therefore, any contributions are greatly appreciated and really go a long way to help us out.
-
-We hope you find jTypes to be a very useful tool in the development of your applications or libraries and we have many more great things to come, so be sure to check-in every once in a while to see what's new!
+> The fusion language superset can also be combined with jTypes in `.fjt` files to allow for inline HTML and CSS in class definitions.
 
 ## Media
 
-![jTypes](http://cdn.gaulinsoft.com/jtypes/opengraph.png)
+![jTypes](https://i.imgur.com/eTZfjwW.png)
